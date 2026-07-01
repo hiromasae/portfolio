@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
 :root {
+	--font-heading: "Supreme", "Segoe UI", system-ui, -apple-system, sans-serif;
+	--font-body: "Satoshi", "Segoe UI", system-ui, -apple-system, sans-serif;
 	--paper: #f7f6f3;
 	--ink: #1f1e1c;
 	--ink-soft: #6b6862;
@@ -14,9 +16,18 @@ html {
 body {
 	background-color: var(--paper);
 	color: var(--ink);
-	font-family: "Lucida Grande", "Segoe UI", system-ui, -apple-system, sans-serif;
+	font-family: var(--font-body);
 	-webkit-font-smoothing: antialiased;
 	text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-family: var(--font-heading);
 }
 
 /* ── Subtle paper grain: fixed, non-interactive noise overlay ── */
