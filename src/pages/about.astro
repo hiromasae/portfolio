@@ -1,0 +1,59 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+
+const toolkit = ['Figma', 'Claude', 'Subframe', 'HTML', 'CSS', 'JavaScript'];
+const methods = ['Interaction Design', 'Design Systems', 'Responsive Design', 'Design to Code'];
+---
+
+<Layout title="About — Hiro Eernisse" description="About Hiro Eernisse, product design engineer.">
+	<Nav />
+
+	<main class="mx-auto max-w-3xl px-5 py-12 sm:py-16">
+		<h1 class="text-3xl font-bold tracking-tight sm:text-4xl">About</h1>
+
+		<div class="mt-8 grid gap-10 sm:grid-cols-[1.4fr_1fr]">
+			<div>
+				<p class="max-w-xl text-lg leading-relaxed">
+					I'm a design engineer with a CS background. I work on UI/UX design and frontend,
+					especially when I can move quickly from idea to working interface.
+				</p>
+				<p class="mt-4 max-w-xl leading-relaxed text-[var(--ink-soft)]">
+					I'm comfortable at any stage, whether that's early-stage chaos or scaling at a mature
+					company — as long as the work matters. I'm open to full-time, contract, and freelance
+					roles. Outside of work, I play drums in a heavy metal band.
+				</p>
+			</div>
+			<dl class="space-y-6 text-sm">
+				<div>
+					<dt class="mb-2 font-semibold text-[var(--ink)]">Toolkit</dt>
+					<dd class="flex flex-wrap gap-1.5">
+						{
+							toolkit.map((t) => (
+								<span class="rounded-none border border-black/10 bg-white px-2 py-1 text-[var(--ink-soft)] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+									{t}
+								</span>
+							))
+						}
+					</dd>
+				</div>
+				<div>
+					<dt class="mb-2 font-semibold text-[var(--ink)]">Methods</dt>
+					<dd class="flex flex-wrap gap-1.5">
+						{
+							methods.map((m) => (
+								<span class="rounded-none border border-black/10 bg-white px-2 py-1 text-[var(--ink-soft)] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+									{m}
+								</span>
+							))
+						}
+					</dd>
+				</div>
+			</dl>
+		</div>
+
+		<div class="mt-12">
+			<a href="/#projects" class="btn">← Back to projects</a>
+		</div>
+	</main>
+</Layout>

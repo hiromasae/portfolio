@@ -1,0 +1,83 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Nav from '../../components/Nav.astro';
+import { projects } from '../../data/projects';
+
+export function getStaticPaths() {
+	return projects.map((project) => ({
+		params: { slug: project.slug },
+		props: { project },
+	}));
+}
+
+const { project } = Astro.props;
+---
+
+<Layout title={`${project.title} — Hiro Eernisse`} description={project.blurb}>
+	<Nav />
+
+	<main class="mx-auto max-w-3xl px-5 py-12">
+		<a href="/#projects" class="btn mb-8">← Back to projects</a>
+
+		<header>
+			<p class="text-sm text-[var(--ink-soft)]">{project.company} · {project.year}</p>
+			<h1 class="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">{project.title}</h1>
+			<div class="mt-4 flex flex-wrap items-center gap-2">
+				{
+					project.tags.map((t) => (
+						<span class="rounded-sm border border-black/10 bg-white px-2.5 py-0.5 text-xs font-medium text-[var(--ink-soft)]">
+							{t}
+						</span>
+					))
+				}
+				{
+					project.link && (
+						<a href={project.link} target="_blank" rel="noopener" class="btn ml-1">
+							Visit ↗
+						</a>
+					)
+				}
+			</div>
+		</header>
+
+		<section class="mt-8">
+			<h2 class="text-sm font-semibold uppercase tracking-widest text-[var(--ink-soft)]">
+				The problem
+			</h2>
+			<p class="mt-3 text-lg leading-relaxed">{project.problem}</p>
+		</section>
+
+		<section class="mt-8">
+			<h2 class="text-sm font-semibold uppercase tracking-widest text-[var(--ink-soft)]">
+				What I did
+			</h2>
+			<ul class="mt-3 space-y-2">
+				{
+					project.contributions.map((c) => (
+						<li class="flex gap-2.5 leading-relaxed">
+							<span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--ink-soft)]" />
+							<span>{c}</span>
+						</li>
+					))
+				}
+			</ul>
+		</section>
+
+		<section class="mt-10 space-y-5">
+			{
+				project.images.map((src, i) => (
+					<img
+						src={src}
+						alt={`${project.title} — image ${i + 1}`}
+						loading={i === 0 ? 'eager' : 'lazy'}
+						class="w-full rounded-sm border border-black/10 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06),0_10px_30px_-14px_rgba(0,0,0,0.22)]"
+					/>
+				))
+			}
+		</section>
+	</main>
+
+	<footer class="mx-auto max-w-3xl px-5 py-10">
+		<a href="/#projects" class="btn">← Back to projects</a>
+	</footer>
+</Layout>

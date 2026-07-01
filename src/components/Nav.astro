@@ -1,0 +1,36 @@
+---
+import { contacts } from '../data/projects';
+import Icon from './Icon.astro';
+---
+
+<nav
+	class="sticky top-0 z-40 border-b border-black/8 bg-[var(--paper)]/80 backdrop-blur-md"
+>
+	<div class="mx-auto flex max-w-5xl items-center gap-4 px-5 py-3">
+		<a href="/" class="text-[0.95rem] font-bold tracking-tight text-[var(--ink)]">
+			Hiro Eernisse
+		</a>
+
+		<div class="ml-2 hidden items-center gap-1 text-sm text-[var(--ink-soft)] sm:flex">
+			<a href="/#projects" class="rounded-none px-2 py-1 hover:text-[var(--ink)]">Projects</a>
+			<a href="/about" class="rounded-none px-2 py-1 hover:text-[var(--ink)]">About</a>
+		</div>
+
+		<div class="ml-auto flex items-center gap-1.5">
+			{
+				contacts.map((c) => (
+					<a
+						href={c.href}
+						class="btn btn-icon"
+						title={c.label}
+						aria-label={c.label}
+						target={c.href.startsWith('mailto:') ? undefined : '_blank'}
+						rel="noopener"
+					>
+						<Icon name={c.icon} />
+					</a>
+				))
+			}
+		</div>
+	</div>
+</nav>

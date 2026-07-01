@@ -1,0 +1,42 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import { projects } from '../data/projects';
+---
+
+<Layout>
+	<Nav />
+
+	<main class="mx-auto max-w-5xl px-5">
+		<!-- Hero -->
+		<header class="pt-16 pb-10 sm:pt-24 sm:pb-14">
+			<p class="text-sm font-medium uppercase tracking-widest text-[var(--ink-soft)]">
+				Product Design Engineer
+			</p>
+			<h1 class="mt-3 max-w-2xl text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl">
+				Designing and building at the speed of AI.
+			</h1>
+			<p class="mt-4 max-w-md text-[var(--ink-soft)]">
+				Hiro Eernisse — working across Figma, Claude, Subframe, and front-end code.
+			</p>
+		</header>
+
+		<!-- Projects -->
+		<section id="projects" class="scroll-mt-20 pb-16">
+			<h2 class="mb-5 text-sm font-semibold uppercase tracking-widest text-[var(--ink-soft)]">
+				Projects
+			</h2>
+			<div class="grid gap-5 sm:grid-cols-2">
+				{projects.map((project) => <ProjectCard project={project} />)}
+			</div>
+		</section>
+	</main>
+
+	<footer class="mx-auto max-w-5xl px-5 py-10 text-sm text-[var(--ink-soft)]">
+		<div class="flex items-center justify-between border-t border-black/10 pt-6">
+			<span>© 2026 Hiro Eernisse</span>
+			<a href="/#projects" class="btn">Back to top ↑</a>
+		</div>
+	</footer>
+</Layout>
