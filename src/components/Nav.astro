@@ -4,9 +4,9 @@ import Icon from './Icon.astro';
 ---
 
 <nav
-	class="sticky top-0 z-40 border-b border-black/8 bg-[var(--paper)]/80 backdrop-blur-md"
+	class="sticky top-0 z-40 border-b border-black/8 bg-[var(--paper)]"
 >
-	<div class="mx-auto flex max-w-5xl items-center gap-4 px-5 py-3">
+	<div class="mx-auto flex max-w-[1280px] items-center gap-4 px-5 py-3">
 		<a href="/" class="text-[0.95rem] font-bold tracking-tight text-[var(--ink)]">
 			Hiro Eernisse
 		</a>
@@ -18,19 +18,61 @@ import Icon from './Icon.astro';
 
 		<div class="ml-auto flex items-center gap-1.5">
 			{
-				contacts.map((c) => (
-					<a
-						href={c.href}
-						class="btn btn-icon"
-						title={c.label}
-						aria-label={c.label}
-						target={c.href.startsWith('mailto:') ? undefined : '_blank'}
-						rel="noopener"
-					>
-						<Icon name={c.icon} />
-					</a>
-				))
+				contacts.map((c) => {
+					const isEmail = c.href.startsWith('mailto:');
+					const hoverLabel = isEmail ? 'Copy email' : c.label;
+					return (
+						<a
+							href={c.href}
+							class="btn-icon"
+							aria-label={hoverLabel}
+							data-copy={isEmail ? c.href.replace('mailto:', '') : undefined}
+							target={isEmail ? undefined : '_blank'}
+							rel="noopener"
+						>
+							<Icon name={c.icon} />
+							<span class="contact-label" data-default={hoverLabel}>
+								{hoverLabel}
+								{!isEmail && (
+									<svg
+										class="contact-ext"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="2"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										aria-hidden="true"
+									>
+										<path d="M15 3h6v6" />
+										<path d="M10 14 21 3" />
+										<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+									</svg>
+								)}
+							</span>
+						</a>
+					);
+				})
 			}
 		</div>
 	</div>
 </nav>
+
+<script>
+	document.querySelectorAll<HTMLAnchorElement>('a[data-copy]').forEach((el) => {
+		const label = el.querySelector('.contact-label');
+		const address = el.dataset.copy ?? '';
+		el.addEventListener('click', async (e) => {
+			e.preventDefault();
+			try {
+				await navigator.clipboard.writeText(address);
+				if (label) label.textContent = 'Copied!';
+			} catch {
+				if (label) label.textContent = 'Press ⌘C to copy';
+			}
+			window.setTimeout(() => {
+				if (label) label.textContent = label.getAttribute('data-default') ?? '';
+			}, 1500);
+		});
+	});
+</script>

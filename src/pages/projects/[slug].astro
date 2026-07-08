@@ -16,7 +16,7 @@ const { project } = Astro.props;
 <Layout title={`${project.title} — Hiro Eernisse`} description={project.blurb}>
 	<Nav />
 
-	<main class="mx-auto max-w-3xl px-5 py-12">
+	<main class="mx-auto max-w-5xl px-5 py-12">
 		<a href="/#projects" class="btn mb-8">← Back to projects</a>
 
 		<header>
@@ -25,7 +25,7 @@ const { project } = Astro.props;
 			<div class="mt-4 flex flex-wrap items-center gap-2">
 				{
 					project.tags.map((t) => (
-						<span class="rounded-sm border border-black/10 bg-white px-2.5 py-0.5 text-xs font-medium text-[var(--ink-soft)]">
+						<span class="rounded-sm border border-black/15 bg-white px-2.5 py-0.5 text-xs font-medium text-[var(--ink-soft)]">
 							{t}
 						</span>
 					))
@@ -70,14 +70,14 @@ const { project } = Astro.props;
 						src={src}
 						alt={`${project.title} — image ${i + 1}`}
 						loading={i === 0 ? 'eager' : 'lazy'}
-						class="w-full rounded-sm border border-black/10 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06),0_10px_30px_-14px_rgba(0,0,0,0.22)]"
+						class="w-full rounded-sm border border-black/15 bg-white"
 					/>
 				))
 			}
 		</section>
 	</main>
 
-	<footer class="mx-auto max-w-3xl px-5 py-10">
+	<footer class="mx-auto max-w-5xl px-5 py-10">
 		<a href="/#projects" class="btn">← Back to projects</a>
 	</footer>
 </Layout>

@@ -103,7 +103,7 @@ export const projects: Project[] = [
 
 export const contacts = [
 	{ label: 'Email', href: 'mailto:hiroeern@gmail.com', icon: 'email' },
-	{ label: 'LinkedIn', href: 'https://www.linkedin.com/in/hiro-design', icon: 'linkedin' },
 	{ label: 'Calendly', href: 'https://calendly.com/hiroeern/30-min-chat', icon: 'calendly' },
+	{ label: 'LinkedIn', href: 'https://www.linkedin.com/in/hiro-design', icon: 'linkedin' },
 	{ label: 'GitHub', href: 'https://github.com/hiromasae', icon: 'github' },
 ] as const;
