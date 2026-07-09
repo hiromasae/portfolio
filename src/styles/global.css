@@ -3,15 +3,15 @@
 :root {
 	--font-heading: "Supreme", "Segoe UI", system-ui, -apple-system, sans-serif;
 	--font-body: "Satoshi", "Segoe UI", system-ui, -apple-system, sans-serif;
-	--paper: #f7f6f3;
-	--ink: #1f1e1c;
-	--ink-soft: #6b6862;
+	--paper: #fefcf7;
+	--ink: #0a0a08;
+	--ink-soft: #333029;
 	--line: rgba(0, 0, 0, 0.1);
 }
 
 html {
-	/* Bump the base scale so nav + content read slightly larger (16px → 17px) */
-	font-size: 106.25%;
+	/* Bump the base scale so nav + content read larger overall (16px → 19px) */
+	font-size: 118.75%;
 	scroll-behavior: smooth;
 }
 
@@ -43,7 +43,7 @@ h6 {
 	font-size: 0.875rem;
 	font-weight: 600;
 	line-height: 1;
-	color: #3a3835;
+	color: #1a1917;
 	text-decoration: none;
 	white-space: nowrap;
 	cursor: pointer;
