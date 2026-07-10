@@ -1,19 +1,28 @@
 ---
 import { contacts } from '../data/projects';
 import Icon from './Icon.astro';
+
+const path = Astro.url.pathname;
+const onHome = path === '/';
+const onAbout = path === '/about' || path === '/about/';
 ---
 
 <nav
-	class="sticky top-0 z-40 border-b border-black/8 bg-[var(--paper)]"
+	id="site-nav"
+	data-scrolled="false"
+	class="group/nav sticky top-0 z-40 bg-[var(--paper)]"
 >
-	<div class="mx-auto flex max-w-[1280px] items-center gap-4 px-5 py-3">
-		<a href="/" class="text-[0.95rem] font-bold tracking-tight text-[var(--ink)]">
+	<div class="mx-auto flex max-w-[1280px] items-center gap-4 px-5 py-8 transition-[padding] duration-200 ease-out group-data-[scrolled=true]/nav:py-3">
+		<a
+			href="/"
+			class="text-[1.6rem] font-bold tracking-tight text-[var(--ink)] transition-[font-size] duration-200 ease-out group-data-[scrolled=true]/nav:text-[0.95rem]"
+		>
 			Hiro Eernisse
 		</a>
 
-		<div class="ml-2 hidden items-center gap-1 text-sm text-[var(--ink-soft)] sm:flex">
-			<a href="/#projects" class="rounded-none px-2 py-1 hover:text-[var(--ink)]">Projects</a>
-			<a href="/about" class="rounded-none px-2 py-1 hover:text-[var(--ink)]">About</a>
+		<div class="ml-2 hidden items-center gap-1 text-lg text-[var(--ink-soft)] transition-[font-size] duration-200 ease-out group-data-[scrolled=true]/nav:text-sm sm:flex">
+			{!onHome && <a href="/#projects" class="rounded-none px-2 py-1 hover:text-[var(--ink)]">Projects</a>}
+			{!onAbout && <a href="/about" class="rounded-none px-2 py-1 hover:text-[var(--ink)]">About</a>}
 		</div>
 
 		<div class="ml-auto flex items-center gap-1.5">
@@ -59,6 +68,38 @@ import Icon from './Icon.astro';
 </nav>
 
 <script>
+	const nav = document.getElementById('site-nav');
+	if (nav) {
+		// Hysteresis: expand only near the very top, collapse well before that,
+		// with a dead-band between so scroll jitter can't rapidly toggle (and
+		// re-animate) the nav height.
+		const EXPAND_BELOW = 16;
+		const COLLAPSE_ABOVE = 72;
+		let scrolled = window.scrollY > COLLAPSE_ABOVE;
+		let ticking = false;
+
+		const apply = () => {
+			ticking = false;
+			const y = window.scrollY;
+			if (!scrolled && y > COLLAPSE_ABOVE) scrolled = true;
+			else if (scrolled && y < EXPAND_BELOW) scrolled = false;
+			else return;
+			nav.dataset.scrolled = scrolled ? 'true' : 'false';
+		};
+
+		nav.dataset.scrolled = scrolled ? 'true' : 'false';
+		window.addEventListener(
+			'scroll',
+			() => {
+				if (!ticking) {
+					ticking = true;
+					requestAnimationFrame(apply);
+				}
+			},
+			{ passive: true }
+		);
+	}
+
 	document.querySelectorAll<HTMLAnchorElement>('a[data-copy]').forEach((el) => {
 		const label = el.querySelector('.contact-label');
 		const address = el.dataset.copy ?? '';

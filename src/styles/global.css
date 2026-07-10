@@ -13,6 +13,9 @@ html {
 	/* Bump the base scale so nav + content read larger overall (16px → 19px) */
 	font-size: 118.75%;
 	scroll-behavior: smooth;
+	/* Always reserve the scrollbar gutter so short pages (e.g. About) don't
+	   shift horizontally relative to long, scrollable ones (e.g. Home). */
+	scrollbar-gutter: stable;
 }
 
 body {
@@ -39,7 +42,7 @@ h6 {
 	justify-content: center;
 	gap: 0.5rem;
 	padding: 0.55rem 1.1rem;
-	border-radius: 0.15rem;
+	border-radius: 0.11rem;
 	font-size: 0.875rem;
 	font-weight: 600;
 	line-height: 1;
@@ -74,7 +77,7 @@ h6 {
 	align-items: center;
 	justify-content: center;
 	padding: 0.5rem;
-	border-radius: 0.14rem;
+	border-radius: 0.11rem;
 	color: var(--ink-soft);
 	text-decoration: none;
 	transition: color 0.12s ease;
@@ -99,7 +102,7 @@ h6 {
 	gap: 0.3rem;
 	white-space: nowrap;
 	padding: 0.25rem 0.5rem;
-	border-radius: 0.14rem;
+	border-radius: 0.11rem;
 	background: var(--ink);
 	color: var(--paper);
 	font-size: 0.7rem;
@@ -132,4 +135,20 @@ h6 {
 	width: 1.05rem;
 	height: 1.05rem;
 	display: block;
+}
+
+/* Larger contact icons at the top of the page; shrink once scrolled.
+   Scoped to the button's direct-child icon so it doesn't also enlarge the
+   external-link glyph nested inside the hover label. */
+#site-nav .btn-icon > svg {
+	width: 1.6rem;
+	height: 1.6rem;
+	transition:
+		width 0.2s ease-out,
+		height 0.2s ease-out;
+}
+
+#site-nav[data-scrolled='true'] .btn-icon > svg {
+	width: 1.05rem;
+	height: 1.05rem;
 }
