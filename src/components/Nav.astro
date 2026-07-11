@@ -9,7 +9,8 @@ const onAbout = path === '/about' || path === '/about/';
 
 <nav
 	id="site-nav"
-	data-scrolled="false"
+	data-home={onHome ? 'true' : 'false'}
+	data-scrolled={onHome ? 'false' : 'true'}
 	class="group/nav sticky top-0 z-40 bg-[var(--paper)]"
 >
 	<div class="mx-auto flex max-w-[1280px] items-center gap-4 px-5 py-8 transition-[padding] duration-200 ease-out group-data-[scrolled=true]/nav:py-3">
@@ -25,7 +26,7 @@ const onAbout = path === '/about' || path === '/about/';
 			{!onAbout && <a href="/about" class="rounded-none px-2 py-1 hover:text-[var(--ink)]">About</a>}
 		</div>
 
-		<div class="ml-auto flex items-center gap-1.5">
+		<div id="contact-group" class="relative ml-auto flex items-center gap-1.5">
 			{
 				contacts.map((c) => {
 					const isEmail = c.href.startsWith('mailto:');
@@ -35,41 +36,95 @@ const onAbout = path === '/about' || path === '/about/';
 							href={c.href}
 							class="btn-icon"
 							aria-label={hoverLabel}
+							data-label={hoverLabel}
 							data-copy={isEmail ? c.href.replace('mailto:', '') : undefined}
 							target={isEmail ? undefined : '_blank'}
 							rel="noopener"
 						>
 							<Icon name={c.icon} />
-							<span class="contact-label" data-default={hoverLabel}>
-								{hoverLabel}
-								{!isEmail && (
-									<svg
-										class="contact-ext"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										stroke-width="2"
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										aria-hidden="true"
-									>
-										<path d="M15 3h6v6" />
-										<path d="M10 14 21 3" />
-										<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-									</svg>
-								)}
-							</span>
 						</a>
 					);
 				})
 			}
+			{/* One shared ink pill that glides between the icons on hover/focus,
+			    carrying the hovered icon's label. Positioned entirely by script.
+			    The ↗ shows only for external (new-tab) links. */}
+			<span class="contact-slider" aria-hidden="true">
+				<span class="contact-slider-text"></span>
+				<svg
+					class="contact-slider-ext"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					aria-hidden="true"
+				>
+					<path d="M15 3h6v6" />
+					<path d="M10 14 21 3" />
+					<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+				</svg>
+			</span>
 		</div>
 	</div>
 </nav>
 
+<script is:inline>
+	// Smoothly collapse the nav from its expanded (home masthead) state down to
+	// the compact state when arriving on an interior page — but only when the
+	// user navigated there from the *top* of the home page. Because this is a
+	// multi-page app, that transition can't happen across the page load on its
+	// own; we carry a one-shot flag and replay the collapse on arrival.
+	//
+	// This runs inline (pre-paint) so the interior nav can paint expanded first,
+	// with no flash of the compact state, before animating down.
+	(function () {
+		var nav = document.getElementById('site-nav');
+		if (!nav) return;
+		var KEY = 'nav-intro-collapse';
+
+		if (nav.dataset.home === 'true') {
+			// On home: arm the flag when leaving the expanded masthead for an
+			// internal, non-index page. `data-scrolled === 'false'` means the
+			// masthead is expanded, i.e. the user is at the top.
+			try { sessionStorage.removeItem(KEY); } catch (e) {}
+			document.addEventListener('click', function (e) {
+				var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+				if (!a || a.target === '_blank') return;
+				var url;
+				try { url = new URL(a.href, location.href); } catch (e) { return; }
+				var toInterior = url.origin === location.origin && url.pathname !== '/';
+				if (toInterior && nav.dataset.scrolled === 'false') {
+					try { sessionStorage.setItem(KEY, '1'); } catch (e) {}
+				}
+			});
+			return;
+		}
+
+		// On an interior page: consume the flag and, unless it's absent or the
+		// user prefers reduced motion, start expanded and collapse next frame.
+		var pending = false;
+		try { pending = sessionStorage.getItem(KEY) === '1'; } catch (e) {}
+		if (!pending) return;
+		try { sessionStorage.removeItem(KEY); } catch (e) {}
+		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+		nav.dataset.scrolled = 'false'; // expanded on first paint
+		requestAnimationFrame(function () {
+			requestAnimationFrame(function () {
+				nav.dataset.scrolled = 'true'; // animate down to compact
+			});
+		});
+	})();
+</script>
+
 <script>
 	const nav = document.getElementById('site-nav');
-	if (nav) {
+	// Only the home page uses the expand-on-top masthead. Interior pages
+	// (About, project detail) stay locked to the compact state so the nav
+	// doesn't compete with the page's own heading.
+	if (nav && nav.dataset.home === 'true') {
 		// Hysteresis: expand only near the very top, collapse well before that,
 		// with a dead-band between so scroll jitter can't rapidly toggle (and
 		// re-animate) the nav height.
@@ -100,20 +155,145 @@ const onAbout = path === '/about' || path === '/about/';
 		);
 	}
 
-	document.querySelectorAll<HTMLAnchorElement>('a[data-copy]').forEach((el) => {
-		const label = el.querySelector('.contact-label');
-		const address = el.dataset.copy ?? '';
-		el.addEventListener('click', async (e) => {
-			e.preventDefault();
-			try {
-				await navigator.clipboard.writeText(address);
-				if (label) label.textContent = 'Copied!';
-			} catch {
-				if (label) label.textContent = 'Press ⌘C to copy';
+	// ── Sliding contact label ──
+	// A single ink pill glides between the contact icons, always sitting under
+	// whichever one is hovered or focused, and carrying that icon's label. When
+	// moving between icons it slides + resizes; on first appearance it fades in
+	// place (no slide from the corner).
+	const group = document.getElementById('contact-group');
+	const pill = group?.querySelector<HTMLElement>('.contact-slider');
+	const pillText = pill?.querySelector<HTMLElement>('.contact-slider-text');
+
+	if (group && pill && pillText) {
+		const icons = Array.from(group.querySelectorAll<HTMLAnchorElement>('.btn-icon'));
+
+		// Hidden clone of the pill, used to measure the exact width each label
+		// needs — including the external-link arrow when shown — so the pill's
+		// width can animate to an explicit px value.
+		const measurer = pill.cloneNode(true) as HTMLElement;
+		measurer.style.cssText =
+			'position:absolute;visibility:hidden;top:-9999px;left:0;opacity:1;transform:none;transition:none;width:auto;';
+		group.appendChild(measurer);
+		const measurerText = measurer.querySelector<HTMLElement>('.contact-slider-text')!;
+
+		let visible = false;
+		let resetTimer = 0;
+		let swapSeq = 0;
+		const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+		const labelFor = (icon: HTMLElement) => icon.getAttribute('data-label') ?? '';
+		const isExternal = (icon: HTMLElement) => icon.getAttribute('target') === '_blank';
+
+		// Drop any in-flight roll animation and return the text to a clean,
+		// visible resting state (used before every direct repositioning).
+		const resetText = () => {
+			swapSeq++;
+			pillText.style.transition = 'none';
+			pillText.style.transform = 'none';
+			pillText.style.opacity = '1';
+		};
+
+		// Position + size the pill under `icon`, showing `text`. Links that open
+		// in a new tab also get the trailing ↗ arrow.
+		const place = (icon: HTMLElement, text: string) => {
+			const gRect = group.getBoundingClientRect();
+			const iRect = icon.getBoundingClientRect();
+			const centerX = iRect.left - gRect.left + iRect.width / 2;
+			const external = isExternal(icon);
+			resetText();
+			measurerText.textContent = text;
+			measurer.classList.toggle('is-external', external);
+			pillText.textContent = text;
+			pill.classList.toggle('is-external', external);
+			pill.style.width = `${measurer.offsetWidth}px`;
+			pill.style.transform = `translateX(${centerX}px) translateX(-50%)`;
+		};
+
+		// Roll the current text up and out, then roll `text` up into place —
+		// used for the copy feedback, so "Copied!" animates in and back without
+		// resizing the pill.
+		const swapText = (text: string) => {
+			if (reduce) {
+				pillText.textContent = text;
+				return;
 			}
+			const seq = ++swapSeq;
+			pillText.style.transition = 'transform 0.08s ease, opacity 0.08s ease';
+			pillText.style.transform = 'translateY(-100%)';
+			pillText.style.opacity = '0';
 			window.setTimeout(() => {
-				if (label) label.textContent = label.getAttribute('data-default') ?? '';
-			}, 1500);
+				if (seq !== swapSeq) return; // superseded
+				pillText.textContent = text;
+				pillText.style.transition = 'none';
+				pillText.style.transform = 'translateY(100%)';
+				pillText.style.opacity = '0';
+				void pillText.offsetHeight; // reflow so the entry animates
+				pillText.style.transition =
+					'transform 0.12s cubic-bezier(0.34, 1.35, 0.64, 1), opacity 0.1s ease';
+				pillText.style.transform = 'translateY(0)';
+				pillText.style.opacity = '1';
+			}, 80);
+		};
+
+		const showAt = (icon: HTMLElement, text = labelFor(icon)) => {
+			if (visible) {
+				pill.style.opacity = '1';
+				place(icon, text); // slide + resize to the new icon
+			} else {
+				// Appear in place: kill transitions, position, then fade in.
+				pill.style.transition = 'none';
+				place(icon, text);
+				void pill.offsetWidth; // force reflow so the jump isn't animated
+				pill.style.transition = '';
+				pill.style.opacity = '1';
+				visible = true;
+			}
+		};
+
+		const hide = () => {
+			visible = false;
+			pill.style.opacity = '0';
+		};
+
+		icons.forEach((icon) => icon.addEventListener('mouseenter', () => showAt(icon)));
+		group.addEventListener('mouseleave', hide);
+		group.addEventListener('focusin', (e) => {
+			const icon = (e.target as HTMLElement).closest<HTMLElement>('.btn-icon');
+			if (icon) showAt(icon);
 		});
-	});
+		group.addEventListener('focusout', (e) => {
+			if (!group.contains(e.relatedTarget as Node)) hide();
+		});
+
+		// Copy-to-clipboard: swap the pill text to feedback, then restore. On
+		// success we swap the text only — keeping the rectangle at the "Copy
+		// email" width so it doesn't resize. The (rare) fallback hint is longer,
+		// so that one does resize to stay readable.
+		icons.forEach((icon) => {
+			const address = icon.dataset.copy;
+			if (!address) return;
+			icon.addEventListener('click', async (e) => {
+				e.preventDefault();
+				let ok = true;
+				try {
+					await navigator.clipboard.writeText(address);
+				} catch {
+					ok = false;
+				}
+				window.clearTimeout(resetTimer);
+				if (ok) {
+					if (!visible) showAt(icon);
+					swapText('Copied!'); // roll in, same width
+					resetTimer = window.setTimeout(() => {
+						if (visible) swapText(labelFor(icon)); // roll back
+					}, 1500);
+				} else {
+					showAt(icon, 'Press ⌘C to copy'); // longer hint: resize to fit
+					resetTimer = window.setTimeout(() => {
+						if (visible) place(icon, labelFor(icon));
+					}, 1500);
+				}
+			});
+		});
+	}
 </script>

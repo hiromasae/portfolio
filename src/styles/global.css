@@ -92,15 +92,21 @@ h6 {
 	outline-offset: 2px;
 }
 
-/* Destination label revealed under each contact icon on hover */
-.contact-label {
+/* Shared sliding label: a single ink pill that glides between the contact
+   icons, always sitting just below whichever one is hovered or focused and
+   carrying its destination text. Position and width are driven entirely by
+   script (see Nav.astro); the transitions here make the move a smooth slide.
+   `left: 0` + a translateX from script keeps the transform origin stable so
+   the width animation grows/shrinks evenly. */
+.contact-slider {
 	position: absolute;
 	top: 100%;
-	left: 50%;
-	display: flex;
+	left: 0;
+	margin-top: 0.3rem;
+	display: inline-flex;
 	align-items: center;
+	justify-content: center;
 	gap: 0.3rem;
-	white-space: nowrap;
 	padding: 0.25rem 0.5rem;
 	border-radius: 0.11rem;
 	background: var(--ink);
@@ -108,27 +114,33 @@ h6 {
 	font-size: 0.7rem;
 	font-weight: 500;
 	line-height: 1;
+	white-space: nowrap;
 	opacity: 0;
-	transform: translate(-50%, 0);
 	pointer-events: none;
+	transform: translateX(0) translateX(-50%);
 	transition:
-		opacity 0.14s ease,
-		transform 0.14s ease;
+		transform 0.17s cubic-bezier(0.3, 0, 0.1, 1),
+		width 0.17s cubic-bezier(0.3, 0, 0.1, 1),
+		opacity 0.14s ease;
 	z-index: 60;
+	overflow: hidden;
 }
 
-.contact-label .contact-ext {
+.contact-slider-text {
+	display: block;
+}
+
+/* Trailing ↗ shown only for external (new-tab) links. */
+.contact-slider-ext {
 	width: 0.72rem;
 	height: 0.72rem;
 	flex: none;
-	display: block;
+	display: none;
 	opacity: 0.85;
 }
 
-.btn-icon:hover .contact-label,
-.btn-icon:focus-visible .contact-label {
-	opacity: 1;
-	transform: translate(-50%, 4px);
+.contact-slider.is-external .contact-slider-ext {
+	display: block;
 }
 
 .btn-icon svg {
