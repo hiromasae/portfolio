@@ -107,6 +107,31 @@ body {
 	transition: none !important;
 }
 
+/* ── Prime the intro replay ──
+   When arriving from another page, Nav.astro replays the expand/collapse motion
+   by first snapping the nav to its *starting* state, then animating to rest. If
+   transitions were live during that snap, the nav would instead animate up from
+   the SSR default and cancel the replay (a visible "jut"). So we suppress the
+   nav's transitions for the single frame the start state is applied — same idea
+   as the theme swap above — then remove this class and let the replay animate. */
+#site-nav.nav-no-transition,
+#site-nav.nav-no-transition * {
+	transition: none !important;
+}
+
+/* Compact nav: the logo shrinks via transform, which leaves its layout box at
+   the expanded width — so the links slide left by the width the logo visually
+   gave up (measured into --nav-logo-dx by Nav.astro) to keep hugging it.
+   --nav-logo-scale is the single source for the logo's compact scale; the
+   logo's markup class and both Nav.astro measurements derive from it. */
+#site-nav {
+	--nav-logo-scale: 0.656;
+}
+
+#site-nav[data-scrolled="true"] .nav-links {
+	transform: translateX(var(--nav-logo-dx, 0px)) scale(0.78);
+}
+
 h1,
 h2,
 h3,
@@ -246,20 +271,28 @@ h6 {
 }
 
 /* Larger contact icons at the top of the page; shrink once scrolled.
-   Scoped to the button's direct-child icon so it doesn't also enlarge the
-   external-link glyph nested inside the hover label. */
+   The size change is a composited `transform: scale` on the *button*, not an
+   animated width/height on the SVG: animating an SVG's width/height re-rasters
+   the glyph every frame, which is the main source of jank when the nav
+   compacts. Scaling the button stays on the compositor, and the per-icon hover
+   transforms (which live on the SVG itself) compose cleanly on top. */
+#site-nav .btn-icon {
+	transition:
+		color 0.12s ease,
+		transform 0.2s ease-out;
+}
+
+#site-nav[data-scrolled='true'] .btn-icon {
+	transform: scale(0.75); /* 1.2rem / 1.6rem */
+}
+
+/* SVG size is fixed now; only the hover/press gesture transitions. Scoped to
+   the button's direct-child icon so it doesn't also enlarge the external-link
+   glyph nested inside the hover label. */
 #site-nav .btn-icon > svg {
 	width: 1.6rem;
 	height: 1.6rem;
-	transition:
-		width 0.2s ease-out,
-		height 0.2s ease-out,
-		transform 0.26s cubic-bezier(0.34, 1.2, 0.64, 1);
-}
-
-#site-nav[data-scrolled='true'] .btn-icon > svg {
-	width: 1.2rem;
-	height: 1.2rem;
+	transition: transform 0.26s cubic-bezier(0.34, 1.2, 0.64, 1);
 }
 
 /* ── Per-icon hover motion ──

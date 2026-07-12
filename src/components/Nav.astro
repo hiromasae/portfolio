@@ -5,6 +5,9 @@ import Icon from './Icon.astro';
 const path = Astro.url.pathname;
 const onHome = path === '/';
 const onAbout = path === '/about' || path === '/about/';
+// Project detail pages carry their own "← Back to projects" button, so the nav
+// Projects link would be redundant there.
+const onProject = path.startsWith('/projects/');
 ---
 
 <nav
@@ -13,16 +16,24 @@ const onAbout = path === '/about' || path === '/about/';
 	data-scrolled={onHome ? 'false' : 'true'}
 	class="group/nav sticky top-0 z-40 bg-[var(--paper)]"
 >
-	<div class="mx-auto flex max-w-[1280px] items-center gap-4 px-5 py-8 transition-[padding] duration-200 ease-out group-data-[scrolled=true]/nav:py-3.5">
-		<a
-			href="/"
-			class="text-[1.6rem] font-bold tracking-tight text-[var(--ink)] transition-[font-size] duration-200 ease-out group-data-[scrolled=true]/nav:text-[1.05rem]"
-		>
-			Hiro Eernisse
-		</a>
+	{/* The vertical padding (nav height) snaps between states with no transition;
+	    the resulting position shift is played back as a composited transform by
+	    the FLIP logic in the script below. Nothing here animates a layout
+	    property, so the collapse/expand never forces a per-frame reflow. */}
+	<div class="mx-auto max-w-[1280px] px-5 py-8 group-data-[scrolled=true]/nav:py-3.5">
+		<div class="nav-inner flex items-center gap-4">
+			<a
+				href="/"
+				class="nav-logo origin-left text-[1.6rem] font-bold tracking-tight text-[var(--ink)] transition-transform duration-200 ease-out group-data-[scrolled=true]/nav:scale-[var(--nav-logo-scale)]"
+			>
+				Hiro Eernisse
+			</a>
 
-		<div class="ml-2 hidden items-center gap-1 text-lg text-[var(--ink-soft)] transition-[font-size] duration-200 ease-out group-data-[scrolled=true]/nav:text-sm sm:flex">
-			{!onHome && <a href="/#projects" class="rounded-none px-2 py-1 hover:text-[var(--ink)]">Projects</a>}
+			{/* Compact transform (translateX + scale) lives in global.css: the links
+			    slide left by the width the scaled-down logo gives up, so they keep
+			    hugging it even though its layout box stays expanded-width. */}
+			<div class="nav-links ml-2 hidden origin-left items-center gap-1 text-lg text-[var(--ink-soft)] transition-transform duration-200 ease-out sm:flex">
+			{!onHome && !onProject && <a href="/#projects" class="rounded-none px-2 py-1 hover:text-[var(--ink)]">Projects</a>}
 			{!onAbout && <a href="/about" class="rounded-none px-2 py-1 hover:text-[var(--ink)]">About</a>}
 		</div>
 
@@ -103,55 +114,81 @@ const onAbout = path === '/about' || path === '/about/';
 				</svg>
 			</button>
 		</div>
+		</div>
 	</div>
 </nav>
 
 <script is:inline>
-	// Smoothly collapse the nav from its expanded (home masthead) state down to
-	// the compact state when arriving on an interior page — but only when the
-	// user navigated there from the *top* of the home page. Because this is a
-	// multi-page app, that transition can't happen across the page load on its
-	// own; we carry a one-shot flag and replay the collapse on arrival.
+	// Carry the nav's expand/collapse state across page navigations. Because this
+	// is a multi-page app, the height change between the home masthead (expanded)
+	// and interior pages (compact) can't tween across a page load on its own — so
+	// we persist the nav's visual state when a page is left and diff it against
+	// the new page's resting state on arrival:
 	//
-	// This runs inline (pre-paint) so the interior nav can paint expanded first,
-	// with no flash of the compact state, before animating down.
+	//   1. pagehide: store the nav's current state (fires for every way a page
+	//      can be left — link click, back/forward, address bar).
+	//   2. On arrival: compute this page's resting state from first principles
+	//      (home near the top → expanded, anything else → compact).
+	//   3. If the carried state differs, paint in the carried state and hand the
+	//      resting state to the module script, which animates the difference.
+	//
+	// No per-flow special cases: collapse (home → interior) and expand
+	// (anywhere → top of home) both fall out of the same diff.
+	//
+	// Runs inline (pre-paint) so the page paints in its *starting* state, with
+	// no flash of the resting state, before animating on the next frame.
 	(function () {
 		var nav = document.getElementById('site-nav');
 		if (!nav) return;
-		var KEY = 'nav-intro-collapse';
+		var KEY = 'nav-state';
 
-		if (nav.dataset.home === 'true') {
-			// On home: arm the flag when leaving the expanded masthead for an
-			// internal, non-index page. `data-scrolled === 'false'` means the
-			// masthead is expanded, i.e. the user is at the top.
-			try { sessionStorage.removeItem(KEY); } catch (e) {}
-			document.addEventListener('click', function (e) {
-				var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
-				if (!a || a.target === '_blank') return;
-				var url;
-				try { url = new URL(a.href, location.href); } catch (e) { return; }
-				var toInterior = url.origin === location.origin && url.pathname !== '/';
-				if (toInterior && nav.dataset.scrolled === 'false') {
-					try { sessionStorage.setItem(KEY, '1'); } catch (e) {}
-				}
-			});
-			return;
+		window.addEventListener('pagehide', function () {
+			try {
+				sessionStorage.setItem(KEY, nav.dataset.scrolled + ':' + Date.now());
+			} catch (e) {}
+		});
+
+		// This page's resting state right now. The 72px threshold matches
+		// COLLAPSE_ABOVE in the scroll handler below, so a hash landing just
+		// under the masthead (e.g. /#projects) still counts as expanded.
+		var onHome = nav.dataset.home === 'true';
+		var target = onHome && window.scrollY < 72 ? 'false' : 'true';
+
+		// The state carried over from the page we just left, if fresh. The age
+		// cap means returning to a stale tab (e.g. from an external site much
+		// later) paints at rest instead of replaying an old animation.
+		var carried = null;
+		try {
+			var raw = sessionStorage.getItem(KEY);
+			sessionStorage.removeItem(KEY);
+			if (raw) {
+				var sep = raw.lastIndexOf(':');
+				if (Date.now() - +raw.slice(sep + 1) < 10000) carried = raw.slice(0, sep);
+			}
+		} catch (e) {}
+
+		var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		var animate = !reduce && (carried === 'true' || carried === 'false') && carried !== target;
+
+		// Give the compact links transform its logo-width compensation before
+		// first paint (see global.css): the var defaults to 0px, which would
+		// paint the links where the full-size logo ends and visibly snap them
+		// left once the (separately fetched) module script measures. Measured
+		// with whatever font is available now; refined after fonts load.
+		var logo = nav.querySelector('.nav-logo');
+		if (logo) {
+			var scale =
+				parseFloat(getComputedStyle(nav).getPropertyValue('--nav-logo-scale')) || 1;
+			nav.style.setProperty('--nav-logo-dx', -(logo.offsetWidth * (1 - scale)) + 'px');
 		}
 
-		// On an interior page: consume the flag and, unless it's absent or the
-		// user prefers reduced motion, start expanded and collapse next frame.
-		var pending = false;
-		try { pending = sessionStorage.getItem(KEY) === '1'; } catch (e) {}
-		if (!pending) return;
-		try { sessionStorage.removeItem(KEY); } catch (e) {}
-		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-		nav.dataset.scrolled = 'false'; // expanded on first paint
-		requestAnimationFrame(function () {
-			requestAnimationFrame(function () {
-				nav.dataset.scrolled = 'true'; // animate down to compact
-			});
-		});
+		// Paint pre-paint in the starting state (carried if animating, else rest),
+		// transitions suppressed so this snap can't tween from the SSR default.
+		nav.classList.add('nav-no-transition');
+		nav.dataset.scrolled = animate ? carried : target;
+		void nav.offsetWidth;
+		nav.classList.remove('nav-no-transition');
+		if (animate) nav.dataset.introTo = target;
 	})();
 </script>
 
@@ -186,38 +223,115 @@ const onAbout = path === '/about' || path === '/about/';
 	});
 
 	const nav = document.getElementById('site-nav');
-	// Only the home page uses the expand-on-top masthead. Interior pages
-	// (About, project detail) stay locked to the compact state so the nav
-	// doesn't compete with the page's own heading.
-	if (nav && nav.dataset.home === 'true') {
-		// Hysteresis: expand only near the very top, collapse well before that,
-		// with a dead-band between so scroll jitter can't rapidly toggle (and
-		// re-animate) the nav height.
-		const EXPAND_BELOW = 16;
-		const COLLAPSE_ABOVE = 72;
-		let scrolled = window.scrollY > COLLAPSE_ABOVE;
-		let ticking = false;
+	if (nav) {
+		// The collapse/expand changes the nav's height, which shifts the bar's
+		// content and everything below it. Animating that shift with a layout
+		// property (padding/font-size) forces a reflow every frame — the source
+		// of the stutter. Instead we use FLIP: snap the height change instantly
+		// (invisible, as the nav has no visible bottom edge), measure how far each
+		// affected block moved, then play that delta back as a composited
+		// `transform`. Only transforms animate per frame, so there is no reflow.
+		// (The name/links/icons scale via their own CSS transform transitions.)
+		const DUR = 200;
+		const barInner = nav.querySelector('.nav-inner');
+		const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-		const apply = () => {
-			ticking = false;
-			const y = window.scrollY;
-			if (!scrolled && y > COLLAPSE_ABOVE) scrolled = true;
-			else if (scrolled && y < EXPAND_BELOW) scrolled = false;
-			else return;
-			nav.dataset.scrolled = scrolled ? 'true' : 'false';
+		// Refine the links' logo-width compensation (first set pre-paint by the
+		// inline script above, possibly against a fallback font) once fonts
+		// finish loading, and keep it correct across resizes. offsetWidth
+		// ignores transforms, so this is stable regardless of nav state.
+		const logo = nav.querySelector('.nav-logo');
+		if (logo) {
+			const logoScale =
+				parseFloat(getComputedStyle(nav).getPropertyValue('--nav-logo-scale')) || 1;
+			const setLogoDx = () =>
+				nav.style.setProperty('--nav-logo-dx', `${-(logo.offsetWidth * (1 - logoScale))}px`);
+			document.fonts?.ready.then(setLogoDx);
+			window.addEventListener('resize', setLogoDx);
+		}
+		// The bar content plus every block that flows after the sticky nav.
+		const shiftables = () =>
+			[barInner, document.querySelector('main'), document.querySelector('footer')].filter(Boolean);
+
+		// Set the state with no animation (initial paint, reduced motion).
+		const snap = (next) => {
+			nav.classList.add('nav-no-transition');
+			nav.dataset.scrolled = next;
+			void nav.offsetWidth;
+			nav.classList.remove('nav-no-transition');
 		};
 
-		nav.dataset.scrolled = scrolled ? 'true' : 'false';
-		window.addEventListener(
-			'scroll',
-			() => {
-				if (!ticking) {
-					ticking = true;
-					requestAnimationFrame(apply);
-				}
-			},
-			{ passive: true }
-		);
+		const animateTo = (next) => {
+			if (nav.dataset.scrolled === next) return;
+			if (reduceMotion) { snap(next); return; }
+			const els = shiftables();
+			// Clear any in-flight transform so we measure true layout positions.
+			els.forEach((el) => { el.style.transition = 'none'; el.style.transform = ''; });
+			void nav.offsetWidth;
+			const first = els.map((el) => el.getBoundingClientRect().top);
+			nav.dataset.scrolled = next; // snap the height; start CSS scale transitions
+			const last = els.map((el) => el.getBoundingClientRect().top);
+			// Invert: offset each block back to where it was, with transitions off.
+			els.forEach((el, i) => {
+				const dy = first[i] - last[i];
+				el.style.transform = dy ? `translateY(${dy}px)` : '';
+			});
+			void nav.offsetWidth;
+			// Play: release the offsets so they glide to zero on the compositor.
+			requestAnimationFrame(() => {
+				els.forEach((el) => {
+					el.style.transition = `transform ${DUR}ms ease-out`;
+					el.style.transform = '';
+					el.addEventListener('transitionend', function done() {
+						el.style.transition = '';
+						el.removeEventListener('transitionend', done);
+					});
+				});
+			});
+		};
+
+		// Play the intro handed over by the inline script (which already snapped
+		// the carried state pre-paint). Start immediately — measurements show
+		// first-load frame spikes happen with or without the animation, so
+		// deferring it only reads as lag. The resting state is recomputed here
+		// rather than taken from the hand-off: back/forward scroll restoration
+		// can land between the two scripts (e.g. returning to a scrolled-down
+		// home), and if the restored position already matches the painted state,
+		// animateTo's early return correctly skips the intro.
+		const introTo = nav.dataset.introTo;
+		if (introTo) {
+			delete nav.dataset.introTo;
+			animateTo(nav.dataset.home === 'true' && window.scrollY < 72 ? 'false' : 'true');
+		}
+
+		// Home masthead: expand near the very top, collapse once scrolled, with a
+		// dead-band so scroll jitter can't rapidly re-trigger the animation.
+		// (The initial state is already painted by the inline script above;
+		// COLLAPSE_ABOVE must stay in sync with the 72px threshold there.)
+		if (nav.dataset.home === 'true') {
+			const EXPAND_BELOW = 16;
+			const COLLAPSE_ABOVE = 72;
+			let scrolled = window.scrollY > COLLAPSE_ABOVE;
+			let ticking = false;
+			const apply = () => {
+				ticking = false;
+				const y = window.scrollY;
+				if (!scrolled && y > COLLAPSE_ABOVE) scrolled = true;
+				else if (scrolled && y < EXPAND_BELOW) scrolled = false;
+				else return;
+				animateTo(scrolled ? 'true' : 'false');
+			};
+			window.addEventListener(
+				'scroll',
+				() => {
+					if (!ticking) {
+						ticking = true;
+						requestAnimationFrame(apply);
+					}
+				},
+				{ passive: true }
+			);
+		}
 	}
 
 	// ── Sliding contact label ──

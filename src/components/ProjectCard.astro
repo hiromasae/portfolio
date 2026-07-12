@@ -29,6 +29,7 @@ const { project, reversed = false } = Astro.props;
 				src={project.cover}
 				alt={project.title}
 				loading="lazy"
+				decoding="async"
 				class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
 			/>
 		</div>
