@@ -10,16 +10,16 @@ const { project, reversed = false } = Astro.props;
 <a
 	href={`/projects/${project.slug}`}
 	class:list={[
-		'@container group flex flex-col overflow-hidden rounded-[1.5px] border border-black/25 bg-white md:h-[78vh]',
-		'shadow-[0_1px_1px_rgba(0,0,0,0.03),0_10px_30px_-16px_rgba(0,0,0,0.15)] transition-[box-shadow,border-color,transform] duration-300 ease-out',
-		'hover:border-black/40 hover:shadow-[0_2px_3px_rgba(0,0,0,0.04),0_18px_44px_-18px_rgba(0,0,0,0.24)]',
-		'active:scale-[0.99] active:border-[var(--ink)] active:bg-neutral-50 active:shadow-[0_1px_1px_rgba(0,0,0,0.04),0_6px_16px_-14px_rgba(0,0,0,0.2)]',
+		'@container group flex flex-col overflow-hidden rounded-[1.5px] border border-[var(--line)] bg-[var(--surface)] md:h-[78vh]',
+		'shadow-[0_1px_1px_rgba(0,0,0,0.03),0_10px_30px_-16px_rgba(0,0,0,0.15)] transition-[box-shadow,border-color,background-color,transform] duration-300 ease-out',
+		'hover:border-[var(--line-strong)] hover:shadow-[0_2px_3px_rgba(0,0,0,0.04),0_18px_44px_-18px_rgba(0,0,0,0.24)]',
+		'active:scale-[0.99] active:border-[var(--ink)] active:bg-[var(--surface-sunken)] active:shadow-[0_1px_1px_rgba(0,0,0,0.04),0_6px_16px_-14px_rgba(0,0,0,0.2)]',
 		reversed ? 'md:flex-row-reverse' : 'md:flex-row',
 	]}
 >
 	<div
 		class:list={[
-			'overflow-hidden border-black/20 bg-neutral-100 transition-[width] duration-300 ease-out md:w-[74%] md:group-hover:w-[52%]',
+			'overflow-hidden border-[var(--line)] bg-[var(--surface-sunken)] transition-[width,background-color] duration-300 ease-out md:w-[74%] md:group-hover:w-[52%]',
 			'border-b md:border-b-0',
 			reversed ? 'md:border-l' : 'md:border-r',
 		]}

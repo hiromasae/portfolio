@@ -13,10 +13,10 @@ const onAbout = path === '/about' || path === '/about/';
 	data-scrolled={onHome ? 'false' : 'true'}
 	class="group/nav sticky top-0 z-40 bg-[var(--paper)]"
 >
-	<div class="mx-auto flex max-w-[1280px] items-center gap-4 px-5 py-8 transition-[padding] duration-200 ease-out group-data-[scrolled=true]/nav:py-3">
+	<div class="mx-auto flex max-w-[1280px] items-center gap-4 px-5 py-8 transition-[padding] duration-200 ease-out group-data-[scrolled=true]/nav:py-3.5">
 		<a
 			href="/"
-			class="text-[1.6rem] font-bold tracking-tight text-[var(--ink)] transition-[font-size] duration-200 ease-out group-data-[scrolled=true]/nav:text-[0.95rem]"
+			class="text-[1.6rem] font-bold tracking-tight text-[var(--ink)] transition-[font-size] duration-200 ease-out group-data-[scrolled=true]/nav:text-[1.05rem]"
 		>
 			Hiro Eernisse
 		</a>
@@ -57,8 +57,8 @@ const onAbout = path === '/about' || path === '/about/';
 					fill="none"
 					stroke="currentColor"
 					stroke-width="2"
-					stroke-linecap="round"
-					stroke-linejoin="round"
+					stroke-linecap="square"
+					stroke-linejoin="miter"
 					aria-hidden="true"
 				>
 					<path d="M15 3h6v6" />
@@ -66,6 +66,42 @@ const onAbout = path === '/about' || path === '/about/';
 					<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
 				</svg>
 			</span>
+		</div>
+
+		{/* Light/dark toggle, set off from the contacts by a thin divider. */}
+		<div class="flex items-center border-l border-[var(--line)] pl-1.5">
+			<button
+				id="theme-toggle"
+				type="button"
+				class="btn-icon theme-toggle"
+				aria-label="Toggle light and dark theme"
+			>
+				<svg
+					class="icon-moon"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="square"
+					stroke-linejoin="miter"
+					aria-hidden="true"
+				>
+					<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+				</svg>
+				<svg
+					class="icon-sun"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="square"
+					stroke-linejoin="miter"
+					aria-hidden="true"
+				>
+					<circle cx="12" cy="12" r="4" />
+					<path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+				</svg>
+			</button>
 		</div>
 	</div>
 </nav>
@@ -120,6 +156,35 @@ const onAbout = path === '/about' || path === '/about/';
 </script>
 
 <script>
+	// ── Theme toggle ──
+	// Flip <html data-theme> and remember the manual choice. The initial theme
+	// is resolved pre-paint in Layout.astro; this only handles user clicks.
+	const themeToggle = document.getElementById('theme-toggle');
+	const syncThemeLabel = () => {
+		const dark = document.documentElement.dataset.theme === 'dark';
+		themeToggle?.setAttribute(
+			'aria-label',
+			dark ? 'Switch to light theme' : 'Switch to dark theme',
+		);
+	};
+	syncThemeLabel();
+	themeToggle?.addEventListener('click', () => {
+		const root = document.documentElement;
+		const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+		// Suppress every transition for the frame the theme flips so the whole
+		// page changes at once — no element animates on its own clock, and grey
+		// text never dips through a low-contrast mid-tone. Force a style flush
+		// with transitions off, then re-enable them on the next frame.
+		root.classList.add('theme-switching');
+		root.dataset.theme = next;
+		try {
+			localStorage.setItem('theme', next);
+		} catch (e) {}
+		syncThemeLabel();
+		void root.offsetHeight;
+		requestAnimationFrame(() => root.classList.remove('theme-switching'));
+	});
+
 	const nav = document.getElementById('site-nav');
 	// Only the home page uses the expand-on-top masthead. Interior pages
 	// (About, project detail) stay locked to the compact state so the nav
@@ -255,8 +320,25 @@ const onAbout = path === '/about' || path === '/about/';
 			pill.style.opacity = '0';
 		};
 
-		icons.forEach((icon) => icon.addEventListener('mouseenter', () => showAt(icon)));
-		group.addEventListener('mouseleave', hide);
+		// Show the label only while the cursor is actually over an icon. Slipping
+		// into a gap between two icons doesn't hide instantly — a short grace
+		// delay lets a sweep to the next icon cancel the hide and keep the pill
+		// gliding — but lingering in the gap clears the label.
+		let gapHideTimer = 0;
+		icons.forEach((icon) => {
+			icon.addEventListener('mouseenter', () => {
+				window.clearTimeout(gapHideTimer);
+				showAt(icon);
+			});
+			icon.addEventListener('mouseleave', () => {
+				window.clearTimeout(gapHideTimer);
+				gapHideTimer = window.setTimeout(hide, 90);
+			});
+		});
+		group.addEventListener('mouseleave', () => {
+			window.clearTimeout(gapHideTimer);
+			hide();
+		});
 		group.addEventListener('focusin', (e) => {
 			const icon = (e.target as HTMLElement).closest<HTMLElement>('.btn-icon');
 			if (icon) showAt(icon);

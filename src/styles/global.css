@@ -3,10 +3,48 @@
 :root {
 	--font-heading: "Supreme", "Segoe UI", system-ui, -apple-system, sans-serif;
 	--font-body: "Satoshi", "Segoe UI", system-ui, -apple-system, sans-serif;
+
+	/* ── Light theme (default) ── */
+	color-scheme: light;
 	--paper: #fefcf7;
 	--ink: #0a0a08;
 	--ink-soft: #333029;
-	--line: rgba(0, 0, 0, 0.1);
+	--line: rgba(0, 0, 0, 0.22); /* card/tag borders */
+	--line-strong: rgba(0, 0, 0, 0.4); /* hover borders */
+	--surface: #ffffff; /* cards, tags, nav buttons */
+	--surface-sunken: #f4f2ec; /* card image bed, active states */
+
+	--btn-bg: #efece6;
+	--btn-bg-hover: #e7e3dc;
+	--btn-bg-active: #ddd9d1;
+	--btn-text: #1a1917;
+	--btn-border: rgba(0, 0, 0, 0.18);
+
+	--focus-ring: #7a94c9;
+}
+
+/* ── Dark theme ── */
+/* A desaturated near-black with only the faintest cool cast (B a hair above R/G)
+   — reads as clean charcoal, not the warm-brown "candlelit" tone that comes off
+   as generic. Text is a neutral off-white rather than cream. Applied via
+   data-theme on <html> (set pre-paint in Layout). */
+:root[data-theme="dark"] {
+	color-scheme: dark;
+	--paper: #151619;
+	--ink: #e8e9ec;
+	--ink-soft: #8b8d94;
+	--line: rgba(255, 255, 255, 0.12);
+	--line-strong: rgba(255, 255, 255, 0.3);
+	--surface: #1d1e22;
+	--surface-sunken: #24262b;
+
+	--btn-bg: #24262b;
+	--btn-bg-hover: #2c2e34;
+	--btn-bg-active: #34363d;
+	--btn-text: #e8e9ec;
+	--btn-border: rgba(255, 255, 255, 0.14);
+
+	--focus-ring: #8ba3d6;
 }
 
 html {
@@ -16,6 +54,34 @@ html {
 	/* Always reserve the scrollbar gutter so short pages (e.g. About) don't
 	   shift horizontally relative to long, scrollable ones (e.g. Home). */
 	scrollbar-gutter: stable;
+	/* Firefox: a fixed translucent thumb (see note on the WebKit rules below). */
+	scrollbar-width: thin;
+	scrollbar-color: rgba(128, 128, 128, 0.55) transparent;
+}
+
+/* ── Scrollbar ──
+   Native scrollbars can't be transitioned — even custom ::-webkit-scrollbar
+   pseudo-elements ignore CSS transitions — so a theme-dependent scrollbar would
+   snap mid-fade and break the synchronized swap. Instead we give it one neutral
+   translucent color that reads correctly over both the warm-paper and warm-dark
+   backgrounds, so toggling doesn't change it at all: nothing to snap. */
+::-webkit-scrollbar {
+	width: 12px;
+	height: 12px;
+}
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+::-webkit-scrollbar-thumb {
+	background-color: rgba(128, 128, 128, 0.55);
+	border-radius: 999px;
+	/* Transparent border + padding-box clip insets the thumb so it floats with a
+	   little breathing room instead of filling the full gutter. */
+	border: 3px solid transparent;
+	background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+	background-color: rgba(128, 128, 128, 0.8);
 }
 
 body {
@@ -24,6 +90,21 @@ body {
 	font-family: var(--font-body);
 	-webkit-font-smoothing: antialiased;
 	text-rendering: optimizeLegibility;
+}
+
+/* ── Instant, synchronized theme swap ──
+   Cross-fading colors looks broken: each element interpolates on its own clock
+   and — worse — text and its background pass through matching mid-tones at the
+   same instant, so grey text (nav links, section labels) dips to invisible
+   mid-fade while the fixed project arrows repaint and reflow. So rather than
+   animate the swap, we suppress ALL transitions for the one frame the theme
+   flips: everything changes together, instantly, with no partial states. The
+   class is added, the theme flipped, then it's removed next frame (Nav.astro). */
+.theme-switching,
+.theme-switching *,
+.theme-switching *::before,
+.theme-switching *::after {
+	transition: none !important;
 }
 
 h1,
@@ -46,27 +127,27 @@ h6 {
 	font-size: 0.875rem;
 	font-weight: 600;
 	line-height: 1;
-	color: #1a1917;
 	text-decoration: none;
 	white-space: nowrap;
 	cursor: pointer;
-	background: #efece6;
-	border: 1px solid rgba(0, 0, 0, 0.18);
+	color: var(--btn-text);
+	background: var(--btn-bg);
+	border: 1px solid var(--btn-border);
 	transition:
 		background 0.12s ease,
 		border-color 0.12s ease;
 }
 
 .btn:hover {
-	background: #e7e3dc;
+	background: var(--btn-bg-hover);
 }
 
 .btn:active {
-	background: #ddd9d1;
+	background: var(--btn-bg-active);
 }
 
 .btn:focus-visible {
-	outline: 2px solid #7a94c9;
+	outline: 2px solid var(--focus-ring);
 	outline-offset: 2px;
 }
 
@@ -88,8 +169,23 @@ h6 {
 }
 
 .btn-icon:focus-visible {
-	outline: 2px solid #7a94c9;
+	outline: 2px solid var(--focus-ring);
 	outline-offset: 2px;
+}
+
+/* Theme toggle: show the icon for the theme you'll switch TO — a moon in
+   light mode, a sun in dark mode. */
+.theme-toggle .icon-sun {
+	display: none;
+}
+.theme-toggle .icon-moon {
+	display: block;
+}
+:root[data-theme="dark"] .theme-toggle .icon-sun {
+	display: block;
+}
+:root[data-theme="dark"] .theme-toggle .icon-moon {
+	display: none;
 }
 
 /* Shared sliding label: a single ink pill that glides between the contact
@@ -119,9 +215,9 @@ h6 {
 	pointer-events: none;
 	transform: translateX(0) translateX(-50%);
 	transition:
-		transform 0.17s cubic-bezier(0.3, 0, 0.1, 1),
-		width 0.17s cubic-bezier(0.3, 0, 0.1, 1),
-		opacity 0.14s ease;
+		transform 0.1s cubic-bezier(0.4, 0, 0.1, 1),
+		width 0.16s cubic-bezier(0.3, 0, 0.1, 1),
+		opacity 0.1s ease;
 	z-index: 60;
 	overflow: hidden;
 }
@@ -157,10 +253,72 @@ h6 {
 	height: 1.6rem;
 	transition:
 		width 0.2s ease-out,
-		height 0.2s ease-out;
+		height 0.2s ease-out,
+		transform 0.26s cubic-bezier(0.34, 1.2, 0.64, 1);
 }
 
 #site-nav[data-scrolled='true'] .btn-icon > svg {
-	width: 1.05rem;
-	height: 1.05rem;
+	width: 1.2rem;
+	height: 1.2rem;
+}
+
+/* ── Per-icon hover motion ──
+   Each icon gets a small, distinct move on hover — but as a rigid body only:
+   the whole glyph lifts, pops, or turns without deforming its internal
+   geometry. (Morphing sub-parts of these abstract line icons — an opening
+   flap, sliding calendar posts — just reads as a stroke glitching, so we
+   don't.) Transforms ride the shared transition on `#site-nav .btn-icon > svg`
+   above, which must list `transform` or its ID specificity would silence
+   these. All transform-only for cheap compositing; off under reduced-motion. */
+@media (prefers-reduced-motion: no-preference) {
+	.icon-email,
+	.icon-linkedin,
+	.icon-calendly,
+	.icon-github,
+	.theme-toggle .icon-sun,
+	.theme-toggle .icon-moon {
+		transform-box: fill-box;
+		transform-origin: center;
+	}
+
+	/* The four contact icons share one gesture — a clean lift — so they read
+	   as a family rather than four separate tricks. */
+	.btn-icon:hover .icon-email,
+	.btn-icon:hover .icon-linkedin,
+	.btn-icon:hover .icon-calendly,
+	.btn-icon:hover .icon-github {
+		transform: translateY(-3px);
+	}
+
+	/* Theme toggle: the sun spins, the moon leans in. */
+	.theme-toggle:hover .icon-sun {
+		transform: rotate(40deg);
+	}
+	.theme-toggle:hover .icon-moon {
+		transform: rotate(-16deg);
+	}
+
+	/* Pressed: the lifted icon dips back and scales in for a tactile click.
+	   These must follow the :hover rules (equal specificity → source order wins)
+	   so the press overrides the lift while the pointer is still down. */
+	.btn-icon:active .icon-email,
+	.btn-icon:active .icon-linkedin,
+	.btn-icon:active .icon-calendly,
+	.btn-icon:active .icon-github {
+		transform: translateY(-1px) scale(0.9);
+	}
+	/* Keep the toggle's hover rotation, just press it in. */
+	.theme-toggle:active .icon-sun {
+		transform: rotate(40deg) scale(0.9);
+	}
+	.theme-toggle:active .icon-moon {
+		transform: rotate(-16deg) scale(0.9);
+	}
+
+	/* Snap in fast on press, ease back on release. Uses ID-level specificity so
+	   it beats the base `#site-nav .btn-icon > svg` transition, which otherwise
+	   locks every direct-child icon to the softer 0.26s spring. */
+	#site-nav .btn-icon:active > svg {
+		transition-duration: 0.09s;
+	}
 }
