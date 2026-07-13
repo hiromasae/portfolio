@@ -39,13 +39,14 @@ const onProject = path.startsWith('/projects/');
 
 		<div id="contact-group" class="relative ml-auto flex items-center gap-1.5">
 			{
-				contacts.map((c) => {
+				contacts.map((c, i) => {
 					const isEmail = c.href.startsWith('mailto:');
 					const hoverLabel = isEmail ? 'Copy email' : c.label;
 					return (
 						<a
 							href={c.href}
 							class="btn-icon"
+							style={`--nav-icon-r: ${contacts.length - i}`}
 							aria-label={hoverLabel}
 							data-label={hoverLabel}
 							data-copy={isEmail ? c.href.replace('mailto:', '') : undefined}
@@ -79,41 +80,40 @@ const onProject = path.startsWith('/projects/');
 			</span>
 		</div>
 
-		{/* Light/dark toggle, set off from the contacts by a thin divider. */}
-		<div class="flex items-center border-l border-[var(--line)] pl-1.5">
-			<button
-				id="theme-toggle"
-				type="button"
-				class="btn-icon theme-toggle"
-				aria-label="Toggle light and dark theme"
+		{/* Light/dark toggle: a filled, bordered button, which sets it apart from
+		    the borderless contact icons on its own. */}
+		<button
+			id="theme-toggle"
+			type="button"
+			class="btn-icon theme-toggle"
+			aria-label="Toggle light and dark theme"
+		>
+			<svg
+				class="icon-moon"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="square"
+				stroke-linejoin="miter"
+				aria-hidden="true"
 			>
-				<svg
-					class="icon-moon"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-					stroke-linecap="square"
-					stroke-linejoin="miter"
-					aria-hidden="true"
-				>
-					<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-				</svg>
-				<svg
-					class="icon-sun"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-					stroke-linecap="square"
-					stroke-linejoin="miter"
-					aria-hidden="true"
-				>
-					<circle cx="12" cy="12" r="4" />
-					<path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
-				</svg>
-			</button>
-		</div>
+				<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+			</svg>
+			<svg
+				class="icon-sun"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="square"
+				stroke-linejoin="miter"
+				aria-hidden="true"
+			>
+				<circle cx="12" cy="12" r="4" />
+				<path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+			</svg>
+		</button>
 		</div>
 	</div>
 </nav>
@@ -129,14 +129,20 @@ const onProject = path.startsWith('/projects/');
 	//      can be left — link click, back/forward, address bar).
 	//   2. On arrival: compute this page's resting state from first principles
 	//      (home near the top → expanded, anything else → compact).
-	//   3. If the carried state differs, paint in the carried state and hand the
-	//      resting state to the module script, which animates the difference.
+	//   3. If the carried state differs, paint in the carried state and play the
+	//      difference as soon as parsing finishes.
 	//
 	// No per-flow special cases: collapse (home → interior) and expand
 	// (anywhere → top of home) both fall out of the same diff.
 	//
 	// Runs inline (pre-paint) so the page paints in its *starting* state, with
-	// no flash of the resting state, before animating on the next frame.
+	// no flash of the resting state, before animating on the next frame. The
+	// intro itself also lives here rather than in the module script below:
+	// module scripts evaluate in document order behind whatever the toolchain
+	// injects ahead of them (in dev: the Vite client and dev toolbar), so on a
+	// slow round trip the nav sat frozen in the carried state for up to a
+	// second after paint. readyState 'interactive' fires before any module
+	// script runs, so the intro can't be starved by them.
 	(function () {
 		var nav = document.getElementById('site-nav');
 		if (!nav) return;
@@ -188,7 +194,65 @@ const onProject = path.startsWith('/projects/');
 		nav.dataset.scrolled = animate ? carried : target;
 		void nav.offsetWidth;
 		nav.classList.remove('nav-no-transition');
-		if (animate) nav.dataset.introTo = target;
+		if (!animate) return;
+
+		// FLIP the carried→resting difference (a one-shot copy of animateTo in
+		// the module script below — keep the two in step): snap the height
+		// change, measure how far each affected block moved, offset it back,
+		// then release the offset as a composited transform.
+		var runIntro = function () {
+			// Recompute the resting state rather than reusing `target`:
+			// back/forward scroll restoration can land before this runs (e.g.
+			// returning to a scrolled-down home), and if the restored position
+			// already matches the painted state there is nothing to animate.
+			var to = onHome && window.scrollY < 72 ? 'false' : 'true';
+			if (nav.dataset.scrolled === to) return;
+			var els = [
+				nav.querySelector('.nav-inner'),
+				document.querySelector('main'),
+				document.querySelector('footer'),
+			].filter(Boolean);
+			var first = els.map(function (el) {
+				return el.getBoundingClientRect().top;
+			});
+			nav.dataset.scrolled = to; // snap the height; start CSS scale transitions
+			var last = els.map(function (el) {
+				return el.getBoundingClientRect().top;
+			});
+			els.forEach(function (el, i) {
+				var dy = first[i] - last[i];
+				el.style.transition = 'none';
+				el.style.transform = dy ? 'translateY(' + dy + 'px)' : '';
+			});
+			void nav.offsetWidth;
+			// Release synchronously — NOT on the next rAF. The scale/translateX
+			// transitions above started at this task's style clock; releasing a
+			// frame later would start the vertical glide ~16ms behind them, and
+			// that per-axis lag bends every straight diagonal into an arc (an
+			// oval over a collapse+expand round trip). Same-task release gives
+			// all axes the identical start time on any refresh rate.
+			els.forEach(function (el) {
+				el.style.transition = 'transform 200ms var(--nav-ease)';
+				el.style.transform = '';
+				el.addEventListener('transitionend', function done() {
+					el.style.transition = '';
+					el.removeEventListener('transitionend', done);
+				});
+			});
+			void nav.offsetWidth;
+		};
+
+		// 'interactive' means main/footer exist and layout is measurable; it
+		// fires before module scripts evaluate, so this can't run twice against
+		// the scroll handler installed below.
+		if (document.readyState !== 'loading') {
+			runIntro();
+		} else {
+			document.addEventListener('readystatechange', function onReady() {
+				document.removeEventListener('readystatechange', onReady);
+				runIntro();
+			});
+		}
 	})();
 </script>
 
@@ -278,31 +342,27 @@ const onProject = path.startsWith('/projects/');
 			});
 			void nav.offsetWidth;
 			// Play: release the offsets so they glide to zero on the compositor.
-			requestAnimationFrame(() => {
-				els.forEach((el) => {
-					el.style.transition = `transform ${DUR}ms ease-out`;
-					el.style.transform = '';
-					el.addEventListener('transitionend', function done() {
-						el.style.transition = '';
-						el.removeEventListener('transitionend', done);
-					});
+			// Released in the same task (with a forced style flush), not on the
+			// next rAF: the children's scale/translateX transitions started at
+			// this task's style clock, and a one-frame-later vertical start bends
+			// the straight diagonals into arcs — an oval over a collapse+expand
+			// round trip. (Same pattern in the inline intro above.)
+			els.forEach((el) => {
+				el.style.transition = `transform ${DUR}ms var(--nav-ease)`;
+				el.style.transform = '';
+				el.addEventListener('transitionend', function done() {
+					el.style.transition = '';
+					el.removeEventListener('transitionend', done);
 				});
 			});
+			void nav.offsetWidth;
 		};
 
-		// Play the intro handed over by the inline script (which already snapped
-		// the carried state pre-paint). Start immediately — measurements show
-		// first-load frame spikes happen with or without the animation, so
-		// deferring it only reads as lag. The resting state is recomputed here
-		// rather than taken from the hand-off: back/forward scroll restoration
-		// can land between the two scripts (e.g. returning to a scrolled-down
-		// home), and if the restored position already matches the painted state,
-		// animateTo's early return correctly skips the intro.
-		const introTo = nav.dataset.introTo;
-		if (introTo) {
-			delete nav.dataset.introTo;
-			animateTo(nav.dataset.home === 'true' && window.scrollY < 72 ? 'false' : 'true');
-		}
+		// (The cross-page intro is played by the inline script above, which runs
+		// at readyState 'interactive' — before this module evaluates — so it
+		// can't be starved by the module chain. animateTo here only serves the
+		// scroll handler; its transform-clearing preamble also lets it cleanly
+		// take over from an intro still in flight.)
 
 		// Home masthead: expand near the very top, collapse once scrolled, with a
 		// dead-band so scroll jitter can't rapidly re-trigger the animation.

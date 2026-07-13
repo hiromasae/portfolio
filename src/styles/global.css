@@ -21,6 +21,16 @@
 	--btn-border: rgba(0, 0, 0, 0.18);
 
 	--focus-ring: #7a94c9;
+
+	/* Single easing for the whole nav collapse/expand ensemble. The motion is
+	   assembled from independent transitions — the FLIP translateY (set inline
+	   from Nav.astro's scripts, also on <main>/<footer>, hence :root), the
+	   icons' translateX/scale below, and the Tailwind `ease-out` classes on
+	   the logo/links — and every piece must ride the same curve: if the
+	   horizontal and vertical components ease differently, their per-frame
+	   disagreement bends the straight glide into a visible swing. Keep this
+	   equal to Tailwind's --ease-out (used by the markup classes). */
+	--nav-ease: cubic-bezier(0, 0, 0.2, 1);
 }
 
 /* ── Dark theme ── */
@@ -198,7 +208,26 @@ h6 {
 	outline-offset: 2px;
 }
 
-/* Theme toggle: show the icon for the theme you'll switch TO — a moon in
+/* Theme toggle: same surface grammar as .btn (the arrow buttons) and the
+   project cards — filled, hairline border, full-strength foreground — which
+   sets it apart from the borderless contact icons without needing a divider.
+   The color rules override .btn-icon's muted resting/hover greys. */
+.theme-toggle {
+	color: var(--btn-text);
+	background: var(--btn-bg);
+	border: 1px solid var(--btn-border);
+}
+
+.theme-toggle:hover {
+	color: var(--btn-text);
+	background: var(--btn-bg-hover);
+}
+
+.theme-toggle:active {
+	background: var(--btn-bg-active);
+}
+
+/* Show the icon for the theme you'll switch TO — a moon in
    light mode, a sun in dark mode. */
 .theme-toggle .icon-sun {
 	display: none;
@@ -279,11 +308,22 @@ h6 {
 #site-nav .btn-icon {
 	transition:
 		color 0.12s ease,
-		transform 0.2s ease-out;
+		background-color 0.12s ease,
+		transform 0.2s var(--nav-ease);
 }
 
 #site-nav[data-scrolled='true'] .btn-icon {
 	transform: scale(0.75); /* 1.2rem / 1.6rem */
+}
+
+/* Close ranks as the icons shrink. scale() leaves each button's layout box at
+   full width, so compacting would visually *loosen* the row exactly as the
+   glyphs get smaller. Instead each contact icon slides right by the slack the
+   buttons between it and the right edge give up — 0.65rem per button (2.6rem
+   box × the 25% shrink) — anchored at the theme toggle. --nav-icon-r is the
+   button's distance-in-buttons from that anchor, set in Nav.astro's markup. */
+#site-nav[data-scrolled='true'] #contact-group .btn-icon {
+	transform: translateX(calc(0.65rem * var(--nav-icon-r, 0))) scale(0.75);
 }
 
 /* SVG size is fixed now; only the hover/press gesture transitions. Scoped to
