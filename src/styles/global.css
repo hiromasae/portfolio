@@ -11,12 +11,13 @@
 	--ink-soft: #333029;
 	--line: rgba(0, 0, 0, 0.22); /* card/tag borders */
 	--line-strong: rgba(0, 0, 0, 0.4); /* hover borders */
+	--line-soft: rgba(0, 0, 0, 0.12); /* quiet borders (theme toggle) */
 	--surface: #ffffff; /* cards, tags, nav buttons */
 	--surface-sunken: #f4f2ec; /* card image bed, active states */
 
 	--btn-bg: #efece6;
-	--btn-bg-hover: #e7e3dc;
-	--btn-bg-active: #ddd9d1;
+	--btn-bg-hover: #e5e0d6;
+	--btn-bg-active: #dad4c8;
 	--btn-text: #1a1917;
 	--btn-border: rgba(0, 0, 0, 0.18);
 
@@ -45,12 +46,13 @@
 	--ink-soft: #8b8d94;
 	--line: rgba(255, 255, 255, 0.12);
 	--line-strong: rgba(255, 255, 255, 0.3);
+	--line-soft: rgba(255, 255, 255, 0.11);
 	--surface: #1d1e22;
 	--surface-sunken: #24262b;
 
 	--btn-bg: #24262b;
-	--btn-bg-hover: #2c2e34;
-	--btn-bg-active: #34363d;
+	--btn-bg-hover: #2e3037;
+	--btn-bg-active: #383a43;
 	--btn-text: #e8e9ec;
 	--btn-border: rgba(255, 255, 255, 0.14);
 
@@ -175,6 +177,7 @@ h6 {
 
 .btn:hover {
 	background: var(--btn-bg-hover);
+	border-color: var(--line-strong);
 }
 
 .btn:active {
@@ -208,38 +211,48 @@ h6 {
 	outline-offset: 2px;
 }
 
-/* Theme toggle: same surface grammar as .btn (the arrow buttons) and the
-   project cards — filled, hairline border, full-strength foreground — which
-   sets it apart from the borderless contact icons without needing a divider.
-   The color rules override .btn-icon's muted resting/hover greys. */
+/* Theme toggle: boxed but unfilled at rest — the quiet border sets it apart from
+   the borderless contact icons without competing with them for attention. On
+   interaction it borrows the arrow buttons' (.btn) surface grammar: hover fills
+   with --btn-bg and firms the border, press deepens to --btn-bg-active — so the
+   toggle whispers at rest but behaves like the rest of the button family once
+   you touch it. Resting/hover foreground come from .btn-icon, like its neighbors. */
 .theme-toggle {
-	color: var(--btn-text);
-	background: var(--btn-bg);
-	border: 1px solid var(--btn-border);
+	/* Grid-stack both glyphs in a single cell so the sun and moon overlap and
+	   can cross-rotate on theme change, rather than hard-swapping via display.
+	   The cell sizes to the (identical) icons, so the button keeps its size. */
+	display: inline-grid;
+	place-items: center;
+	border: 1px solid var(--line-soft);
 }
 
 .theme-toggle:hover {
-	color: var(--btn-text);
-	background: var(--btn-bg-hover);
+	border-color: var(--line-strong);
+	background: var(--btn-bg);
 }
 
 .theme-toggle:active {
 	background: var(--btn-bg-active);
 }
 
-/* Show the icon for the theme you'll switch TO — a moon in
-   light mode, a sun in dark mode. */
+/* Both glyphs live in the same grid cell (see .theme-toggle); only the icon for
+   the theme you'd switch TO is shown — a moon in light, a sun in dark. The swap
+   is by opacity so the hidden one stays in layout, ready to animate in. */
+.theme-toggle .icon-sun,
+.theme-toggle .icon-moon {
+	grid-area: 1 / 1;
+}
 .theme-toggle .icon-sun {
-	display: none;
+	opacity: 0;
 }
 .theme-toggle .icon-moon {
-	display: block;
+	opacity: 1;
 }
 :root[data-theme="dark"] .theme-toggle .icon-sun {
-	display: block;
+	opacity: 1;
 }
 :root[data-theme="dark"] .theme-toggle .icon-moon {
-	display: none;
+	opacity: 0;
 }
 
 /* Shared sliding label: a single ink pill that glides between the contact
@@ -309,6 +322,7 @@ h6 {
 	transition:
 		color 0.12s ease,
 		background-color 0.12s ease,
+		border-color 0.12s ease,
 		transform 0.2s var(--nav-ease);
 }
 
@@ -332,7 +346,13 @@ h6 {
 #site-nav .btn-icon > svg {
 	width: 1.6rem;
 	height: 1.6rem;
-	transition: transform 0.26s cubic-bezier(0.34, 1.2, 0.64, 1);
+	/* Contact icons gesture via `transform`; the theme toggle uses the individual
+	   `rotate`/`scale` properties so its hover lean and swap pop ride separate
+	   channels and never fight over one matrix (see the theme-swap notes below). */
+	transition:
+		transform 0.26s cubic-bezier(0.34, 1.2, 0.64, 1),
+		rotate 0.26s cubic-bezier(0.34, 1.2, 0.64, 1),
+		scale 0.26s cubic-bezier(0.34, 1.2, 0.64, 1);
 }
 
 /* ── Per-icon hover motion ──
@@ -363,12 +383,14 @@ h6 {
 		transform: translateY(-3px);
 	}
 
-	/* Theme toggle: the sun spins, the moon leans in. */
+	/* Theme toggle: the sun spins, the moon leans in. Uses the individual
+	   `rotate` property (not `transform`) so the swap can pop the icon in via
+	   `scale` on a separate channel without disturbing this lean. */
 	.theme-toggle:hover .icon-sun {
-		transform: rotate(40deg);
+		rotate: 40deg;
 	}
 	.theme-toggle:hover .icon-moon {
-		transform: rotate(-16deg);
+		rotate: -16deg;
 	}
 
 	/* Pressed: the lifted icon dips back and scales in for a tactile click.
@@ -382,10 +404,12 @@ h6 {
 	}
 	/* Keep the toggle's hover rotation, just press it in. */
 	.theme-toggle:active .icon-sun {
-		transform: rotate(40deg) scale(0.9);
+		rotate: 40deg;
+		scale: 0.9;
 	}
 	.theme-toggle:active .icon-moon {
-		transform: rotate(-16deg) scale(0.9);
+		rotate: -16deg;
+		scale: 0.9;
 	}
 
 	/* Snap in fast on press, ease back on release. Uses ID-level specificity so
@@ -393,5 +417,33 @@ h6 {
 	   locks every direct-child icon to the softer 0.26s spring. */
 	#site-nav .btn-icon:active > svg {
 		transition-duration: 0.09s;
+	}
+
+	/* ── Theme swap ──
+	   Near-instant, and deliberately NOT a crossfade: two stacked glyphs fading
+	   through each other read as overlapping. Instead the outgoing glyph just
+	   snaps to opacity 0 (its resting state for the new theme, applied by the
+	   theme flip), and only the incoming one animates — a quick scale-in — so
+	   there's never more than one glyph on screen at a time. Animates only
+	   `scale`, leaving `rotate` to the hover rule: if you toggle while hovering,
+	   the incoming glyph is already sitting at its hover lean and just pops in, so
+	   it can't snap from an upright animation end into the leaned hover state.
+	   Driven by keyframe `animation`, not a transition, so it survives the blanket
+	   `transition: none` the flip applies for its one frame (see .theme-switching).
+	   `.theme-anim` is toggled per-click in Nav.astro; the pair below picks
+	   whichever glyph is incoming for the new theme. Its end state (scale 1)
+	   equals the glyph's resting scale, so it settles with no snap. */
+	:root:not([data-theme="dark"]) .theme-toggle.theme-anim .icon-moon,
+	:root[data-theme="dark"] .theme-toggle.theme-anim .icon-sun {
+		animation: theme-icon-in 0.13s cubic-bezier(0.2, 0.7, 0.3, 1);
+	}
+}
+
+@keyframes theme-icon-in {
+	from {
+		scale: 0.6;
+	}
+	to {
+		scale: 1;
 	}
 }

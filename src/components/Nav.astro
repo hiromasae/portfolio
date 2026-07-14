@@ -80,12 +80,12 @@ const onProject = path.startsWith('/projects/');
 			</span>
 		</div>
 
-		{/* Light/dark toggle: a filled, bordered button, which sets it apart from
-		    the borderless contact icons on its own. */}
+		{/* Light/dark toggle: boxed by a quiet border (no fill), which sets it
+		    apart from the borderless contact icons without outshouting them. */}
 		<button
 			id="theme-toggle"
 			type="button"
-			class="btn-icon theme-toggle"
+			class="btn-icon theme-toggle ml-2"
 			aria-label="Toggle light and dark theme"
 		>
 			<svg
@@ -261,6 +261,7 @@ const onProject = path.startsWith('/projects/');
 	// Flip <html data-theme> and remember the manual choice. The initial theme
 	// is resolved pre-paint in Layout.astro; this only handles user clicks.
 	const themeToggle = document.getElementById('theme-toggle');
+	const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 	const syncThemeLabel = () => {
 		const dark = document.documentElement.dataset.theme === 'dark';
 		themeToggle?.setAttribute(
@@ -282,6 +283,14 @@ const onProject = path.startsWith('/projects/');
 			localStorage.setItem('theme', next);
 		} catch (e) {}
 		syncThemeLabel();
+		// Play the sun/moon swap. It's a keyframe animation (unaffected by the
+		// transition suppression above), retriggered by removing the class and
+		// forcing a reflow before re-adding so rapid clicks restart it cleanly.
+		if (themeToggle && !prefersReducedMotion.matches) {
+			themeToggle.classList.remove('theme-anim');
+			void themeToggle.offsetWidth;
+			themeToggle.classList.add('theme-anim');
+		}
 		void root.offsetHeight;
 		requestAnimationFrame(() => root.classList.remove('theme-switching'));
 	});
