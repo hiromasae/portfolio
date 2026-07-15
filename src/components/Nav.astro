@@ -5,8 +5,8 @@ import Icon from './Icon.astro';
 const path = Astro.url.pathname;
 const onHome = path === '/';
 const onAbout = path === '/about' || path === '/about/';
-// Project detail pages carry their own "← Back to projects" button, so the nav
-// Projects link would be redundant there.
+// Project detail pages live under the Projects section, so the Projects nav
+// link is the active one there.
 const onProject = path.startsWith('/projects/');
 ---
 
@@ -20,7 +20,7 @@ const onProject = path.startsWith('/projects/');
 	    the resulting position shift is played back as a composited transform by
 	    the FLIP logic in the script below. Nothing here animates a layout
 	    property, so the collapse/expand never forces a per-frame reflow. */}
-	<div class="mx-auto max-w-[1280px] px-5 py-8 group-data-[scrolled=true]/nav:py-3.5">
+	<div class="mx-auto max-w-[1280px] px-5 py-8 group-data-[scrolled=true]/nav:py-1">
 		<div class="nav-inner flex items-center gap-4">
 			<a
 				href="/"
@@ -29,15 +29,26 @@ const onProject = path.startsWith('/projects/');
 				Hiro Eernisse
 			</a>
 
-			{/* Compact transform (translateX + scale) lives in global.css: the links
-			    slide left by the width the scaled-down logo gives up, so they keep
-			    hugging it even though its layout box stays expanded-width. */}
+			{/* Projects/About sit right beside the wordmark. The link for the
+			    section you're on is marked active with aria-current (styled in
+			    global.css). Compact transform (translateX + scale) lives in
+			    global.css: the links slide left by the width the scaled-down logo
+			    gives up, so they keep hugging it even though its layout box stays
+			    expanded-width. */}
 			<div class="nav-links ml-2 hidden origin-left items-center gap-1 text-lg text-[var(--ink-soft)] transition-transform duration-200 ease-out sm:flex">
-			{!onHome && !onProject && <a href="/#projects" class="rounded-none px-2 py-1 hover:text-[var(--ink)]">Projects</a>}
-			{!onAbout && <a href="/about" class="rounded-none px-2 py-1 hover:text-[var(--ink)]">About</a>}
-		</div>
+				<a
+					href="/#projects"
+					class="rounded-none px-2 py-1 transition-colors hover:text-[var(--ink)]"
+					aria-current={onProject ? 'page' : undefined}
+				>Projects</a>
+				<a
+					href="/about"
+					class="rounded-none px-2 py-1 transition-colors hover:text-[var(--ink)]"
+					aria-current={onAbout ? 'page' : undefined}
+				>About</a>
+			</div>
 
-		<div id="contact-group" class="relative ml-auto flex items-center gap-1.5">
+		<div id="contact-group" class="relative ml-auto flex items-center gap-1.5 self-center">
 			{
 				contacts.map((c, i) => {
 					const isEmail = c.href.startsWith('mailto:');
@@ -85,7 +96,7 @@ const onProject = path.startsWith('/projects/');
 		<button
 			id="theme-toggle"
 			type="button"
-			class="btn-icon theme-toggle ml-2"
+			class="btn-icon theme-toggle ml-2 self-center"
 			aria-label="Toggle light and dark theme"
 		>
 			<svg

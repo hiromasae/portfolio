@@ -63,6 +63,13 @@ html {
 	/* Bump the base scale so nav + content read larger overall (16px → 19px) */
 	font-size: 118.75%;
 	scroll-behavior: smooth;
+	/* The nav's collapse/expand FLIP (see Nav.astro) animates the content shift
+	   itself while holding scrollY constant. Scroll anchoring fights that: when
+	   the sticky nav resizes it re-adjusts scrollY by the height delta, which
+	   both double-compensates the FLIP and — if that delta exceeds the collapse
+	   dead-band — bounces the scroll position back and forth across the
+	   threshold, making the nav flip-flop. Let the FLIP own the transition. */
+	overflow-anchor: none;
 	/* Always reserve the scrollbar gutter so short pages (e.g. About) don't
 	   shift horizontally relative to long, scrollable ones (e.g. Home). */
 	scrollbar-gutter: stable;
@@ -142,6 +149,36 @@ body {
 
 #site-nav[data-scrolled="true"] .nav-links {
 	transform: translateX(var(--nav-logo-dx, 0px)) scale(0.78);
+}
+
+/* Nav links: a hairline underline wipes in from the left on hover or focus. The
+   active section link keeps it permanently drawn (and full ink). The reveal is a
+   scaleX anchored at the left edge; the grow animation itself is gated on
+   reduced-motion below, so it just snaps in for users who opt out. */
+.nav-links a {
+	position: relative;
+}
+
+.nav-links a::after {
+	content: "";
+	position: absolute;
+	left: 0.5rem;
+	right: 0.5rem;
+	bottom: 0.3rem;
+	height: 1px;
+	background: currentColor;
+	transform: scaleX(0);
+	transform-origin: left;
+}
+
+.nav-links a:hover::after,
+.nav-links a:focus-visible::after,
+.nav-links a[aria-current="page"]::after {
+	transform: scaleX(1);
+}
+
+.nav-links a[aria-current="page"] {
+	color: var(--ink);
 }
 
 h1,
@@ -327,17 +364,17 @@ h6 {
 }
 
 #site-nav[data-scrolled='true'] .btn-icon {
-	transform: scale(0.75); /* 1.2rem / 1.6rem */
+	transform: scale(0.66); /* ~1.05rem / 1.6rem */
 }
 
 /* Close ranks as the icons shrink. scale() leaves each button's layout box at
    full width, so compacting would visually *loosen* the row exactly as the
    glyphs get smaller. Instead each contact icon slides right by the slack the
-   buttons between it and the right edge give up — 0.65rem per button (2.6rem
-   box × the 25% shrink) — anchored at the theme toggle. --nav-icon-r is the
+   buttons between it and the right edge give up — 0.884rem per button (2.6rem
+   box × the 34% shrink) — anchored at the theme toggle. --nav-icon-r is the
    button's distance-in-buttons from that anchor, set in Nav.astro's markup. */
 #site-nav[data-scrolled='true'] #contact-group .btn-icon {
-	transform: translateX(calc(0.65rem * var(--nav-icon-r, 0))) scale(0.75);
+	transform: translateX(calc(0.884rem * var(--nav-icon-r, 0))) scale(0.66);
 }
 
 /* SVG size is fixed now; only the hover/press gesture transitions. Scoped to
@@ -364,6 +401,10 @@ h6 {
    above, which must list `transform` or its ID specificity would silence
    these. All transform-only for cheap compositing; off under reduced-motion. */
 @media (prefers-reduced-motion: no-preference) {
+	.nav-links a::after {
+		transition: transform 0.2s var(--nav-ease);
+	}
+
 	.icon-email,
 	.icon-linkedin,
 	.icon-calendly,
