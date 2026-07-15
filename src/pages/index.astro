@@ -10,7 +10,7 @@ import { projects } from '../data/projects';
 
 	<main class="mx-auto max-w-[1280px] px-5">
 		<!-- Projects -->
-		<section id="projects" class="scroll-mt-20 pt-16 pb-16 sm:pt-24">
+		<section id="projects" class="scroll-mt-20 pt-8 pb-16 sm:pt-10">
 			<h2 class="mb-5 text-sm font-bold uppercase tracking-widest text-[var(--ink-soft)]">
 				Projects
 			</h2>
@@ -20,26 +20,6 @@ import { projects } from '../data/projects';
 		</section>
 	</main>
 
-	<!-- Card-by-card navigation -->
-	<div class="fixed right-[max(1rem,calc((100vw-1280px)/3-1.375rem))] top-1/2 z-40 hidden -translate-y-1/2 flex-col gap-2 md:flex">
-		<button
-			id="project-prev"
-			type="button"
-			aria-label="Previous project"
-			class="flex h-11 w-11 items-center justify-center rounded-[1.5px] border border-[var(--line)] bg-[var(--surface)] text-lg text-[var(--ink)] shadow-[0_1px_1px_rgba(0,0,0,0.03),0_10px_30px_-16px_rgba(0,0,0,0.15)] transition-[color,border-color,background-color,box-shadow,opacity,visibility,transform] duration-300 hover:border-[var(--ink)] hover:shadow-[0_2px_3px_rgba(0,0,0,0.04),0_18px_44px_-18px_rgba(0,0,0,0.24)] active:scale-95 active:border-[var(--ink)] active:bg-[var(--surface-sunken)]"
-		>
-			<span aria-hidden="true">↑</span>
-		</button>
-		<button
-			id="project-next"
-			type="button"
-			aria-label="Next project"
-			class="flex h-11 w-11 items-center justify-center rounded-[1.5px] border border-[var(--line)] bg-[var(--surface)] text-lg text-[var(--ink)] shadow-[0_1px_1px_rgba(0,0,0,0.03),0_10px_30px_-16px_rgba(0,0,0,0.15)] transition-[color,border-color,background-color,box-shadow,opacity,visibility,transform] duration-300 hover:border-[var(--ink)] hover:shadow-[0_2px_3px_rgba(0,0,0,0.04),0_18px_44px_-18px_rgba(0,0,0,0.24)] active:scale-95 active:border-[var(--ink)] active:bg-[var(--surface-sunken)]"
-		>
-			<span aria-hidden="true">↓</span>
-		</button>
-	</div>
-
 	<footer class="mx-auto max-w-[1280px] px-5 py-10 text-sm text-[var(--ink-soft)]">
 		<div class="flex items-center justify-between border-t border-[var(--line)] pt-6">
 			<span>© 2026 Hiro Eernisse</span>
@@ -47,50 +27,4 @@ import { projects } from '../data/projects';
 		</div>
 	</footer>
 
-	<script>
-		const cards = Array.from(
-			document.querySelectorAll<HTMLElement>('#project-list > a'),
-		);
-		const prev = document.getElementById('project-prev') as HTMLButtonElement | null;
-		const next = document.getElementById('project-next') as HTMLButtonElement | null;
-
-		if (cards.length && prev && next) {
-			// Index of the card whose center sits closest to the viewport center.
-			const currentIndex = () => {
-				const mid = window.innerHeight / 2;
-				let closest = 0;
-				let smallest = Infinity;
-				cards.forEach((card, i) => {
-					const rect = card.getBoundingClientRect();
-					const dist = Math.abs(rect.top + rect.height / 2 - mid);
-					if (dist < smallest) {
-						smallest = dist;
-						closest = i;
-					}
-				});
-				return closest;
-			};
-
-			const goTo = (i: number) => {
-				const clamped = Math.max(0, Math.min(cards.length - 1, i));
-				cards[clamped].scrollIntoView({ behavior: 'smooth', block: 'center' });
-			};
-
-			const syncButtons = () => {
-				const i = currentIndex();
-				const atStart = i <= 0;
-				const atEnd = i >= cards.length - 1;
-				prev.style.opacity = atStart ? '0' : '1';
-				prev.style.visibility = atStart ? 'hidden' : 'visible';
-				next.style.opacity = atEnd ? '0' : '1';
-				next.style.visibility = atEnd ? 'hidden' : 'visible';
-			};
-
-			prev.addEventListener('click', () => goTo(currentIndex() - 1));
-			next.addEventListener('click', () => goTo(currentIndex() + 1));
-			window.addEventListener('scroll', syncButtons, { passive: true });
-			window.addEventListener('resize', syncButtons);
-			syncButtons();
-		}
-	</script>
 </Layout>
