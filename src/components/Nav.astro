@@ -5,9 +5,9 @@ import Icon from './Icon.astro';
 const path = Astro.url.pathname;
 const onHome = path === '/';
 const onAbout = path === '/about' || path === '/about/';
-// Project detail pages live under the Projects section, so the Projects nav
-// link is the active one there.
-const onProject = path.startsWith('/projects/');
+// The home page is the projects listing, and project detail pages live under
+// the Projects section, so the Projects nav link is the active one on both.
+const onProject = onHome || path.startsWith('/projects/');
 ---
 
 <nav
@@ -165,11 +165,11 @@ const onProject = path.startsWith('/projects/');
 			} catch (e) {}
 		});
 
-		// This page's resting state right now. The 72px threshold matches
-		// COLLAPSE_ABOVE in the scroll handler below, so a hash landing just
-		// under the masthead (e.g. /#projects) still counts as expanded.
+		// This page's resting state right now. The 12px threshold matches
+		// COLLAPSE_ABOVE in the scroll handler below, so the nav paints compact
+		// the moment the page loads scrolled even slightly off the top.
 		var onHome = nav.dataset.home === 'true';
-		var target = onHome && window.scrollY < 72 ? 'false' : 'true';
+		var target = onHome && window.scrollY < 12 ? 'false' : 'true';
 
 		// The state carried over from the page we just left, if fresh. The age
 		// cap means returning to a stale tab (e.g. from an external site much
@@ -216,7 +216,7 @@ const onProject = path.startsWith('/projects/');
 			// back/forward scroll restoration can land before this runs (e.g.
 			// returning to a scrolled-down home), and if the restored position
 			// already matches the painted state there is nothing to animate.
-			var to = onHome && window.scrollY < 72 ? 'false' : 'true';
+			var to = onHome && window.scrollY < 12 ? 'false' : 'true';
 			if (nav.dataset.scrolled === to) return;
 			var els = [
 				nav.querySelector('.nav-inner'),
@@ -387,10 +387,10 @@ const onProject = path.startsWith('/projects/');
 		// Home masthead: expand near the very top, collapse once scrolled, with a
 		// dead-band so scroll jitter can't rapidly re-trigger the animation.
 		// (The initial state is already painted by the inline script above;
-		// COLLAPSE_ABOVE must stay in sync with the 72px threshold there.)
+		// COLLAPSE_ABOVE must stay in sync with the 12px threshold there.)
 		if (nav.dataset.home === 'true') {
-			const EXPAND_BELOW = 16;
-			const COLLAPSE_ABOVE = 72;
+			const EXPAND_BELOW = 4;
+			const COLLAPSE_ABOVE = 12;
 			let scrolled = window.scrollY > COLLAPSE_ABOVE;
 			let ticking = false;
 			const apply = () => {
@@ -499,12 +499,17 @@ const onProject = path.startsWith('/projects/');
 				pill.style.opacity = '1';
 				place(icon, text); // slide + resize to the new icon
 			} else {
-				// Appear in place: kill transitions, position, then fade in.
+				// Appear with a left-to-right wipe (matching the nav-link
+				// underline) rather than a fade: kill transitions, position it
+				// fully clipped from the right edge, then release the clip so the
+				// label reveals left to right. Reduced motion just snaps it in.
 				pill.style.transition = 'none';
 				place(icon, text);
-				void pill.offsetWidth; // force reflow so the jump isn't animated
-				pill.style.transition = '';
 				pill.style.opacity = '1';
+				pill.style.clipPath = reduce ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)';
+				void pill.offsetWidth; // force reflow so the wipe animates from clipped
+				pill.style.transition = '';
+				pill.style.clipPath = 'inset(0 0 0 0)';
 				visible = true;
 			}
 		};
