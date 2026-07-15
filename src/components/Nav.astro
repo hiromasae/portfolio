@@ -38,6 +38,7 @@ const onProject = onHome || path.startsWith('/projects/');
 			<div class="nav-links ml-2 hidden origin-left items-center gap-1 text-lg font-medium text-[var(--ink-soft)] transition-transform duration-200 ease-out sm:flex">
 				<a
 					href="/#projects"
+					data-projects-link
 					class="rounded-none px-2 py-1 transition-colors hover:text-[var(--ink)]"
 					aria-current={onProject ? 'page' : undefined}
 				>Projects</a>
@@ -169,7 +170,13 @@ const onProject = onHome || path.startsWith('/projects/');
 		// COLLAPSE_ABOVE in the scroll handler below, so the nav paints compact
 		// the moment the page loads scrolled even slightly off the top.
 		var onHome = nav.dataset.home === 'true';
-		var target = onHome && window.scrollY < 12 ? 'false' : 'true';
+		// A pending "show projects" intent — set when the Projects link is clicked
+		// on another page — means this home load should rest compact, not expanded:
+		// the module script scrolls to the projects view once layout is measurable,
+		// and painting compact up front avoids a flash of the tall masthead.
+		var wantProjects = false;
+		try { wantProjects = sessionStorage.getItem('nav-projects') === '1'; } catch (e) {}
+		var target = onHome && window.scrollY < 12 && !wantProjects ? 'false' : 'true';
 
 		// The state carried over from the page we just left, if fresh. The age
 		// cap means returning to a stale tab (e.g. from an external site much
@@ -384,11 +391,69 @@ const onProject = onHome || path.startsWith('/projects/');
 		// scroll handler; its transform-clearing preamble also lets it cleanly
 		// take over from an intro still in flight.)
 
+		// ── "Projects" → projects section, compact nav ──
+		// The projects list is the top of the home page, sitting directly under the
+		// masthead. A plain #projects anchor fights the sticky collapse: once the nav
+		// is compact, the section's document top is nearer the viewport top than the
+		// anchor's scroll-margin (95px), so the browser clamps the jump to y=0 —
+		// snapping back to the very top with the masthead re-expanded. So we take
+		// over: scroll to the spot where the nav is collapsed and the first card sits
+		// just beneath it. Cross-page, a sessionStorage flag carries the intent so the
+		// home page lands there directly (see the inline script's `wantProjects`).
+		const PROJECTS_FLAG = 'nav-projects';
+
+		// The y that leaves the nav compact with the first card just below it.
+		const projectsTargetY = () => {
+			const list = document.getElementById('project-list');
+			if (!list) return null;
+			// Gap from the nav's bottom edge to the first card — the section's top
+			// padding. It's independent of nav state: the card's document position
+			// and the nav's box height shift together between expanded and compact,
+			// so this difference is the same either way.
+			const contentGap = list.getBoundingClientRect().top + window.scrollY - nav.offsetHeight;
+			// Land the card ~12px under the compact nav, but never so near the top
+			// that the scroll handler's 12px threshold would re-expand the masthead.
+			return Math.max(contentGap - 12, 16);
+		};
+
+		const goToProjects = (smooth) => {
+			const y = projectsTargetY();
+			if (y == null) return;
+			window.scrollTo({ top: y, behavior: smooth && !reduceMotion ? 'smooth' : 'auto' });
+		};
+
+		// Intercept the Projects link on every page. On home we scroll in place; from
+		// elsewhere we stash the intent and navigate to a clean "/" (no #projects, so
+		// the browser's own anchor jump can't fire and fight us).
+		document.querySelectorAll('a[data-projects-link]').forEach((link) => {
+			link.addEventListener('click', (e) => {
+				if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+				e.preventDefault();
+				if (nav.dataset.home === 'true') {
+					history.replaceState(null, '', '/');
+					goToProjects(true);
+				} else {
+					try { sessionStorage.setItem(PROJECTS_FLAG, '1'); } catch (err) {}
+					window.location.href = '/';
+				}
+			});
+		});
+
 		// Home masthead: expand near the very top, collapse once scrolled, with a
 		// dead-band so scroll jitter can't rapidly re-trigger the animation.
 		// (The initial state is already painted by the inline script above;
 		// COLLAPSE_ABOVE must stay in sync with the 12px threshold there.)
 		if (nav.dataset.home === 'true') {
+			// Cross-page arrival with a pending Projects intent: the nav was already
+			// painted compact by the inline script, so just settle onto the projects
+			// view (instant — this is the landing, not a same-page transition).
+			let wantProjects = false;
+			try {
+				wantProjects = sessionStorage.getItem(PROJECTS_FLAG) === '1';
+				sessionStorage.removeItem(PROJECTS_FLAG);
+			} catch (err) {}
+			if (wantProjects) goToProjects(false);
+
 			const EXPAND_BELOW = 4;
 			const COLLAPSE_ABOVE = 12;
 			let scrolled = window.scrollY > COLLAPSE_ABOVE;
