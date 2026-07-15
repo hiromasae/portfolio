@@ -20,33 +20,40 @@ const onProject = onHome || path.startsWith('/projects/');
 	    the resulting position shift is played back as a composited transform by
 	    the FLIP logic in the script below. Nothing here animates a layout
 	    property, so the collapse/expand never forces a per-frame reflow. */}
-	<div class="mx-auto max-w-[1280px] px-5 py-8 group-data-[scrolled=true]/nav:py-1">
-		<div class="nav-inner flex items-center gap-4">
-			<a
-				href="/"
-				class="nav-logo origin-left text-[1.6rem] font-bold tracking-tight text-[var(--ink)] transition-transform duration-200 ease-out group-data-[scrolled=true]/nav:scale-[var(--nav-logo-scale)]"
-			>
-				Hiro Eernisse
-			</a>
+	<div class="mx-auto max-w-[1280px] px-5 py-12 group-data-[scrolled=true]/nav:py-1">
+		{/* No flex gap here: it would also open up between the contact group and
+		    the theme toggle, breaking the compact close-ranks math in global.css
+		    (which assumes one uniform 0.375rem gap between all buttons). The
+		    logo↔links gap lives in the links' ml-7 instead. */}
+		<div class="nav-inner flex items-center">
+			{/* Left cluster: wordmark + links compact as ONE unit — the wrapper
+			    carries the logo's scale, so the links and the whitespace before
+			    them shrink in exact proportion to the wordmark through pure
+			    layout (no JS width measurement, so no dependence on which font
+			    has loaded). The links counter-scale inside the shrunken wrapper
+			    (see .nav-links in global.css) to land at their own, larger
+			    compact size and stay readable. */}
+			<div class="nav-left flex origin-left items-center transition-transform duration-200 ease-out group-data-[scrolled=true]/nav:scale-[var(--nav-logo-scale)]">
+				<a href="/" class="nav-logo text-[2.5rem] font-bold tracking-tight text-[var(--ink)]">
+					Hiro Eernisse
+				</a>
 
-			{/* Projects/About sit right beside the wordmark. The link for the
-			    section you're on is marked active with aria-current (styled in
-			    global.css). Compact transform (translateX + scale) lives in
-			    global.css: the links slide left by the width the scaled-down logo
-			    gives up, so they keep hugging it even though its layout box stays
-			    expanded-width. */}
-			<div class="nav-links ml-2 hidden origin-left items-center gap-1 text-lg font-medium text-[var(--ink-soft)] transition-transform duration-200 ease-out sm:flex">
-				<a
-					href="/#projects"
-					data-projects-link
-					class="rounded-none px-2 py-1 transition-colors hover:text-[var(--ink)]"
-					aria-current={onProject ? 'page' : undefined}
-				>Projects</a>
-				<a
-					href="/about"
-					class="rounded-none px-2 py-1 transition-colors hover:text-[var(--ink)]"
-					aria-current={onAbout ? 'page' : undefined}
-				>About</a>
+				{/* Projects/About sit right beside the wordmark. The link for the
+				    section you're on is marked active with aria-current (styled in
+				    global.css). */}
+				<div class="nav-links ml-7 hidden origin-left items-center gap-1 text-xl font-medium text-[var(--ink-soft)] transition-transform duration-200 ease-out sm:flex">
+					<a
+						href="/#projects"
+						data-projects-link
+						class="rounded-none px-2 py-1 transition-colors hover:text-[var(--ink)]"
+						aria-current={onProject ? 'page' : undefined}
+					>Projects</a>
+					<a
+						href="/about"
+						class="rounded-none px-2 py-1 transition-colors hover:text-[var(--ink)]"
+						aria-current={onAbout ? 'page' : undefined}
+					>About</a>
+				</div>
 			</div>
 
 		<div id="contact-group" class="relative ml-auto flex items-center gap-1.5 self-center">
@@ -93,11 +100,14 @@ const onProject = onHome || path.startsWith('/projects/');
 		</div>
 
 		{/* Light/dark toggle: boxed by a quiet border (no fill), which sets it
-		    apart from the borderless contact icons without outshouting them. */}
+		    apart from the borderless contact icons without outshouting them —
+		    as does its wider ml-6 gap. The compact close-ranks slide in
+		    global.css hard-codes both gaps (contact-group's gap-1.5 and this
+		    ml-6); keep them in step. */}
 		<button
 			id="theme-toggle"
 			type="button"
-			class="btn-icon theme-toggle ml-2 self-center"
+			class="btn-icon theme-toggle ml-6 self-center"
 			aria-label="Toggle light and dark theme"
 		>
 			<svg
@@ -193,18 +203,6 @@ const onProject = onHome || path.startsWith('/projects/');
 
 		var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 		var animate = !reduce && (carried === 'true' || carried === 'false') && carried !== target;
-
-		// Give the compact links transform its logo-width compensation before
-		// first paint (see global.css): the var defaults to 0px, which would
-		// paint the links where the full-size logo ends and visibly snap them
-		// left once the (separately fetched) module script measures. Measured
-		// with whatever font is available now; refined after fonts load.
-		var logo = nav.querySelector('.nav-logo');
-		if (logo) {
-			var scale =
-				parseFloat(getComputedStyle(nav).getPropertyValue('--nav-logo-scale')) || 1;
-			nav.style.setProperty('--nav-logo-dx', -(logo.offsetWidth * (1 - scale)) + 'px');
-		}
 
 		// Paint pre-paint in the starting state (carried if animating, else rest),
 		// transitions suppressed so this snap can't tween from the SSR default.
@@ -327,19 +325,6 @@ const onProject = onHome || path.startsWith('/projects/');
 		const barInner = nav.querySelector('.nav-inner');
 		const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-		// Refine the links' logo-width compensation (first set pre-paint by the
-		// inline script above, possibly against a fallback font) once fonts
-		// finish loading, and keep it correct across resizes. offsetWidth
-		// ignores transforms, so this is stable regardless of nav state.
-		const logo = nav.querySelector('.nav-logo');
-		if (logo) {
-			const logoScale =
-				parseFloat(getComputedStyle(nav).getPropertyValue('--nav-logo-scale')) || 1;
-			const setLogoDx = () =>
-				nav.style.setProperty('--nav-logo-dx', `${-(logo.offsetWidth * (1 - logoScale))}px`);
-			document.fonts?.ready.then(setLogoDx);
-			window.addEventListener('resize', setLogoDx);
-		}
 		// The bar content plus every block that flows after the sticky nav.
 		const shiftables = () =>
 			[barInner, document.querySelector('main'), document.querySelector('footer')].filter(Boolean);
@@ -482,8 +467,9 @@ const onProject = onHome || path.startsWith('/projects/');
 	// ── Sliding contact label ──
 	// A single ink pill glides between the contact icons, always sitting under
 	// whichever one is hovered or focused, and carrying that icon's label. When
-	// moving between icons it slides + resizes; on first appearance it fades in
-	// place (no slide from the corner).
+	// moving between icons it slides + resizes; on appearance it wipes in left
+	// to right, and on hide it wipes back out right to left (no slide from the
+	// corner, no fade) — the same in/out grammar as the nav links' underline.
 	const group = document.getElementById('contact-group');
 	const pill = group?.querySelector<HTMLElement>('.contact-slider');
 	const pillText = pill?.querySelector<HTMLElement>('.contact-slider-text');
@@ -581,7 +567,18 @@ const onProject = onHome || path.startsWith('/projects/');
 
 		const hide = () => {
 			visible = false;
-			pill.style.opacity = '0';
+			// Wipe out right-to-left — the entrance wipe played in reverse, the
+			// same in/out symmetry as the nav links' underline (which grows from
+			// and retracts toward its left edge). Opacity stays 1; the pill is
+			// hidden purely by the clip. Reduced motion snaps it away instead.
+			if (reduce) {
+				pill.style.transition = 'none';
+				pill.style.clipPath = 'inset(0 100% 0 0)';
+				void pill.offsetWidth;
+				pill.style.transition = '';
+				return;
+			}
+			pill.style.clipPath = 'inset(0 100% 0 0)';
 		};
 
 		// Show the label only while the cursor is actually over an icon. Slipping
