@@ -180,13 +180,51 @@ const onProject = onHome || path.startsWith('/projects/');
 		// COLLAPSE_ABOVE in the scroll handler below, so the nav paints compact
 		// the moment the page loads scrolled even slightly off the top.
 		var onHome = nav.dataset.home === 'true';
-		// A pending "show projects" intent — set when the Projects link is clicked
-		// on another page — means this home load should rest compact, not expanded:
-		// the module script scrolls to the projects view once layout is measurable,
-		// and painting compact up front avoids a flash of the tall masthead.
-		var wantProjects = false;
-		try { wantProjects = sessionStorage.getItem('nav-projects') === '1'; } catch (e) {}
-		var target = onHome && window.scrollY < 12 && !wantProjects ? 'false' : 'true';
+		// A pending "show projects" intent — set when a projects link is clicked on
+		// another page. The flag holds '1' for the top of the list or a project
+		// slug for a specific card. Handled entirely here, not in the module
+		// script: the nav paints compact up front (no flash of the tall masthead)
+		// and the scroll to the projects view runs at 'interactive' — before any
+		// module script, and before first paint in practice — so the page opens
+		// already resting on the target instead of visibly jumping to it.
+		var projectsIntent = null;
+		if (onHome) {
+			try {
+				projectsIntent = sessionStorage.getItem('nav-projects');
+				sessionStorage.removeItem('nav-projects');
+			} catch (e) {}
+		}
+		// An exact return position — recorded (as "slug:y") by the module script
+		// when a project card is opened from the list — so "Back to projects"
+		// restores the very scroll position the visitor left, not just the card
+		// aligned under the nav. Honored only when the intent names the same
+		// project the position was recorded for (a detail page reached some other
+		// way falls back to the card alignment), and consumed on use so a stale
+		// entry can't hijack a later landing.
+		var returnY = null;
+		if (projectsIntent && projectsIntent !== '1') {
+			try {
+				var ret = sessionStorage.getItem('nav-return');
+				if (ret) {
+					var retSep = ret.indexOf(':');
+					if (ret.slice(0, retSep) === projectsIntent) {
+						returnY = Math.max(0, +ret.slice(retSep + 1) || 0);
+						sessionStorage.removeItem('nav-return');
+					}
+				}
+			} catch (e) {}
+		}
+		// Curtain for the landing (see global.css): first paint can beat both the
+		// 'interactive' scroll below and the browser's own fragment scroll, which
+		// would flash the top of the page for a frame before snapping down to the
+		// card. Content stays hidden until positioned; arrive() always lifts it.
+		if (projectsIntent) document.documentElement.classList.add('projects-landing');
+		// This load's resting scroll: the exact remembered position (which may be
+		// the very top, where the masthead stays expanded), the computed projects
+		// view (always past the collapse threshold), or wherever the browser put
+		// us. The nav paints to match it.
+		var restY = projectsIntent ? (returnY !== null ? returnY : 16) : window.scrollY;
+		var target = onHome && restY < 12 ? 'false' : 'true';
 
 		// The state carried over from the page we just left, if fresh. The age
 		// cap means returning to a stale tab (e.g. from an external site much
@@ -210,7 +248,30 @@ const onProject = onHome || path.startsWith('/projects/');
 		nav.dataset.scrolled = animate ? carried : target;
 		void nav.offsetWidth;
 		nav.classList.remove('nav-no-transition');
-		if (!animate) return;
+		if (!animate && !projectsIntent) return;
+
+		// Land on the projects view: the exact remembered position when we have
+		// one, otherwise the intended card (or the top of the list) ~12px under
+		// the compact nav (a one-shot copy of goToProjects in the module script
+		// below — keep the two in step). For a card, the browser's native
+		// fragment scroll has already positioned the page pre-paint (the link
+		// navigates to /#project-<slug>); this settles the final position and
+		// drops the hash off the URL. 'instant' overrides the stylesheet's
+		// `scroll-behavior: smooth`; a landing must not glide.
+		var landOnProjects = function () {
+			if (returnY !== null) {
+				window.scrollTo({ top: returnY, behavior: 'instant' });
+			} else {
+				var el =
+					(projectsIntent !== '1' && document.getElementById('project-' + projectsIntent)) ||
+					document.getElementById('project-list');
+				if (el) {
+					var y = el.getBoundingClientRect().top + window.scrollY - nav.offsetHeight - 12;
+					window.scrollTo({ top: Math.max(y, 16), behavior: 'instant' });
+				}
+			}
+			if (location.hash) history.replaceState(null, '', '/');
+		};
 
 		// FLIP the carried→resting difference (a one-shot copy of animateTo in
 		// the module script below — keep the two in step): snap the height
@@ -260,13 +321,25 @@ const onProject = onHome || path.startsWith('/projects/');
 
 		// 'interactive' means main/footer exist and layout is measurable; it
 		// fires before module scripts evaluate, so this can't run twice against
-		// the scroll handler installed below.
+		// the scroll handler installed below. The landing scroll runs first so
+		// runIntro's recomputed resting state sees the final scroll position
+		// (already compact + scrolled → nothing to animate).
+		var arrive = function () {
+			if (projectsIntent) {
+				try {
+					landOnProjects();
+				} finally {
+					document.documentElement.classList.remove('projects-landing');
+				}
+			}
+			if (animate) runIntro();
+		};
 		if (document.readyState !== 'loading') {
-			runIntro();
+			arrive();
 		} else {
 			document.addEventListener('readystatechange', function onReady() {
 				document.removeEventListener('readystatechange', onReady);
-				runIntro();
+				arrive();
 			});
 		}
 	})();
@@ -384,43 +457,75 @@ const onProject = onHome || path.startsWith('/projects/');
 		// snapping back to the very top with the masthead re-expanded. So we take
 		// over: scroll to the spot where the nav is collapsed and the first card sits
 		// just beneath it. Cross-page, a sessionStorage flag carries the intent so the
-		// home page lands there directly (see the inline script's `wantProjects`).
+		// home page lands there directly (see the inline script's `projectsIntent`).
 		const PROJECTS_FLAG = 'nav-projects';
 
-		// The y that leaves the nav compact with the first card just below it.
-		const projectsTargetY = () => {
-			const list = document.getElementById('project-list');
-			if (!list) return null;
-			// Gap from the nav's bottom edge to the first card — the section's top
-			// padding. It's independent of nav state: the card's document position
-			// and the nav's box height shift together between expanded and compact,
-			// so this difference is the same either way.
-			const contentGap = list.getBoundingClientRect().top + window.scrollY - nav.offsetHeight;
-			// Land the card ~12px under the compact nav, but never so near the top
-			// that the scroll handler's 12px threshold would re-expand the masthead.
-			return Math.max(contentGap - 12, 16);
+		// The y that leaves the nav compact with `el` just below it (mirrored by
+		// the inline script's `landOnProjects` — keep the two in step). The
+		// measured gap is independent of nav state: the element's document position
+		// and the nav's box height shift together between expanded and compact, so
+		// this difference is the same either way. Land the element ~12px under the
+		// compact nav, but never so near the top that the scroll handler's 12px
+		// threshold would re-expand the masthead.
+		const compactTargetY = (el) => {
+			const top = el.getBoundingClientRect().top + window.scrollY - nav.offsetHeight;
+			return Math.max(top - 12, 16);
 		};
 
-		const goToProjects = (smooth) => {
-			const y = projectsTargetY();
-			if (y == null) return;
-			window.scrollTo({ top: y, behavior: smooth && !reduceMotion ? 'smooth' : 'auto' });
+		// Scroll to the projects view — a specific card when `slug` names one
+		// (Back-to-projects returns you to the card you came from), otherwise the
+		// top of the list.
+		const goToProjects = (smooth, slug) => {
+			const target =
+				(slug && document.getElementById(`project-${slug}`)) ||
+				document.getElementById('project-list');
+			if (!target) return;
+			// 'instant', not 'auto': the stylesheet's `scroll-behavior: smooth`
+			// turns 'auto' into a glide, and the landing snap must not animate.
+			window.scrollTo({
+				top: compactTargetY(target),
+				behavior: smooth && !reduceMotion ? 'smooth' : 'instant',
+			});
 		};
 
-		// Intercept the Projects link on every page. On home we scroll in place; from
-		// elsewhere we stash the intent and navigate to a clean "/" (no #projects, so
-		// the browser's own anchor jump can't fire and fight us).
+		// Intercept every projects link (nav "Projects", "Back to projects"). On
+		// home we scroll in place. From elsewhere we stash the intent — '1' for the
+		// top of the list, or a slug for a specific card — and navigate. A slug
+		// intent keeps the card's #fragment on the URL: the browser's native
+		// fragment scroll positions the page *during parsing*, before first paint,
+		// so the landing opens on the card with no visible jump (the inline
+		// script's landOnProjects then settles the exact position — a remembered
+		// return spot when one exists — and cleans the hash).
+		// The list intent stays a clean "/" — its target sits so near the top that
+		// the browser's own #projects jump gets clamped and fights the collapse.
 		document.querySelectorAll('a[data-projects-link]').forEach((link) => {
 			link.addEventListener('click', (e) => {
 				if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
 				e.preventDefault();
+				const slug = link.dataset.projectSlug;
 				if (nav.dataset.home === 'true') {
 					history.replaceState(null, '', '/');
-					goToProjects(true);
+					goToProjects(true, slug);
 				} else {
-					try { sessionStorage.setItem(PROJECTS_FLAG, '1'); } catch (err) {}
-					window.location.href = '/';
+					try { sessionStorage.setItem(PROJECTS_FLAG, slug || '1'); } catch (err) {}
+					window.location.href = slug ? `/#project-${slug}` : '/';
 				}
+			});
+		});
+
+		// Opening a project from the list records the exact scroll position it was
+		// opened from (as "slug:y"), so that project's "Back to projects" restores
+		// the very spot the visitor left — not just the card aligned under the nav
+		// (see the inline script's `returnY`). Keyed by slug: a detail page reached
+		// any other way ignores another card's entry.
+		document.querySelectorAll('#project-list a[id^="project-"]').forEach((card) => {
+			card.addEventListener('click', () => {
+				try {
+					sessionStorage.setItem(
+						'nav-return',
+						`${card.id.slice('project-'.length)}:${Math.round(window.scrollY)}`
+					);
+				} catch (err) {}
 			});
 		});
 
@@ -429,16 +534,9 @@ const onProject = onHome || path.startsWith('/projects/');
 		// (The initial state is already painted by the inline script above;
 		// COLLAPSE_ABOVE must stay in sync with the 12px threshold there.)
 		if (nav.dataset.home === 'true') {
-			// Cross-page arrival with a pending Projects intent: the nav was already
-			// painted compact by the inline script, so just settle onto the projects
-			// view (instant — this is the landing, not a same-page transition).
-			let wantProjects = false;
-			try {
-				wantProjects = sessionStorage.getItem(PROJECTS_FLAG) === '1';
-				sessionStorage.removeItem(PROJECTS_FLAG);
-			} catch (err) {}
-			if (wantProjects) goToProjects(false);
-
+			// (Cross-page arrivals with a pending projects intent are handled by the
+			// inline script above, pre-paint — by the time this module evaluates the
+			// page is already resting on the projects view.)
 			const EXPAND_BELOW = 4;
 			const COLLAPSE_ABOVE = 12;
 			let scrolled = window.scrollY > COLLAPSE_ABOVE;

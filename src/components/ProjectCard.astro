@@ -8,9 +8,10 @@ const { project, reversed = false } = Astro.props;
 ---
 
 <a
+	id={`project-${project.slug}`}
 	href={`/projects/${project.slug}`}
 	class:list={[
-		'@container group flex flex-col overflow-hidden rounded-[1.5px] border border-[var(--line)] bg-[var(--surface)] md:h-[78vh]',
+		'@container group flex flex-col overflow-hidden rounded-[1.5px] scroll-mt-24 border border-[var(--line)] bg-[var(--surface)] md:h-[78vh]',
 		'shadow-[0_1px_1px_rgba(0,0,0,0.03),0_10px_30px_-16px_rgba(0,0,0,0.15)] transition-[box-shadow,border-color,background-color,transform] duration-300 ease-out',
 		'hover:border-[var(--line-strong)] hover:shadow-[0_2px_3px_rgba(0,0,0,0.04),0_18px_44px_-18px_rgba(0,0,0,0.24)]',
 		'active:scale-[0.99] active:border-[var(--ink)] active:bg-[var(--surface-sunken)] active:shadow-[0_1px_1px_rgba(0,0,0,0.04),0_6px_16px_-14px_rgba(0,0,0,0.2)]',

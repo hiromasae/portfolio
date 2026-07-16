@@ -78,6 +78,17 @@ html {
 	scrollbar-color: rgba(128, 128, 128, 0.55) transparent;
 }
 
+/* While a cross-page projects landing is being positioned (Nav.astro's inline
+   script sets this class when an intent is pending, and removes it right after
+   the landing scroll runs at 'interactive'), keep the content invisible: first
+   paint can beat that scroll, which would flash the top of the page for a
+   frame before snapping down to the target card. Hidden until positioned, the
+   page reveals already resting on the card. */
+html.projects-landing main,
+html.projects-landing footer {
+	visibility: hidden;
+}
+
 /* ── Scrollbar ──
    Native scrollbars can't be transitioned — even custom ::-webkit-scrollbar
    pseudo-elements ignore CSS transitions — so a theme-dependent scrollbar would

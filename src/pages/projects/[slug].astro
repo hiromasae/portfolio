@@ -17,7 +17,12 @@ const { project } = Astro.props;
 	<Nav />
 
 	<main class="mx-auto max-w-5xl px-5 py-12">
-		<a href="/#projects" class="btn mb-8">← Back to projects</a>
+		<a
+			href={`/#project-${project.slug}`}
+			data-projects-link
+			data-project-slug={project.slug}
+			class="btn mb-8">← Back to projects</a
+		>
 
 		<header>
 			<p class="text-sm text-[var(--ink-soft)]">{project.company} · {project.year}</p>
@@ -78,6 +83,11 @@ const { project } = Astro.props;
 	</main>
 
 	<footer class="mx-auto max-w-5xl px-5 py-10">
-		<a href="/#projects" class="btn">← Back to projects</a>
+		<a
+			href={`/#project-${project.slug}`}
+			data-projects-link
+			data-project-slug={project.slug}
+			class="btn">← Back to projects</a
+		>
 	</footer>
 </Layout>
