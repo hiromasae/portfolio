@@ -171,10 +171,22 @@ body {
 	transform: scale(calc(var(--nav-links-scale) / var(--nav-logo-scale)));
 }
 
-/* Nav links: a hairline underline wipes in from the left on hover or focus. The
-   active section link keeps it permanently drawn (and full ink). The reveal is a
-   scaleX anchored at the left edge; the grow animation itself is gated on
-   reduced-motion below, so it just snaps in for users who opt out. */
+/* Nav links share one underline that glides between them: it rests under the
+   active section link, follows the cursor on hover/focus, and slides across when
+   you navigate between Projects and About (positioned by the scripts in
+   Nav.astro). The container is the slider's positioning context and offset
+   parent — the script measures each link's offsetLeft/offsetWidth in this
+   untransformed space, so the numbers stay stable across the compact scale and
+   are identical on both pages. */
+.nav-links {
+	position: relative;
+}
+
+/* No-JS fallback: without the script to drive the shared slider, each active
+   link draws its own hairline underline (the scaleX reveal is gated on
+   reduced-motion below, so it just snaps in for users who opt out). Once the
+   script takes over it adds `.has-slider`, which retires these in favour of the
+   single gliding underline. */
 .nav-links a {
 	position: relative;
 }
@@ -197,8 +209,28 @@ body {
 	transform: scaleX(1);
 }
 
+.nav-links.has-slider a::after {
+	display: none;
+}
+
 .nav-links a[aria-current="page"] {
 	color: var(--ink);
+}
+
+/* The shared gliding underline. Hidden until the script positions it (width 0),
+   then given an explicit x (translateX) and width per target link. It lives
+   inside .nav-links, so it inherits the compact scale along with the links it
+   sits under. Its slide is motion-gated below. */
+.nav-underline {
+	position: absolute;
+	left: 0;
+	bottom: 0.3rem;
+	height: 1px;
+	width: 0;
+	background: var(--ink);
+	transform: translateX(0);
+	transform-origin: left;
+	pointer-events: none;
 }
 
 h1,
@@ -436,6 +468,14 @@ h6 {
 @media (prefers-reduced-motion: no-preference) {
 	.nav-links a::after {
 		transition: transform 0.2s var(--nav-ease);
+	}
+
+	/* The shared underline slides + resizes between links; under reduced motion
+	   it just snaps to each target (no transition declared). */
+	.nav-underline {
+		transition:
+			transform 0.2s var(--nav-ease),
+			width 0.2s var(--nav-ease);
 	}
 
 	.icon-email,

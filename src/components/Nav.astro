@@ -45,14 +45,23 @@ const onProject = onHome || path.startsWith('/projects/');
 					<a
 						href="/#projects"
 						data-projects-link
+						data-nav-link="projects"
 						class="rounded-none px-2 py-1 transition-colors hover:text-[var(--ink)]"
 						aria-current={onProject ? 'page' : undefined}
 					>Projects</a>
 					<a
 						href="/about"
+						data-nav-link="about"
 						class="rounded-none px-2 py-1 transition-colors hover:text-[var(--ink)]"
 						aria-current={onAbout ? 'page' : undefined}
 					>About</a>
+					{/* One shared underline that glides between the two links: it rests
+					    under the active section, follows the cursor on hover/focus and
+					    springs back on leave, and slides from the old link to the new one
+					    across a Projects↔About navigation (replayed by the inline script
+					    below). Positioned entirely by script; a CSS fallback under each
+					    active link covers the no-JS case (see global.css). */}
+					<span class="nav-underline" aria-hidden="true"></span>
 				</div>
 			</div>
 
@@ -341,6 +350,128 @@ const onProject = onHome || path.startsWith('/projects/');
 				document.removeEventListener('readystatechange', onReady);
 				arrive();
 			});
+		}
+	})();
+</script>
+
+<script is:inline>
+	// ── Sliding nav-link underline (cross-page arrival) ──
+	// Like the nav's collapse animation, the underline's Projects↔About slide
+	// can't tween across an MPA page load on its own. So we persist where the
+	// underline was sitting when a page is left, and on arrival diff it against
+	// this page's active link: same machinery as the nav-state script above.
+	//
+	//   1. pagehide: store the link the underline currently sits under (which the
+	//      hover/focus handlers keep up to date), NOT just this page's active
+	//      link. If the visitor hovered the link they then clicked, the underline
+	//      already slid there — so the destination must start from THAT spot, or
+	//      it would visibly reset and replay the same slide a second time.
+	//   2. On arrival: find this page's active link. Paint the underline resting
+	//      under it — unless a fresh, DIFFERENT spot was carried over, in which
+	//      case paint it under the OLD spot and release it to slide to the new
+	//      one. (Hover-then-click lands with carried === active → no replay; a
+	//      navigation that didn't touch the nav, e.g. a project card, still
+	//      slides.)
+	//
+	// Runs inline (pre-paint) so the underline is placed before first paint: no
+	// flash of it at the destination before the slide, and adding `has-slider`
+	// here retires the CSS fallback underline in the same frame. Measurements use
+	// offsetLeft/offsetWidth (untransformed layout space), so they're unaffected
+	// by the compact scale and identical on both pages.
+	(function () {
+		var links = document.querySelector('#site-nav .nav-links');
+		if (!links) return;
+		var underline = links.querySelector('.nav-underline');
+		var items = links.querySelectorAll('a[data-nav-link]');
+		if (!underline || !items.length) return;
+		// JS is driving the slider now — drop the per-link CSS fallback underline.
+		links.classList.add('has-slider');
+
+		var active = null;
+		var activeKey = null;
+		for (var i = 0; i < items.length; i++) {
+			if (items[i].getAttribute('aria-current') === 'page') {
+				active = items[i];
+				activeKey = items[i].getAttribute('data-nav-link');
+			}
+		}
+		if (!active) return;
+
+		// Place the underline under `link`. With animate=false the move is snapped
+		// (transitions suppressed and flushed) so it can't tween from a stale
+		// spot; with animate=true it rides the CSS transition and glides.
+		var place = function (link, animate) {
+			// Record which link the underline now sits under, so pagehide can carry
+			// the live position across the navigation (the module hover handlers
+			// update this too — keep the two in step).
+			underline.dataset.at = link.getAttribute('data-nav-link') || '';
+			var cs = getComputedStyle(link);
+			var padL = parseFloat(cs.paddingLeft) || 0;
+			var padR = parseFloat(cs.paddingRight) || 0;
+			var x = link.offsetLeft + padL;
+			var w = Math.max(0, link.offsetWidth - padL - padR);
+			if (!animate) underline.style.transition = 'none';
+			underline.style.transform = 'translateX(' + x + 'px)';
+			underline.style.width = w + 'px';
+			if (!animate) {
+				void underline.offsetWidth;
+				underline.style.transition = '';
+			}
+		};
+
+		// Where the underline sat on the page we just left — the slide's starting
+		// point, if fresh and different from this page's active link.
+		var from = null;
+		try {
+			var raw = sessionStorage.getItem('nav-underline');
+			sessionStorage.removeItem('nav-underline');
+			if (raw) {
+				var sep = raw.lastIndexOf(':');
+				var key = raw.slice(0, sep);
+				if (Date.now() - +raw.slice(sep + 1) < 10000 && key !== activeKey) {
+					from = links.querySelector('a[data-nav-link="' + key + '"]');
+				}
+			}
+		} catch (e) {}
+
+		// Carry the underline's live spot to the next page — captured when the
+		// visitor COMMITS a navigation (a link click), not on pagehide. By pagehide
+		// the link has lost focus and the unload-time focus/hover springback has
+		// already snapped the underline back to the active link, which was
+		// overwriting the carried spot and making the destination replay a slide
+		// the visitor had just seen on hover. The bubble phase runs after each
+		// link's own handler, so a click that only scrolls in place (the Projects
+		// link on home calls preventDefault) is skipped, as are new-tab/modified
+		// clicks that don't navigate this tab.
+		document.addEventListener('click', function (e) {
+			var a = e.target && e.target.closest && e.target.closest('a[href]');
+			if (!a || e.defaultPrevented) return;
+			if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+			try {
+				sessionStorage.setItem(
+					'nav-underline',
+					(underline.dataset.at || activeKey) + ':' + Date.now()
+				);
+			} catch (err) {}
+		});
+
+		var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		if (from && !reduce) {
+			place(from, false); // paint under the old spot, style flushed
+			// Mark the arrival slide in flight so the module's font/resize realign
+			// doesn't snap it straight to the end (see restUnderline below).
+			underline.dataset.sliding = '1';
+			underline.addEventListener('transitionend', function done() {
+				underline.dataset.sliding = '';
+				underline.removeEventListener('transitionend', done);
+			});
+			// Release on the next frame so the transition animates from the
+			// flushed 'from' state to the active link rather than snapping.
+			requestAnimationFrame(function () {
+				place(active, true);
+			});
+		} else {
+			place(active, false); // no slide to replay — just rest under active
 		}
 	})();
 </script>
@@ -736,5 +867,75 @@ const onProject = onHome || path.startsWith('/projects/');
 				}
 			});
 		});
+	}
+
+	// ── Sliding nav-link underline (interactivity) ──
+	// The inline script above already positioned the underline under the active
+	// link (and replayed any cross-page slide). This adds the live behaviour:
+	// the underline follows the cursor/focus to whichever link is hovered, and
+	// springs back to the active link when the pointer or focus leaves. Moving
+	// between the two links slides it across (each link's mouseenter repositions
+	// it), matching the contact pills' slide + resize grammar.
+	const navLinksEl = document.querySelector<HTMLElement>('#site-nav .nav-links');
+	const navUnderline = navLinksEl?.querySelector<HTMLElement>('.nav-underline');
+	if (navLinksEl && navUnderline) {
+		navLinksEl.classList.add('has-slider'); // defensive: inline script may have been skipped
+		const navItems = Array.from(navLinksEl.querySelectorAll<HTMLAnchorElement>('a[data-nav-link]'));
+		const activeItem = () =>
+			navItems.find((a) => a.getAttribute('aria-current') === 'page') ?? navItems[0];
+		const reduceUnderline = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+		// Slide (or, with animate=false, snap) the underline under `link`. Widths
+		// are measured in the container's untransformed layout space, so the
+		// numbers are correct whether the nav is expanded or compact.
+		const placeUnderline = (link: HTMLElement | undefined, animate: boolean) => {
+			if (!link) return;
+			// Keep the carried-position record current (mirrors the inline place()).
+			navUnderline.dataset.at = link.getAttribute('data-nav-link') ?? '';
+			const cs = getComputedStyle(link);
+			const padL = parseFloat(cs.paddingLeft) || 0;
+			const padR = parseFloat(cs.paddingRight) || 0;
+			const x = link.offsetLeft + padL;
+			const w = Math.max(0, link.offsetWidth - padL - padR);
+			if (!animate) navUnderline.style.transition = 'none';
+			navUnderline.style.transform = `translateX(${x}px)`;
+			navUnderline.style.width = `${w}px`;
+			if (!animate) {
+				void navUnderline.offsetWidth;
+				navUnderline.style.transition = '';
+			}
+		};
+
+		const slide = !reduceUnderline;
+		navItems.forEach((link) => {
+			link.addEventListener('mouseenter', () => placeUnderline(link, slide));
+			link.addEventListener('focus', () => placeUnderline(link, slide));
+		});
+		// Spring back to the active link once hover/focus leaves the group.
+		navLinksEl.addEventListener('mouseleave', () => placeUnderline(activeItem(), slide));
+		navLinksEl.addEventListener('focusout', (e) => {
+			if (!navLinksEl.contains(e.relatedTarget as Node)) placeUnderline(activeItem(), slide);
+		});
+
+		// Re-rest the underline (no animation) whenever the links' geometry can
+		// shift out from under it: the web font swapping in after first paint, or
+		// a viewport resize (including crossing the sm breakpoint where the links
+		// appear, and the compact ⇄ expanded change on the home page).
+		const restUnderline = () => {
+			// Don't yank the underline to the active link mid-arrival-slide (the
+			// inline script flags that with data-sliding); let the glide finish.
+			if (navUnderline.dataset.sliding === '1') return;
+			placeUnderline(activeItem(), false);
+		};
+		document.fonts?.ready.then(restUnderline);
+		let underlineResizeTimer = 0;
+		window.addEventListener(
+			'resize',
+			() => {
+				window.clearTimeout(underlineResizeTimer);
+				underlineResizeTimer = window.setTimeout(restUnderline, 100);
+			},
+			{ passive: true }
+		);
 	}
 </script>
