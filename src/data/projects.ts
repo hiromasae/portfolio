@@ -105,5 +105,6 @@ export const contacts = [
 	{ label: 'Email', href: 'mailto:hiroeern@gmail.com', icon: 'email' },
 	{ label: 'Calendly', href: 'https://calendly.com/hiroeern/30-min-chat', icon: 'calendly' },
 	{ label: 'LinkedIn', href: 'https://www.linkedin.com/in/hiro-design', icon: 'linkedin' },
+	{ label: 'Twitter', href: 'https://x.com/hiroeernisse', icon: 'twitter' },
 	{ label: 'GitHub', href: 'https://github.com/hiromasae', icon: 'github' },
 ] as const;

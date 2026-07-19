@@ -482,18 +482,20 @@ h6 {
 	.icon-linkedin,
 	.icon-calendly,
 	.icon-github,
+	.icon-twitter,
 	.theme-toggle .icon-sun,
 	.theme-toggle .icon-moon {
 		transform-box: fill-box;
 		transform-origin: center;
 	}
 
-	/* The four contact icons share one gesture — a clean lift — so they read
-	   as a family rather than four separate tricks. */
+	/* The contact icons share one gesture — a clean lift — so they read
+	   as a family rather than separate tricks. */
 	.btn-icon:hover .icon-email,
 	.btn-icon:hover .icon-linkedin,
 	.btn-icon:hover .icon-calendly,
-	.btn-icon:hover .icon-github {
+	.btn-icon:hover .icon-github,
+	.btn-icon:hover .icon-twitter {
 		transform: translateY(-3px);
 	}
 
@@ -513,7 +515,8 @@ h6 {
 	.btn-icon:active .icon-email,
 	.btn-icon:active .icon-linkedin,
 	.btn-icon:active .icon-calendly,
-	.btn-icon:active .icon-github {
+	.btn-icon:active .icon-github,
+	.btn-icon:active .icon-twitter {
 		transform: translateY(-1px) scale(0.9);
 	}
 	/* Keep the toggle's hover rotation, just press it in. */
