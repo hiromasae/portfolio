@@ -26,7 +26,7 @@ const { project, reversed = false } = Astro.props;
 			alt={project.title}
 			loading="lazy"
 			decoding="async"
-			class="h-full w-full object-cover transition-transform duration-500 ease-out md:group-hover:scale-[1.03]"
+			class="h-full w-full object-cover transition-transform duration-300 ease-out md:group-hover:scale-[1.03]"
 		/>
 	</div>
 
@@ -35,37 +35,39 @@ const { project, reversed = false } = Astro.props;
 	    image is on. */}
 	<div
 		class:list={[
-			'w-full border-t border-[var(--line)] bg-[var(--surface)] p-5',
+			'w-full border-t border-[var(--line)] bg-[var(--surface)] p-5 transition-colors duration-150 group-active:bg-[var(--surface-sunken)]',
 			'md:absolute md:inset-y-0 md:flex md:w-[34%] md:items-center md:border-t-0 md:p-8',
-			'md:transition-transform md:duration-500 md:ease-out md:[transition-timing-function:cubic-bezier(0.65,0,0.2,1)]',
+			'md:transition-transform md:duration-300 md:ease-out md:[transition-timing-function:cubic-bezier(0.5,0,0.15,1)]',
 			reversed
 				? 'md:left-0 md:border-r md:-translate-x-full md:group-hover:translate-x-0'
 				: 'md:right-0 md:border-l md:translate-x-full md:group-hover:translate-x-0',
 		]}
 	>
 		<div class="max-w-[22rem]">
-			<span class="text-xs text-[var(--ink-soft)] md:text-[1rem]">{project.year}</span>
+			<div class="flex items-center justify-between">
+				<span class="text-xs text-[var(--ink-soft)] md:text-[1rem]">{project.year}</span>
+				<span class="inline-flex items-center text-[var(--ink)]">
+					<svg
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						aria-hidden="true"
+						class="h-[1.05rem] w-[1.05rem]"
+					>
+						<line x1="7" y1="17" x2="17" y2="7"></line>
+						<polyline points="7 7 17 7 17 17"></polyline>
+					</svg>
+					<span class="sr-only">View project</span>
+				</span>
+			</div>
 			<h3
 				class="mt-1 text-lg font-bold tracking-tight text-[var(--ink)] md:text-[1.75rem] md:leading-tight"
 			>
 				{project.title}
 			</h3>
-			<span class="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-[var(--ink)]">
-				View project
-				<svg
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					aria-hidden="true"
-					class="h-[0.95rem] w-[0.95rem]"
-				>
-					<line x1="7" y1="17" x2="17" y2="7"></line>
-					<polyline points="7 7 17 7 17 17"></polyline>
-				</svg>
-			</span>
 		</div>
 	</div>
 </a>
