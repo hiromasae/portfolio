@@ -119,6 +119,9 @@ const onProject = onHome || path.startsWith('/projects/');
 			class="btn-icon theme-toggle ml-6 self-center"
 			aria-label="Toggle light and dark theme"
 		>
+			{/* Two glyphs grid-stacked in one cell; only the icon for the theme you'd
+			    switch TO is shown (moon in light, sun in dark), swapped by opacity +
+			    a scale pop. See the theme-swap block in global.css. */}
 			<svg
 				class="icon-moon"
 				viewBox="0 0 24 24"
@@ -129,7 +132,7 @@ const onProject = onHome || path.startsWith('/projects/');
 				stroke-linejoin="miter"
 				aria-hidden="true"
 			>
-				<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+				<path d="M20 14.5A8 8 0 1 1 12.5 4a6.5 6.5 0 0 0 7.5 10.5Z" />
 			</svg>
 			<svg
 				class="icon-sun"
@@ -141,7 +144,7 @@ const onProject = onHome || path.startsWith('/projects/');
 				stroke-linejoin="miter"
 				aria-hidden="true"
 			>
-				<circle cx="12" cy="12" r="4" />
+				<circle cx="12" cy="12" r="3.6" />
 				<path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
 			</svg>
 		</button>
