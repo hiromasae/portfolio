@@ -63,12 +63,11 @@ html {
 	/* Bump the base scale so nav + content read larger overall (16px → 19px) */
 	font-size: 118.75%;
 	scroll-behavior: smooth;
-	/* The nav's collapse/expand FLIP (see Nav.astro) animates the content shift
-	   itself while holding scrollY constant. Scroll anchoring fights that: when
-	   the sticky nav resizes it re-adjusts scrollY by the height delta, which
-	   both double-compensates the FLIP and — if that delta exceeds the collapse
-	   dead-band — bounces the scroll position back and forth across the
-	   threshold, making the nav flip-flop. Let the FLIP own the transition. */
+	/* The nav's height is scroll-driven (see Nav.astro's q model): scrolling
+	   shrinks the bar, which moves the content below. Scroll anchoring would
+	   see that shift and re-adjust scrollY to compensate — a feedback loop
+	   (scroll → shrink → anchor re-scrolls → shrink more). The scrub owns the
+	   relationship between scroll and geometry; anchoring must stay out. */
 	overflow-anchor: none;
 	/* Always reserve the scrollbar gutter so short pages (e.g. About) don't
 	   shift horizontally relative to long, scrollable ones (e.g. Home). */
@@ -137,38 +136,101 @@ body {
 	transition: none !important;
 }
 
-/* ── Prime the intro replay ──
-   When arriving from another page, Nav.astro replays the expand/collapse motion
-   by first snapping the nav to its *starting* state, then animating to rest. If
-   transitions were live during that snap, the nav would instead animate up from
-   the SSR default and cancel the replay (a visible "jut"). So we suppress the
-   nav's transitions for the single frame the start state is applied — same idea
-   as the theme swap above — then remove this class and let the replay animate. */
-#site-nav.nav-no-transition,
-#site-nav.nav-no-transition * {
-	transition: none !important;
+/* ── Scroll-driven masthead: the q model ──
+   The bar shrinks as two clusters that each scale as one unit — the left
+   cluster (.nav-left: wordmark + links) toward --nav-logo-scale, anchored at
+   its left edge, and the right cluster (contact icons + toggle) toward
+   --nav-icon-scale, anchored at the nav's right edge — so within each cluster
+   every gap stays exactly proportionate to the elements around it.
+
+   Every part of the geometry is a function of ONE progress value --q
+   (0 = expanded masthead, 1 = compact bar). On the home page --q follows
+   scrollY 1:1 over a 5.5rem range (each scrolled pixel removes one pixel of
+   bar); interior pages pin --q to 1.
+
+   CRUCIALLY, the scrub is TRANSFORM-ONLY: the nav's layout is pinned at the
+   compact bar (fixed .nav-pad padding below), and the expanded masthead is
+   created by translating the bar's contents and the whole page down as
+   --q → 0. Transforms never reflow, so scrubbing costs style + composite
+   only — an earlier version scrubbed the padding itself and re-laid-out the
+   entire document on every scrolled frame, which felt laggy. The shift
+   distances: page (main/footer) moves the full former height delta, 5.5rem;
+   the bar's contents sit at the old padding midpoint, half that, 2.75rem.
+
+   --q defaults to 1 (compact, zero shift — safe for any page without the
+   nav) and the home page's masthead flips it to 0. --q-links (the links'
+   nonlinear counter-scale, see .nav-links below) is always written together
+   with --q by Nav.astro's setQ; the static value here (0.702 / 0.42) covers
+   interior pages and no-JS — keep in step. */
+html {
+	--q: 1;
+	--q-links: 1.6714;
+	--nav-shift: 5.5rem;
+	--nav-shift-inner: 2.75rem;
 }
 
-/* Compact nav: the bar shrinks as two clusters that each scale as one unit —
-   the left cluster (.nav-left: wordmark + links) by --nav-logo-scale, anchored
-   at its left edge, and the right cluster (contact icons + toggle) by
-   --nav-icon-scale, anchored at the nav's right edge — so within each cluster
-   every gap stays exactly proportionate to the elements around it. These vars
-   are the single source for the compact scales; the wrapper's markup class and
-   the transforms below all derive from them. */
+html:has(#site-nav[data-home='true']) {
+	--q: 0;
+	--q-links: 1;
+}
+
 #site-nav {
 	--nav-logo-scale: 0.42;
 	--nav-links-scale: 0.702;
 	--nav-icon-scale: 0.62;
 }
 
-/* Compact: the .nav-left wrapper (see Nav.astro) already scales the links down
-   by --nav-logo-scale along with the wordmark and the gap. That would leave
-   the links as small as the logo, so they counter-scale up inside the shrunken
-   wrapper to land at a net --nav-links-scale — keeping compact links readable
-   while their position and leading whitespace still track the logo exactly. */
-#site-nav[data-scrolled="true"] .nav-links {
-	transform: scale(calc(var(--nav-links-scale) / var(--nav-logo-scale)));
+/* Layout pinned compact; the masthead's extra height is transform-made. */
+#site-nav .nav-pad {
+	padding-block: 0.25rem;
+}
+
+#site-nav .nav-inner {
+	transform: translateY(calc(var(--nav-shift-inner) * (1 - var(--q))));
+}
+
+/* The page rides below the masthead: everything after the sticky bar shifts
+   down by the same amount the bar's box gave up. (No fixed-position elements
+   live inside these, so the containing block a transform creates is safe.) */
+main,
+footer {
+	transform: translateY(calc(var(--nav-shift) * (1 - var(--q))));
+}
+
+/* The masthead's opaque backdrop below the pinned box: content scrolled
+   partway through the range tucks y px under the masthead (it always did —
+   the taller layout box used to cover it), so this paper veil extends the
+   bar's painted extent to its VISUAL height, scrubbed by scaleY — solid
+   color, so the scale is invisible and its bottom edge IS the bar's visual
+   bottom. Negative z-index keeps it under the bar's own contents while the
+   nav's z-40 stacking context still paints it over the page. */
+#site-nav::after {
+	content: '';
+	position: absolute;
+	top: 100%;
+	left: 0;
+	right: 0;
+	height: var(--nav-shift);
+	background: var(--paper);
+	transform-origin: top;
+	transform: scaleY(calc(1 - var(--q)));
+	z-index: -1;
+}
+
+/* Left cluster: wordmark + links scale as one unit toward --nav-logo-scale,
+   anchored at the left edge (origin-left in the markup). */
+#site-nav .nav-left {
+	scale: calc(1 - (1 - var(--nav-logo-scale)) * var(--q));
+}
+
+/* The .nav-left wrapper already scales the links down along with the wordmark
+   and the gap. That would leave the links as small as the logo at q = 1, so
+   they counter-scale up inside the shrunken wrapper to land at a net
+   --nav-links-scale — keeping compact links readable while their position and
+   leading whitespace still track the logo exactly. The exact counter-scale is
+   nonlinear in --q (net ÷ wrapper), so it rides its own JS-written var. */
+#site-nav .nav-links {
+	transform: scale(var(--q-links));
 }
 
 /* Nav links share one underline that glides between them: it rests under the
@@ -403,43 +465,166 @@ h6 {
 	display: block;
 }
 
-/* Larger contact icons at the top of the page; shrink once scrolled.
-   The size change is a composited `transform: scale` on the *button*, not an
-   animated width/height on the SVG: animating an SVG's width/height re-rasters
-   the glyph every frame, which is the main source of jank when the nav
-   compacts. Scaling the button stays on the compositor, and the per-icon hover
-   transforms (which live on the SVG itself) compose cleanly on top. */
+/* Larger contact icons at the top of the page; shrinking with --q. The size
+   change is a `transform: scale` on the *button*, not a width/height on the
+   SVG: resizing an SVG's box re-rasters the glyph every frame. Scaling the
+   button stays cheap, and the per-icon hover transforms (which live on the
+   SVG itself) compose cleanly on top. */
 #site-nav .btn-icon {
 	transition:
 		color 0.12s ease,
 		background-color 0.12s ease,
-		border-color 0.12s ease,
-		transform 0.2s var(--nav-ease);
+		border-color 0.12s ease;
 }
 
-/* Compact: the whole right cluster (contact icons + theme toggle) shrinks as
-   one uniform miniature anchored to the nav's right edge — glyphs AND the gaps
-   between them all scale by --nav-icon-scale, and the cluster's right edge
-   stays flush in both states. Each button scales about its own center, so to
-   hold the cluster similar its center must also move right to icon-scale× its
-   distance from that edge — that distance is half its own 2.9rem box (0.5rem
-   padding ×2 + 1.9rem glyph) plus one box-and-gap (2.9rem + 0.375rem) per
-   button between it and the edge (--nav-icon-r, set in Nav.astro's markup;
-   the toggle is the last button, r = 0). The min() term adds the toggle gap's
-   extra width over an icon gap (its ml-6, 1.5rem, vs contact-group's gap-1.5,
-   0.375rem), which every contact button crosses exactly once; no flex gap on
-   .nav-inner may add to these. */
-#site-nav[data-scrolled='true'] .btn-icon {
+/* The whole right cluster (contact icons + theme toggle) shrinks as one
+   uniform miniature anchored to the nav's right edge — glyphs AND the gaps
+   between them all scale toward --nav-icon-scale, and the cluster's right
+   edge stays flush at every q. Each button scales about its own center, so to
+   hold the cluster similar its center must also move right in proportion to
+   its distance from that edge — that distance is half its own 2.9rem box
+   (0.5rem padding ×2 + 1.9rem glyph) plus one box-and-gap (2.9rem + 0.375rem)
+   per button between it and the edge (--nav-icon-r, set in Nav.astro's
+   markup; the toggle is the last button, r = 0). The min() term adds the
+   toggle gap's extra width over an icon gap (its ml-6, 1.5rem, vs
+   contact-group's gap-1.5, 0.375rem), which every contact button crosses
+   exactly once; no flex gap on .nav-inner may add to these. Both terms are
+   linear in --q, so the cluster rides the scrub exactly with the wordmark. */
+#site-nav .btn-icon {
 	transform: translateX(
 			calc(
 				(
 						2.9rem / 2 + (2.9rem + 0.375rem) * var(--nav-icon-r, 0) +
 							(1.5rem - 0.375rem) * min(var(--nav-icon-r, 0), 1)
 					) *
-					(1 - var(--nav-icon-scale))
+					(1 - var(--nav-icon-scale)) * var(--q)
 			)
 		)
-		scale(var(--nav-icon-scale)); /* glyph: ~1.18rem = 1.9rem × 0.62 */
+		scale(calc(1 - (1 - var(--nav-icon-scale)) * var(--q))); /* glyph at q=1: ~1.18rem */
+}
+
+/* ── Compositor-driven scrub ──
+   Where scroll-driven animations are supported, the same geometry binds
+   directly to the scroll offset as keyframe animations: sampled in perfect
+   sync with the compositor's scroll (the JS --q scrub necessarily runs a
+   frame behind the wheel) and, being transform/scale-only, running off the
+   main thread. Home page only. Nav.astro lifts it (html.nav-intro) while a
+   cross-page intro tween drives --q, and hands back once the tween lands on
+   the scroll-derived value — the animations then sample the same geometry,
+   so the switch is invisible. Endpoint values must keep in step with the
+   --q calc() rules above and setQ in Nav.astro; the 5.5rem range matches
+   RANGE there. Browsers without support just keep the JS --q scrub. */
+@supports (animation-timeline: scroll()) {
+	html:has(#site-nav[data-home='true']):not(.nav-intro) main,
+	html:has(#site-nav[data-home='true']):not(.nav-intro) footer {
+		animation: nav-scrub-page linear both;
+		animation-timeline: scroll(root block);
+		animation-range: 0rem 5.5rem;
+	}
+	html:has(#site-nav[data-home='true']):not(.nav-intro) #site-nav .nav-inner {
+		animation: nav-scrub-inner linear both;
+		animation-timeline: scroll(root block);
+		animation-range: 0rem 5.5rem;
+	}
+	html:has(#site-nav[data-home='true']):not(.nav-intro) #site-nav .nav-left {
+		animation: nav-scrub-logo linear both;
+		animation-timeline: scroll(root block);
+		animation-range: 0rem 5.5rem;
+	}
+	html:has(#site-nav[data-home='true']):not(.nav-intro) #site-nav .nav-links {
+		animation: nav-scrub-links linear both;
+		animation-timeline: scroll(root block);
+		animation-range: 0rem 5.5rem;
+	}
+	html:has(#site-nav[data-home='true']):not(.nav-intro) #site-nav .btn-icon {
+		animation: nav-scrub-icon linear both;
+		animation-timeline: scroll(root block);
+		animation-range: 0rem 5.5rem;
+	}
+	html:has(#site-nav[data-home='true']):not(.nav-intro) #site-nav::after {
+		animation: nav-scrub-veil linear both;
+		animation-timeline: scroll(root block);
+		animation-range: 0rem 5.5rem;
+	}
+}
+
+@keyframes nav-scrub-veil {
+	from {
+		transform: scaleY(1);
+	}
+	to {
+		transform: scaleY(0);
+	}
+}
+
+@keyframes nav-scrub-page {
+	from {
+		transform: translateY(var(--nav-shift));
+	}
+	to {
+		transform: translateY(0);
+	}
+}
+
+@keyframes nav-scrub-inner {
+	from {
+		transform: translateY(var(--nav-shift-inner));
+	}
+	to {
+		transform: translateY(0);
+	}
+}
+
+@keyframes nav-scrub-logo {
+	from {
+		scale: 1;
+	}
+	to {
+		scale: var(--nav-logo-scale);
+	}
+}
+
+/* The links' counter-scale is nonlinear in q (net --nav-links-scale ÷ the
+   wrapper's shrinking scale), so the curve is approximated piecewise — the
+   intermediate stops keep the error under half a pixel of text. Values are
+   (1 − 0.298q) / (1 − 0.58q) — keep in step with setQ in Nav.astro. */
+@keyframes nav-scrub-links {
+	0% {
+		transform: scale(1);
+	}
+	25% {
+		transform: scale(1.0824);
+	}
+	50% {
+		transform: scale(1.1986);
+	}
+	75% {
+		transform: scale(1.3743);
+	}
+	87.5% {
+		transform: scale(1.501);
+	}
+	100% {
+		transform: scale(1.6714);
+	}
+}
+
+@keyframes nav-scrub-icon {
+	from {
+		transform: translateX(0) scale(1);
+	}
+	to {
+		transform: translateX(
+				calc(
+					(
+							2.9rem / 2 + (2.9rem + 0.375rem) * var(--nav-icon-r, 0) +
+								(1.5rem - 0.375rem) * min(var(--nav-icon-r, 0), 1)
+						) *
+						(1 - var(--nav-icon-scale))
+				)
+			)
+			scale(var(--nav-icon-scale));
+	}
 }
 
 /* SVG size is fixed now; only the hover/press gesture transitions. Scoped to

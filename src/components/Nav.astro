@@ -8,32 +8,35 @@ const onAbout = path === '/about' || path === '/about/';
 // The home page is the projects listing, and project detail pages live under
 // the Projects section, so the Projects nav link is the active one on both.
 const onProject = onHome || path.startsWith('/projects/');
+
 ---
 
 <nav
 	id="site-nav"
 	data-home={onHome ? 'true' : 'false'}
-	data-scrolled={onHome ? 'false' : 'true'}
-	class="group/nav sticky top-0 z-40 bg-[var(--paper)]"
+	class="sticky top-0 z-40 bg-[var(--paper)]"
 >
-	{/* The vertical padding (nav height) snaps between states with no transition;
-	    the resulting position shift is played back as a composited transform by
-	    the FLIP logic in the script below. Nothing here animates a layout
-	    property, so the collapse/expand never forces a per-frame reflow. */}
-	<div class="mx-auto max-w-[1280px] px-5 py-12 group-data-[scrolled=true]/nav:py-1">
+	{/* The bar's whole geometry — vertical padding (height), wordmark/links
+	    scale, icon close-ranks slide — derives from one progress value --q
+	    (0 = expanded masthead, 1 = compact bar) via calc() in global.css. On
+	    the home page --q is scrubbed 1:1 from scrollY by the scripts below, so
+	    bar and contents move together with the scroll itself: one unit, no
+	    animation clock. */}
+	<div class="nav-pad mx-auto max-w-[1280px] px-5">
 		{/* No flex gap here: it would also open up between the contact group and
 		    the theme toggle, breaking the compact close-ranks math in global.css
 		    (which assumes one uniform 0.375rem gap between all buttons). The
 		    logo↔links gap lives in the links' ml-7 instead. */}
 		<div class="nav-inner flex items-center">
 			{/* Left cluster: wordmark + links compact as ONE unit — the wrapper
-			    carries the logo's scale, so the links and the whitespace before
-			    them shrink in exact proportion to the wordmark through pure
-			    layout (no JS width measurement, so no dependence on which font
-			    has loaded). The links counter-scale inside the shrunken wrapper
-			    (see .nav-links in global.css) to land at their own, larger
-			    compact size and stay readable. */}
-			<div class="nav-left flex origin-left items-center transition-transform duration-200 ease-out group-data-[scrolled=true]/nav:scale-[var(--nav-logo-scale)]">
+			    carries the logo's scale (q-driven, see .nav-left in global.css),
+			    so the links and the whitespace before them shrink in exact
+			    proportion to the wordmark through pure layout (no JS width
+			    measurement, so no dependence on which font has loaded). The links
+			    counter-scale inside the shrunken wrapper (see .nav-links in
+			    global.css) to land at their own, larger compact size and stay
+			    readable. */}
+			<div class="nav-left flex origin-left items-center">
 				<a href="/" class="nav-logo text-[2.5rem] font-bold tracking-tight text-[var(--ink)]">
 					Hiro Eernisse
 				</a>
@@ -41,7 +44,7 @@ const onProject = onHome || path.startsWith('/projects/');
 				{/* Projects/About sit right beside the wordmark. The link for the
 				    section you're on is marked active with aria-current (styled in
 				    global.css). */}
-				<div class="nav-links ml-7 hidden origin-left items-center gap-1 text-xl font-medium text-[var(--ink-soft)] transition-transform duration-200 ease-out sm:flex">
+				<div class="nav-links ml-7 hidden origin-left items-center gap-1 text-xl font-medium text-[var(--ink-soft)] sm:flex">
 					<a
 						href="/#projects"
 						data-projects-link
@@ -153,45 +156,94 @@ const onProject = onHome || path.startsWith('/projects/');
 </nav>
 
 <script is:inline>
-	// Carry the nav's expand/collapse state across page navigations. Because this
-	// is a multi-page app, the height change between the home masthead (expanded)
-	// and interior pages (compact) can't tween across a page load on its own — so
-	// we persist the nav's visual state when a page is left and diff it against
-	// the new page's resting state on arrival:
+	// ── Scroll-driven masthead: the q model ──
+	// One progress value q (0 = expanded masthead, 1 = compact bar) drives the
+	// nav's entire geometry through calc() in global.css — vertical padding,
+	// wordmark/links scale, icon close-ranks slide are all functions of q, so
+	// the bar and its contents move as one unit BY CONSTRUCTION. On the home
+	// page q is scrubbed 1:1 from scrollY (no thresholds, no timed animation:
+	// the bar tracks a wheel notch exactly as fast as the page scrolls);
+	// interior pages pin q to 1.
 	//
-	//   1. pagehide: store the nav's current state (fires for every way a page
-	//      can be left — link click, back/forward, address bar).
-	//   2. On arrival: compute this page's resting state from first principles
-	//      (home near the top → expanded, anything else → compact).
-	//   3. If the carried state differs, paint in the carried state and play the
-	//      difference as soon as parsing finishes.
-	//
-	// No per-flow special cases: collapse (home → interior) and expand
-	// (anywhere → top of home) both fall out of the same diff.
-	//
-	// Runs inline (pre-paint) so the page paints in its *starting* state, with
-	// no flash of the resting state, before animating on the next frame. The
-	// intro itself also lives here rather than in the module script below:
-	// module scripts evaluate in document order behind whatever the toolchain
-	// injects ahead of them (in dev: the Vite client and dev toolbar), so on a
-	// slow round trip the nav sat frozen in the carried state for up to a
-	// second after paint. readyState 'interactive' fires before any module
-	// script runs, so the intro can't be starved by them.
+	// This inline script owns everything that must happen pre-paint:
+	//   - paint this load's q (from scrollY — or the q carried across an MPA
+	//     navigation, so interior→home-top tweens open instead of snapping)
+	//   - the projects-landing intent (position the page before first paint)
+	//   - the cross-page intro: tween q to its resting value at 'interactive'
+	//     (readyState 'interactive' fires before module scripts evaluate, so
+	//     the intro can't be starved by the module chain — in dev, the Vite
+	//     client — on a slow round trip)
+	// The live scroll scrubbing lives in the module script below, which reuses
+	// window.__navQ installed here: one source for the q math.
 	(function () {
 		var nav = document.getElementById('site-nav');
 		if (!nav) return;
-		var KEY = 'nav-state';
+		var onHome = nav.dataset.home === 'true';
+		var root = document.documentElement;
+		// Full-collapse scroll distance = the masthead's height delta (the
+		// --nav-shift the page rides on in global.css, 5.5rem) — the masthead
+		// collapse tracks the scroll exactly 1:1. Keep in step with the CSS,
+		// including the animation-range of the compositor scrub there.
+		var RANGE = 5.5 * (parseFloat(getComputedStyle(root).fontSize) || 19);
+		var LOGO =
+			parseFloat(getComputedStyle(nav).getPropertyValue('--nav-logo-scale')) || 0.42;
+		var LINKS =
+			parseFloat(getComputedStyle(nav).getPropertyValue('--nav-links-scale')) || 0.702;
+		// On supporting browsers the home-page geometry is bound straight to the
+		// scroll offset by the compositor (the scroll-driven animations in
+		// global.css) — the JS scrub then only maintains bookkeeping (--q for
+		// the intro handoff, persistence, landing math).
+		var TIMELINE =
+			onHome && !!(window.CSS && CSS.supports && CSS.supports('animation-timeline: scroll()'));
+		var q = onHome ? 0 : 1; // matches the stylesheet default before the first setQ
+
+		// Set q (vars live on <html>: main/footer ride --q too). The links'
+		// counter-scale is a NONLINEAR function of q (they must land at a net
+		// --nav-links-scale while riding inside the wrapper's --nav-logo-scale),
+		// so it can't be a pure calc() — both vars are set together here, the
+		// single writer. Keep the formula in step with the nav-scrub-links
+		// keyframes in global.css.
+		var setQ = function (v) {
+			v = Math.max(0, Math.min(1, v));
+			q = v;
+			root.style.setProperty('--q', String(v));
+			root.style.setProperty(
+				'--q-links',
+				((1 - (1 - LINKS) * v) / (1 - (1 - LOGO) * v)).toFixed(5)
+			);
+		};
+		var qFromScroll = function () {
+			return onHome ? Math.max(0, Math.min(1, window.scrollY / RANGE)) : 1;
+		};
+		// The q the PAINTED geometry currently reflects: with the compositor
+		// scrub active the visuals follow the scroll offset directly (whatever
+		// --q says); while html.nav-intro detaches it — or without timeline
+		// support at all — the visuals follow --q.
+		var qPainted = function () {
+			return TIMELINE && !root.classList.contains('nav-intro') ? qFromScroll() : q;
+		};
+		// The bar's current VISUAL height: its layout box is pinned compact, and
+		// the masthead's extra height is the page shift still un-collapsed.
+		var visualNavH = function () {
+			return nav.offsetHeight + RANGE * (1 - qPainted());
+		};
+		// Shared with the module script's scrub handler.
+		window.__navQ = {
+			setQ: setQ,
+			range: RANGE,
+			get: function () {
+				return q;
+			},
+			fromScroll: qFromScroll,
+			visualNavH: visualNavH,
+		};
 
 		window.addEventListener('pagehide', function () {
 			try {
-				sessionStorage.setItem(KEY, nav.dataset.scrolled + ':' + Date.now());
+				sessionStorage.setItem('nav-q', q.toFixed(4) + ':' + Date.now());
 			} catch (e) {}
 		});
 
-		// This page's resting state right now. The 12px threshold matches
-		// COLLAPSE_ABOVE in the scroll handler below, so the nav paints compact
-		// the moment the page loads scrolled even slightly off the top.
-		var onHome = nav.dataset.home === 'true';
 		// A pending "show projects" intent — set when a projects link is clicked on
 		// another page. The flag holds '1' for the top of the list or a project
 		// slug for a specific card. Handled entirely here, not in the module
@@ -231,40 +283,38 @@ const onProject = onHome || path.startsWith('/projects/');
 		// would flash the top of the page for a frame before snapping down to the
 		// card. Content stays hidden until positioned; arrive() always lifts it.
 		if (projectsIntent) document.documentElement.classList.add('projects-landing');
-		// This load's resting scroll: the exact remembered position (which may be
-		// the very top, where the masthead stays expanded), the computed projects
-		// view (always past the collapse threshold), or wherever the browser put
-		// us. The nav paints to match it.
-		var restY = projectsIntent ? (returnY !== null ? returnY : 16) : window.scrollY;
-		var target = onHome && restY < 12 ? 'false' : 'true';
+		// This load's resting q: from the exact remembered position, the projects
+		// view (≈ fully compact), or wherever the browser put us.
+		var restY = projectsIntent ? (returnY !== null ? returnY : RANGE) : window.scrollY;
+		var restQ = onHome ? Math.max(0, Math.min(1, restY / RANGE)) : 1;
 
-		// The state carried over from the page we just left, if fresh. The age
-		// cap means returning to a stale tab (e.g. from an external site much
-		// later) paints at rest instead of replaying an old animation.
+		// The q carried over from the page we just left, if fresh. The age cap
+		// means returning to a stale tab (e.g. from an external site much later)
+		// paints at rest instead of replaying an old tween.
 		var carried = null;
 		try {
-			var raw = sessionStorage.getItem(KEY);
-			sessionStorage.removeItem(KEY);
+			var raw = sessionStorage.getItem('nav-q');
+			sessionStorage.removeItem('nav-q');
 			if (raw) {
 				var sep = raw.lastIndexOf(':');
-				if (Date.now() - +raw.slice(sep + 1) < 10000) carried = raw.slice(0, sep);
+				if (Date.now() - +raw.slice(sep + 1) < 10000) carried = +raw.slice(0, sep);
 			}
 		} catch (e) {}
+		if (carried !== null && !(carried >= 0 && carried <= 1)) carried = null;
 
 		var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-		var animate = !reduce && (carried === 'true' || carried === 'false') && carried !== target;
+		var animate = !reduce && carried !== null && Math.abs(carried - restQ) > 0.02;
 
-		// Paint pre-paint in the starting state (carried if animating, else rest),
-		// transitions suppressed so this snap can't tween from the SSR default.
-		nav.classList.add('nav-no-transition');
-		nav.dataset.scrolled = animate ? carried : target;
-		void nav.offsetWidth;
-		nav.classList.remove('nav-no-transition');
+		// Paint pre-paint at the starting q (carried if tweening, else rest).
+		// A pending intro detaches the compositor scrub NOW, pre-paint, so the
+		// first frame shows the carried --q geometry, not the scroll-derived one.
+		if (animate) root.classList.add('nav-intro');
+		setQ(animate ? carried : restQ);
 		if (!animate && !projectsIntent) return;
 
 		// Land on the projects view: the exact remembered position when we have
 		// one, otherwise the intended card (or the top of the list) ~12px under
-		// the compact nav (a one-shot copy of goToProjects in the module script
+		// the compact bar (a one-shot copy of goToProjects in the module script
 		// below — keep the two in step). For a card, the browser's native
 		// fragment scroll has already positioned the page pre-paint (the link
 		// navigates to /#project-<slug>); this settles the final position and
@@ -278,64 +328,65 @@ const onProject = onHome || path.startsWith('/projects/');
 					(projectsIntent !== '1' && document.getElementById('project-' + projectsIntent)) ||
 					document.getElementById('project-list');
 				if (el) {
-					var y = el.getBoundingClientRect().top + window.scrollY - nav.offsetHeight - 12;
-					window.scrollTo({ top: Math.max(y, 16), behavior: 'instant' });
+					// The bar's VISUAL height on purpose: the element's rect rides
+					// the page shift, and rect − visualH is q-invariant, so this is
+					// the right target whatever q is painted right now (mirrors
+					// compactTargetY in the module script below — keep in step).
+					var y = el.getBoundingClientRect().top + window.scrollY - visualNavH() - 12;
+					window.scrollTo({ top: Math.max(y, 0), behavior: 'instant' });
 				}
 			}
+			setQ(qFromScroll()); // q must agree with wherever we landed
 			if (location.hash) history.replaceState(null, '', '/');
 		};
 
-		// FLIP the carried→resting difference (a one-shot copy of animateTo in
-		// the module script below — keep the two in step): snap the height
-		// change, measure how far each affected block moved, offset it back,
-		// then release the offset as a composited transform.
+		// Cross-page intro: tween q from the carried value to rest. rAF-driven
+		// (not a CSS transition) because --q-links is a nonlinear function of q
+		// that only setQ can keep exact. The ease approximates the old
+		// --nav-ease decel. While it runs, html.nav-intro keeps the compositor
+		// scrub detached so --q owns the geometry; finishing (or the user's own
+		// scrolling, which aborts it) hands back at the scroll-derived value —
+		// the same geometry, so the switch is invisible.
 		var runIntro = function () {
-			// Recompute the resting state rather than reusing `target`:
-			// back/forward scroll restoration can land before this runs (e.g.
-			// returning to a scrolled-down home), and if the restored position
-			// already matches the painted state there is nothing to animate.
-			var to = onHome && window.scrollY < 12 ? 'false' : 'true';
-			if (nav.dataset.scrolled === to) return;
-			var els = [
-				nav.querySelector('.nav-inner'),
-				document.querySelector('main'),
-				document.querySelector('footer'),
-			].filter(Boolean);
-			var first = els.map(function (el) {
-				return el.getBoundingClientRect().top;
-			});
-			nav.dataset.scrolled = to; // snap the height; start CSS scale transitions
-			var last = els.map(function (el) {
-				return el.getBoundingClientRect().top;
-			});
-			els.forEach(function (el, i) {
-				var dy = first[i] - last[i];
-				el.style.transition = 'none';
-				el.style.transform = dy ? 'translateY(' + dy + 'px)' : '';
-			});
-			void nav.offsetWidth;
-			// Release synchronously — NOT on the next rAF. The scale/translateX
-			// transitions above started at this task's style clock; releasing a
-			// frame later would start the vertical glide ~16ms behind them, and
-			// that per-axis lag bends every straight diagonal into an arc (an
-			// oval over a collapse+expand round trip). Same-task release gives
-			// all axes the identical start time on any refresh rate.
-			els.forEach(function (el) {
-				el.style.transition = 'transform 200ms var(--nav-ease)';
-				el.style.transform = '';
-				el.addEventListener('transitionend', function done() {
-					el.style.transition = '';
-					el.removeEventListener('transitionend', done);
-				});
-			});
-			void nav.offsetWidth;
+			var from = q;
+			// Recompute rest instead of reusing restQ: back/forward scroll
+			// restoration can land before this runs (e.g. returning to a
+			// scrolled-down home), and the restored position may already match.
+			var to = qFromScroll();
+			var finish = function () {
+				setQ(qFromScroll());
+				root.classList.remove('nav-intro');
+			};
+			if (Math.abs(from - to) < 0.02) {
+				finish();
+				return;
+			}
+			var aborted = false;
+			var onScroll = function () {
+				aborted = true;
+				window.removeEventListener('scroll', onScroll);
+				finish();
+			};
+			window.addEventListener('scroll', onScroll, { passive: true });
+			var t0 = performance.now();
+			var step = function (now) {
+				if (aborted) return;
+				var t = Math.min(1, (now - t0) / 200);
+				var e = 1 - Math.pow(1 - t, 3); // ease-out cubic
+				setQ(from + (to - from) * e);
+				if (t < 1) {
+					requestAnimationFrame(step);
+				} else {
+					window.removeEventListener('scroll', onScroll);
+					finish();
+				}
+			};
+			requestAnimationFrame(step);
 		};
 
-		// 'interactive' means main/footer exist and layout is measurable; it
-		// fires before module scripts evaluate, so this can't run twice against
-		// the scroll handler installed below. The landing scroll runs first so
-		// runIntro's recomputed resting state sees the final scroll position
-		// (already compact + scrolled → nothing to animate).
+		// 'interactive' means main and the cards exist and layout is measurable;
+		// it fires before module scripts evaluate. The landing scroll runs first
+		// so runIntro's recomputed resting q sees the final scroll position.
 		var arrive = function () {
 			if (projectsIntent) {
 				try {
@@ -519,92 +570,46 @@ const onProject = onHome || path.startsWith('/projects/');
 	});
 
 	const nav = document.getElementById('site-nav');
-	if (nav) {
-		// The collapse/expand changes the nav's height, which shifts the bar's
-		// content and everything below it. Animating that shift with a layout
-		// property (padding/font-size) forces a reflow every frame — the source
-		// of the stutter. Instead we use FLIP: snap the height change instantly
-		// (invisible, as the nav has no visible bottom edge), measure how far each
-		// affected block moved, then play that delta back as a composited
-		// `transform`. Only transforms animate per frame, so there is no reflow.
-		// (The name/links/icons scale via their own CSS transform transitions.)
-		const DUR = 200;
-		const barInner = nav.querySelector('.nav-inner');
+	// The q machinery (scroll → geometry) is installed pre-paint by the inline
+	// script above — see there for the model. This module adds the live scroll
+	// scrubbing and the projects-link behaviours.
+	const navQ = (window as any).__navQ;
+	if (nav && navQ) {
 		const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-		// The bar content plus every block that flows after the sticky nav.
-		const shiftables = () =>
-			[barInner, document.querySelector('main'), document.querySelector('footer')].filter(Boolean);
-
-		// Set the state with no animation (initial paint, reduced motion).
-		const snap = (next) => {
-			nav.classList.add('nav-no-transition');
-			nav.dataset.scrolled = next;
-			void nav.offsetWidth;
-			nav.classList.remove('nav-no-transition');
-		};
-
-		const animateTo = (next) => {
-			if (nav.dataset.scrolled === next) return;
-			if (reduceMotion) { snap(next); return; }
-			const els = shiftables();
-			// Clear any in-flight transform so we measure true layout positions.
-			els.forEach((el) => { el.style.transition = 'none'; el.style.transform = ''; });
-			void nav.offsetWidth;
-			const first = els.map((el) => el.getBoundingClientRect().top);
-			nav.dataset.scrolled = next; // snap the height; start CSS scale transitions
-			const last = els.map((el) => el.getBoundingClientRect().top);
-			// Invert: offset each block back to where it was, with transitions off.
-			els.forEach((el, i) => {
-				const dy = first[i] - last[i];
-				el.style.transform = dy ? `translateY(${dy}px)` : '';
-			});
-			void nav.offsetWidth;
-			// Play: release the offsets so they glide to zero on the compositor.
-			// Released in the same task (with a forced style flush), not on the
-			// next rAF: the children's scale/translateX transitions started at
-			// this task's style clock, and a one-frame-later vertical start bends
-			// the straight diagonals into arcs — an oval over a collapse+expand
-			// round trip. (Same pattern in the inline intro above.)
-			els.forEach((el) => {
-				el.style.transition = `transform ${DUR}ms var(--nav-ease)`;
-				el.style.transform = '';
-				el.addEventListener('transitionend', function done() {
-					el.style.transition = '';
-					el.removeEventListener('transitionend', done);
-				});
-			});
-			void nav.offsetWidth;
-		};
-
-		// (The cross-page intro is played by the inline script above, which runs
-		// at readyState 'interactive' — before this module evaluates — so it
-		// can't be starved by the module chain. animateTo here only serves the
-		// scroll handler; its transform-clearing preamble also lets it cleanly
-		// take over from an intro still in flight.)
-
-		// ── "Projects" → projects section, compact nav ──
-		// The projects list is the top of the home page, sitting directly under the
-		// masthead. A plain #projects anchor fights the sticky collapse: once the nav
-		// is compact, the section's document top is nearer the viewport top than the
-		// anchor's scroll-margin (95px), so the browser clamps the jump to y=0 —
-		// snapping back to the very top with the masthead re-expanded. So we take
-		// over: scroll to the spot where the nav is collapsed and the first card sits
-		// just beneath it. Cross-page, a sessionStorage flag carries the intent so the
-		// home page lands there directly (see the inline script's `projectsIntent`).
+		// ── "Projects" → projects section ──
+		// The projects list is the top of the home page, sitting directly under
+		// the masthead. A plain #projects anchor lands too near the top (the bar
+		// would sit mid-collapse); instead we scroll to the spot where the bar is
+		// fully compact and the first card sits just beneath it. Cross-page, a
+		// sessionStorage flag carries the intent so the home page lands there
+		// directly (see the inline script's `projectsIntent`).
 		const PROJECTS_FLAG = 'nav-projects';
 
-		// The y that leaves the nav compact with `el` just below it (mirrored by
-		// the inline script's `landOnProjects` — keep the two in step). The
-		// measured gap is independent of nav state: the element's document position
-		// and the nav's box height shift together between expanded and compact, so
-		// this difference is the same either way. Land the element ~12px under the
-		// compact nav, but never so near the top that the scroll handler's 12px
-		// threshold would re-expand the masthead.
+		// The y that rests `el` ~12px under the bar (mirrored by the inline
+		// script's `landOnProjects` — keep the two in step). Uses the bar's
+		// current VISUAL height on purpose: the element's rect rides the page
+		// shift, and the two change together as q does, so their difference is
+		// q-invariant — the same answer at any scroll state, including the
+		// final one.
 		const compactTargetY = (el) => {
-			const top = el.getBoundingClientRect().top + window.scrollY - nav.offsetHeight;
-			return Math.max(top - 12, 16);
+			const top = el.getBoundingClientRect().top + window.scrollY - navQ.visualNavH();
+			return Math.max(top - 12, 0);
 		};
+
+		// The settle (below) only ever finishes a USER gesture. A programmatic
+		// scroll — the projects landing, goToProjects — may deliberately rest
+		// mid-range (the list sits so high that a fully-compact bar is
+		// geometrically impossible there); settling would yank that designed
+		// position away. Suppressed until the next real input. A mid-range q at
+		// module init means the pre-paint landing already positioned us.
+		let allowSettle = !(navQ.get() > 0 && navQ.get() < 1);
+		const armSettle = () => {
+			allowSettle = true;
+		};
+		window.addEventListener('wheel', armSettle, { passive: true });
+		window.addEventListener('touchstart', armSettle, { passive: true });
+		window.addEventListener('keydown', armSettle);
 
 		// Scroll to the projects view — a specific card when `slug` names one
 		// (Back-to-projects returns you to the card you came from), otherwise the
@@ -614,6 +619,7 @@ const onProject = onHome || path.startsWith('/projects/');
 				(slug && document.getElementById(`project-${slug}`)) ||
 				document.getElementById('project-list');
 			if (!target) return;
+			allowSettle = false; // this glide's resting spot is the destination
 			// 'instant', not 'auto': the stylesheet's `scroll-behavior: smooth`
 			// turns 'auto' into a glide, and the landing snap must not animate.
 			window.scrollTo({
@@ -663,25 +669,35 @@ const onProject = onHome || path.startsWith('/projects/');
 			});
 		});
 
-		// Home masthead: expand near the very top, collapse once scrolled, with a
-		// dead-band so scroll jitter can't rapidly re-trigger the animation.
-		// (The initial state is already painted by the inline script above;
-		// COLLAPSE_ABOVE must stay in sync with the 12px threshold there.)
+		// ── Home masthead scrub ──
+		// q tracks scrollY 1:1 through the collapse range (rAF-throttled like any
+		// scroll-linked effect), so the bar collapses and expands exactly as fast
+		// as the page scrolls — a wheel notch moves bar, contents and page as one
+		// unit with zero added latency. No thresholds, no timed animation.
 		if (nav.dataset.home === 'true') {
 			// (Cross-page arrivals with a pending projects intent are handled by the
 			// inline script above, pre-paint — by the time this module evaluates the
 			// page is already resting on the projects view.)
-			const EXPAND_BELOW = 4;
-			const COLLAPSE_ABOVE = 12;
-			let scrolled = window.scrollY > COLLAPSE_ABOVE;
 			let ticking = false;
+			let settleTimer = 0;
 			const apply = () => {
 				ticking = false;
-				const y = window.scrollY;
-				if (!scrolled && y > COLLAPSE_ABOVE) scrolled = true;
-				else if (scrolled && y < EXPAND_BELOW) scrolled = false;
-				else return;
-				animateTo(scrolled ? 'true' : 'false');
+				navQ.setQ(navQ.fromScroll());
+			};
+			// Resting mid-range would leave the bar mid-size; shortly after
+			// scrolling pauses, finish the gesture by gliding the SCROLL to the
+			// nearest end of the range (never q directly — the bar must stay
+			// glued to the page). The settle's own smooth scroll feeds scroll
+			// events back through this handler, so q rides it; once it lands,
+			// q is 0 or 1 and the settle no-ops. A wheel turn mid-settle
+			// interrupts the smooth scroll natively and scrubbing resumes.
+			const settle = () => {
+				const qNow = navQ.get();
+				if (qNow <= 0 || qNow >= 1) return;
+				window.scrollTo({
+					top: qNow < 0.5 ? 0 : navQ.range,
+					behavior: reduceMotion ? 'instant' : 'smooth',
+				});
 			};
 			window.addEventListener(
 				'scroll',
@@ -690,6 +706,8 @@ const onProject = onHome || path.startsWith('/projects/');
 						ticking = true;
 						requestAnimationFrame(apply);
 					}
+					window.clearTimeout(settleTimer);
+					if (allowSettle) settleTimer = window.setTimeout(settle, 160);
 				},
 				{ passive: true }
 			);
