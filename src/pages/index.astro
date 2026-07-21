@@ -18,9 +18,19 @@ import { projects } from '../data/projects';
 	</main>
 
 	<footer class="mx-auto max-w-[1280px] px-5 py-10 text-sm text-[var(--ink-soft)]">
-		<div class="flex items-center justify-between border-t border-[var(--line)] pt-6">
-			<span>© 2026 Hiro Eernisse</span>
-			<a href="/#projects" class="btn">Back to top ↑</a>
+		<div
+			class="flex flex-col gap-6 border-t border-[var(--line)] pt-6 sm:flex-row sm:items-start sm:justify-between"
+		>
+			<div class="max-w-md space-y-1.5">
+				<span class="block">© 2026 Hiro Eernisse</span>
+				{/* Colophon — a quiet build note for the people who look. The site is
+				    itself the portfolio piece, so it names how it's made. */}
+				<p class="text-[var(--ink-soft)]">
+					Built in Astro. The masthead is transform-only — no reflow, no framework
+					JavaScript. Type set in Supreme &amp; Satoshi.
+				</p>
+			</div>
+			<a href="/#projects" class="btn shrink-0">Back to top ↑</a>
 		</div>
 	</footer>
 
