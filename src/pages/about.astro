@@ -3,18 +3,82 @@ import Layout from '../layouts/Layout.astro';
 import Nav from '../components/Nav.astro';
 ---
 
-<Layout title="About — Hiro Eernisse" description="About Hiro Eernisse, product design engineer.">
+<Layout title="About — Hiro Eernisse" description="About Hiro Eernisse, design engineer.">
 	<Nav />
 
 	<main class="mx-auto max-w-[1280px] px-5 py-12 sm:py-16">
-		<div class="max-w-xl space-y-4 text-lg leading-relaxed">
-			<p class="mb-10 text-2xl font-bold tracking-tight text-[var(--ink)] sm:text-3xl">はじめまして。</p>
-			<p>I'm a Design Engineer based in the San Francisco Bay Area.</p>
-			<p>
-				In an era of AI-generated slop, I care deeply about polish, intentional user flows, and
-				interfaces that feel original.
-			</p>
-			<p>Outside of work, I play heavy metal drums.</p>
+		<div class="flex flex-col gap-12 lg:flex-row lg:items-start lg:justify-between lg:gap-20">
+			<div class="max-w-xl space-y-4 text-lg leading-relaxed">
+				<p class="reveal mb-10 text-2xl font-bold tracking-tight text-[var(--ink)] sm:text-3xl" style="--i: 0">はじめまして。</p>
+				<p class="reveal" style="--i: 1">I'm a Design Engineer based in the San Francisco Bay Area.</p>
+				<p class="reveal" style="--i: 2">
+					I build with AI, but I make the decisions that matter myself. Taste, and knowing how a
+					person moves through a product, is still human work.
+				</p>
+				<p class="reveal" style="--i: 3">Outside of work, I play heavy metal drums and hike.</p>
+			</div>
+			<figure class="reveal w-full shrink-0 lg:w-[26rem]" style="--i: 4">
+				<img
+					src="/images/me.jpeg"
+					alt="Hiro Eernisse"
+					width="416"
+					height="520"
+					class="aspect-[4/5] w-full rounded-[1.5px] border border-[var(--line)] object-cover"
+				/>
+				<figcaption class="mt-2 flex items-center gap-1.5 text-xs text-[var(--ink-soft)]">
+					<svg
+						class="h-3.5 w-3.5 shrink-0"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="square"
+						stroke-linejoin="miter"
+						aria-hidden="true"
+					>
+						<path d="M12 22s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12Z" />
+						<circle cx="12" cy="10" r="2.5" />
+					</svg>
+					Eagle Lake, South Lake Tahoe, CA
+				</figcaption>
+			</figure>
 		</div>
 	</main>
 </Layout>
+
+<style>
+	/* Left-to-right entrance to match the site's horizontal motion language:
+	   each element fades and slides in from the left, one after the next, and the
+	   sequence resolves rightward (bio lines first, photo last). Slower duration +
+	   wider stagger for an unhurried feel. Pure CSS so it runs on first paint;
+	   starts at opacity 0 to avoid a flash of the resting state. */
+	main {
+		/* The leftward start offset would otherwise poke a transient horizontal
+		   scrollbar; clip it without creating a scroll container. */
+		overflow-x: clip;
+	}
+
+	.reveal {
+		opacity: 0;
+		animation: reveal 0.75s cubic-bezier(0.22, 0.68, 0, 1) both;
+		animation-delay: calc(var(--i) * 120ms);
+	}
+
+	@keyframes reveal {
+		from {
+			opacity: 0;
+			transform: translateX(-16px);
+		}
+		to {
+			opacity: 1;
+			transform: none;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.reveal {
+			opacity: 1;
+			animation: none;
+		}
+	}
+</style>
