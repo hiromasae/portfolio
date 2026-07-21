@@ -19,9 +19,9 @@ const onProject = onHome || path.startsWith('/projects/');
 	{/* The bar's whole geometry — vertical padding (height), wordmark/links
 	    scale, icon close-ranks slide — derives from one progress value --q
 	    (0 = expanded masthead, 1 = compact bar) via calc() in global.css. On
-	    the home page --q is scrubbed 1:1 from scrollY by the scripts below, so
-	    bar and contents move together with the scroll itself: one unit, no
-	    animation clock. */}
+	    the home page the scripts below TRIGGER a timed tween of --q between
+	    the two states when the scroll crosses the top of the page: expanded
+	    only at the top, compact once you've scrolled away. */}
 	<div class="nav-pad mx-auto max-w-[1280px] px-5">
 		{/* No flex gap here: it would also open up between the contact group and
 		    the theme toggle, breaking the compact close-ranks math in global.css
@@ -36,7 +36,7 @@ const onProject = onHome || path.startsWith('/projects/');
 			    counter-scale inside the shrunken wrapper (see .nav-links in
 			    global.css) to land at their own, larger compact size and stay
 			    readable. */}
-			<div class="nav-left flex origin-left items-center">
+			<div class="nav-left relative flex origin-left items-center">
 				<a href="/" class="nav-logo text-[2.5rem] font-bold tracking-tight text-[var(--ink)]">
 					Hiro Eernisse
 				</a>
@@ -111,44 +111,42 @@ const onProject = onHome || path.startsWith('/projects/');
 			</span>
 		</div>
 
-		{/* Light/dark toggle: boxed by a quiet border (no fill), which sets it
-		    apart from the borderless contact icons without outshouting them —
-		    as does its wider ml-6 gap. The compact close-ranks slide in
-		    global.css hard-codes both gaps (contact-group's gap-1.5 and this
-		    ml-6); keep them in step. */}
+		{/* Light/dark toggle: the classic contrast glyph — a circle half ink,
+		    half paper, drawn at the contact icons' size and stroke. The filled
+		    side marks the current theme (right = light, left = dark); on toggle
+		    the ink SWEEPS across to the other side — a slide, not a spin, to
+		    match the site's motion language. The fill is a rect that slides
+		    inside a static circular clip (animating the rect, not the clipPath,
+		    keeps the motion working in Safari); see the theme-swap block in
+		    global.css. Wider ml-8 gap sets it apart from the contacts; the
+		    close-ranks slide in global.css hard-codes both gaps and every
+		    button's 2.9rem box, which the default .btn-icon padding + 1.9rem
+		    glyph give this button already. */}
 		<button
 			id="theme-toggle"
 			type="button"
-			class="btn-icon theme-toggle ml-6 self-center"
-			aria-label="Toggle light and dark theme"
+			class="btn-icon theme-toggle ml-8 self-center"
+			role="switch"
+			aria-checked="false"
+			aria-label="Dark theme"
 		>
-			{/* Two glyphs grid-stacked in one cell; only the icon for the theme you'd
-			    switch TO is shown (moon in light, sun in dark), swapped by opacity +
-			    a scale pop. See the theme-swap block in global.css. */}
 			<svg
-				class="icon-moon"
 				viewBox="0 0 24 24"
 				fill="none"
 				stroke="currentColor"
 				stroke-width="2"
 				stroke-linecap="square"
-				stroke-linejoin="miter"
 				aria-hidden="true"
 			>
-				<path d="M20 14.5A8 8 0 1 1 12.5 4a6.5 6.5 0 0 0 7.5 10.5Z" />
-			</svg>
-			<svg
-				class="icon-sun"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="square"
-				stroke-linejoin="miter"
-				aria-hidden="true"
-			>
-				<circle cx="12" cy="12" r="3.6" />
-				<path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+				<defs>
+					<clipPath id="theme-fill-clip">
+						<circle cx="12" cy="12" r="9" />
+					</clipPath>
+				</defs>
+				<circle cx="12" cy="12" r="9" />
+				<g clip-path="url(#theme-fill-clip)">
+					<rect class="theme-fill-rect" x="12" y="2" width="9" height="20" fill="currentColor" stroke="none" />
+				</g>
 			</svg>
 		</button>
 		</div>
@@ -156,53 +154,54 @@ const onProject = onHome || path.startsWith('/projects/');
 </nav>
 
 <script is:inline>
-	// ── Scroll-driven masthead: the q model ──
+	// ── Triggered masthead: the q model ──
 	// One progress value q (0 = expanded masthead, 1 = compact bar) drives the
 	// nav's entire geometry through calc() in global.css — vertical padding,
 	// wordmark/links scale, icon close-ranks slide are all functions of q, so
-	// the bar and its contents move as one unit BY CONSTRUCTION. On the home
-	// page q is scrubbed 1:1 from scrollY (no thresholds, no timed animation:
-	// the bar tracks a wheel notch exactly as fast as the page scrolls);
-	// interior pages pin q to 1.
+	// the bar and its contents move as one unit BY CONSTRUCTION. q rests at
+	// exactly 0 or 1: on the home page, crossing the top of the page TRIGGERS
+	// a timed tween between the two states (expanded only at the top, compact
+	// once you've scrolled away); interior pages pin q to 1.
 	//
 	// This inline script owns everything that must happen pre-paint:
 	//   - paint this load's q (from scrollY — or the q carried across an MPA
 	//     navigation, so interior→home-top tweens open instead of snapping)
 	//   - the projects-landing intent (position the page before first paint)
-	//   - the cross-page intro: tween q to its resting value at 'interactive'
-	//     (readyState 'interactive' fires before module scripts evaluate, so
-	//     the intro can't be starved by the module chain — in dev, the Vite
-	//     client — on a slow round trip)
-	// The live scroll scrubbing lives in the module script below, which reuses
-	// window.__navQ installed here: one source for the q math.
+	//   - the cross-page intro: start the compositor-side intro keyframes at
+	//     'interactive' (readyState 'interactive' fires before module scripts
+	//     evaluate, so the intro can't be starved by the module chain — in
+	//     dev, the Vite client — on a slow round trip)
+	// The scroll watcher that fires the trigger lives in the module script
+	// below, which reuses window.__navQ installed here: one source for the
+	// q math.
 	(function () {
 		var nav = document.getElementById('site-nav');
 		if (!nav) return;
 		var onHome = nav.dataset.home === 'true';
 		var root = document.documentElement;
-		// Full-collapse scroll distance = the masthead's height delta (the
-		// --nav-shift the page rides on in global.css, 5.5rem) — the masthead
-		// collapse tracks the scroll exactly 1:1. Keep in step with the CSS,
-		// including the animation-range of the compositor scrub there.
+		// The masthead's height delta (the --nav-shift the page rides on in
+		// global.css, 5.5rem) — the distance the page and veil travel between
+		// the two states. Keep in step with the CSS.
 		var RANGE = 5.5 * (parseFloat(getComputedStyle(root).fontSize) || 19);
 		var LOGO =
 			parseFloat(getComputedStyle(nav).getPropertyValue('--nav-logo-scale')) || 0.42;
 		var LINKS =
-			parseFloat(getComputedStyle(nav).getPropertyValue('--nav-links-scale')) || 0.702;
-		// On supporting browsers the home-page geometry is bound straight to the
-		// scroll offset by the compositor (the scroll-driven animations in
-		// global.css) — the JS scrub then only maintains bookkeeping (--q for
-		// the intro handoff, persistence, landing math).
-		var TIMELINE =
-			onHome && !!(window.CSS && CSS.supports && CSS.supports('animation-timeline: scroll()'));
+			parseFloat(getComputedStyle(nav).getPropertyValue('--nav-links-scale')) || 0.7;
+		// Trigger thresholds: expand only at (essentially) the top of the page,
+		// compact once you've scrolled away. The gap between the two lines is
+		// hysteresis — trackpad jitter around a single line can't make the bar
+		// oscillate.
+		var EXPAND_AT = 8;
+		var COLLAPSE_AT = 32;
+		var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 		var q = onHome ? 0 : 1; // matches the stylesheet default before the first setQ
 
 		// Set q (vars live on <html>: main/footer ride --q too). The links'
 		// counter-scale is a NONLINEAR function of q (they must land at a net
 		// --nav-links-scale while riding inside the wrapper's --nav-logo-scale),
 		// so it can't be a pure calc() — both vars are set together here, the
-		// single writer. Keep the formula in step with the nav-scrub-links
-		// keyframes in global.css.
+		// single writer. Keep the formula's endpoints in step with the static
+		// --q-links fallback in global.css.
 		var setQ = function (v) {
 			v = Math.max(0, Math.min(1, v));
 			q = v;
@@ -212,22 +211,56 @@ const onProject = onHome || path.startsWith('/projects/');
 				((1 - (1 - LINKS) * v) / (1 - (1 - LOGO) * v)).toFixed(5)
 			);
 		};
+		// A tween in flight: its rAF handle and destination. tweenTarget doubles
+		// as "the state we're heading to" for the hysteresis in qFromScroll.
+		var raf = 0;
+		var tweenTarget = null;
+
+		// The state (0 or 1) the current scroll position calls for. Hysteresis:
+		// measured against the state we're in (or already tweening toward), so
+		// the answer only flips when the scroll crosses the relevant line.
 		var qFromScroll = function () {
-			return onHome ? Math.max(0, Math.min(1, window.scrollY / RANGE)) : 1;
+			if (!onHome) return 1;
+			var y = window.scrollY;
+			var state = tweenTarget !== null ? tweenTarget : q >= 0.5 ? 1 : 0;
+			return state === 1 ? (y < EXPAND_AT ? 0 : 1) : y > COLLAPSE_AT ? 1 : 0;
 		};
-		// The q the PAINTED geometry currently reflects: with the compositor
-		// scrub active the visuals follow the scroll offset directly (whatever
-		// --q says); while html.nav-intro detaches it — or without timeline
-		// support at all — the visuals follow --q.
-		var qPainted = function () {
-			return TIMELINE && !root.classList.contains('nav-intro') ? qFromScroll() : q;
+
+		// The trigger animation: glide q to `to` from wherever it is now. rAF-
+		// driven (not a CSS transition) because --q-links is a nonlinear function
+		// of q that only setQ can keep exact. Retargetable mid-flight — a fresh
+		// call cancels the old tween and continues from the current q, so rapid
+		// direction changes fold into one motion. Reduced motion snaps.
+		var tweenTo = function (to) {
+			if (to === (tweenTarget !== null ? tweenTarget : q)) return;
+			cancelAnimationFrame(raf);
+			if (reduce) {
+				tweenTarget = null;
+				setQ(to);
+				return;
+			}
+			tweenTarget = to;
+			var from = q;
+			var t0 = performance.now();
+			var step = function (now) {
+				var t = Math.min(1, (now - t0) / 260);
+				var e = 1 - Math.pow(1 - t, 3); // ease-out cubic
+				setQ(from + (to - from) * e);
+				if (t < 1) {
+					raf = requestAnimationFrame(step);
+				} else {
+					tweenTarget = null;
+				}
+			};
+			raf = requestAnimationFrame(step);
 		};
+
 		// The bar's current VISUAL height: its layout box is pinned compact, and
 		// the masthead's extra height is the page shift still un-collapsed.
 		var visualNavH = function () {
-			return nav.offsetHeight + RANGE * (1 - qPainted());
+			return nav.offsetHeight + RANGE * (1 - q);
 		};
-		// Shared with the module script's scrub handler.
+		// Shared with the module script's trigger watcher.
 		window.__navQ = {
 			setQ: setQ,
 			range: RANGE,
@@ -235,6 +268,7 @@ const onProject = onHome || path.startsWith('/projects/');
 				return q;
 			},
 			fromScroll: qFromScroll,
+			tweenTo: tweenTo,
 			visualNavH: visualNavH,
 		};
 
@@ -283,10 +317,11 @@ const onProject = onHome || path.startsWith('/projects/');
 		// would flash the top of the page for a frame before snapping down to the
 		// card. Content stays hidden until positioned; arrive() always lifts it.
 		if (projectsIntent) document.documentElement.classList.add('projects-landing');
-		// This load's resting q: from the exact remembered position, the projects
-		// view (≈ fully compact), or wherever the browser put us.
+		// This load's resting state: from the exact remembered position, the
+		// projects view (compact), or wherever the browser put us — expanded
+		// only when that spot is the top of the page.
 		var restY = projectsIntent ? (returnY !== null ? returnY : RANGE) : window.scrollY;
-		var restQ = onHome ? Math.max(0, Math.min(1, restY / RANGE)) : 1;
+		var restQ = onHome ? (restY > COLLAPSE_AT ? 1 : 0) : 1;
 
 		// The q carried over from the page we just left, if fresh. The age cap
 		// means returning to a stale tab (e.g. from an external site much later)
@@ -302,13 +337,9 @@ const onProject = onHome || path.startsWith('/projects/');
 		} catch (e) {}
 		if (carried !== null && !(carried >= 0 && carried <= 1)) carried = null;
 
-		var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 		var animate = !reduce && carried !== null && Math.abs(carried - restQ) > 0.02;
 
 		// Paint pre-paint at the starting q (carried if tweening, else rest).
-		// A pending intro detaches the compositor scrub NOW, pre-paint, so the
-		// first frame shows the carried --q geometry, not the scroll-derived one.
-		if (animate) root.classList.add('nav-intro');
 		setQ(animate ? carried : restQ);
 		if (!animate && !projectsIntent) return;
 
@@ -340,59 +371,53 @@ const onProject = onHome || path.startsWith('/projects/');
 			if (location.hash) history.replaceState(null, '', '/');
 		};
 
-		// Cross-page intro: tween q from the carried value to rest. rAF-driven
-		// (not a CSS transition) because --q-links is a nonlinear function of q
-		// that only setQ can keep exact. The ease approximates the old
-		// --nav-ease decel. While it runs, html.nav-intro keeps the compositor
-		// scrub detached so --q owns the geometry; finishing (or the user's own
-		// scrolling, which aborts it) hands back at the scroll-derived value —
-		// the same geometry, so the switch is invisible.
+		// Cross-page intro: from the carried geometry (painted pre-paint above)
+		// to this page's resting state. Deliberately NOT the JS tween — this
+		// runs during the busiest window of a page's life (parsing, module
+		// evaluation, font loads), where a rAF tween that recalcs the whole
+		// document's styles per frame visibly drops frames. Instead --q snaps
+		// to rest and the nav-intro-* class plays the compositor-side keyframes
+		// in global.css: their first frame equals the carried geometry already
+		// painted, and removing the class lands on the same --q rest geometry,
+		// so both handoffs are invisible and main-thread stalls can't stutter
+		// the motion. A scroll mid-intro aborts to rest (the module watcher
+		// then treats it like any other scroll).
 		var runIntro = function () {
 			var from = q;
 			// Recompute rest instead of reusing restQ: back/forward scroll
 			// restoration can land before this runs (e.g. returning to a
 			// scrolled-down home), and the restored position may already match.
 			var to = qFromScroll();
-			var finish = function () {
-				setQ(qFromScroll());
-				root.classList.remove('nav-intro');
+			setQ(to);
+			if (Math.abs(from - to) < 0.02) return;
+			var cls = to === 1 ? 'nav-intro-collapse' : 'nav-intro-expand';
+			var fallback = 0;
+			var done = function (e) {
+				// Only a nav-tween animation may end the intro; other animations
+				// (e.g. the theme toggle's) bubble the same event.
+				if (e && e.type === 'animationend' && String(e.animationName).indexOf('nav-tween') !== 0)
+					return;
+				window.clearTimeout(fallback);
+				root.classList.remove(cls);
+				window.removeEventListener('scroll', done);
+				document.removeEventListener('animationend', done);
 			};
-			if (Math.abs(from - to) < 0.02) {
-				finish();
-				return;
-			}
-			var aborted = false;
-			var onScroll = function () {
-				aborted = true;
-				window.removeEventListener('scroll', onScroll);
-				finish();
-			};
-			window.addEventListener('scroll', onScroll, { passive: true });
-			var t0 = performance.now();
-			var step = function (now) {
-				if (aborted) return;
-				var t = Math.min(1, (now - t0) / 200);
-				var e = 1 - Math.pow(1 - t, 3); // ease-out cubic
-				setQ(from + (to - from) * e);
-				if (t < 1) {
-					requestAnimationFrame(step);
-				} else {
-					window.removeEventListener('scroll', onScroll);
-					finish();
-				}
-			};
-			requestAnimationFrame(step);
+			root.classList.add(cls);
+			document.addEventListener('animationend', done);
+			window.addEventListener('scroll', done, { passive: true });
+			// Insurance: never leave the intro class stuck if animationend is lost.
+			fallback = window.setTimeout(done, 400);
 		};
 
 		// 'interactive' means main and the cards exist and layout is measurable;
 		// it fires before module scripts evaluate. The landing scroll runs first
-		// so runIntro's recomputed resting q sees the final scroll position.
+		// so the intro's resting state reflects the final scroll position.
 		var arrive = function () {
 			if (projectsIntent) {
 				try {
 					landOnProjects();
 				} finally {
-					document.documentElement.classList.remove('projects-landing');
+					root.classList.remove('projects-landing');
 				}
 			}
 			if (animate) runIntro();
@@ -536,14 +561,13 @@ const onProject = onHome || path.startsWith('/projects/');
 	// is resolved pre-paint in Layout.astro; this only handles user clicks.
 	const themeToggle = document.getElementById('theme-toggle');
 	const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-	const syncThemeLabel = () => {
+	// The button is a switch ("Dark theme"): checked = dark on. The thumb's
+	// resting position comes from CSS state alone; only aria needs syncing.
+	const syncThemeState = () => {
 		const dark = document.documentElement.dataset.theme === 'dark';
-		themeToggle?.setAttribute(
-			'aria-label',
-			dark ? 'Switch to light theme' : 'Switch to dark theme',
-		);
+		themeToggle?.setAttribute('aria-checked', String(dark));
 	};
-	syncThemeLabel();
+	syncThemeState();
 	themeToggle?.addEventListener('click', () => {
 		const root = document.documentElement;
 		const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
@@ -556,8 +580,8 @@ const onProject = onHome || path.startsWith('/projects/');
 		try {
 			localStorage.setItem('theme', next);
 		} catch (e) {}
-		syncThemeLabel();
-		// Play the sun/moon swap. It's a keyframe animation (unaffected by the
+		syncThemeState();
+		// Play the thumb slide. It's a keyframe animation (unaffected by the
 		// transition suppression above), retriggered by removing the class and
 		// forcing a reflow before re-adding so rapid clicks restart it cleanly.
 		if (themeToggle && !prefersReducedMotion.matches) {
@@ -570,9 +594,9 @@ const onProject = onHome || path.startsWith('/projects/');
 	});
 
 	const nav = document.getElementById('site-nav');
-	// The q machinery (scroll → geometry) is installed pre-paint by the inline
-	// script above — see there for the model. This module adds the live scroll
-	// scrubbing and the projects-link behaviours.
+	// The q machinery (states + trigger tween) is installed pre-paint by the
+	// inline script above — see there for the model. This module adds the
+	// scroll watcher that fires the trigger, and the projects-link behaviours.
 	const navQ = (window as any).__navQ;
 	if (nav && navQ) {
 		const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -597,20 +621,6 @@ const onProject = onHome || path.startsWith('/projects/');
 			return Math.max(top - 12, 0);
 		};
 
-		// The settle (below) only ever finishes a USER gesture. A programmatic
-		// scroll — the projects landing, goToProjects — may deliberately rest
-		// mid-range (the list sits so high that a fully-compact bar is
-		// geometrically impossible there); settling would yank that designed
-		// position away. Suppressed until the next real input. A mid-range q at
-		// module init means the pre-paint landing already positioned us.
-		let allowSettle = !(navQ.get() > 0 && navQ.get() < 1);
-		const armSettle = () => {
-			allowSettle = true;
-		};
-		window.addEventListener('wheel', armSettle, { passive: true });
-		window.addEventListener('touchstart', armSettle, { passive: true });
-		window.addEventListener('keydown', armSettle);
-
 		// Scroll to the projects view — a specific card when `slug` names one
 		// (Back-to-projects returns you to the card you came from), otherwise the
 		// top of the list.
@@ -619,7 +629,6 @@ const onProject = onHome || path.startsWith('/projects/');
 				(slug && document.getElementById(`project-${slug}`)) ||
 				document.getElementById('project-list');
 			if (!target) return;
-			allowSettle = false; // this glide's resting spot is the destination
 			// 'instant', not 'auto': the stylesheet's `scroll-behavior: smooth`
 			// turns 'auto' into a glide, and the landing snap must not animate.
 			window.scrollTo({
@@ -669,35 +678,18 @@ const onProject = onHome || path.startsWith('/projects/');
 			});
 		});
 
-		// ── Home masthead scrub ──
-		// q tracks scrollY 1:1 through the collapse range (rAF-throttled like any
-		// scroll-linked effect), so the bar collapses and expands exactly as fast
-		// as the page scrolls — a wheel notch moves bar, contents and page as one
-		// unit with zero added latency. No thresholds, no timed animation.
+		// ── Home masthead trigger ──
+		// The bar has exactly two resting states: the expanded masthead at the
+		// top of the page and the compact bar everywhere else. Each scroll frame
+		// asks fromScroll which state the position calls for (with hysteresis,
+		// see the inline script) and hands it to tweenTo — which no-ops when
+		// already there or already heading there, so this fires the timed tween
+		// only on an actual threshold crossing.
 		if (nav.dataset.home === 'true') {
-			// (Cross-page arrivals with a pending projects intent are handled by the
-			// inline script above, pre-paint — by the time this module evaluates the
-			// page is already resting on the projects view.)
 			let ticking = false;
-			let settleTimer = 0;
 			const apply = () => {
 				ticking = false;
-				navQ.setQ(navQ.fromScroll());
-			};
-			// Resting mid-range would leave the bar mid-size; shortly after
-			// scrolling pauses, finish the gesture by gliding the SCROLL to the
-			// nearest end of the range (never q directly — the bar must stay
-			// glued to the page). The settle's own smooth scroll feeds scroll
-			// events back through this handler, so q rides it; once it lands,
-			// q is 0 or 1 and the settle no-ops. A wheel turn mid-settle
-			// interrupts the smooth scroll natively and scrubbing resumes.
-			const settle = () => {
-				const qNow = navQ.get();
-				if (qNow <= 0 || qNow >= 1) return;
-				window.scrollTo({
-					top: qNow < 0.5 ? 0 : navQ.range,
-					behavior: reduceMotion ? 'instant' : 'smooth',
-				});
+				navQ.tweenTo(navQ.fromScroll());
 			};
 			window.addEventListener(
 				'scroll',
@@ -706,8 +698,6 @@ const onProject = onHome || path.startsWith('/projects/');
 						ticking = true;
 						requestAnimationFrame(apply);
 					}
-					window.clearTimeout(settleTimer);
-					if (allowSettle) settleTimer = window.setTimeout(settle, 160);
 				},
 				{ passive: true }
 			);
@@ -769,9 +759,11 @@ const onProject = onHome || path.startsWith('/projects/');
 			pill.style.transform = `translateX(${centerX}px) translateX(-50%)`;
 		};
 
-		// Roll the current text up and out, then roll `text` up into place —
-		// used for the copy feedback, so "Copied!" animates in and back without
-		// resizing the pill.
+		// Slide the current text out to the right, then slide `text` in from the
+		// left — one continuous left-to-right motion, the same direction as the
+		// pill's entrance wipe and the nav-link underline — used for the copy
+		// feedback, so "Copied!" animates in and back without resizing the pill
+		// (which clips the outgoing/incoming text via its overflow: hidden).
 		const swapText = (text: string) => {
 			if (reduce) {
 				pillText.textContent = text;
@@ -779,18 +771,18 @@ const onProject = onHome || path.startsWith('/projects/');
 			}
 			const seq = ++swapSeq;
 			pillText.style.transition = 'transform 0.08s ease, opacity 0.08s ease';
-			pillText.style.transform = 'translateY(-100%)';
+			pillText.style.transform = 'translateX(70%)';
 			pillText.style.opacity = '0';
 			window.setTimeout(() => {
 				if (seq !== swapSeq) return; // superseded
 				pillText.textContent = text;
 				pillText.style.transition = 'none';
-				pillText.style.transform = 'translateY(100%)';
+				pillText.style.transform = 'translateX(-70%)';
 				pillText.style.opacity = '0';
 				void pillText.offsetHeight; // reflow so the entry animates
 				pillText.style.transition =
 					'transform 0.12s cubic-bezier(0.34, 1.35, 0.64, 1), opacity 0.1s ease';
-				pillText.style.transform = 'translateY(0)';
+				pillText.style.transform = 'translateX(0)';
 				pillText.style.opacity = '1';
 			}, 80);
 		};
