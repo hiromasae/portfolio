@@ -367,15 +367,18 @@ h6 {
 /* Theme toggle: the classic contrast glyph — a circle half ink, half paper,
    drawn with the icons' 2px square-cap stroke at their exact size, so the
    button needs no box or track to hold its own in the row. The filled side
-   marks the current theme: right in light, left in dark. The fill is an ink
-   rect sliding inside a static circular clipPath (see Nav.astro) — sliding
-   the rect sweeps the ink across the circle, a slide rather than a spin, in
-   step with the site's other motion (nav underline, contact pill wipe).
+   marks the current theme: right in light, left in dark. The fill is a PAIR
+   of ink rects one pattern-period (18 units) apart sliding inside a static
+   circular clipPath (see Nav.astro) — sliding them sweeps the ink across the
+   circle, a slide rather than a spin, in step with the site's other motion
+   (nav underline, contact pill wipe). Two rects rather than one so the sweep
+   can always travel RIGHTWARD (see the theme-swap block): the pattern is
+   periodic, so any two transforms 18 apart paint the same pixels.
    Resting position is pure state — no transition here: the sweep on click is
-   played by keyframes (see the theme-swap block), and everything else
-   (initial paint, reduced motion) should just snap. The rect spans the
-   circle's right half (x 12–21 of its 3–21 diameter); -9px lands it on the
-   left half exactly. */
+   played by keyframes, and everything else (initial paint, reduced motion)
+   should just snap. At translateX(0) the lead rect spans the circle's right
+   half (x 12–21 of its 3–21 diameter) with the twin off-circle at -6–3;
+   -9px lands the twin on the left half exactly (lead rect off-circle). */
 .theme-fill-rect {
 	transform: translateX(0);
 }
@@ -683,10 +686,15 @@ html:is(.nav-intro-collapse, .nav-intro-expand) #site-nav::after {
 	   .theme-fill-rect above); the sweep on click is played by keyframes, not
 	   a transition, so it survives the blanket `transition: none` the flip
 	   applies for its one frame (see .theme-switching). `.theme-anim` is
-	   toggled per-click in Nav.astro; the pair below picks the direction from
-	   the theme just applied, and each animation ends on the fill's new
-	   resting transform, so it settles with no snap. Under reduced motion
-	   Nav.astro never adds the class and the fill just snaps across. */
+	   toggled per-click in Nav.astro; the pair below picks the sweep for the
+	   theme just applied. BOTH sweeps travel rightward — the ink never
+	   reverses: to-light slides the left-half fill right through the middle,
+	   and to-dark wraps — the right-half ink exits through the circle's right
+	   edge while the twin rect pours in from the left. to-dark therefore ends
+	   at +9px, not the -9px resting value: the two-rect pattern repeats every
+	   18 units, so the frames are pixel-identical and the handoff to the
+	   resting rule doesn't snap. Under reduced motion Nav.astro never adds
+	   the class and the fill just snaps across. */
 	:root[data-theme="dark"] .theme-toggle.theme-anim .theme-fill-rect {
 		animation: theme-fill-to-dark 0.22s var(--nav-ease);
 	}
@@ -700,7 +708,8 @@ html:is(.nav-intro-collapse, .nav-intro-expand) #site-nav::after {
 		transform: translateX(0);
 	}
 	to {
-		transform: translateX(-9px);
+		/* +9, not -9: rightward wrap; pattern-identical to the -9px rest. */
+		transform: translateX(9px);
 	}
 }
 

@@ -115,40 +115,60 @@ const onProject = onHome || path.startsWith('/projects/');
 		    half paper, drawn at the contact icons' size and stroke. The filled
 		    side marks the current theme (right = light, left = dark); on toggle
 		    the ink SWEEPS across to the other side — a slide, not a spin, to
-		    match the site's motion language. The fill is a rect that slides
-		    inside a static circular clip (animating the rect, not the clipPath,
-		    keeps the motion working in Safari); see the theme-swap block in
+		    match the site's motion language, and always travelling RIGHTWARD:
+		    the fill is a pair of rects one pattern-period (18 units) apart
+		    sliding inside a static circular clip (animating rects, not the
+		    clipPath, keeps the motion working in Safari), so light→dark can
+		    wrap — ink exits through the circle's right edge while the twin
+		    rect pours in from the left. See the theme-swap block in
 		    global.css. Wider ml-8 gap sets it apart from the contacts; the
 		    close-ranks slide in global.css hard-codes both gaps and every
 		    button's 2.9rem box, which the default .btn-icon padding + 1.9rem
-		    glyph give this button already. */}
-		<button
-			id="theme-toggle"
-			type="button"
-			class="btn-icon theme-toggle ml-8 self-center"
-			role="switch"
-			aria-checked="false"
-			aria-label="Dark theme"
-		>
-			<svg
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="square"
-				aria-hidden="true"
+		    glyph give this button already (the gap now rides on the wrapper,
+		    same layout). The button is named for the theme a click switches TO
+		    (play/pause-style); the script keeps aria-label and the hover pill
+		    on the same text. */}
+		<div id="theme-toggle-wrap" class="relative ml-8 flex self-center">
+			<button
+				id="theme-toggle"
+				type="button"
+				class="btn-icon theme-toggle"
+				aria-label="Dark theme"
 			>
-				<defs>
-					<clipPath id="theme-fill-clip">
-						<circle cx="12" cy="12" r="9" />
-					</clipPath>
-				</defs>
-				<circle cx="12" cy="12" r="9" />
-				<g clip-path="url(#theme-fill-clip)">
-					<rect class="theme-fill-rect" x="12" y="2" width="9" height="20" fill="currentColor" stroke="none" />
-				</g>
-			</svg>
-		</button>
+				<svg
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="square"
+					aria-hidden="true"
+				>
+					<defs>
+						<clipPath id="theme-fill-clip">
+							<circle cx="12" cy="12" r="9" />
+						</clipPath>
+					</defs>
+					<circle cx="12" cy="12" r="9" />
+					<g clip-path="url(#theme-fill-clip)">
+						<rect class="theme-fill-rect" x="12" y="2" width="9" height="20" fill="currentColor" stroke="none" />
+						{/* The twin, exactly one period (18) left: off-circle at rest
+						    in light (its right edge only touches the clip's tangent
+						    point), it becomes the left-half fill as the sweep carries
+						    it in. Both rects share the class so the resting transforms
+						    and sweep keyframes drive them in lockstep. */}
+						<rect class="theme-fill-rect" x="-6" y="2" width="9" height="20" fill="currentColor" stroke="none" />
+					</g>
+				</svg>
+			</button>
+			{/* Twin of the contact pill (same class, so same look and wipes) —
+			    deliberately its OWN element rather than the shared slider: the
+			    shared pill gliding across the ml-8 gap would visually annex the
+			    toggle into the contacts cluster. See the toggle-label block in
+			    the script below. */}
+			<span class="contact-slider" aria-hidden="true">
+				<span class="contact-slider-text"></span>
+			</span>
+		</div>
 		</div>
 	</div>
 </nav>
@@ -561,11 +581,15 @@ const onProject = onHome || path.startsWith('/projects/');
 	// is resolved pre-paint in Layout.astro; this only handles user clicks.
 	const themeToggle = document.getElementById('theme-toggle');
 	const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-	// The button is a switch ("Dark theme"): checked = dark on. The thumb's
-	// resting position comes from CSS state alone; only aria needs syncing.
+	// The button is named for the theme a click switches TO (play/pause-style):
+	// "Dark theme" while light is active, "Light theme" while dark is. The
+	// hover pill below shows the same text, so the visible label and the
+	// accessible name always agree. The glyph's resting position comes from
+	// CSS state alone; only the name needs syncing.
+	const themeLabel = () =>
+		document.documentElement.dataset.theme === 'dark' ? 'Light theme' : 'Dark theme';
 	const syncThemeState = () => {
-		const dark = document.documentElement.dataset.theme === 'dark';
-		themeToggle?.setAttribute('aria-checked', String(dark));
+		themeToggle?.setAttribute('aria-label', themeLabel());
 	};
 	syncThemeState();
 	themeToggle?.addEventListener('click', () => {
@@ -878,6 +902,132 @@ const onProject = onHome || path.startsWith('/projects/');
 						if (visible) place(icon, labelFor(icon));
 					}, 1500);
 				}
+			});
+		});
+	}
+
+	// ── Theme toggle label ──
+	// A twin of the contact pill: same class (so same look, entrance wipe and
+	// exit wipe) under its own button. A lone button needs none of the shared
+	// slider's slide-between machinery — the pill just wipes in showing the
+	// theme a click would switch TO, and a click rolls the text to the next
+	// label (the same roll as the email icon's "Copied!", doubling as
+	// confirmation). Kept separate from the shared slider on purpose: one pill
+	// gliding across the ml-8 gap would read as the toggle joining the
+	// contacts cluster.
+	const toggleWrap = document.getElementById('theme-toggle-wrap');
+	const togglePill = toggleWrap?.querySelector<HTMLElement>('.contact-slider');
+	const togglePillText = togglePill?.querySelector<HTMLElement>('.contact-slider-text');
+	if (toggleWrap && themeToggle && togglePill && togglePillText) {
+		const reduceToggle = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+		// Hidden clone for width measurement (mirrors the contact slider's):
+		// the pill's width transition needs explicit px, and the two labels
+		// differ slightly in width.
+		const measurer = togglePill.cloneNode(true) as HTMLElement;
+		measurer.style.cssText =
+			'position:absolute;visibility:hidden;top:-9999px;left:0;opacity:1;transform:none;transition:none;width:auto;';
+		toggleWrap.appendChild(measurer);
+		const measurerText = measurer.querySelector<HTMLElement>('.contact-slider-text')!;
+		const widthFor = (text: string) => {
+			measurerText.textContent = text;
+			return measurer.offsetWidth;
+		};
+
+		let shown = false;
+		let rollSeq = 0;
+
+		// Rect-based centering rather than pure CSS: the button's visual box
+		// rides the --q close-ranks transform, and rects see transforms — so
+		// the pill lands under the glyph at any nav state (mirrors place()).
+		// The center is CLAMPED to keep the pill inside the scrollport: the
+		// compact bar right-anchors the toggle so near the viewport edge that
+		// a centered pill would cross clientWidth — and scrollbar-gutter:
+		// stable ends painting there, silently shearing the pill's right side.
+		const placePill = (text: string) => {
+			const wRect = toggleWrap.getBoundingClientRect();
+			const bRect = themeToggle.getBoundingClientRect();
+			const width = widthFor(text);
+			const maxCenter =
+				document.documentElement.clientWidth - 8 - width / 2 - wRect.left;
+			const centerX = Math.min(
+				bRect.left - wRect.left + bRect.width / 2,
+				maxCenter
+			);
+			rollSeq++;
+			togglePillText.style.transition = 'none';
+			togglePillText.style.transform = 'none';
+			togglePillText.style.opacity = '1';
+			togglePillText.textContent = text;
+			togglePill.style.width = `${width}px`;
+			togglePill.style.transform = `translateX(${centerX}px) translateX(-50%)`;
+		};
+
+		const showPill = () => {
+			if (shown) return;
+			// Same entrance as the contact pill: position while transitions are
+			// off, then release the clip so the label wipes in left to right.
+			togglePill.style.transition = 'none';
+			placePill(themeLabel());
+			togglePill.style.opacity = '1';
+			togglePill.style.clipPath = reduceToggle ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)';
+			void togglePill.offsetWidth;
+			togglePill.style.transition = '';
+			togglePill.style.clipPath = 'inset(0 0 0 0)';
+			shown = true;
+		};
+
+		const hidePill = () => {
+			shown = false;
+			// Exit wipe right-to-left, or a snap under reduced motion — the
+			// same out grammar as the contact pill.
+			if (reduceToggle) {
+				togglePill.style.transition = 'none';
+				togglePill.style.clipPath = 'inset(0 100% 0 0)';
+				void togglePill.offsetWidth;
+				togglePill.style.transition = '';
+				return;
+			}
+			togglePill.style.clipPath = 'inset(0 100% 0 0)';
+		};
+
+		toggleWrap.addEventListener('mouseenter', showPill);
+		toggleWrap.addEventListener('mouseleave', hidePill);
+		toggleWrap.addEventListener('focusin', showPill);
+		toggleWrap.addEventListener('focusout', (e) => {
+			if (!toggleWrap.contains(e.relatedTarget as Node)) hidePill();
+		});
+
+		// Roll to the new label after a click flips the theme. This listener
+		// registers after the flip handler above, so themeLabel() already
+		// answers for the NEW state. Deferred one frame: the flip suppresses
+		// every transition via .theme-switching for its frame (removed in the
+		// flip handler's own rAF, which was queued before this one), and the
+		// roll must not start until transitions are live again.
+		themeToggle.addEventListener('click', () => {
+			if (!shown) return;
+			requestAnimationFrame(() => {
+				const text = themeLabel();
+				togglePill.style.width = `${widthFor(text)}px`;
+				if (reduceToggle) {
+					togglePillText.textContent = text;
+					return;
+				}
+				const seq = ++rollSeq;
+				togglePillText.style.transition = 'transform 0.08s ease, opacity 0.08s ease';
+				togglePillText.style.transform = 'translateX(70%)';
+				togglePillText.style.opacity = '0';
+				window.setTimeout(() => {
+					if (seq !== rollSeq) return; // superseded by a reposition
+					togglePillText.textContent = text;
+					togglePillText.style.transition = 'none';
+					togglePillText.style.transform = 'translateX(-70%)';
+					void togglePillText.offsetHeight; // reflow so the entry animates
+					togglePillText.style.transition =
+						'transform 0.12s cubic-bezier(0.34, 1.35, 0.64, 1), opacity 0.1s ease';
+					togglePillText.style.transform = 'translateX(0)';
+					togglePillText.style.opacity = '1';
+				}, 80);
 			});
 		});
 	}
