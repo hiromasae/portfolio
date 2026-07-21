@@ -179,7 +179,11 @@ html:has(#site-nav[data-home='true']) {
 #site-nav {
 	--nav-logo-scale: 0.42;
 	--nav-links-scale: 0.7;
-	--nav-icon-scale: 0.62;
+	/* 0.70, up from an original 0.62: at 0.62 the ~1.9px strokes read a size
+	   class smaller beside the bold compact wordmark, and the ~34px hit boxes
+	   ran well under touch-target guidance (the contact icons are the only
+	   nav actions on phones, where the links are sm:-gated). */
+	--nav-icon-scale: 0.7;
 }
 
 /* Layout pinned compact; the masthead's extra height is transform-made. */
