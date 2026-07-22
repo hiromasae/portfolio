@@ -6,18 +6,32 @@ import Nav from '../components/Nav.astro';
 <Layout title="About — Hiro Eernisse" description="About Hiro Eernisse, design engineer.">
 	<Nav />
 
+	<!-- Critical hide, present before first paint and left untouched by Vite's dev
+	     HMR style swap (which briefly drops the scoped .reveal rule and flashes the
+	     text). The scoped rule below drives the actual animation. -->
+	<style is:inline>
+		.reveal {
+			opacity: 0;
+		}
+		@media (prefers-reduced-motion: reduce) {
+			.reveal {
+				opacity: 1;
+			}
+		}
+	</style>
+
 	<main class="mx-auto max-w-[1280px] px-5 py-12 sm:py-16">
 		<div class="flex flex-col gap-12 lg:flex-row lg:items-start lg:justify-between lg:gap-20">
-			<div class="max-w-xl space-y-4 text-lg leading-relaxed">
-				<h1 class="reveal mb-10 text-2xl font-bold tracking-tight text-[var(--ink)] sm:text-3xl" style="--i: 0">はじめまして。</h1>
-				<p class="reveal" style="--i: 1">I'm a Design Engineer based in the San Francisco Bay Area.</p>
-				<p class="reveal" style="--i: 2">
+			<div class="max-w-xl space-y-6 text-lg leading-relaxed">
+				<h1 class="reveal mb-12 text-3xl font-bold tracking-tight text-[var(--ink)] sm:text-4xl" style="--i: 0">はじめまして。</h1>
+				<p class="reveal" style="--base: 700ms; --i: 0">I'm a Design Engineer based in the San Francisco Bay Area.</p>
+				<p class="reveal" style="--base: 700ms; --i: 1">
 					I build with AI, but I make the decisions that matter myself. Taste, and knowing how a
 					person moves through a product, is still human work.
 				</p>
-				<p class="reveal" style="--i: 3">Outside of work, I play heavy metal drums and hike.</p>
+				<p class="reveal" style="--base: 700ms; --i: 2">Outside of work, I play heavy metal drums and hike.</p>
 			</div>
-			<figure class="reveal w-full max-w-[18rem] shrink-0 sm:max-w-[22rem] lg:w-[26rem] lg:max-w-none" style="--i: 4">
+			<figure class="reveal w-full max-w-[18rem] shrink-0 sm:max-w-[22rem] lg:w-[26rem] lg:max-w-none" style="--base: 180ms; --i: 0">
 				<img
 					src="/images/me.webp"
 					alt="Hiro Eernisse"
@@ -25,7 +39,7 @@ import Nav from '../components/Nav.astro';
 					height="1040"
 					class="aspect-[4/5] w-full rounded-[1.5px] border border-[var(--line)] object-cover"
 				/>
-				<figcaption class="mt-2 flex items-center gap-1.5 text-xs text-[var(--ink-soft)]">
+				<figcaption class="mt-2.5 flex items-center gap-1.5 text-xs text-[var(--ink-soft)]">
 					<svg
 						class="h-3.5 w-3.5 shrink-0"
 						viewBox="0 0 24 24"
@@ -60,8 +74,10 @@ import Nav from '../components/Nav.astro';
 
 	.reveal {
 		opacity: 0;
-		animation: reveal 0.75s cubic-bezier(0.22, 0.68, 0, 1) both;
-		animation-delay: calc(var(--i) * 120ms);
+		animation: reveal 0.8s cubic-bezier(0.22, 0.68, 0, 1) both;
+		/* --base holds the intro (heading + photo) alone for a beat before the bio
+		   lines cascade in, giving the introduction more impact. */
+		animation-delay: calc(var(--base, 0ms) + var(--i) * 150ms);
 	}
 
 	@keyframes reveal {
