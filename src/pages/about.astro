@@ -1,59 +1,100 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Nav from '../components/Nav.astro';
-
-const toolkit = ['Figma', 'Claude', 'Subframe', 'HTML', 'CSS', 'JavaScript'];
-const methods = ['Interaction Design', 'Design Systems', 'Responsive Design', 'Design to Code'];
 ---
 
-<Layout title="About — Hiro Eernisse" description="About Hiro Eernisse, product design engineer.">
+<Layout title="About — Hiro Eernisse" description="About Hiro Eernisse, design engineer.">
 	<Nav />
 
-	<main class="mx-auto max-w-5xl px-5 py-12 sm:py-16">
-		<h1 class="text-3xl font-bold tracking-tight sm:text-4xl">About</h1>
+	<!-- Critical hide, present before first paint and left untouched by Vite's dev
+	     HMR style swap (which briefly drops the scoped .reveal rule and flashes the
+	     text). The scoped rule below drives the actual animation. -->
+	<style is:inline>
+		.reveal {
+			opacity: 0;
+		}
+		@media (prefers-reduced-motion: reduce) {
+			.reveal {
+				opacity: 1;
+			}
+		}
+	</style>
 
-		<div class="mt-8 grid gap-10 sm:grid-cols-[1.4fr_1fr]">
-			<div>
-				<p class="max-w-xl text-lg leading-relaxed">
-					I'm a design engineer with a CS background. I work on UI/UX design and frontend,
-					especially when I can move quickly from idea to working interface.
+	<main class="mx-auto max-w-[1280px] px-5 py-12 sm:py-16">
+		<div class="flex flex-col gap-12 lg:flex-row lg:items-start lg:justify-between lg:gap-20">
+			<div class="max-w-xl space-y-6 text-lg leading-relaxed">
+				<h1 class="reveal mb-12 text-3xl font-bold tracking-tight text-[var(--ink)] sm:text-4xl" style="--i: 0">はじめまして。</h1>
+				<p class="reveal" style="--base: 700ms; --i: 0">I'm a Design Engineer based in the San Francisco Bay Area.</p>
+				<p class="reveal" style="--base: 700ms; --i: 1">
+					I build with AI, but I make the decisions that matter myself. Taste, and knowing how a
+					person moves through a product, is still human work.
 				</p>
-				<p class="mt-4 max-w-xl leading-relaxed text-[var(--ink-soft)]">
-					I'm comfortable at any stage, whether that's early-stage chaos or scaling at a mature
-					company — as long as the work matters. I'm open to full-time, contract, and freelance
-					roles. Outside of work, I play drums in a heavy metal band.
-				</p>
+				<p class="reveal" style="--base: 700ms; --i: 2">Outside of work, I play heavy metal drums and hike.</p>
 			</div>
-			<dl class="space-y-6 text-sm">
-				<div>
-					<dt class="mb-2 font-semibold text-[var(--ink)]">Toolkit</dt>
-					<dd class="flex flex-wrap gap-1.5">
-						{
-							toolkit.map((t) => (
-								<span class="rounded-none border border-[var(--line)] bg-[var(--surface)] px-2 py-1 text-[var(--ink-soft)]">
-									{t}
-								</span>
-							))
-						}
-					</dd>
-				</div>
-				<div>
-					<dt class="mb-2 font-semibold text-[var(--ink)]">Methods</dt>
-					<dd class="flex flex-wrap gap-1.5">
-						{
-							methods.map((m) => (
-								<span class="rounded-none border border-[var(--line)] bg-[var(--surface)] px-2 py-1 text-[var(--ink-soft)]">
-									{m}
-								</span>
-							))
-						}
-					</dd>
-				</div>
-			</dl>
-		</div>
-
-		<div class="mt-12">
-			<a href="/#projects" data-projects-link class="btn">← Back to projects</a>
+			<figure class="reveal w-full max-w-[18rem] shrink-0 sm:max-w-[22rem] lg:w-[26rem] lg:max-w-none" style="--base: 180ms; --i: 0">
+				<img
+					src="/images/me.webp"
+					alt="Hiro Eernisse"
+					width="832"
+					height="1040"
+					class="aspect-[4/5] w-full rounded-[1.5px] border border-[var(--line)] object-cover"
+				/>
+				<figcaption class="mt-2.5 flex items-center gap-1.5 text-xs text-[var(--ink-soft)]">
+					<svg
+						class="h-3.5 w-3.5 shrink-0"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="square"
+						stroke-linejoin="miter"
+						aria-hidden="true"
+					>
+						<path d="M12 22s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12Z" />
+						<circle cx="12" cy="10" r="2.5" />
+					</svg>
+					Eagle Lake, South Lake Tahoe, CA
+				</figcaption>
+			</figure>
 		</div>
 	</main>
 </Layout>
+
+<style>
+	/* Left-to-right entrance to match the site's horizontal motion language:
+	   each element fades and slides in from the left, one after the next, and the
+	   sequence resolves rightward (bio lines first, photo last). Slower duration +
+	   wider stagger for an unhurried feel. Pure CSS so it runs on first paint;
+	   starts at opacity 0 to avoid a flash of the resting state. */
+	main {
+		/* The leftward start offset would otherwise poke a transient horizontal
+		   scrollbar; clip it without creating a scroll container. */
+		overflow-x: clip;
+	}
+
+	.reveal {
+		opacity: 0;
+		animation: reveal 0.8s cubic-bezier(0.22, 0.68, 0, 1) both;
+		/* --base holds the intro (heading + photo) alone for a beat before the bio
+		   lines cascade in, giving the introduction more impact. */
+		animation-delay: calc(var(--base, 0ms) + var(--i) * 150ms);
+	}
+
+	@keyframes reveal {
+		from {
+			opacity: 0;
+			transform: translateX(-16px);
+		}
+		to {
+			opacity: 1;
+			transform: none;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.reveal {
+			opacity: 1;
+			animation: none;
+		}
+	}
+</style>
