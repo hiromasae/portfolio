@@ -365,12 +365,14 @@ h6 {
 	background-size: 100% 2px;
 }
 /* ── Project card: title arrow ──
-   Sequenced after the underline: the → wipes in left-to-right starting when
-   the underline wipe (--dur-card) ends, then tilts -45° to point ↗ the moment
-   its own wipe lands — the delays are sums of the tokens, so the chain can't
-   drift out of sync. The base rule carries the exit transition (quick, no
-   delays) so un-hovering retracts everything at once instead of replaying the
-   stagger in reverse. */
+   Sequenced after the underline, with overlap: the → wipes in left-to-right
+   from ~55% through the underline wipe, then tilts -45° to point ↗ as its own
+   wipe is landing (~85% through). Overlapping keeps the left-to-right read
+   while settling the whole gesture in ~535ms instead of the 700ms a strict
+   chain costs — the delays are fractions of the tokens, so the choreography
+   can't drift out of sync. The base rule carries the exit transition (quick,
+   no delays) so un-hovering retracts everything at once instead of replaying
+   the stagger in reverse. */
 .project-card__arrow {
 	clip-path: inset(0 100% 0 0);
 	transform: rotate(0deg);
@@ -384,9 +386,9 @@ h6 {
 	clip-path: inset(0 0 0 0);
 	transform: rotate(-45deg);
 	transition:
-		clip-path var(--dur-gesture) var(--nav-ease) var(--dur-card),
+		clip-path var(--dur-gesture) var(--nav-ease) calc(var(--dur-card) * 0.55),
 		transform var(--dur-gesture) var(--nav-ease)
-			calc(var(--dur-card) + var(--dur-gesture));
+			calc(var(--dur-card) * 0.55 + var(--dur-gesture) * 0.85);
 }
 @media (prefers-reduced-motion: reduce) {
 	.project-card__title,
