@@ -18,32 +18,19 @@ const { project } = Astro.props;
 	]}
 >
 	{/* Metadata sits on the page background — reading as a label above the image,
-	    not inside a card. overflow-hidden clips the parked "View" at the right edge. */}
-	<div class="flex items-center justify-between gap-3.5 overflow-hidden">
-		<div class="flex min-w-0 flex-1 flex-col gap-1.5">
-			<span class="text-[0.8rem] font-medium text-[var(--ink-soft)]">
-				{project.year} · {project.tags.join(', ')}
-			</span>
-			{/* Title-only underline that wipes in left-to-right on hover/focus — the
-			    site's nav-underline gesture — alongside the card zoom. See the scoped
-			    <style> below; width grows 0% → 100% and snaps under reduced motion. */}
-			<h3 class="text-lg font-bold tracking-tight text-[var(--ink)] md:text-[1.3rem] md:leading-tight">
-				<span class="project-card__title">{project.title}</span>
-			</h3>
-		</div>
-
-		{/* "View" is parked off the right edge with its layout slot reserved, so the
-		    row never reflows. On hover or keyboard focus it slides into place —
-		    entering from off-card. Decorative: the whole card is the link. */}
-		<span
-			aria-hidden="true"
-			class:list={[
-				'flex flex-none items-center gap-2 self-end pb-[3px] whitespace-nowrap text-[1rem] font-semibold text-[var(--ink)]',
-				'translate-x-[calc(100%+1.4rem)] transition-transform duration-[340ms] ease-out',
-				'group-hover:translate-x-0 group-focus-within:translate-x-0 motion-reduce:transition-none',
-			]}
-		>
-			<span>View</span>
+	    not inside a card. */}
+	<div class="flex min-w-0 flex-col gap-1">
+		{/* Dateline above the title: just the year, small and muted. */}
+		<span class="text-[0.8rem] font-medium tabular-nums text-[var(--ink-soft)]">{project.year}</span>
+		{/* Title-only underline that wipes in left-to-right on hover/focus — the
+		    site's nav-underline gesture — alongside the card zoom. The underline
+		    targets .project-card__title in global.css. */}
+		<h3 class="text-lg font-bold tracking-tight text-[var(--ink)] md:text-[1.3rem] md:leading-tight">
+			<span class="project-card__title">{project.title}</span>
+			{/* A right-pointing arrow that wipes in left-to-right once the title
+			    underline finishes, then tilts up to point ↗. Choreography lives
+			    with the underline rules in global.css (.project-card__arrow).
+			    Decorative — the whole card is the link. */}
 			<svg
 				viewBox="0 0 24 24"
 				fill="none"
@@ -52,12 +39,12 @@ const { project } = Astro.props;
 				stroke-linecap="round"
 				stroke-linejoin="round"
 				aria-hidden="true"
-				class="h-[1.2rem] w-[1.2rem]"
+				class="project-card__arrow ml-2 inline-block h-[1.1rem] w-[1.1rem] align-[-0.125em]"
 			>
-				<line x1="7" y1="17" x2="17" y2="7"></line>
-				<polyline points="7 7 17 7 17 17"></polyline>
+				<line x1="4" y1="12" x2="19" y2="12"></line>
+				<polyline points="12 5 19 12 12 19"></polyline>
 			</svg>
-		</span>
+		</h3>
 	</div>
 
 	{/* The image is the card: it carries the border and shadow. The whole link

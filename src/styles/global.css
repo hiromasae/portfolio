@@ -329,8 +329,30 @@ h6 {
 .project-card:focus-within .project-card__title {
 	background-size: 100% 2px;
 }
+/* ── Project card: title arrow ──
+   Sequenced after the underline: the → wipes in left-to-right starting when
+   the 0.3s underline wipe ends, then tilts -45° to point ↗. The base rule
+   carries the exit transition (quick, no delays) so un-hovering retracts
+   everything at once instead of replaying the stagger in reverse. */
+.project-card__arrow {
+	clip-path: inset(0 100% 0 0);
+	transform: rotate(0deg);
+	transform-origin: 50% 50%;
+	transition:
+		clip-path 0.2s var(--nav-ease),
+		transform 0.2s var(--nav-ease);
+}
+.project-card:hover .project-card__arrow,
+.project-card:focus-within .project-card__arrow {
+	clip-path: inset(0 0 0 0);
+	transform: rotate(-45deg);
+	transition:
+		clip-path 0.22s var(--nav-ease) 0.3s,
+		transform 0.2s var(--nav-ease) 0.54s;
+}
 @media (prefers-reduced-motion: reduce) {
-	.project-card__title {
+	.project-card__title,
+	.project-card__arrow {
 		transition: none;
 	}
 }
