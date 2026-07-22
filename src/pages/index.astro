@@ -11,8 +11,8 @@ import { projects } from '../data/projects';
 	<main class="mx-auto max-w-[1280px] px-5">
 		<!-- Projects -->
 		<section id="projects" class="scroll-mt-20 pt-8 pb-16 sm:pt-10">
-			<div id="project-list" class="flex flex-col gap-6">
-				{projects.map((project, i) => <ProjectCard project={project} reversed={i % 2 === 1} />)}
+			<div id="project-list" class="flex flex-col gap-12">
+				{projects.map((project) => <ProjectCard project={project} />)}
 			</div>
 		</section>
 	</main>

@@ -50,8 +50,6 @@ export const projects: Project[] = [
 			'Designed user flow diagrams for the SumaAdmin platform',
 			'Made architecture visuals for review materials',
 			'Created supporting graphics around risk and process flow',
-			'Added search and filter to the enrollment table interface',
-			'Implemented real-time database sync for student enrollment data',
 		],
 		cover: '/images/suma1.webp',
 		images: ['/images/suma1.webp', '/images/suma2.webp', '/images/suma3.webp', '/images/suma4.webp'],

@@ -2,72 +2,66 @@
 import type { Project } from '../data/projects';
 interface Props {
 	project: Project;
-	reversed?: boolean;
 }
-const { project, reversed = false } = Astro.props;
+const { project } = Astro.props;
 ---
 
 <a
 	id={`project-${project.slug}`}
 	href={`/projects/${project.slug}`}
 	class:list={[
-		'group relative flex flex-col overflow-hidden rounded-[1.5px] scroll-mt-24 border border-[var(--line)] bg-[var(--surface)] md:block md:h-[78vh]',
-		'shadow-[0_1px_1px_rgba(0,0,0,0.03),0_10px_30px_-16px_rgba(0,0,0,0.15)] transition-[box-shadow,border-color,background-color,transform] duration-300 ease-out',
-		'hover:border-[var(--line-strong)] hover:shadow-[0_2px_3px_rgba(0,0,0,0.04),0_18px_44px_-18px_rgba(0,0,0,0.24)]',
-		'active:scale-[0.99] active:border-[var(--ink)] active:shadow-[0_1px_1px_rgba(0,0,0,0.04),0_6px_16px_-14px_rgba(0,0,0,0.2)]',
+		'project-card group flex flex-col gap-5 scroll-mt-24 rounded-[1.5px]',
+		'transition-[scale] duration-300 ease-out',
+		'hover:scale-[1.02] focus-within:scale-[1.02] active:scale-[0.99]',
+		'motion-reduce:hover:scale-100 motion-reduce:focus-within:scale-100 motion-reduce:active:scale-100',
+		'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]',
 	]}
 >
-	{/* Image — full-bleed on md+, a normal aspect box on mobile */}
+	{/* Metadata sits on the page background — reading as a label above the image,
+	    not inside a card. */}
+	<div class="flex min-w-0 flex-col gap-1">
+		{/* Dateline above the title: just the year, small and muted. */}
+		<span class="text-[0.8rem] font-medium tabular-nums text-[var(--ink-soft)]">{project.year}</span>
+		{/* Title-only underline that wipes in left-to-right on hover/focus — the
+		    site's nav-underline gesture — alongside the card zoom. The underline
+		    targets .project-card__title in global.css. */}
+		<h3 class="text-lg font-bold tracking-tight text-[var(--ink)] md:text-[1.3rem] md:leading-tight">
+			<span class="project-card__title">{project.title}</span>
+			{/* A right-pointing arrow that wipes in left-to-right once the title
+			    underline finishes, then tilts up to point ↗. Choreography lives
+			    with the underline rules in global.css (.project-card__arrow).
+			    Decorative — the whole card is the link. */}
+			<svg
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				aria-hidden="true"
+				class="project-card__arrow ml-2 inline-block h-[1.1rem] w-[1.1rem] align-[-0.125em]"
+			>
+				<line x1="4" y1="12" x2="19" y2="12"></line>
+				<polyline points="12 5 19 12 12 19"></polyline>
+			</svg>
+		</h3>
+	</div>
+
+	{/* The image is the card: it carries the border and shadow. The whole link
+	    zooms as one unit on hover (scale on the <a>), so the blended metadata
+	    above scales along with it. */}
 	<div
-		class="aspect-[16/10] w-full overflow-hidden bg-[var(--surface-sunken)] md:absolute md:inset-0 md:aspect-auto md:h-full"
+		class:list={[
+			'relative aspect-[16/9] w-full overflow-hidden rounded-[1.5px] border border-[var(--line)] bg-[var(--surface-sunken)]',
+			'shadow-[0_1px_1px_rgba(0,0,0,0.03),0_10px_30px_-16px_rgba(0,0,0,0.15)]',
+		]}
 	>
 		<img
 			src={project.cover}
 			alt={project.title}
 			loading="lazy"
 			decoding="async"
-			class="h-full w-full object-cover transition-transform duration-300 ease-out md:group-hover:scale-[1.03]"
+			class="absolute inset-0 h-full w-full object-cover object-top"
 		/>
-	</div>
-
-	{/* Panel — static below the image on mobile; on md+ it's an overlay that
-	    stays hidden off the edge and slides in on hover, from whichever side the
-	    image is on. */}
-	<div
-		class:list={[
-			'w-full border-t border-[var(--line)] bg-[var(--surface)] p-5 transition-colors duration-150 group-active:bg-[var(--surface-sunken)]',
-			'md:absolute md:inset-y-0 md:flex md:w-[34%] md:items-center md:border-t-0 md:p-8',
-			'md:transition-transform md:duration-300 md:ease-out md:[transition-timing-function:cubic-bezier(0.5,0,0.15,1)]',
-			reversed
-				? 'md:left-0 md:border-r md:-translate-x-full md:group-hover:translate-x-0'
-				: 'md:right-0 md:border-l md:translate-x-full md:group-hover:translate-x-0',
-		]}
-	>
-		<div class="max-w-[22rem]">
-			<div class="flex items-center justify-between">
-				<span class="text-xs text-[var(--ink-soft)] md:text-[1rem]">{project.year}</span>
-				<span class="inline-flex items-center text-[var(--ink)]">
-					<svg
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						aria-hidden="true"
-						class="h-[1.05rem] w-[1.05rem]"
-					>
-						<line x1="7" y1="17" x2="17" y2="7"></line>
-						<polyline points="7 7 17 7 17 17"></polyline>
-					</svg>
-					<span class="sr-only">View project</span>
-				</span>
-			</div>
-			<h3
-				class="mt-1 text-lg font-bold tracking-tight text-[var(--ink)] md:text-[1.75rem] md:leading-tight"
-			>
-				{project.title}
-			</h3>
-		</div>
 	</div>
 </a>
