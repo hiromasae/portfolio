@@ -306,6 +306,35 @@ h6 {
 	font-family: var(--font-heading);
 }
 
+/* ── Project card: title underline ──
+   Wipes in left-to-right on hover/focus of the whole card — the same
+   nav-underline gesture used elsewhere. A gradient "line" whose width grows
+   0% → 100%, so it sweeps from the left. Lives here (not a component-scoped
+   <style>) so it can't be missed by Vite's dev-time style injection. */
+.project-card__title {
+	/* inline-block, NOT inline: an inline element's padding doesn't grow the
+	   line box, so with Supreme's real metrics the line painted 3px below the
+	   text landed outside the line box — where the header row's overflow-hidden
+	   (which parks "View" off-card) clipped it invisible. An inline-block's
+	   padding is real layout, so the underline always sits inside the box. */
+	display: inline-block;
+	background-image: linear-gradient(var(--ink), var(--ink));
+	background-repeat: no-repeat;
+	background-position: left bottom;
+	background-size: 0% 2px;
+	padding-bottom: 3px;
+	transition: background-size 0.3s var(--nav-ease);
+}
+.project-card:hover .project-card__title,
+.project-card:focus-within .project-card__title {
+	background-size: 100% 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+	.project-card__title {
+		transition: none;
+	}
+}
+
 /* ── Button ── */
 .btn {
 	display: inline-flex;

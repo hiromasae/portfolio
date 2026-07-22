@@ -10,29 +10,31 @@ const { project } = Astro.props;
 	id={`project-${project.slug}`}
 	href={`/projects/${project.slug}`}
 	class:list={[
-		'group relative flex flex-col overflow-hidden rounded-[1.5px] scroll-mt-24 border border-[var(--line)] bg-[var(--surface)]',
-		'shadow-[0_1px_1px_rgba(0,0,0,0.03),0_10px_30px_-16px_rgba(0,0,0,0.15)]',
-		'transition-[scale,box-shadow,border-color] duration-300 ease-out',
-		'hover:scale-[1.02] hover:border-[var(--line-strong)] hover:shadow-[0_2px_3px_rgba(0,0,0,0.04),0_18px_44px_-18px_rgba(0,0,0,0.24)]',
-		'motion-reduce:hover:scale-100',
+		'project-card group flex flex-col gap-5 scroll-mt-24 rounded-[1.5px]',
+		'transition-[scale] duration-300 ease-out',
+		'hover:scale-[1.02] focus-within:scale-[1.02] active:scale-[0.99]',
+		'motion-reduce:hover:scale-100 motion-reduce:focus-within:scale-100 motion-reduce:active:scale-100',
 		'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]',
 	]}
 >
-	{/* Metadata pinned at the top; the title always reads at a glance. */}
-	<div class="flex items-center justify-between gap-3.5 px-[1.15rem] pt-4 pb-[0.95rem]">
+	{/* Metadata sits on the page background — reading as a label above the image,
+	    not inside a card. overflow-hidden clips the parked "View" at the right edge. */}
+	<div class="flex items-center justify-between gap-3.5 overflow-hidden">
 		<div class="flex min-w-0 flex-1 flex-col gap-1.5">
 			<span class="text-[0.8rem] font-medium text-[var(--ink-soft)]">
 				{project.year} · {project.tags.join(', ')}
 			</span>
+			{/* Title-only underline that wipes in left-to-right on hover/focus — the
+			    site's nav-underline gesture — alongside the card zoom. See the scoped
+			    <style> below; width grows 0% → 100% and snaps under reduced motion. */}
 			<h3 class="text-lg font-bold tracking-tight text-[var(--ink)] md:text-[1.3rem] md:leading-tight">
-				{project.title}
+				<span class="project-card__title">{project.title}</span>
 			</h3>
 		</div>
 
-		{/* "View" is parked off the card's right edge (the card's overflow clips it)
-		    with its layout slot reserved, so the row never reflows. On hover or
-		    keyboard focus it slides into place — entering from off-card. Decorative:
-		    the whole card is the link, named by the title. */}
+		{/* "View" is parked off the right edge with its layout slot reserved, so the
+		    row never reflows. On hover or keyboard focus it slides into place —
+		    entering from off-card. Decorative: the whole card is the link. */}
 		<span
 			aria-hidden="true"
 			class:list={[
@@ -58,7 +60,18 @@ const { project } = Astro.props;
 		</span>
 	</div>
 
-	<div class="relative aspect-[16/9] w-full overflow-hidden bg-[var(--surface-sunken)]">
+	{/* The image is the card: it carries the border and shadow. The whole link
+	    zooms as one unit on hover (scale on the <a>), so the blended metadata
+	    above scales along with it. */}
+	<div
+		class:list={[
+			'relative aspect-[16/9] w-full overflow-hidden rounded-[1.5px] border border-[var(--line)] bg-[var(--surface-sunken)]',
+			'shadow-[0_1px_1px_rgba(0,0,0,0.03),0_10px_30px_-16px_rgba(0,0,0,0.15)]',
+			'transition-[box-shadow,border-color] duration-300 ease-out',
+			'group-hover:border-[var(--line-strong)] group-focus-within:border-[var(--line-strong)]',
+			'group-hover:shadow-[0_2px_3px_rgba(0,0,0,0.04),0_18px_44px_-18px_rgba(0,0,0,0.24)] group-focus-within:shadow-[0_2px_3px_rgba(0,0,0,0.04),0_18px_44px_-18px_rgba(0,0,0,0.24)]',
+		]}
+	>
 		<img
 			src={project.cover}
 			alt={project.title}
