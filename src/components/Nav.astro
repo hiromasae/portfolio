@@ -215,6 +215,16 @@ const onProject = onHome || path.startsWith('/projects/');
 			parseFloat(getComputedStyle(nav).getPropertyValue('--nav-logo-scale')) || 0.42;
 		var LINKS =
 			parseFloat(getComputedStyle(nav).getPropertyValue('--nav-links-scale')) || 0.7;
+		// The expanded wordmark's magnification (media-queried in global.css; the
+		// links counter it away, so only the name grows). Unlike LOGO/LINKS this
+		// can CHANGE while the page lives — crossing the viewport gate — and the
+		// q-links formula depends on it at rest (1/boost at q = 0), so it's
+		// re-read below when the gate flips.
+		var BOOST =
+			parseFloat(getComputedStyle(nav).getPropertyValue('--nav-boost')) || 1;
+		// The links' own net expanded scale (gated with the boost, same re-read).
+		var LBOOST =
+			parseFloat(getComputedStyle(nav).getPropertyValue('--nav-links-boost')) || 1;
 		// Trigger thresholds: expand only at (essentially) the top of the page,
 		// compact once you've scrolled away. The gap between the two lines is
 		// hysteresis — trackpad jitter around a single line can't make the bar
@@ -230,13 +240,22 @@ const onProject = onHome || path.startsWith('/projects/');
 		// so it can't be a pure calc() — both vars are set together here, the
 		// single writer. Keep the formula's endpoints in step with the static
 		// --q-links fallback in global.css.
+		// Crossing the boost gate changes what q-links must be AT REST (1/boost at
+		// q = 0), so the last-written var goes stale: re-read and re-paint. Keep
+		// the query in step with the --nav-boost media query in global.css.
+		window.matchMedia('(min-width: 1200px)').addEventListener('change', function () {
+			BOOST = parseFloat(getComputedStyle(nav).getPropertyValue('--nav-boost')) || 1;
+			LBOOST = parseFloat(getComputedStyle(nav).getPropertyValue('--nav-links-boost')) || 1;
+			setQ(q);
+		});
+
 		var setQ = function (v) {
 			v = Math.max(0, Math.min(1, v));
 			q = v;
 			root.style.setProperty('--q', String(v));
 			root.style.setProperty(
 				'--q-links',
-				((1 - (1 - LINKS) * v) / (1 - (1 - LOGO) * v)).toFixed(5)
+				((LBOOST - (LBOOST - LINKS) * v) / (BOOST - (BOOST - LOGO) * v)).toFixed(5)
 			);
 		};
 		// A tween in flight: its rAF handle and destination. tweenTarget doubles
@@ -391,6 +410,22 @@ const onProject = onHome || path.startsWith('/projects/');
 				: null;
 		if (loadIntro) root.classList.add(loadIntro);
 
+		// ── Content reveal coordination ──
+		// The pages' .reveal cascades (global.css) start after whatever entrance
+		// the bar is playing, keyed off classes captured here — pre-paint, where
+		// this load's arrival shape is decided. PERSISTENT classes on purpose,
+		// not the nav-intro-* ones: those are removed at cleanup, and an
+		// animation-delay that changes mid-flight restarts the animation.
+		//   reveal-skip: a projects landing opens resting on a card — content
+		//     reveals at rest, no entrance above the target.
+		//   reveal-hold: a cross-page tween is coming — wait out --dur-nav.
+		//   reveal-hold-draw / -wipe: a load intro is coming — wait out that
+		//     variant's fixed choreography.
+		if (projectsIntent) root.classList.add('reveal-skip');
+		else if (animate) root.classList.add('reveal-hold');
+		else if (loadIntro)
+			root.classList.add(loadIntro === 'nav-intro-draw' ? 'reveal-hold-draw' : 'reveal-hold-wipe');
+
 		// Paint pre-paint at the starting q (carried if tweening, else rest).
 		setQ(animate ? carried : restQ);
 		if (!animate && !projectsIntent && !loadIntro) return;
@@ -441,7 +476,14 @@ const onProject = onHome || path.startsWith('/projects/');
 			// scrolled-down home), and the restored position may already match.
 			var to = qFromScroll();
 			setQ(to);
-			if (Math.abs(from - to) < 0.02) return;
+			if (Math.abs(from - to) < 0.02) {
+				// No tween after all — release the content hold so the reveal
+				// doesn't wait out a bar that's already at rest. (The delay
+				// recompute can jump a just-started reveal a few frames in;
+				// this path is rare and the jump beats a phantom wait.)
+				root.classList.remove('reveal-hold');
+				return;
+			}
 			var cls = to === 1 ? 'nav-intro-collapse' : 'nav-intro-expand';
 			var fallback = 0;
 			var done = function (e) {
@@ -474,7 +516,9 @@ const onProject = onHome || path.startsWith('/projects/');
 			// for restQ's variant; if the state changed, stand down — the bar
 			// just paints at rest, no entrance.
 			if (qFromScroll() !== restQ) {
-				root.classList.remove(loadIntro);
+				// Stand down the content hold with the intro (same rare-jump
+				// trade as runIntro's bail).
+				root.classList.remove(loadIntro, 'reveal-hold-draw', 'reveal-hold-wipe');
 				return;
 			}
 			root.classList.add('nav-intro-go');

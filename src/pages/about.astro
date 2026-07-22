@@ -6,31 +6,6 @@ import Nav from '../components/Nav.astro';
 <Layout title="About — Hiro Eernisse" description="About Hiro Eernisse, design engineer.">
 	<Nav />
 
-	<!-- Critical hide, present before first paint and left untouched by Vite's dev
-	     HMR style swap (which briefly drops the scoped .reveal rule and flashes the
-	     text). The scoped rule below drives the actual animation. -->
-	<style is:inline>
-		.reveal {
-			opacity: 0;
-		}
-		@media (prefers-reduced-motion: reduce) {
-			.reveal {
-				opacity: 1;
-			}
-		}
-	</style>
-
-	<script is:inline>
-		// Runs pre-paint, after the nav's own inline script has painted this
-		// load's q. q < 1 here means the nav arrived expanded and its collapse
-		// intro is about to play — hold the content reveal until the bar has
-		// landed (the --hold delay in the styles below).
-		(function () {
-			var nq = window.__navQ;
-			if (nq && nq.get() < 0.98) document.documentElement.classList.add('reveal-hold');
-		})();
-	</script>
-
 	<main class="mx-auto max-w-[1280px] px-5 py-12 sm:py-16">
 		<div class="flex flex-col gap-12 lg:flex-row lg:items-start lg:justify-between lg:gap-20">
 			<div class="max-w-xl space-y-6 text-lg leading-relaxed">
@@ -70,50 +45,3 @@ import Nav from '../components/Nav.astro';
 		</div>
 	</main>
 </Layout>
-
-<style>
-	/* Left-to-right entrance to match the site's horizontal motion language:
-	   each element fades and slides in from the left, one after the next, and the
-	   sequence resolves rightward (bio lines first, photo last). Slower duration +
-	   wider stagger for an unhurried feel. Pure CSS so it runs on first paint;
-	   starts at opacity 0 to avoid a flash of the resting state. */
-	main {
-		/* The leftward start offset would otherwise poke a transient horizontal
-		   scrollbar; clip it without creating a scroll container. */
-		overflow-x: clip;
-	}
-
-	.reveal {
-		opacity: 0;
-		animation: reveal 0.8s cubic-bezier(0.22, 0.68, 0, 1) both;
-		/* --base holds the intro (heading + photo) alone for a beat before the bio
-		   lines cascade in, giving the introduction more impact. */
-		animation-delay: calc(var(--hold, 0ms) + var(--base, 0ms) + var(--i) * 150ms);
-	}
-
-	/* When the nav arrives expanded (set pre-paint by the inline script above),
-	   the whole reveal sequence waits out the bar's collapse — the shared
-	   --dur-nav token, so retiming the nav retimes this hold with it — plus a
-	   beat before the content takes the stage. */
-	:global(html.reveal-hold) main {
-		--hold: calc(var(--dur-nav) + 90ms);
-	}
-
-	@keyframes reveal {
-		from {
-			opacity: 0;
-			transform: translateX(-16px);
-		}
-		to {
-			opacity: 1;
-			transform: none;
-		}
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.reveal {
-			opacity: 1;
-			animation: none;
-		}
-	}
-</style>

@@ -31,6 +31,24 @@ const {
 				}
 			})();
 		</script>
+		{/* Critical hide for the content reveal — global.css drives the actual
+		    animation and holds. Lives here so it's present before first paint on
+		    every page, and left untouched by Vite's dev HMR style swap (which
+		    briefly drops the global rules and would flash the content). */}
+		<style is:inline>
+			.reveal {
+				opacity: 0;
+			}
+			html.reveal-skip .reveal,
+			html.projects-landing .reveal {
+				opacity: 1;
+			}
+			@media (prefers-reduced-motion: reduce) {
+				.reveal {
+					opacity: 1;
+				}
+			}
+		</style>
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="generator" content={Astro.generator} />
