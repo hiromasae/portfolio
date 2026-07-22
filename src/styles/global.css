@@ -37,6 +37,28 @@
 	   disagreement bends the straight glide into a visible swing. Keep this
 	   equal to Tailwind's --ease-out (used by the markup classes). */
 	--nav-ease: cubic-bezier(0, 0, 0.2, 1);
+
+	/* ── Motion duration scale ──
+	   Every repeated timing rides one of these tokens; only genuinely one-off
+	   ceremonial timings (the load intro's stagger delays, About's 0.8s reveal)
+	   stay local to their rules.
+	   --dur-tap: instant feedback — hover/press color changes on buttons, the
+	     nav links (unified here: they previously rode Tailwind's 150ms default).
+	   --dur-gesture: the standard wipe/slide gesture — underlines, pills,
+	     the card arrow, the theme sweep.
+	   --dur-nav: the nav ensemble tween. Nav.astro's rAF tween reads this via
+	     getComputedStyle and About's reveal hold derives from it, so changing
+	     it here retimes the scroll trigger, the cross-page intro keyframes,
+	     and the content hold together.
+	   --dur-card: the project card's hover pair — zoom (ProjectCard.astro's
+	     duration-[var(--dur-card)]) and title underline, kept equal so the two
+	     read as one gesture.
+	   --dur-draw: the load intro's icon stroke-draw. */
+	--dur-tap: 120ms;
+	--dur-gesture: 200ms;
+	--dur-nav: 260ms;
+	--dur-card: 300ms;
+	--dur-draw: 420ms;
 }
 
 /* ── Dark theme ── */
@@ -263,6 +285,9 @@ footer {
    single gliding underline. */
 .nav-links a {
 	position: relative;
+	/* Hover color on the buttons' tap clock (Tailwind's transition-colors,
+	   which these links used to carry, ran a different 150ms/curve combo). */
+	transition: color var(--dur-tap) ease;
 }
 
 .nav-links a::after {
@@ -333,7 +358,7 @@ h6 {
 	background-position: left bottom;
 	background-size: 0% 2px;
 	padding-bottom: 3px;
-	transition: background-size 0.3s var(--nav-ease);
+	transition: background-size var(--dur-card) var(--nav-ease);
 }
 .project-card:hover .project-card__title,
 .project-card:focus-within .project-card__title {
@@ -341,24 +366,27 @@ h6 {
 }
 /* ── Project card: title arrow ──
    Sequenced after the underline: the → wipes in left-to-right starting when
-   the 0.3s underline wipe ends, then tilts -45° to point ↗. The base rule
-   carries the exit transition (quick, no delays) so un-hovering retracts
-   everything at once instead of replaying the stagger in reverse. */
+   the underline wipe (--dur-card) ends, then tilts -45° to point ↗ the moment
+   its own wipe lands — the delays are sums of the tokens, so the chain can't
+   drift out of sync. The base rule carries the exit transition (quick, no
+   delays) so un-hovering retracts everything at once instead of replaying the
+   stagger in reverse. */
 .project-card__arrow {
 	clip-path: inset(0 100% 0 0);
 	transform: rotate(0deg);
 	transform-origin: 50% 50%;
 	transition:
-		clip-path 0.2s var(--nav-ease),
-		transform 0.2s var(--nav-ease);
+		clip-path var(--dur-gesture) var(--nav-ease),
+		transform var(--dur-gesture) var(--nav-ease);
 }
 .project-card:hover .project-card__arrow,
 .project-card:focus-within .project-card__arrow {
 	clip-path: inset(0 0 0 0);
 	transform: rotate(-45deg);
 	transition:
-		clip-path 0.22s var(--nav-ease) 0.3s,
-		transform 0.2s var(--nav-ease) 0.54s;
+		clip-path var(--dur-gesture) var(--nav-ease) var(--dur-card),
+		transform var(--dur-gesture) var(--nav-ease)
+			calc(var(--dur-card) + var(--dur-gesture));
 }
 @media (prefers-reduced-motion: reduce) {
 	.project-card__title,
@@ -385,8 +413,8 @@ h6 {
 	background: var(--btn-bg);
 	border: 1px solid var(--btn-border);
 	transition:
-		background 0.12s ease,
-		border-color 0.12s ease;
+		background var(--dur-tap) ease,
+		border-color var(--dur-tap) ease;
 }
 
 .btn:hover {
@@ -413,7 +441,7 @@ h6 {
 	border-radius: 0.11rem;
 	color: var(--ink-soft);
 	text-decoration: none;
-	transition: color 0.12s ease;
+	transition: color var(--dur-tap) ease;
 }
 
 .btn-icon:hover {
@@ -474,7 +502,7 @@ h6 {
 	transition:
 		transform 0.1s cubic-bezier(0.4, 0, 0.1, 1),
 		width 0.16s cubic-bezier(0.3, 0, 0.1, 1),
-		clip-path 0.2s var(--nav-ease),
+		clip-path var(--dur-gesture) var(--nav-ease),
 		opacity 0.1s ease;
 	z-index: 60;
 	overflow: hidden;
@@ -510,9 +538,9 @@ h6 {
    SVG itself) compose cleanly on top. */
 #site-nav .btn-icon {
 	transition:
-		color 0.12s ease,
-		background-color 0.12s ease,
-		border-color 0.12s ease;
+		color var(--dur-tap) ease,
+		background-color var(--dur-tap) ease,
+		border-color var(--dur-tap) ease;
 }
 
 /* The whole right cluster (contact icons + theme toggle) shrinks as one
@@ -560,7 +588,8 @@ h6 {
    The expand direction replays the same keyframes reversed; its ease-in
    timing function, played backwards, becomes the same decelerating curve as
    the collapse. Keyframe endpoints must keep in step with the --q calc()
-   rules above and setQ in Nav.astro; 260ms matches tweenTo there. */
+   rules above and setQ in Nav.astro; the duration rides --dur-nav, which
+   tweenTo reads too, so the two can't drift apart. */
 html.nav-intro-collapse {
 	--nav-intro-dir: normal;
 	--nav-intro-ease: cubic-bezier(0.33, 1, 0.68, 1); /* ≈ tweenTo's ease-out cubic */
@@ -571,22 +600,22 @@ html.nav-intro-expand {
 }
 html:is(.nav-intro-collapse, .nav-intro-expand) main,
 html:is(.nav-intro-collapse, .nav-intro-expand) footer {
-	animation: nav-tween-page 260ms var(--nav-intro-ease) var(--nav-intro-dir) both;
+	animation: nav-tween-page var(--dur-nav) var(--nav-intro-ease) var(--nav-intro-dir) both;
 }
 html:is(.nav-intro-collapse, .nav-intro-expand) #site-nav .nav-inner {
-	animation: nav-tween-inner 260ms var(--nav-intro-ease) var(--nav-intro-dir) both;
+	animation: nav-tween-inner var(--dur-nav) var(--nav-intro-ease) var(--nav-intro-dir) both;
 }
 html:is(.nav-intro-collapse, .nav-intro-expand) #site-nav .nav-left {
-	animation: nav-tween-logo 260ms var(--nav-intro-ease) var(--nav-intro-dir) both;
+	animation: nav-tween-logo var(--dur-nav) var(--nav-intro-ease) var(--nav-intro-dir) both;
 }
 html:is(.nav-intro-collapse, .nav-intro-expand) #site-nav .nav-links {
-	animation: nav-tween-links 260ms var(--nav-intro-ease) var(--nav-intro-dir) both;
+	animation: nav-tween-links var(--dur-nav) var(--nav-intro-ease) var(--nav-intro-dir) both;
 }
 html:is(.nav-intro-collapse, .nav-intro-expand) #site-nav .btn-icon {
-	animation: nav-tween-icon 260ms var(--nav-intro-ease) var(--nav-intro-dir) both;
+	animation: nav-tween-icon var(--dur-nav) var(--nav-intro-ease) var(--nav-intro-dir) both;
 }
 html:is(.nav-intro-collapse, .nav-intro-expand) #site-nav::after {
-	animation: nav-tween-veil 260ms var(--nav-intro-ease) var(--nav-intro-dir) both;
+	animation: nav-tween-veil var(--dur-nav) var(--nav-intro-ease) var(--nav-intro-dir) both;
 }
 
 /* The keyframes run in the collapse direction: from expanded masthead (q = 0)
@@ -755,18 +784,18 @@ html.nav-intro-draw .theme-fill-rect {
 }
 
 html:is(.nav-intro-draw, .nav-intro-wipe).nav-intro-go #site-nav .nav-logo {
-	animation: nav-load-wipe 0.26s var(--nav-ease) both;
+	animation: nav-load-wipe var(--dur-nav) var(--nav-ease) both;
 }
 html:is(.nav-intro-draw, .nav-intro-wipe).nav-intro-go #site-nav .nav-links {
-	animation: nav-load-wipe 0.26s var(--nav-ease) 90ms both;
+	animation: nav-load-wipe var(--dur-nav) var(--nav-ease) 90ms both;
 }
 html:is(.nav-intro-draw, .nav-intro-wipe).nav-intro-go #site-nav .nav-underline {
-	animation: nav-load-wipe 0.2s var(--nav-ease) 190ms both;
+	animation: nav-load-wipe var(--dur-gesture) var(--nav-ease) 190ms both;
 }
 /* Wipe variant buttons: delays stagger left→right off each button's
    --nav-icon-r (email r=4 … twitter r=1, toggle unset → 0 → 440ms tail). */
 html.nav-intro-wipe.nav-intro-go #site-nav .btn-icon {
-	animation: nav-load-wipe 0.2s var(--nav-ease)
+	animation: nav-load-wipe var(--dur-gesture) var(--nav-ease)
 		calc(240ms + (4 - var(--nav-icon-r, 0)) * 50ms) both;
 }
 /* Draw variant: contacts stroke-draw on the same r-stagger, wider spacing;
@@ -775,14 +804,14 @@ html.nav-intro-wipe.nav-intro-go #site-nav .btn-icon {
    die with the animation so each icon snaps to clean undashed rendering at
    its own finish (see the hold above). */
 html.nav-intro-draw.nav-intro-go #contact-group .btn-icon svg :is(path, rect) {
-	animation: nav-load-stroke 0.42s var(--nav-ease)
+	animation: nav-load-stroke var(--dur-draw) var(--nav-ease)
 		calc(240ms + (4 - var(--nav-icon-r, 0)) * 90ms) backwards;
 }
 html.nav-intro-draw.nav-intro-go .theme-toggle svg > circle {
-	animation: nav-load-stroke 0.42s var(--nav-ease) 600ms backwards;
+	animation: nav-load-stroke var(--dur-draw) var(--nav-ease) 600ms backwards;
 }
 html.nav-intro-draw.nav-intro-go .theme-fill-rect {
-	animation: nav-load-sweep 0.22s var(--nav-ease) 1000ms both;
+	animation: nav-load-sweep var(--dur-gesture) var(--nav-ease) 1000ms both;
 }
 
 @keyframes nav-load-wipe {
@@ -835,15 +864,15 @@ html.nav-intro-draw.nav-intro-go .theme-fill-rect {
    these. All transform-only for cheap compositing; off under reduced-motion. */
 @media (prefers-reduced-motion: no-preference) {
 	.nav-links a::after {
-		transition: transform 0.2s var(--nav-ease);
+		transition: transform var(--dur-gesture) var(--nav-ease);
 	}
 
 	/* The shared underline slides + resizes between links; under reduced motion
 	   it just snaps to each target (no transition declared). */
 	.nav-underline {
 		transition:
-			transform 0.2s var(--nav-ease),
-			width 0.2s var(--nav-ease);
+			transform var(--dur-gesture) var(--nav-ease),
+			width var(--dur-gesture) var(--nav-ease);
 	}
 
 	.icon-email,
@@ -904,10 +933,10 @@ html.nav-intro-draw.nav-intro-go .theme-fill-rect {
 	   resting rule doesn't snap. Under reduced motion Nav.astro never adds
 	   the class and the fill just snaps across. */
 	:root[data-theme="dark"] .theme-toggle.theme-anim .theme-fill-rect {
-		animation: theme-fill-to-dark 0.22s var(--nav-ease);
+		animation: theme-fill-to-dark var(--dur-gesture) var(--nav-ease);
 	}
 	:root:not([data-theme="dark"]) .theme-toggle.theme-anim .theme-fill-rect {
-		animation: theme-fill-to-light 0.22s var(--nav-ease);
+		animation: theme-fill-to-light var(--dur-gesture) var(--nav-ease);
 	}
 }
 

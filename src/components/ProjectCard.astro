@@ -11,7 +11,7 @@ const { project } = Astro.props;
 	href={`/projects/${project.slug}`}
 	class:list={[
 		'project-card group flex flex-col gap-5 scroll-mt-24 rounded-[1.5px]',
-		'transition-[scale] duration-300 ease-out',
+		'transition-[scale] duration-[var(--dur-card)] ease-out',
 		'hover:scale-[1.02] focus-within:scale-[1.02] active:scale-[0.99]',
 		'motion-reduce:hover:scale-100 motion-reduce:focus-within:scale-100 motion-reduce:active:scale-100',
 		'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]',

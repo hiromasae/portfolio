@@ -49,13 +49,13 @@ const onProject = onHome || path.startsWith('/projects/');
 						href="/#projects"
 						data-projects-link
 						data-nav-link="projects"
-						class="rounded-none px-2 py-1 transition-colors hover:text-[var(--ink)]"
+						class="rounded-none px-2 py-1 hover:text-[var(--ink)]"
 						aria-current={onProject ? 'page' : undefined}
 					>Projects</a>
 					<a
 						href="/about"
 						data-nav-link="about"
-						class="rounded-none px-2 py-1 transition-colors hover:text-[var(--ink)]"
+						class="rounded-none px-2 py-1 hover:text-[var(--ink)]"
 						aria-current={onAbout ? 'page' : undefined}
 					>About</a>
 					{/* One shared underline that glides between the two links: it rests
@@ -205,6 +205,12 @@ const onProject = onHome || path.startsWith('/projects/');
 		// global.css, 5.5rem) — the distance the page and veil travel between
 		// the two states. Keep in step with the CSS.
 		var RANGE = 5.5 * (parseFloat(getComputedStyle(root).fontSize) || 19);
+		// The ensemble tween's duration — read from the --dur-nav token so the
+		// rAF tween here and the cross-page intro keyframes in global.css (which
+		// ride the same var) always run at the same speed. parseFloat drops the
+		// "ms" suffix; keep the token in ms.
+		var DUR =
+			parseFloat(getComputedStyle(root).getPropertyValue('--dur-nav')) || 260;
 		var LOGO =
 			parseFloat(getComputedStyle(nav).getPropertyValue('--nav-logo-scale')) || 0.42;
 		var LINKS =
@@ -265,7 +271,7 @@ const onProject = onHome || path.startsWith('/projects/');
 			var from = q;
 			var t0 = performance.now();
 			var step = function (now) {
-				var t = Math.min(1, (now - t0) / 260);
+				var t = Math.min(1, (now - t0) / DUR);
 				var e = 1 - Math.pow(1 - t, 3); // ease-out cubic
 				setQ(from + (to - from) * e);
 				if (t < 1) {
@@ -452,7 +458,7 @@ const onProject = onHome || path.startsWith('/projects/');
 			document.addEventListener('animationend', done);
 			window.addEventListener('scroll', done, { passive: true });
 			// Insurance: never leave the intro class stuck if animationend is lost.
-			fallback = window.setTimeout(done, 400);
+			fallback = window.setTimeout(done, DUR + 140);
 		};
 
 		// Release the load intro's animations (the variant class was added
