@@ -9,7 +9,7 @@ import Nav from '../components/Nav.astro';
 	<main class="mx-auto max-w-[1280px] px-5 py-12 sm:py-16">
 		<div class="flex flex-col gap-12 lg:flex-row lg:items-start lg:justify-between lg:gap-20">
 			<div class="max-w-xl space-y-4 text-lg leading-relaxed">
-				<p class="reveal mb-10 text-2xl font-bold tracking-tight text-[var(--ink)] sm:text-3xl" style="--i: 0">はじめまして。</p>
+				<h1 class="reveal mb-10 text-2xl font-bold tracking-tight text-[var(--ink)] sm:text-3xl" style="--i: 0">はじめまして。</h1>
 				<p class="reveal" style="--i: 1">I'm a Design Engineer based in the San Francisco Bay Area.</p>
 				<p class="reveal" style="--i: 2">
 					I build with AI, but I make the decisions that matter myself. Taste, and knowing how a
@@ -17,12 +17,12 @@ import Nav from '../components/Nav.astro';
 				</p>
 				<p class="reveal" style="--i: 3">Outside of work, I play heavy metal drums and hike.</p>
 			</div>
-			<figure class="reveal w-full shrink-0 lg:w-[26rem]" style="--i: 4">
+			<figure class="reveal w-full max-w-[18rem] shrink-0 sm:max-w-[22rem] lg:w-[26rem] lg:max-w-none" style="--i: 4">
 				<img
-					src="/images/me.jpeg"
+					src="/images/me.webp"
 					alt="Hiro Eernisse"
-					width="416"
-					height="520"
+					width="832"
+					height="1040"
 					class="aspect-[4/5] w-full rounded-[1.5px] border border-[var(--line)] object-cover"
 				/>
 				<figcaption class="mt-2 flex items-center gap-1.5 text-xs text-[var(--ink-soft)]">
