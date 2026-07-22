@@ -148,7 +148,9 @@ const onProject = onHome || path.startsWith('/projects/');
 							<circle cx="12" cy="12" r="9" />
 						</clipPath>
 					</defs>
-					<circle cx="12" cy="12" r="9" />
+					{/* --len: measured circumference for the load intro's circle draw —
+					    same true-unit dash scheme as the contact icons (Icon.astro). */}
+					<circle cx="12" cy="12" r="9" style="--len: 56.25" />
 					<g clip-path="url(#theme-fill-clip)">
 						<rect class="theme-fill-rect" x="12" y="2" width="9" height="20" fill="currentColor" stroke="none" />
 						{/* The twin, exactly one period (18) left: off-circle at rest
@@ -359,9 +361,33 @@ const onProject = onHome || path.startsWith('/projects/');
 
 		var animate = !reduce && carried !== null && Math.abs(carried - restQ) > 0.02;
 
+		// ── Load intro: the bar's entrance on a hard load ──
+		// Only for arrivals that AREN'T an internal navigation: a fresh carried
+		// q means we just left another page of the site (the cross-page tween
+		// above owns those — one entrance per arrival, never two), EXCEPT a
+		// reload, which also carries a fresh q (pagehide fires) but should
+		// still get the entrance. First visits and external arrivals have no
+		// fresh carried q and qualify. The variant follows the resting state —
+		// the expanded masthead gets the draw flourish, the compact bar the
+		// staggered wipe (keyframes + hidden holds in global.css). The class
+		// goes on pre-paint so first paint holds the bar hidden at each
+		// animation's first frame; runLoadIntro releases it at 'interactive'.
+		var navType = '';
+		try {
+			var navEntry = performance.getEntriesByType('navigation')[0];
+			if (navEntry) navType = navEntry.type;
+		} catch (e) {}
+		var loadIntro =
+			!reduce && !animate && !projectsIntent && (carried === null || navType === 'reload')
+				? restQ === 0
+					? 'nav-intro-draw'
+					: 'nav-intro-wipe'
+				: null;
+		if (loadIntro) root.classList.add(loadIntro);
+
 		// Paint pre-paint at the starting q (carried if tweening, else rest).
 		setQ(animate ? carried : restQ);
-		if (!animate && !projectsIntent) return;
+		if (!animate && !projectsIntent && !loadIntro) return;
 
 		// Land on the projects view: the exact remembered position when we have
 		// one, otherwise the intended card (or the top of the list) ~12px under
@@ -429,6 +455,28 @@ const onProject = onHome || path.startsWith('/projects/');
 			fallback = window.setTimeout(done, 400);
 		};
 
+		// Release the load intro's animations (the variant class was added
+		// pre-paint above; global.css holds everything at first-frame until
+		// .nav-intro-go). Cleanup is a plain timer just past the last fixed
+		// CSS delay+duration — every 'to' frame equals rest, so removing the
+		// classes mid-forwards-fill is invisible. A scroll during the intro is
+		// fine: the wipes/draws ride clip-path and dash channels, orthogonal
+		// to the --q transforms, so the two compose instead of fighting.
+		var runLoadIntro = function () {
+			// Scroll restoration can move the rest state between first paint
+			// and now (same recompute as runIntro). The hidden hold was drawn
+			// for restQ's variant; if the state changed, stand down — the bar
+			// just paints at rest, no entrance.
+			if (qFromScroll() !== restQ) {
+				root.classList.remove(loadIntro);
+				return;
+			}
+			root.classList.add('nav-intro-go');
+			window.setTimeout(function () {
+				root.classList.remove(loadIntro, 'nav-intro-go');
+			}, loadIntro === 'nav-intro-draw' ? 1350 : 780);
+		};
+
 		// 'interactive' means main and the cards exist and layout is measurable;
 		// it fires before module scripts evaluate. The landing scroll runs first
 		// so the intro's resting state reflects the final scroll position.
@@ -441,6 +489,7 @@ const onProject = onHome || path.startsWith('/projects/');
 				}
 			}
 			if (animate) runIntro();
+			else if (loadIntro) runLoadIntro();
 		};
 		if (document.readyState !== 'loading') {
 			arrive();

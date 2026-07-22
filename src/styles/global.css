@@ -23,6 +23,11 @@
 
 	--focus-ring: #7a94c9;
 
+	/* Theme glyph fill rest: the ink half sits right of center in light
+	   (translateX(0)), left in dark (-9px) — see .theme-fill-rect. A var so
+	   the load intro's sweep keyframes can target rest in either theme. */
+	--theme-fill-x: 0px;
+
 	/* Single easing for the whole nav collapse/expand ensemble. The motion is
 	   assembled from independent transitions — the FLIP translateY (set inline
 	   from Nav.astro's scripts, also on <main>/<footer>, hence :root), the
@@ -57,6 +62,7 @@
 	--btn-border: rgba(255, 255, 255, 0.14);
 
 	--focus-ring: #8ba3d6;
+	--theme-fill-x: -9px;
 }
 
 html {
@@ -384,11 +390,7 @@ h6 {
    half (x 12–21 of its 3–21 diameter) with the twin off-circle at -6–3;
    -9px lands the twin on the left half exactly (lead rect off-circle). */
 .theme-fill-rect {
-	transform: translateX(0);
-}
-
-:root[data-theme="dark"] .theme-fill-rect {
-	transform: translateX(-9px);
+	transform: translateX(var(--theme-fill-x, 0px));
 }
 
 /* Shared sliding label: a single ink pill that glides between the contact
@@ -609,6 +611,157 @@ html:is(.nav-intro-collapse, .nav-intro-expand) #site-nav::after {
 				)
 			)
 			scale(var(--nav-icon-scale));
+	}
+}
+
+/* ── Load intro: the bar's entrance on a hard load ──
+   Played only on arrivals with no fresh carried nav state — a reload, a first
+   visit, an external referrer (gated in Nav.astro; internal navigations get
+   the cross-page tween above instead, never both). Two variants, chosen by
+   the resting state:
+
+   nav-intro-wipe (rest compact — interior pages, mid-scroll reloads): every
+   element wipes in left→right with the contact pill's clip-path grammar,
+   delays marching across the bar — wordmark, links, underline, then each
+   button. Clip-only, so it's orthogonal to the --q geometry and composites
+   for free during the load window.
+
+   nav-intro-draw (rest expanded — home at the top): the same wipes for the
+   type, but the icons stroke-draw their outlines (each shape's measured
+   length rides in --len, so one dash animation draws every one of them
+   edge-to-edge over the same duration; see the dash-hold comment below for
+   why true units, not pathLength) and the theme toggle draws its circle
+   then sweeps its ink into
+   the resting half — the same rightward sweep a click plays, one
+   pattern-period (18 units) of travel ending exactly on --theme-fill-x.
+
+   The variant class is added PRE-PAINT by Nav.astro's inline script: the
+   rules without .nav-intro-go are static hidden holds equal to each
+   animation's first frame, so first paint shows nothing of the bar and the
+   'go' handoff (added at 'interactive') is invisible. Cleanup removes both
+   classes on a timer just past the last animation; every 'to' frame equals
+   the natural rest state, so that handoff is invisible too. Reduced motion
+   never adds the classes — the bar just paints at rest. */
+html:is(.nav-intro-draw, .nav-intro-wipe) #site-nav .nav-logo,
+html:is(.nav-intro-draw, .nav-intro-wipe) #site-nav .nav-links,
+html:is(.nav-intro-draw, .nav-intro-wipe) #site-nav .nav-underline {
+	clip-path: inset(0 100% 0 0);
+}
+html.nav-intro-wipe #site-nav .btn-icon {
+	clip-path: inset(0 100% 0 0);
+}
+/* The draw variant's dash setup lives ONLY in two transient places — this
+   pre-go hold and the nav-load-stroke keyframes (backwards fill, no
+   forwards) — never in a rule that outlives the animation. The moment each
+   icon's draw ends its dash vanishes and the browser re-renders it as a
+   plain stroke: closed paths get their seam join welded (dashed rendering
+   caps the seam instead) and any pathLength rounding sliver at the tail
+   fills in — AT THAT ICON'S OWN FINISH, where the shape is complete and the
+   switch is invisible. Holding the dash until the global cleanup instead
+   makes every icon visibly "complete itself" in unison at the very end.
+
+   All dash math runs in TRUE user units against each shape's measured
+   length (--len, set inline in Icon.astro / on the toggle circle) — NOT
+   pathLength normalization: Chrome ignores pathLength for dash rendering,
+   so normalized values run in true units anyway, making short strokes pop
+   in instantly and long ones finish early ("jump to completion").
+
+   Not the obvious offset = length either — a dash ending exactly at a
+   path's start still paints its square CAP, dotting every icon while
+   hidden. Offset --len + 1 puts the dash entirely off-path: truly
+   invisible, and the first unit of the draw spends itself reaching the
+   path.
+
+   Every calc() below multiplies through *1px: Chrome's stroke-dash CSS
+   grammar takes bare numbers (legacy SVG form) but NOT calc() results that
+   are unitless numbers — those go invalid at computed-value time, which
+   silently collapses the keyframes' from-offset to 0 and kills the whole
+   draw. px lengths ARE user units for SVG, so the numbers are identical. */
+html.nav-intro-draw:not(.nav-intro-go) #contact-group .btn-icon svg :is(path, rect),
+html.nav-intro-draw:not(.nav-intro-go) .theme-toggle svg > circle {
+	stroke-dasharray: calc(var(--len) * 1px) calc(var(--len) * 2px);
+	stroke-dashoffset: calc((var(--len) + 1) * 1px);
+}
+/* Closed shapes (the rects, Twitter's silhouette, the toggle circle) draw
+   with BUTT caps for the intro's duration: while dashed, the seam start
+   wears a cap, and a square cap overhangs the path end by a full unit —
+   most visibly as an extended beak on Twitter that "clips off" when the
+   drawn seam wraps shut. Butt keeps the seam flush all along, so the weld
+   changes nothing. Open shapes keep their square caps (their dashed and
+   undashed ends are capped alike, so they never had the problem) — and once
+   a closed path is undashed it has no caps at all, so this rule holding
+   until cleanup is inert. */
+html.nav-intro-draw .icon-email rect,
+html.nav-intro-draw .icon-linkedin rect,
+html.nav-intro-draw .icon-twitter path,
+html.nav-intro-draw .theme-toggle svg > circle {
+	stroke-linecap: butt;
+}
+html.nav-intro-draw .theme-fill-rect {
+	/* One pattern-period left of rest: both rects sit fully off-circle behind
+	   the clip, so the fill is simply absent until the sweep carries it in. */
+	transform: translateX(calc(var(--theme-fill-x) - 18px));
+}
+
+html:is(.nav-intro-draw, .nav-intro-wipe).nav-intro-go #site-nav .nav-logo {
+	animation: nav-load-wipe 0.26s var(--nav-ease) both;
+}
+html:is(.nav-intro-draw, .nav-intro-wipe).nav-intro-go #site-nav .nav-links {
+	animation: nav-load-wipe 0.26s var(--nav-ease) 90ms both;
+}
+html:is(.nav-intro-draw, .nav-intro-wipe).nav-intro-go #site-nav .nav-underline {
+	animation: nav-load-wipe 0.2s var(--nav-ease) 190ms both;
+}
+/* Wipe variant buttons: delays stagger left→right off each button's
+   --nav-icon-r (email r=4 … twitter r=1, toggle unset → 0 → 440ms tail). */
+html.nav-intro-wipe.nav-intro-go #site-nav .btn-icon {
+	animation: nav-load-wipe 0.2s var(--nav-ease)
+		calc(240ms + (4 - var(--nav-icon-r, 0)) * 50ms) both;
+}
+/* Draw variant: contacts stroke-draw on the same r-stagger, wider spacing;
+   the toggle circle draws last, then the ink pours in. `backwards`, NOT
+   `both`: the delay still holds the first (hidden) frame, but the dash must
+   die with the animation so each icon snaps to clean undashed rendering at
+   its own finish (see the hold above). */
+html.nav-intro-draw.nav-intro-go #contact-group .btn-icon svg :is(path, rect) {
+	animation: nav-load-stroke 0.42s var(--nav-ease)
+		calc(240ms + (4 - var(--nav-icon-r, 0)) * 90ms) backwards;
+}
+html.nav-intro-draw.nav-intro-go .theme-toggle svg > circle {
+	animation: nav-load-stroke 0.42s var(--nav-ease) 600ms backwards;
+}
+html.nav-intro-draw.nav-intro-go .theme-fill-rect {
+	animation: nav-load-sweep 0.22s var(--nav-ease) 1000ms both;
+}
+
+@keyframes nav-load-wipe {
+	from {
+		clip-path: inset(0 100% 0 0);
+	}
+	to {
+		clip-path: inset(0 0 0 0);
+	}
+}
+@keyframes nav-load-stroke {
+	/* dasharray rides IN the keyframes so it exists only while the animation
+	   does — on end the stroke reverts to undashed in the same frame. At
+	   offset 0 the dash spans [0, --len], which (lengths rounded up) covers
+	   the whole path and wraps closed seams shut. */
+	from {
+		stroke-dasharray: calc(var(--len) * 1px) calc(var(--len) * 2px);
+		stroke-dashoffset: calc((var(--len) + 1) * 1px);
+	}
+	to {
+		stroke-dasharray: calc(var(--len) * 1px) calc(var(--len) * 2px);
+		stroke-dashoffset: 0px;
+	}
+}
+@keyframes nav-load-sweep {
+	from {
+		transform: translateX(calc(var(--theme-fill-x) - 18px));
+	}
+	to {
+		transform: translateX(var(--theme-fill-x));
 	}
 }
 
