@@ -208,17 +208,33 @@ html {
 	   matchMedia listener in Nav.astro. */
 	--nav-boost: 1;
 	/* Baseline seat: vertically-centered links float visibly above the boosted
-	   wordmark's baseline, so at q = 0 they translate down to just shy of it
-	   (a hair high reads better than exact — Hiro's call), the seat tweening
-	   away with the collapse. The value is the measured baseline gap (14.7px
-	   at ×1.35) ÷ the boost, backed off ~3px — the translate runs in
-	   .nav-left's pre-scale space, so the wrapper multiplies it back up.
+	   wordmark's baseline, so at q = 0 they translate down EXACTLY onto it —
+	   the two texts share a bottom line, the same call as the compact bar's
+	   --nav-seat-compact below (2026-07-23; supersedes the earlier "a hair
+	   high reads better" back-off), the seat tweening away with the collapse.
+	   The value is the measured baseline gap ÷ the boost — the translate runs
+	   in .nav-left's pre-scale space, so the wrapper multiplies it back up.
 	   --nav-icon-seat brings the right cluster's centers down onto the seated
-	   links' centers (measured; NOT boost-divided — the wrappers sit outside
-	   the scaled .nav-left). Both gated with the boost: at ×1 the centered
-	   float is the ordinary nav idiom and stays. */
+	   links' glyph centers (measured; NOT boost-divided — the wrappers sit
+	   outside the scaled .nav-left): the masthead is a tall hero lockup, so
+	   centering the icons in its full height would float them mid-air —
+	   they read as part of the baseline-seated secondary row instead. Both
+	   gated with the boost: at ×1 the centered float is the ordinary nav
+	   idiom and stays. */
 	--nav-seat: 0rem;
 	--nav-icon-seat: 0rem;
+	/* Compact-bar seat — the LINKS only. Flex-centring floats their baseline
+	   ~1.3px above the wordmark's; this nudges them down onto it so the two
+	   texts share a bottom line (the underline then drops just below the
+	   name's baseline, where the text used to sit). The icons/toggle stay
+	   flex-centred: the compact bar's centreline IS the wordmark's optical
+	   centre, and standalone glyphs read by their geometric centre — the
+	   baseline nudge is a text-to-text concern that shouldn't drag them down.
+	   Width-independent — the compact bar is identical at every viewport — so
+	   ungated, unlike the masthead seats above; the * --q term in the
+	   transform zeroes it at q = 0, leaving the expanded state alone. Runs in
+	   .nav-left's pre-scale space (×0.42): 0.162rem ≈ 1.29px. */
+	--nav-seat-compact: 0.162rem;
 	/* Secondary-line magnification, gated with the boost like the seats: the
 	   links' net expanded scale runs to --nav-links-boost instead of 1, and
 	   the right cluster's uniform miniature runs --nav-icon-boost → 0.7
@@ -226,22 +242,25 @@ html {
 	   leftward). Both cancel at q = 1: the compact bar never changes. */
 	--nav-links-boost: 1;
 	--nav-icon-boost: 1;
-	/* Extra name→links air at the masthead only: with the links seated near
-	   the name's baseline, the vertical offset no longer separates the two, so
-	   the expanded state gets ~12px more gap (visual; the translate runs in
-	   .nav-left's pre-scale space like --nav-seat, hence ÷ boost). A translate,
-	   not margin — margin is layout and would leak into the compact bar. */
+	/* Name→links air dial for the masthead ONLY (compact always keeps the
+	   ml-7 layout gap): a translate, not margin — margin is layout and would
+	   leak into the compact bar. Runs in .nav-left's pre-scale space like
+	   --nav-seat, hence visual px ÷ boost; negative pulls tighter than
+	   proportional. 07-22 shipped +0.49rem (~12px extra air, rationale: the
+	   then-lifted links needed horizontal separation); 07-23 Hiro asked to
+	   tighten — now 0, i.e. the masthead gap is exactly the compact gap
+	   magnified, consistent with the boost's pure-scale construction. The
+	   token stays (keyframes reference it) as the redial point. */
 	--nav-gap: 0rem;
 }
 
 @media (min-width: 1200px) {
 	html {
 		--nav-boost: 1.28; /* 2.5rem wordmark reads ~3.2rem expanded */
-		--nav-seat: 0.335rem;
-		--nav-icon-seat: 0.426rem;
+		--nav-seat: 0.488rem;
+		--nav-icon-seat: 0.59rem;
 		--nav-links-boost: 1.06; /* links read ~25.2px expanded */
 		--nav-icon-boost: 1.12;
-		--nav-gap: 0.49rem;
 	}
 }
 
@@ -316,7 +335,8 @@ footer {
    wrapper), so it rides its own JS-written var. */
 #site-nav .nav-links {
 	transform: translateX(calc(var(--nav-gap) * (1 - var(--q))))
-		translateY(calc(var(--nav-seat) * (1 - var(--q)))) scale(var(--q-links));
+		translateY(calc(var(--nav-seat) * (1 - var(--q)) + var(--nav-seat-compact) * var(--q)))
+		scale(var(--q-links));
 }
 
 /* Nav links share one underline that glides between them: it rests under the
@@ -607,7 +627,9 @@ h6 {
    links' centers — measured, and unlike --nav-seat NOT boost-divided: these
    sit outside the scaled .nav-left), tweening away with the collapse. On the
    wrappers, not the buttons, so the close-ranks math below and the hover
-   pills inside them ride along untouched. */
+   pills inside them ride along untouched. No compact term (cf. the links'
+   --nav-seat-compact): compact icons rest flex-centred on the bar's
+   centreline. */
 #site-nav #contact-group,
 #site-nav #theme-toggle-wrap {
 	transform: translateY(calc(var(--nav-icon-seat) * (1 - var(--q))));
@@ -756,7 +778,7 @@ html:is(.nav-intro-collapse, .nav-intro-expand) #site-nav::after {
 			scale(calc(var(--nav-links-boost) / var(--nav-boost)));
 	}
 	to {
-		transform: translateX(0) translateY(0) scale(1.6667);
+		transform: translateX(0) translateY(var(--nav-seat-compact)) scale(1.6667);
 	}
 }
 
