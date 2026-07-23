@@ -338,8 +338,13 @@ footer {
 .nav-links a {
 	position: relative;
 	/* Hover color on the buttons' tap clock (Tailwind's transition-colors,
-	   which these links used to carry, ran a different 150ms/curve combo). */
-	transition: color var(--dur-tap) ease;
+	   which these links used to carry, ran a different 150ms/curve combo).
+	   Transform rides the contact icons' springy release, so a released press
+	   settles with the same recoil (the press-in snap is a :active duration
+	   override below). */
+	transition:
+		color var(--dur-tap) ease,
+		transform 0.26s cubic-bezier(0.34, 1.2, 0.64, 1);
 }
 
 .nav-links a::after {
@@ -972,11 +977,17 @@ html.nav-intro-draw.nav-intro-go .theme-fill-rect {
                       final draw + ink sweep finish over the arriving
                       cards.
 
+   reveal-hold-land   the Projects nav link — a landing on the TOP of the
+                      list. The bar is already compact (no entrance to wait
+                      out), so this is just a short beat to clear the
+                      'interactive' landing scroll before the same cascade a
+                      fresh home load plays.
+
    Keep these values in step with the load-intro delays above and Nav.astro's
    cleanup timers.
 
-   reveal-skip (a projects landing — the page opens resting on a card
-   mid-list) reveals everything at rest: no entrance above the target. */
+   reveal-skip (a projects landing resting on a specific card mid-list — Back
+   to projects) reveals everything at rest: no entrance above the target. */
 html.reveal-hold {
 	--hold: calc(var(--dur-nav) + 90ms);
 }
@@ -985,6 +996,9 @@ html.reveal-hold-wipe {
 }
 html.reveal-hold-draw {
 	--hold: 600ms;
+}
+html.reveal-hold-land {
+	--hold: 150ms;
 }
 
 main {
@@ -1042,6 +1056,16 @@ html.reveal-skip .reveal {
 @media (prefers-reduced-motion: no-preference) {
 	.nav-links a::after {
 		transition: transform var(--dur-gesture) var(--nav-ease);
+	}
+
+	/* Pressed: the text link dips with the same scale-in as the contact icons
+	   and theme toggle, so every nav control shares one tap gesture. Snap in
+	   fast (the duration override); the base rule's spring eases it back on
+	   release. Only Projects/About match — the wordmark is a separate <a>
+	   outside .nav-links. */
+	.nav-links a:active {
+		transform: scale(0.94);
+		transition-duration: 0.09s;
 	}
 
 	/* The shared underline slides + resizes between links; under reduced motion

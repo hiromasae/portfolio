@@ -416,12 +416,17 @@ const onProject = onHome || path.startsWith('/projects/');
 		// this load's arrival shape is decided. PERSISTENT classes on purpose,
 		// not the nav-intro-* ones: those are removed at cleanup, and an
 		// animation-delay that changes mid-flight restarts the animation.
-		//   reveal-skip: a projects landing opens resting on a card — content
-		//     reveals at rest, no entrance above the target.
+		//   reveal-hold-land: the Projects nav link — a landing on the TOP of the
+		//     list, where the first card sits under the compact bar exactly as on
+		//     a fresh home load, so the cascade plays; a short beat first clears
+		//     the 'interactive' landing scroll.
+		//   reveal-skip: a landing resting on a specific card mid-list (Back to
+		//     projects) — content reveals at rest, no entrance above the target.
 		//   reveal-hold: a cross-page tween is coming — wait out --dur-nav.
 		//   reveal-hold-draw / -wipe: a load intro is coming — wait out that
 		//     variant's fixed choreography.
-		if (projectsIntent) root.classList.add('reveal-skip');
+		if (projectsIntent === '1') root.classList.add('reveal-hold-land');
+		else if (projectsIntent) root.classList.add('reveal-skip');
 		else if (animate) root.classList.add('reveal-hold');
 		else if (loadIntro)
 			root.classList.add(loadIntro === 'nav-intro-draw' ? 'reveal-hold-draw' : 'reveal-hold-wipe');
