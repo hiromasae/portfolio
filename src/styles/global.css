@@ -23,6 +23,21 @@
 
 	--focus-ring: #7a94c9;
 
+	/* Paper grain: a whisper of washi tooth baked into the paper surfaces
+	   (body + the nav bar and its veil — every surface that paints --paper),
+	   NOT an overlay above the content: texture belongs to the paper, so
+	   images and type stay clean (07-24 Hiro, revising the earlier fixed
+	   full-viewport film-grain overlay). One inline feTurbulence tile —
+	   stitchTiles keeps the repeat seamless, the saturate-0 matrix kills the
+	   RGB speckle so the grain is pure luminance, and the strength (0.05) is
+	   baked into the rect's opacity because a background-image layer can't
+	   ride a separate opacity knob. Light theme only — on charcoal the gray
+	   speckle read as a haze lifting the black level, so dark drops it (same
+	   ask). (A flowing-pattern second layer — raked wind/water current lines
+	   — was also built and removed here 07-24; plain uniform grain is the
+	   call.) */
+	--grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.05'/%3E%3C/svg%3E");
+
 	/* Theme glyph fill rest: the ink half sits right of center in light
 	   (translateX(0)), left in dark (-9px) — see .theme-fill-rect. A var so
 	   the load intro's sweep keyframes can target rest in either theme. */
@@ -85,6 +100,7 @@
 
 	--focus-ring: #8ba3d6;
 	--theme-fill-x: -9px;
+	--grain: none;
 }
 
 html {
@@ -144,11 +160,25 @@ html.projects-landing footer {
 
 body {
 	background-color: var(--paper);
+	/* The paper's grain (see --grain). The body background paints the canvas
+	   and scrolls with the document, so the tooth belongs to the page the
+	   content sits on — while the sticky bar and its veil repaint --paper
+	   above it, each carrying the same tile (below): their tiles drift out
+	   of phase with the page's as you scroll, but random grain has no
+	   registration to break, so the joins are invisible. */
+	background-image: var(--grain);
 	color: var(--ink);
 	font-family: var(--font-body);
 	-webkit-font-smoothing: antialiased;
 	text-rendering: optimizeLegibility;
 }
+
+/* The nav bar's own paper (bg-[var(--paper)] in the markup) grains too, or
+   the sticky bar would read as a flat band on a textured page. */
+#site-nav {
+	background-image: var(--grain);
+}
+
 
 /* ── Instant, synchronized theme swap ──
    Cross-fading colors looks broken: each element interpolates on its own clock
@@ -321,10 +351,13 @@ footer {
 /* The masthead's opaque backdrop below the pinned box: content scrolled
    partway through the range tucks y px under the masthead (it always did —
    the taller layout box used to cover it), so this paper veil extends the
-   bar's painted extent to its VISUAL height, sized by scaleY — solid
-   color, so the scale is invisible and its bottom edge IS the bar's visual
-   bottom. Negative z-index keeps it under the bar's own contents while the
-   nav's z-40 stacking context still paints it over the page. */
+   bar's painted extent to its VISUAL height, sized by scaleY — flat paper,
+   so the scale is invisible and its bottom edge IS the bar's visual
+   bottom. (The grain rides along and technically stretches with the scale,
+   but only mid-tween and at 5% opacity — imperceptible; at both resting
+   states the veil is unscaled or invisible.) Negative z-index keeps it
+   under the bar's own contents while the nav's z-40 stacking context still
+   paints it over the page. */
 #site-nav::after {
 	content: '';
 	position: absolute;
@@ -333,6 +366,7 @@ footer {
 	right: 0;
 	height: var(--nav-shift);
 	background: var(--paper);
+	background-image: var(--grain);
 	transform-origin: top;
 	transform: scaleY(calc(1 - var(--q)));
 	z-index: -1;
