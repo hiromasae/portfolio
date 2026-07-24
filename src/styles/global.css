@@ -904,9 +904,15 @@ html.nav-intro-draw .theme-toggle svg > circle {
 	stroke-linecap: butt;
 }
 html.nav-intro-draw .theme-fill-rect {
-	/* One pattern-period left of rest: both rects sit fully off-circle behind
-	   the clip, so the fill is simply absent until the sweep carries it in. */
-	transform: translateX(calc(var(--theme-fill-x) - 18px));
+	/* A pattern-period-and-change left of rest: both rects sit fully off-circle
+	   behind the clip, so the fill is simply absent until the sweep carries it
+	   in. 20, not the period's exact 18: at -18 (light theme) the lead rect's
+	   right edge lands exactly ON the clip's left tangent (x = 3), and Chrome's
+	   clip rasterization leaks the edge's antialiasing as a faint full-height
+	   bar at the clip bounds — the extra 2 units keep the edge clear of it.
+	   (Rest's tangent-touching twin never shows the leak: the circle's own
+	   stroke paints over that column.) */
+	transform: translateX(calc(var(--theme-fill-x) - 20px));
 }
 
 html:is(.nav-intro-draw, .nav-intro-wipe).nav-intro-go #site-nav .nav-logo {
@@ -963,8 +969,11 @@ html.nav-intro-draw.nav-intro-go .theme-fill-rect {
 	}
 }
 @keyframes nav-load-sweep {
+	/* from == the pre-go hold above (-20px, see the leak note there), so the
+	   'go' handoff stays invisible; 'to' is rest, so the cleanup handoff is
+	   too. The two extra units of travel are imperceptible at this duration. */
 	from {
-		transform: translateX(calc(var(--theme-fill-x) - 18px));
+		transform: translateX(calc(var(--theme-fill-x) - 20px));
 	}
 	to {
 		transform: translateX(var(--theme-fill-x));
