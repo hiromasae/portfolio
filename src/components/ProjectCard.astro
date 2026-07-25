@@ -45,6 +45,9 @@ const { project } = Astro.props;
 				<polyline points="12 5 19 12 12 19"></polyline>
 			</svg>
 		</h3>
+		{/* One-line "what I did" under the title, so the role reads before the image.
+		    Negative margin pulls it tighter to the title than the column's gap-1. */}
+		<p class="-mt-0.5 max-w-2xl text-[0.95rem] leading-snug text-[var(--ink-soft)]">{project.role}</p>
 	</div>
 
 	{/* The image is the card: it carries the border and shadow. The whole link

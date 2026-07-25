@@ -9,17 +9,11 @@ import { projects } from '../data/projects';
 	<Nav />
 
 	<main class="mx-auto max-w-[1280px] px-5">
-		<!-- Intro: one line saying who this is, first into the reveal cascade. -->
-		<p class="reveal max-w-xl pt-8 text-lg leading-relaxed sm:pt-10 sm:text-xl" style="--i: 0">
-			I'm a Design Engineer in the San Francisco Bay Area. I design product
-			interfaces and build them.
-		</p>
-
 		<!-- Projects -->
 		<section id="projects" class="scroll-mt-20 pt-10 pb-16 sm:pt-12">
 			<div id="project-list" class="flex flex-col gap-12">
 				{projects.map((project, index) => (
-					<div class="reveal" style={`--i: ${index + 1}`}>
+					<div class="reveal" style={`--i: ${index}`}>
 						<ProjectCard project={project} />
 					</div>
 				))}

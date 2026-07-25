@@ -4,6 +4,8 @@ export interface Project {
 	company: string;
 	year: string;
 	tags: string[];
+	/** One-line "what I did" shown under the card title. */
+	role: string;
 	blurb: string;
 	problem: string;
 	contributions: string[];
@@ -19,6 +21,7 @@ export const projects: Project[] = [
 		company: 'Stacksmith',
 		year: '2026',
 		tags: ['Product Design', 'UI/UX'],
+		role: 'Designed and built the browsing flows, comparison views, and overall visual system.',
 		blurb: 'A concept for browsing and comparing AI tools in a way that feels more useful than a giant list.',
 		problem:
 			'There are a lot of AI tools now, but most directories still feel like long lists with no real context. Stacksmith was my attempt to make that easier to sort through by showing what tools fit different roles, where they overlap, and how they might work together in an actual stack.',
@@ -43,6 +46,7 @@ export const projects: Project[] = [
 		company: 'Suma Solutions Inc.',
 		year: '2025',
 		tags: ['Diagrams', 'Healthcare', 'UX'],
+		role: 'Designed user-flow and architecture diagrams clear enough for non-technical reviewers.',
 		blurb: 'Diagrams for a healthcare compliance product made to be clear enough for non-technical reviewers.',
 		problem:
 			'Suma needed a clearer way to explain how its platform worked during a commercialization review. The audience was not deeply technical, so the challenge was turning a pretty complex healthcare product into diagrams that were easy to follow and still accurate.',
@@ -61,6 +65,7 @@ export const projects: Project[] = [
 		company: 'Shipyard',
 		year: '2025–2026',
 		tags: ['Product Design', 'UI/UX'],
+		role: 'Designed and shipped product UI with the dev team, from the main showcase to discovery flows.',
 		blurb: 'A lighter project showcase platform shaped in close collaboration with the dev team.',
 		problem:
 			'A lot of project platforms feel more focused on submission rules than the work itself. Shipyard was meant to feel lighter and more current, with a cleaner way for teams to show what they built and for other people to browse through projects.',
@@ -85,6 +90,7 @@ export const projects: Project[] = [
 		company: 'Indio Technologies',
 		year: '2019',
 		tags: ['UI Redesign', 'Dashboard', 'InsurTech'],
+		role: 'Redesigned two dense internal insurance tools around clarity and everyday use.',
 		blurb: 'A redesign of dense internal insurance tools, focused on clarity, structure, and easier day-to-day use.',
 		problem:
 			'These internal insurance tools had gotten pretty cluttered over time. The screens were dense, hard to scan, and not very intuitive, so the redesign focused on making everyday tasks feel less confusing and easier to get through.',
