@@ -50,13 +50,23 @@ const { project } = Astro.props;
 		<p class="-mt-0.5 max-w-2xl text-[0.95rem] leading-snug text-[var(--ink-soft)]">{project.role}</p>
 	</div>
 
-	{/* The image is the card: it carries the border and shadow. The whole link
-	    zooms as one unit on hover (scale on the <a>), so the blended metadata
-	    above scales along with it. */}
+	{/* The image is the card: it carries the border. The whole link zooms as
+	    one unit on hover (scale on the <a>), so the blended metadata above
+	    scales along with it. The lift shadow is hover-only and lives with the
+	    other card hover choreography in global.css (.project-card__frame).
+
+	    bg-clip-padding keeps the --surface-sunken bed out of the border area.
+	    --line is translucent, so it takes the colour of whatever sits behind
+	    it: painting the bed under the border (the default border-box clip)
+	    composited it over #f4f2ec instead of the page's paper and rendered
+	    the edge ~7/255 darker than the about photo's identical border in
+	    light, and ~13/255 lighter in dark. Clipping to the padding box lets
+	    it composite over paper, like the about <img> which has no background
+	    of its own — same token, same result. Keep the two in step. */}
 	<div
 		class:list={[
-			'relative aspect-[16/9] w-full overflow-hidden rounded-[1.5px] border border-[var(--line)] bg-[var(--surface-sunken)]',
-			'shadow-[0_1px_1px_rgba(0,0,0,0.03),0_10px_30px_-16px_rgba(0,0,0,0.15)]',
+			'project-card__frame',
+			'relative aspect-[16/9] w-full overflow-hidden rounded-[1.5px] border border-[var(--line)] bg-[var(--surface-sunken)] bg-clip-padding',
 		]}
 	>
 		<img

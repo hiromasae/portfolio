@@ -521,9 +521,34 @@ h6 {
 		transform var(--dur-gesture) var(--nav-ease)
 			calc(var(--dur-card) * 0.55 + var(--dur-gesture) * 0.85);
 }
+/* ── Project card: lift shadow ──
+   Hover/focus only, fading in over --dur-card so it lands with the zoom and
+   the title underline. At REST the card casts nothing: --line is translucent,
+   so a resting shadow tinted the paper behind the border and made the card's
+   edge read ~8/255 darker than the about photo's identical --line border.
+   With no resting shadow the two are pixel-identical in both themes.
+
+   The rest state is the same two shadows at zero alpha rather than `none`, so
+   the lists match and only the colour interpolates — the shadow fades up in
+   place instead of growing, and there's no ambiguity about how `none` pairs
+   off against a two-shadow list. Keep the geometry in step between the two. */
+.project-card__frame {
+	box-shadow:
+		0 1px 1px rgba(0, 0, 0, 0),
+		0 10px 30px -16px rgba(0, 0, 0, 0);
+	transition: box-shadow var(--dur-card) var(--nav-ease);
+}
+.project-card:hover .project-card__frame,
+.project-card:focus-within .project-card__frame {
+	box-shadow:
+		0 1px 1px rgba(0, 0, 0, 0.03),
+		0 10px 30px -16px rgba(0, 0, 0, 0.15);
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.project-card__title,
-	.project-card__arrow {
+	.project-card__arrow,
+	.project-card__frame {
 		transition: none;
 	}
 }
