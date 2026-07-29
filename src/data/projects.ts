@@ -8,9 +8,15 @@ export interface Project {
 	role: string;
 	blurb: string;
 	problem: string;
-	contributions: string[];
+	/** The "Work" paragraph — what I did and what it changed. Prose, not a
+	    bullet list: the detail page renders it as one block. */
+	work: string;
 	cover: string;
 	images: string[];
+	/** `tags`, `company` and `link` are no longer rendered anywhere (dropped
+	    from the detail page 2026-07-29; the cards only ever used year, title,
+	    role and cover). Kept because they're real facts that are a nuisance to
+	    re-gather — delete them if they're still unused later. */
 	link?: string;
 }
 
@@ -25,12 +31,8 @@ export const projects: Project[] = [
 		blurb: 'A concept for browsing and comparing AI tools in a way that feels more useful than a giant list.',
 		problem:
 			'There are a lot of AI tools now, but most directories still feel like long lists with no real context. Stacksmith was my attempt to make that easier to sort through by showing what tools fit different roles, where they overlap, and how they might work together in an actual stack.',
-		contributions: [
-			'Designed flows for browsing tools by role and use case',
-			'Built comparison views for looking at different stacks side by side',
-			'Mapped tool relationships to show integrations and overlap',
-			'Created the overall visual system for the product',
-		],
+		work:
+			"I built the browsing around roles and use cases instead of categories, so you start from the job you're trying to do rather than a list you have to read end to end. Comparison views let you put stacks side by side, and mapping how the tools connect puts the overlaps and gaps on the page instead of leaving them for you to work out. The visual system came last, mostly to keep that density readable.",
 		cover: '/images/stacksmith1.png',
 		images: [
 			'/images/stacksmith1.png',
@@ -50,11 +52,8 @@ export const projects: Project[] = [
 		blurb: 'Diagrams for a healthcare compliance product made to be clear enough for non-technical reviewers.',
 		problem:
 			'Suma needed a clearer way to explain how its platform worked during a commercialization review. The audience was not deeply technical, so the challenge was turning a pretty complex healthcare product into diagrams that were easy to follow and still accurate.',
-		contributions: [
-			'Designed user flow diagrams for the SumaAdmin platform',
-			'Made architecture visuals for review materials',
-			'Created supporting graphics around risk and process flow',
-		],
+		work:
+			'I drew the user flows for the SumaAdmin platform, the architecture visuals that went into the review materials, and the supporting graphics around risk and process. Most of the work was deciding what to leave out: each diagram carries one idea, so a reviewer can follow the platform end to end without needing the engineering context underneath it. The set gave the team one consistent way to explain the product to people outside it.',
 		cover: '/images/suma1.webp',
 		images: ['/images/suma1.webp', '/images/suma2.webp', '/images/suma3.webp', '/images/suma4.webp'],
 		link: 'https://www.yoursuma.com/',
@@ -69,11 +68,8 @@ export const projects: Project[] = [
 		blurb: 'A lighter project showcase platform shaped in close collaboration with the dev team.',
 		problem:
 			'A lot of project platforms feel more focused on submission rules than the work itself. Shipyard was meant to feel lighter and more current, with a cleaner way for teams to show what they built and for other people to browse through projects.',
-		contributions: [
-			'Led product UI decisions alongside the dev team',
-			'Refined layouts and interactions as the product changed',
-			'Designed the main showcase and discovery flows',
-		],
+		work:
+			'I led the product UI decisions with the dev team, working inside their loop instead of handing off finished screens. The main showcase and the discovery flows were the two pieces I owned end to end, and both went through several rounds as the scope of the product moved. Keeping the layouts loose enough to absorb that meant the later changes landed as adjustments rather than redesigns.',
 		cover: '/images/shipyard1.webp',
 		images: [
 			'/images/shipyard1.webp',
@@ -94,12 +90,8 @@ export const projects: Project[] = [
 		blurb: 'A redesign of dense internal insurance tools, focused on clarity, structure, and easier day-to-day use.',
 		problem:
 			'These internal insurance tools had gotten pretty cluttered over time. The screens were dense, hard to scan, and not very intuitive, so the redesign focused on making everyday tasks feel less confusing and easier to get through.',
-		contributions: [
-			'Audited the existing components before starting the redesign',
-			'Reworked the Agent Dashboard with a simpler layout',
-			'Redesigned the Broker Profile to reduce visual clutter',
-			'Helped make patterns more consistent across the product',
-		],
+		work:
+			'I audited the existing components first, which turned up a lot of near-duplicates doing the same job in slightly different ways. That gave me the base to rebuild the Agent Dashboard on a simpler layout and to cut the Broker Profile back to what an agent actually needs in front of them. Consolidating those patterns did the real work: the two screens stopped reading as separate products, and the everyday paths through them got shorter.',
 		cover: '/images/indio1.webp',
 		images: ['/images/indio1.webp', '/images/indio2.webp', '/images/indio3.webp', '/images/indio4.webp'],
 	},

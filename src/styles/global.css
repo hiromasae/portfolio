@@ -138,6 +138,22 @@
 	--dur-nav: 260ms;
 	--dur-card: 300ms;
 	--dur-draw: 420ms;
+
+	/* ── Reading measure ──
+	   The cap on any column of running prose (About's intro, a project's
+	   Background and Work). Set for SCANNABILITY, not for the page's grid: the
+	   pages themselves span the nav's 1280px, and only reading matter is
+	   pulled in to this width — so images and cards still fill the page.
+	   32rem = 608px at the 19px base. Measured in Chrome with Satoshi
+	   actually loaded (fallback metrics are wider and will lie): every
+	   prose block on the site runs 9.8–11.5 words a line, mean 10.8,
+	   against a 10–12 target. Suma's is the low one only because its
+	   words are longer — by characters it sits with the rest at ~60.
+	   It is a WIDTH, not a character count, because the
+	   two sizes in play (--text-lg prose, base-size Work lines) should share
+	   one left and right edge down the page. Re-measure if the base font
+	   size or the body face changes. */
+	--measure: 32rem;
 }
 
 /* ── Dark theme ── */
@@ -675,6 +691,95 @@ h6 {
 .btn:focus-visible {
 	outline: 2px solid var(--focus-ring);
 	outline-offset: 2px;
+}
+
+/* Borderless TEXT link — .btn-icon's twin for words rather than a glyph, and
+   the same colour model (--ink-soft at rest, --ink on hover/focus).
+   The project pages' "Back to projects" wears this. Those pages carry no
+   other button since the tags and the Visit button came off (07-29), so a
+   boxed .btn made the one remaining control the only piece of enclosed
+   chrome on an otherwise borderless layout — it read as a leftover. The nav's
+   icons and links are the only other buttons a visitor sees there, so this
+   matches them instead. Weight 500 for the same reason: it's the nav links'
+   weight, and Satoshi has a real 500 (see the .btn note above on which cuts
+   actually exist — 600 is not one of them). */
+.btn-quiet {
+	display: inline-flex;
+	align-items: center;
+	/* Tighter than .btn's 0.5rem: the arrow NUDGES away from the label on
+	   hover (see below), so this gap is the small end of a range, not a
+	   fixed value. At 0.5rem the hovered state opened a visible hole. */
+	gap: 0.4rem;
+	font-size: 0.875rem;
+	font-weight: 500;
+	line-height: 1;
+	color: var(--ink-soft);
+	text-decoration: none;
+	transition: color var(--dur-tap) ease;
+}
+
+.btn-quiet:hover {
+	color: var(--ink);
+}
+
+.btn-quiet:focus-visible {
+	outline: 2px solid var(--focus-ring);
+	outline-offset: 2px;
+	border-radius: 0.11rem;
+}
+
+/* ── Quiet link: label underline + arrow ──
+   The project card's gesture RUN BACKWARDS, because the link means the
+   opposite thing. On the card the underline wipes left-to-right toward an
+   arrow sitting on the right, which then wipes in and tilts to ↗ ("out").
+   Here the arrow sits on the LEFT, so the wipe travels right-to-left and
+   arrives at it, and the arrow answers by nudging further left ("back").
+   Same tokens, same easing, same 0.55 overlap fraction as the card, so the
+   two gestures stay relatives rather than look-alikes — see the
+   .project-card__arrow block above before retiming either.
+
+   No tilt on this one: the card's -45° is carrying a MEANING (this leaves
+   the site), and there's no second meaning here for a rotation to encode,
+   so it would be decoration. The nudge is the whole idea. */
+.btn-quiet__label {
+	/* inline-block for the same reason as .project-card__title: an inline
+	   element's padding doesn't grow the line box, so the underline can land
+	   outside it. */
+	display: inline-block;
+	background-image: linear-gradient(currentColor, currentColor);
+	background-repeat: no-repeat;
+	/* right, not left: this is the mirrored wipe. */
+	background-position: right bottom;
+	background-size: 0% 2px;
+	padding-bottom: 3px;
+	transition: background-size var(--dur-card) var(--nav-ease);
+}
+.btn-quiet:hover .btn-quiet__label,
+.btn-quiet:focus-visible .btn-quiet__label {
+	background-size: 100% 2px;
+}
+/* The base rule carries the exit transition (quick, no delay) so un-hovering
+   retracts the pair at once instead of replaying the stagger in reverse —
+   same trick as the card. */
+.btn-quiet__arrow {
+	/* Matches the label's padding-bottom so the two flex items have equal
+	   boxes: without it the underline's 3px makes the label taller and
+	   `align-items: center` pushes the arrow half that far below the text. */
+	padding-bottom: 3px;
+	transform: translateX(0);
+	transition: transform var(--dur-gesture) var(--nav-ease);
+}
+.btn-quiet:hover .btn-quiet__arrow,
+.btn-quiet:focus-visible .btn-quiet__arrow {
+	transform: translateX(-0.2rem);
+	transition: transform var(--dur-gesture) var(--nav-ease) calc(var(--dur-card) * 0.55);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.btn-quiet__label,
+	.btn-quiet__arrow {
+		transition: none;
+	}
 }
 
 /* Borderless icon link for the nav contacts */
