@@ -37,7 +37,15 @@ const onProject = onHome || path.startsWith('/projects/');
 			    global.css) to land at their own, larger compact size and stay
 			    readable. */}
 			<div class="nav-left relative flex origin-left items-center">
-				<a href="/" class="nav-logo text-[2.5rem] font-bold tracking-tight text-[var(--ink)]">
+				{/* The wordmark carries 柿渋色 kakishibu-iro (persimmon tannin) rather
+				    than --ink — the one piece of type on the site that is a mark
+				    rather than reading matter. --dye-name is tuned for DEPTH, not just
+				    legibility: it has to out-contrast the links beside it or the
+				    biggest thing in the bar reads as the furthest back. Lightening
+				    it on the light theme is a hierarchy regression, not a taste
+				    call, and the HUE is what makes both possible at once — see the
+				    dye block in global.css before recolouring. */}
+				<a href="/" class="nav-logo text-[2.5rem] font-bold tracking-tight text-[var(--dye-name)]">
 					Hiro Eernisse
 				</a>
 
