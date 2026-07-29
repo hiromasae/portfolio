@@ -436,8 +436,16 @@ const onProject = onHome || path.startsWith('/projects/');
 		if (projectsIntent === '1') root.classList.add('reveal-hold-land');
 		else if (projectsIntent) root.classList.add('reveal-skip');
 		else if (animate) root.classList.add('reveal-hold');
-		else if (loadIntro)
+		else if (loadIntro) {
 			root.classList.add(loadIntro === 'nav-intro-draw' ? 'reveal-hold-draw' : 'reveal-hold-wipe');
+			// The bar and the content enter as one choreography, so they wait on
+			// the type as one too — see whenTypeSettled below. The cascade is
+			// PAUSED (rule in Layout.astro's critical block) rather than given a
+			// bigger --hold: the holds are tuned against the intro's fixed
+			// delays, so pausing shifts the whole sequence intact, where
+			// rewriting animation-delay mid-flight would restart it.
+			root.classList.add('reveal-wait');
+		}
 
 		// Paint pre-paint at the starting q (carried if tweening, else rest).
 		setQ(animate ? carried : restQ);
@@ -523,21 +531,64 @@ const onProject = onHome || path.startsWith('/projects/');
 		// classes mid-forwards-fill is invisible. A scroll during the intro is
 		// fine: the wipes/draws ride clip-path and dash channels, orthogonal
 		// to the --q transforms, so the two compose instead of fighting.
+		// Don't start the entrance on type that's about to change under it.
+		// The wordmark and links wipe by clipping a PERCENTAGE of their own
+		// boxes, so a webfont swap mid-wipe re-resolves the clip against a new
+		// box AND re-sets the glyphs inside it, in one frame. Measured 07-29
+		// (dev, warm): Satoshi landed ~250ms into the draw and snapped the
+		// wordmark 435px → 348px, throwing the reveal edge ~83px backwards
+		// mid-motion; the links and the underline they carry jump with it.
+		// Only the left of the bar moves — the icons are SVG, immune to font
+		// metrics — which is exactly how it reads. Frame pacing was clean
+		// throughout (16.7ms median, no gap over 25ms), so this is a layout
+		// jump and not jank: nothing about how the animation is driven can fix
+		// it, only what it runs on top of.
+		//
+		// Waiting costs nothing visible — the bar is held hidden pre-paint
+		// until 'go' either way, so this just lands the entrance a beat later
+		// on type that then holds still. The race is the insurance: a slow,
+		// blocked or offline CDN must not swallow the entrance, so at 1200ms
+		// it plays over the fallback exactly as it does today. Fonts already
+		// pending by here (they start at first layout, before 'interactive'),
+		// so fonts.ready can't resolve early on an empty set.
+		var whenTypeSettled = function (run) {
+			if (!document.fonts || !document.fonts.ready) return run();
+			var fired = false;
+			var once = function () {
+				if (fired) return;
+				fired = true;
+				run();
+			};
+			document.fonts.ready.then(once, once);
+			window.setTimeout(once, 1200);
+		};
+
 		var runLoadIntro = function () {
-			// Scroll restoration can move the rest state between first paint
-			// and now (same recompute as runIntro). The hidden hold was drawn
-			// for restQ's variant; if the state changed, stand down — the bar
-			// just paints at rest, no entrance.
-			if (qFromScroll() !== restQ) {
-				// Stand down the content hold with the intro (same rare-jump
-				// trade as runIntro's bail).
-				root.classList.remove(loadIntro, 'reveal-hold-draw', 'reveal-hold-wipe');
-				return;
-			}
-			root.classList.add('nav-intro-go');
-			window.setTimeout(function () {
-				root.classList.remove(loadIntro, 'nav-intro-go');
-			}, loadIntro === 'nav-intro-draw' ? 1350 : 780);
+			whenTypeSettled(function () {
+				// Scroll restoration can move the rest state between first paint
+				// and now (same recompute as runIntro), and the type wait widens
+				// that window — a scroll during it stands the intro down here.
+				// The hidden hold was drawn for restQ's variant; if the state
+				// changed, stand down — the bar just paints at rest, no entrance.
+				if (qFromScroll() !== restQ) {
+					// Stand down the content hold with the intro (same rare-jump
+					// trade as runIntro's bail).
+					root.classList.remove(
+						loadIntro,
+						'reveal-wait',
+						'reveal-hold-draw',
+						'reveal-hold-wipe'
+					);
+					return;
+				}
+				// Both clocks start in the same frame, which is the point of the
+				// pause — the cascade's hold is measured from the intro's start.
+				root.classList.add('nav-intro-go');
+				root.classList.remove('reveal-wait');
+				window.setTimeout(function () {
+					root.classList.remove(loadIntro, 'nav-intro-go');
+				}, loadIntro === 'nav-intro-draw' ? 1350 : 780);
+			});
 		};
 
 		// 'interactive' means main and the cards exist and layout is measurable;

@@ -43,6 +43,16 @@ const {
 			html.projects-landing .reveal {
 				opacity: 1;
 			}
+			/* Held with the nav's load intro while the webfonts settle (see
+			   whenTypeSettled in Nav.astro). Paused, not re-delayed: the holds
+			   in global.css are tuned against the intro's fixed delays, so
+			   pausing shifts the whole cascade intact — and pausing catches the
+			   delay phase too, which is where this always lands. Here rather
+			   than in global.css so an HMR style swap can't drop it and let the
+			   content march off without the bar. */
+			html.reveal-wait .reveal {
+				animation-play-state: paused;
+			}
 			@media (prefers-reduced-motion: reduce) {
 				.reveal {
 					opacity: 1;
