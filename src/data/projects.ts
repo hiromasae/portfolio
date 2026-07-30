@@ -48,7 +48,7 @@ export const projects: Project[] = [
 		company: 'Suma Solutions Inc.',
 		year: '2025',
 		tags: ['Diagrams', 'Healthcare', 'UX'],
-		role: 'Designed user-flow and architecture diagrams clear enough for non-technical reviewers.',
+		role: 'Drew the user flows and architecture visuals for a non-technical review audience.',
 		blurb: 'Diagrams for a healthcare compliance product made to be clear enough for non-technical reviewers.',
 		problem:
 			'Suma needed a clearer way to explain how its platform worked during a commercialization review. The audience was not deeply technical, so the challenge was turning a pretty complex healthcare product into diagrams that were easy to follow and still accurate.',
@@ -62,9 +62,9 @@ export const projects: Project[] = [
 		slug: 'shipyard',
 		title: 'Shipyard',
 		company: 'Shipyard',
-		year: '2025–2026',
+		year: '2025',
 		tags: ['Product Design', 'UI/UX'],
-		role: 'Designed and shipped product UI with the dev team, from the main showcase to discovery flows.',
+		role: 'Shipped product UI with the dev team, from the main showcase to the discovery flows.',
 		blurb: 'A lighter project showcase platform shaped in close collaboration with the dev team.',
 		problem:
 			'A lot of project platforms feel more focused on submission rules than the work itself. Shipyard was meant to feel lighter and more current, with a cleaner way for teams to show what they built and for other people to browse through projects.',

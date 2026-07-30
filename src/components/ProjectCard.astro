@@ -10,8 +10,14 @@ const { project } = Astro.props;
 	id={`project-${project.slug}`}
 	href={`/projects/${project.slug}`}
 	class:list={[
-		'project-card group flex flex-col gap-5 scroll-mt-24 rounded-[1.5px]',
+		'project-card group flex flex-col gap-4 scroll-mt-24 rounded-[1.5px]',
 		'transition-[scale] duration-[var(--dur-card)] ease-out',
+		/* origin-top, not the default centre: scaling about the centre lifts the
+		   top edge by half the growth, so the heading rose on hover while the
+		   meta gap below it was opening — two conflicting reads of the same
+		   gesture. Anchored at the top, the heading holds its line and the whole
+		   card grows downward, the same direction the gap opens. */
+		'origin-top',
 		'hover:scale-[1.02] focus-within:scale-[1.02] active:scale-[0.99]',
 		'motion-reduce:hover:scale-100 motion-reduce:focus-within:scale-100 motion-reduce:active:scale-100',
 		'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]',
@@ -19,9 +25,9 @@ const { project } = Astro.props;
 >
 	{/* Metadata sits on the page background — reading as a label above the image,
 	    not inside a card. */}
+	{/* The column has exactly two children, so this gap is the whole
+	    title/metadata rhythm — no per-child margins fighting it. */}
 	<div class="flex min-w-0 flex-col gap-1">
-		{/* Dateline above the title: just the year, small and muted. */}
-		<span class="text-[0.8rem] font-medium tabular-nums text-[var(--ink-soft)]">{project.year}</span>
 		{/* Title-only underline that wipes in left-to-right on hover/focus — the
 		    site's nav-underline gesture — alongside the card zoom. The underline
 		    targets .project-card__title in global.css. */}
@@ -46,8 +52,16 @@ const { project } = Astro.props;
 			</svg>
 		</h3>
 		{/* One-line "what I did" under the title, so the role reads before the image.
-		    Negative margin pulls it tighter to the title than the column's gap-1. */}
-		<p class="-mt-0.5 max-w-2xl text-[0.95rem] leading-snug text-[var(--ink-soft)]">{project.role}</p>
+		    The year leads this line rather than taking a dateline of its own above
+		    the title: it's the thinnest fact on the card and a whole line of rhythm
+		    for four characters pushed the title off the top of the block. Same size
+		    and tone as the role, so the two read as one quiet metadata line and the
+		    title stays the only thing above it. */}
+		<p class="max-w-2xl text-[0.95rem] leading-snug text-[var(--ink-soft)]">
+			<span class="tabular-nums">{project.year}</span>
+			<span aria-hidden="true"> · </span>
+			{project.role}
+		</p>
 	</div>
 
 	{/* The image is the card: it carries the border. The whole link zooms as

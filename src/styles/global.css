@@ -582,7 +582,17 @@ h6 {
 	background-repeat: no-repeat;
 	background-position: left bottom;
 	background-size: 0% 2px;
-	padding-bottom: 3px;
+	/* 1px: the line hugs the title, reading as part of it rather than a rule
+	   under it. This is the floor, and it's tighter than it looks. The band is
+	   painted at the *bottom* of the padding box, so its top edge lands at
+	   (padding-bottom − 2px) relative to the content box: the gap to a
+	   descender is `padding − 0.544px` at md, from Supreme 700's real metrics
+	   (1000upm, hhea 980/−280, y yMin −205) against md:leading-tight on
+	   1.3rem — 2.46px at 3, 1.46px at 2, 0.46px at 1, and an overlap at 0.
+	   So "Shipyard" and "Discovery" clear the line by half a pixel here and
+	   will read as touching at some zoom levels. Below md the line-height is
+	   loose enough that there's ~3px to spare. */
+	padding-bottom: 1px;
 	transition: background-size var(--dur-card) var(--nav-ease);
 }
 .project-card:hover .project-card__title,
