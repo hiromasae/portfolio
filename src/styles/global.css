@@ -608,13 +608,22 @@ h6 {
 }
 /* ── Project card: title arrow ──
    Sequenced after the underline, with overlap: the → wipes in left-to-right
-   from ~55% through the underline wipe, then tilts -45° to point ↗ as its own
-   wipe is landing (~85% through). Overlapping keeps the left-to-right read
-   while settling the whole gesture in ~535ms instead of the 700ms a strict
-   chain costs — the delays are fractions of the tokens, so the choreography
-   can't drift out of sync. The base rule carries the exit transition (quick,
-   no delays) so un-hovering retracts everything at once instead of replaying
-   the stagger in reverse. */
+   from ~25% through the underline wipe, then tilts -45° to point ↗ halfway
+   through its own wipe. Overlapping keeps the left-to-right read while
+   settling the whole gesture in ~375ms instead of the 700ms a strict chain
+   costs — the delays are fractions of the tokens, so the choreography can't
+   drift out of sync. The base rule carries the exit transition (quick, no
+   delays) so un-hovering retracts everything at once instead of replaying the
+   stagger in reverse.
+
+   THE FRACTIONS ARE BOUNDED BY --dur-card, not chosen for feel. Everything
+   else on the card — zoom, lift, underline, shadow — has landed at 300ms.
+   These were 0.55 and 0.85, which put the tilt at 335–535ms: it began 35ms
+   AFTER the card had come to rest, with nothing else in flight, so it read as
+   a second event rather than part of the first one. At 0.25 and 0.5 the tilt
+   runs 175–375ms, starting while the card is still moving and trailing it by
+   75ms. If either token or fraction is retuned, keep the tilt's START inside
+   the card's own window — that overlap is what binds the arrow to the card. */
 .project-card__arrow {
 	clip-path: inset(0 100% 0 0);
 	transform: rotate(0deg);
@@ -628,9 +637,9 @@ h6 {
 	clip-path: inset(0 0 0 0);
 	transform: rotate(-45deg);
 	transition:
-		clip-path var(--dur-gesture) var(--nav-ease) calc(var(--dur-card) * 0.55),
+		clip-path var(--dur-gesture) var(--nav-ease) calc(var(--dur-card) * 0.25),
 		transform var(--dur-gesture) var(--nav-ease)
-			calc(var(--dur-card) * 0.55 + var(--dur-gesture) * 0.85);
+			calc(var(--dur-card) * 0.25 + var(--dur-gesture) * 0.5);
 }
 /* ── Project card: lift shadow ──
    Hover/focus only, fading in over --dur-card so it lands with the zoom and
@@ -751,9 +760,14 @@ h6 {
    arrow sitting on the right, which then wipes in and tilts to ↗ ("out").
    Here the arrow sits on the LEFT, so the wipe travels right-to-left and
    arrives at it, and the arrow answers by nudging further left ("back").
-   Same tokens, same easing, same 0.55 overlap fraction as the card, so the
-   two gestures stay relatives rather than look-alikes — see the
-   .project-card__arrow block above before retiming either.
+   Same tokens, same easing — see the .project-card__arrow block above before
+   retiming either.
+
+   The overlap fractions no longer match: the card's moved to 0.25 because it
+   has a zoom and a lift that must contain the arrow's stagger, and this link
+   has neither — it's type on paper, so a 0.55 nudge landing at 365ms trails
+   nothing and reads fine. Divergent on purpose; don't "resync" them without
+   re-reading why the card's number is what it is.
 
    No tilt on this one: the card's -45° is carrying a MEANING (this leaves
    the site), and there's no second meaning here for a rotation to encode,

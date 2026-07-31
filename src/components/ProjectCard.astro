@@ -11,7 +11,7 @@ const { project } = Astro.props;
 	href={`/projects/${project.slug}`}
 	class:list={[
 		'project-card group flex flex-col gap-4 scroll-mt-24 rounded-[1.5px]',
-		'transition-[scale] duration-[var(--dur-card)] ease-out',
+		'transition-[scale,translate] duration-[var(--dur-card)] ease-out',
 		/* origin-top, not the default centre: scaling about the centre lifts the
 		   top edge by half the growth, so the heading rose on hover while the
 		   meta gap below it was opening — two conflicting reads of the same
@@ -19,7 +19,27 @@ const { project } = Astro.props;
 		   card grows downward, the same direction the gap opens. */
 		'origin-top',
 		'hover:scale-[1.02] focus-within:scale-[1.02] active:scale-[0.99]',
+		/* The lift. A scale about a pinned top edge displaces every part in
+		   proportion to its distance from that edge — title 0px, role line
+		   +0.73, image top edge +1.61, card bottom edge +15.3 — so no two parts
+		   of the card travel together and the whole thing reads as separate
+		   pieces resizing rather than one object moving. This translate is the
+		   only displacement they share.
+
+		   It does NOT make the motion rigid: at 3px the top of the card rises
+		   while the bottom edge still drops ~12px, and squaring that would take
+		   a 15.4px lift, which is far too much. What it buys is the top edge
+		   coming off the page instead of staying pinned, and the metadata
+		   participating in the lift — it has no border of its own, so without
+		   this the frame's shadow was the only depth cue on the card and only
+		   the image appeared to rise.
+
+		   Same duration and curve as the zoom, so the two are one gesture.
+		   Press cancels it (active:translate-y-0), pairing with the 0.99 scale
+		   so the card settles back onto the page under the finger. */
+		'hover:-translate-y-[3px] focus-within:-translate-y-[3px] active:translate-y-0',
 		'motion-reduce:hover:scale-100 motion-reduce:focus-within:scale-100 motion-reduce:active:scale-100',
+		'motion-reduce:hover:translate-y-0 motion-reduce:focus-within:translate-y-0',
 		'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]',
 	]}
 >
@@ -64,15 +84,18 @@ const { project } = Astro.props;
 		</p>
 	</div>
 
-	{/* The image is the card: it carries the border. The whole link zooms as
-	    one unit on hover (scale on the <a>), so the blended metadata above
-	    scales along with it. The lift shadow is hover-only and lives with the
-	    other card hover choreography in global.css (.project-card__frame).
+	{/* The image is the card: it carries the border. The whole link zooms and
+	    lifts as one unit on hover (scale + translate on the <a>), so the
+	    blended metadata above rises along with it. This frame is the only
+	    bordered surface, so it's the only thing that can carry a shadow — the
+	    lift on the <a> is what keeps the metadata from being left behind. The
+	    shadow is hover-only and lives with the other card hover choreography
+	    in global.css (.project-card__frame).
 
 	    bg-clip-padding keeps the --surface-sunken bed out of the border area.
 	    --line is translucent, so it takes the colour of whatever sits behind
 	    it: painting the bed under the border (the default border-box clip)
-	    composited it over #f4f2ec instead of the page's paper and rendered
+	    composited it over --surface-sunken instead of the page's paper and rendered
 	    the edge ~7/255 darker than the about photo's identical border in
 	    light, and ~13/255 lighter in dark. Clipping to the padding box lets
 	    it composite over paper, like the about <img> which has no background
