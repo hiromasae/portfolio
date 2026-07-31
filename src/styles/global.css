@@ -31,7 +31,14 @@
 	--btn-text: #1a1917;
 	--btn-border: rgba(0, 0, 0, 0.18);
 
-	--focus-ring: #7a94c9;
+	/* Darkened from #7a94c9 (07-31). That value failed WCAG 1.4.11's 3:1 floor
+	   for non-text against this paper at 2.97:1 — the ring is a UI boundary, so
+	   3:1 is the bar it has to clear, and it was the one token on the site
+	   under its own floor. Hue and chroma held, lightness only: 3.86:1 against
+	   --paper and 3.96:1 against --surface. Found while measuring a page-ground
+	   change that was explored and reverted the same day; the bug predates it
+	   and is independent of it. */
+	--focus-ring: #6680b3;
 
 	/* ── The dye ──
 	   ONE colour on the site, and it's the wordmark. A traditional Japanese
