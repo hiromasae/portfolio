@@ -146,6 +146,33 @@
 	--dur-card: 300ms;
 	--dur-draw: 420ms;
 
+	/* ── The travelling pair ──
+	   The nav's two sliders — the shared underline moving between Projects and
+	   About, and the ink pill moving between the contact icons — are the only
+	   things on the site that TRAVEL a distance on hover. Everything else in
+	   the motion scale above is a wipe, a fade or a scale: gestures that happen
+	   in place, where --nav-ease's pure deceleration is right because there's
+	   no body going anywhere.
+	   These two are different. At --dur-gesture on --nav-ease the underline
+	   arrived the instant it left (07-31, Hiro: "a little too snappy"), which
+	   reads as the underline being redrawn under the new link rather than the
+	   same underline crossing to it — and the whole point of one shared slider
+	   is that it's the same object.
+	   So they get their own pair: longer, and eased like something with mass.
+	   The curve leaves slowly (x1 = 0.34 holds it back at the start, where
+	   --nav-ease is at its fastest), carries 2.99% of the travel past the
+	   target at 61% of the duration, and settles back — measured off the curve
+	   and confirmed against the rendered pixels (3.0% on both sliders: 2.3px
+	   of the underline's 77px Projects→About, 4.0px of the pill's 134px).
+	   3% is deliberately small. The overshoot is here to say the thing has
+	   weight, not to bounce; at this size it reads as the slider settling
+	   rather than as a separate wobble at the end of the move.
+	   Width rides the same pair so a slide between two differently-sized links
+	   stays ONE motion — a slider that arrives before it finishes resizing
+	   reads as two events. */
+	--dur-slide: 320ms;
+	--ease-slide: cubic-bezier(0.34, 1.3, 0.5, 1);
+
 	/* ── Reading measure ──
 	   The cap on any column of running prose (About's intro, a project's
 	   Background and Work). Set for SCANNABILITY, not for the page's grid: the
@@ -955,13 +982,38 @@ h6 {
 	pointer-events: none;
 	transform: translateX(0) translateX(-50%);
 	clip-path: inset(0 0 0 0);
+	/* Position and width ride the travelling pair (see --dur-slide) — this pill
+	   and the nav underline are the site's two sliders and must read as the
+	   same kind of object in motion. The clip-path wipe does NOT: appearing and
+	   disappearing are in-place gestures, so they stay on --dur-gesture with the
+	   rest of the wipes. (Only the slide between two icons is ever seen at the
+	   slide duration — an entrance snaps into position with transitions off
+	   before releasing the clip, see showAt in Nav.astro.) */
 	transition:
-		transform 0.1s cubic-bezier(0.4, 0, 0.1, 1),
-		width 0.16s cubic-bezier(0.3, 0, 0.1, 1),
+		transform var(--dur-slide) var(--ease-slide),
+		width var(--dur-slide) var(--ease-slide),
 		clip-path var(--dur-gesture) var(--nav-ease),
 		opacity 0.1s ease;
 	z-index: 60;
 	overflow: hidden;
+}
+
+/* Reduced motion snaps the pill between icons, matching the underline (whose
+   slide is declared inside a no-preference block). This gap predates the
+   travelling pair — the pill's slide was never gated, it was just short enough
+   at 0.1s to pass for a snap — and lengthening it to --dur-slide is what makes
+   gating it necessary. The clip-path wipe is already suppressed from the
+   script side (see the `reduce` branches of showAt/hide in Nav.astro), which
+   is why only these two survive here.
+   Restated in full rather than overriding transition-property alone: the base
+   rule's durations are a positional list, so dropping two properties off the
+   front would slide clip-path and opacity onto --dur-slide. */
+@media (prefers-reduced-motion: reduce) {
+	.contact-slider {
+		transition:
+			clip-path var(--dur-gesture) var(--nav-ease),
+			opacity 0.1s ease;
+	}
 }
 
 .contact-slider-text {
@@ -1496,12 +1548,13 @@ html.reveal-skip .reveal {
 		transition-duration: 0.09s;
 	}
 
-	/* The shared underline slides + resizes between links; under reduced motion
-	   it just snaps to each target (no transition declared). */
+	/* The shared underline slides + resizes between links on the travelling
+	   pair (see --dur-slide); under reduced motion it just snaps to each
+	   target (no transition declared). */
 	.nav-underline {
 		transition:
-			transform var(--dur-gesture) var(--nav-ease),
-			width var(--dur-gesture) var(--nav-ease);
+			transform var(--dur-slide) var(--ease-slide),
+			width var(--dur-slide) var(--ease-slide);
 	}
 
 	.icon-email,
