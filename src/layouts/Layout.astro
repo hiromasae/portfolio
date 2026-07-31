@@ -13,22 +13,24 @@ const {
 ---
 
 <!doctype html>
-<html lang="en">
+{/* data-theme is stamped in the MARKUP, not by the script below, so the site's
+    default survives with JS disabled or still parsing. Dark is that default. */}
+<html lang="en" data-theme="dark">
 	<head>
 		<meta charset="utf-8" />
 		{/* Resolve the theme before first paint so there's no flash of the wrong
-		    mode: honor a saved manual choice, else follow the OS preference. */}
+		    mode. Only an explicit saved choice can move it off dark; the OS
+		    preference is deliberately NOT consulted, so a visitor on a light
+		    desktop still lands on dark and the nav toggle is the way out. If
+		    that ever needs to go back to following the OS, the condition is the
+		    only thing to change — the attribute above stays as the fallback. */}
 		<script is:inline>
 			(function () {
 				try {
-					var stored = localStorage.getItem('theme');
-					var dark =
-						stored === 'dark' ||
-						(!stored && window.matchMedia('(prefers-color-scheme: dark)').matches);
-					document.documentElement.dataset.theme = dark ? 'dark' : 'light';
-				} catch (e) {
-					document.documentElement.dataset.theme = 'light';
-				}
+					if (localStorage.getItem('theme') === 'light') {
+						document.documentElement.dataset.theme = 'light';
+					}
+				} catch (e) {}
 			})();
 		</script>
 		{/* Critical hide for the content reveal — global.css drives the actual
