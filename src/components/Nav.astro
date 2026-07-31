@@ -137,11 +137,15 @@ const onProject = onHome || path.startsWith('/projects/');
 		    (play/pause-style); the script keeps aria-label and the hover pill
 		    on the same text. */}
 		<div id="theme-toggle-wrap" class="relative ml-8 flex self-center">
+			{/* The pre-JS name. Dark is the site's default (stamped on <html> in
+			    Layout.astro), so the button starts out offering the way OUT of
+			    it; the script's syncThemeState corrects this on load for a
+			    visitor whose saved choice is light. */}
 			<button
 				id="theme-toggle"
 				type="button"
 				class="btn-icon theme-toggle"
-				aria-label="Dark theme"
+				aria-label="Light mode"
 			>
 				<svg
 					viewBox="0 0 24 24"
@@ -745,12 +749,15 @@ const onProject = onHome || path.startsWith('/projects/');
 	const themeToggle = document.getElementById('theme-toggle');
 	const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 	// The button is named for the theme a click switches TO (play/pause-style):
-	// "Dark theme" while light is active, "Light theme" while dark is. The
-	// hover pill below shows the same text, so the visible label and the
-	// accessible name always agree. The glyph's resting position comes from
-	// CSS state alone; only the name needs syncing.
+	// "Dark mode" while light is active, "Light mode" while dark is. The hover
+	// pill below shows the same text, so the visible label and the accessible
+	// name always agree. The glyph's resting position comes from CSS state
+	// alone; only the name needs syncing.
+	// "mode", not "theme" (07-31, Hiro): the pill is read as an instruction by
+	// a visitor who has just moved the cursor onto a half-filled circle, and
+	// "light mode" is what that control is called everywhere else.
 	const themeLabel = () =>
-		document.documentElement.dataset.theme === 'dark' ? 'Light theme' : 'Dark theme';
+		document.documentElement.dataset.theme === 'dark' ? 'Light mode' : 'Dark mode';
 	const syncThemeState = () => {
 		themeToggle?.setAttribute('aria-label', themeLabel());
 	};
