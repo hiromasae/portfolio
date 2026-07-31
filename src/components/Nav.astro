@@ -849,6 +849,25 @@ const onProject = onHome || path.startsWith('/projects/');
 			});
 		});
 
+		// ── Wordmark → top of the page ──
+		// On home the wordmark's href="/" points at the page we're already on, so
+		// letting it navigate reloads the projects list to show it again: the bar
+		// plays its cross-page expand and every card cascades back in behind it.
+		// The visitor asked for the top of the list they're already reading, not a
+		// fresh arrival — so scroll there in place and let the scroll watcher fire
+		// the masthead trigger on the way up, exactly as scrolling by hand does.
+		// Off home the link navigates normally (that IS a fresh arrival).
+		const logo = nav.querySelector<HTMLAnchorElement>('.nav-logo');
+		logo?.addEventListener('click', (e) => {
+			if (nav.dataset.home !== 'true') return;
+			if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+			e.preventDefault();
+			// Drop any card fragment left on the URL, same as the Projects link.
+			if (location.hash) history.replaceState(null, '', '/');
+			// 'instant' overrides the stylesheet's `scroll-behavior: smooth`.
+			window.scrollTo({ top: 0, behavior: reduceMotion ? 'instant' : 'smooth' });
+		});
+
 		// Opening a project from the list records the exact scroll position it was
 		// opened from (as "slug:y"), so that project's "Back to projects" restores
 		// the very spot the visitor left — not just the card aligned under the nav
