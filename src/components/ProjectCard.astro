@@ -49,9 +49,13 @@ const { project } = Astro.props;
 	    title/metadata rhythm — no per-child margins fighting it. */}
 	<div class="flex min-w-0 flex-col gap-1">
 		{/* Title-only underline that wipes in left-to-right on hover/focus — the
-		    site's nav-underline gesture — alongside the card zoom. The underline
+		    site's shared underline gesture — alongside the card zoom. The underline
 		    targets .project-card__title in global.css. */}
-		<h3 class="text-lg font-bold tracking-tight text-[var(--ink)] md:text-[1.3rem] md:leading-tight">
+		{/* Stepped down a size when the list went two-up (2026-08-01): at half the
+		    old column width, 1.3rem titles ran to three lines on the longer ones
+		    and the card read as a headline with a picture under it rather than a
+		    piece of work with a name. */}
+		<h3 class="text-base font-bold tracking-tight text-[var(--ink)] md:text-[1.1rem] md:leading-tight">
 			<span class="project-card__title">{project.title}</span>
 			{/* A right-pointing arrow that wipes in left-to-right once the title
 			    underline finishes, then tilts up to point ↗. Choreography lives
@@ -65,7 +69,7 @@ const { project } = Astro.props;
 				stroke-linecap="round"
 				stroke-linejoin="round"
 				aria-hidden="true"
-				class="project-card__arrow ml-2 inline-block h-[1.1rem] w-[1.1rem] align-[-0.125em]"
+				class="project-card__arrow ml-2 inline-block h-[0.95rem] w-[0.95rem] align-[-0.125em]"
 			>
 				<line x1="4" y1="12" x2="19" y2="12"></line>
 				<polyline points="12 5 19 12 12 19"></polyline>
@@ -77,7 +81,9 @@ const { project } = Astro.props;
 		    for four characters pushed the title off the top of the block. Same size
 		    and tone as the role, so the two read as one quiet metadata line and the
 		    title stays the only thing above it. */}
-		<p class="max-w-2xl text-[0.95rem] leading-snug text-[var(--ink-soft)]">
+		{/* Down with the title for the two-up list; the card's own width is the
+		    measure now, so no max-w is needed on top of it. */}
+		<p class="text-[0.85rem] leading-snug text-[var(--ink-soft)]">
 			<span class="tabular-nums">{project.year}</span>
 			<span aria-hidden="true"> · </span>
 			{project.role}

@@ -4,11 +4,6 @@ import Icon from './Icon.astro';
 
 const path = Astro.url.pathname;
 const onHome = path === '/';
-const onAbout = path === '/about' || path === '/about/';
-// The home page is the projects listing, and project detail pages live under
-// the Projects section, so the Projects nav link is the active one on both.
-const onProject = onHome || path.startsWith('/projects/');
-
 ---
 
 <nav
@@ -16,8 +11,8 @@ const onProject = onHome || path.startsWith('/projects/');
 	data-home={onHome ? 'true' : 'false'}
 	class="sticky top-0 z-40 bg-[var(--paper)]"
 >
-	{/* The bar's whole geometry — vertical padding (height), wordmark/links
-	    scale, icon close-ranks slide — derives from one progress value --q
+	{/* The bar's whole geometry — vertical padding (height), wordmark scale,
+	    icon close-ranks slide — derives from one progress value --q
 	    (0 = expanded masthead, 1 = compact bar) via calc() in global.css. On
 	    the home page the scripts below TRIGGER a timed tween of --q between
 	    the two states when the scroll crosses the top of the page: expanded
@@ -25,55 +20,25 @@ const onProject = onHome || path.startsWith('/projects/');
 	<div class="nav-pad mx-auto max-w-[1280px] px-5">
 		{/* No flex gap here: it would also open up between the contact group and
 		    the theme toggle, breaking the compact close-ranks math in global.css
-		    (which assumes one uniform 0.375rem gap between all buttons). The
-		    logo↔links gap lives in the links' ml-7 instead. */}
+		    (which assumes one uniform 0.375rem gap between all buttons). */}
 		<div class="nav-inner flex items-center">
-			{/* Left cluster: wordmark + links compact as ONE unit — the wrapper
-			    carries the logo's scale (q-driven, see .nav-left in global.css),
-			    so the links and the whitespace before them shrink in exact
-			    proportion to the wordmark through pure layout (no JS width
-			    measurement, so no dependence on which font has loaded). The links
-			    counter-scale inside the shrunken wrapper (see .nav-links in
-			    global.css) to land at their own, larger compact size and stay
-			    readable. */}
+			{/* Left cluster: the wordmark alone since the Projects/About links came
+			    out (2026-08-01). The wrapper still carries the q-driven scale (see
+			    .nav-left in global.css) rather than the <a> itself — it's the
+			    cluster the masthead tween and the load intro both address, and it's
+			    where a second element beside the name would go back. */}
 			<div class="nav-left relative flex origin-left items-center">
 				{/* The wordmark carries 柿渋色 kakishibu-iro (persimmon tannin) rather
 				    than --ink — the one piece of type on the site that is a mark
 				    rather than reading matter. --dye-name is tuned for DEPTH, not just
-				    legibility: it has to out-contrast the links beside it or the
-				    biggest thing in the bar reads as the furthest back. Lightening
+				    legibility: it has to out-contrast the rest of the bar or the
+				    biggest thing in it reads as the furthest back. Lightening
 				    it on the light theme is a hierarchy regression, not a taste
 				    call, and the HUE is what makes both possible at once — see the
 				    dye block in global.css before recolouring. */}
 				<a href="/" class="nav-logo text-[2.5rem] font-bold tracking-tight text-[var(--dye-name)]">
 					Hiro Eernisse
 				</a>
-
-				{/* Projects/About sit right beside the wordmark. The link for the
-				    section you're on is marked active with aria-current (styled in
-				    global.css). */}
-				<div class="nav-links ml-7 hidden origin-left items-center gap-1 text-xl font-medium text-[var(--ink-soft)] sm:flex">
-					<a
-						href="/#projects"
-						data-projects-link
-						data-nav-link="projects"
-						class="rounded-none px-2 py-1 hover:text-[var(--ink)]"
-						aria-current={onProject ? 'page' : undefined}
-					>Projects</a>
-					<a
-						href="/about"
-						data-nav-link="about"
-						class="rounded-none px-2 py-1 hover:text-[var(--ink)]"
-						aria-current={onAbout ? 'page' : undefined}
-					>About</a>
-					{/* One shared underline that glides between the two links: it rests
-					    under the active section, follows the cursor on hover/focus and
-					    springs back on leave, and slides from the old link to the new one
-					    across a Projects↔About navigation (replayed by the inline script
-					    below). Positioned entirely by script; a CSS fallback under each
-					    active link covers the no-JS case (see global.css). */}
-					<span class="nav-underline" aria-hidden="true"></span>
-				</div>
 			</div>
 
 		<div id="contact-group" class="relative ml-auto flex items-center gap-1.5 self-center">
@@ -191,7 +156,7 @@ const onProject = onHome || path.startsWith('/projects/');
 	// ── Triggered masthead: the q model ──
 	// One progress value q (0 = expanded masthead, 1 = compact bar) drives the
 	// nav's entire geometry through calc() in global.css — vertical padding,
-	// wordmark/links scale, icon close-ranks slide are all functions of q, so
+	// wordmark scale, icon close-ranks slide are all functions of q, so
 	// the bar and its contents move as one unit BY CONSTRUCTION. q rests at
 	// exactly 0 or 1: on the home page, crossing the top of the page TRIGGERS
 	// a timed tween between the two states (expanded only at the top, compact
@@ -223,20 +188,6 @@ const onProject = onHome || path.startsWith('/projects/');
 		// "ms" suffix; keep the token in ms.
 		var DUR =
 			parseFloat(getComputedStyle(root).getPropertyValue('--dur-nav')) || 260;
-		var LOGO =
-			parseFloat(getComputedStyle(nav).getPropertyValue('--nav-logo-scale')) || 0.42;
-		var LINKS =
-			parseFloat(getComputedStyle(nav).getPropertyValue('--nav-links-scale')) || 0.7;
-		// The expanded wordmark's magnification (media-queried in global.css; the
-		// links counter it away, so only the name grows). Unlike LOGO/LINKS this
-		// can CHANGE while the page lives — crossing the viewport gate — and the
-		// q-links formula depends on it at rest (1/boost at q = 0), so it's
-		// re-read below when the gate flips.
-		var BOOST =
-			parseFloat(getComputedStyle(nav).getPropertyValue('--nav-boost')) || 1;
-		// The links' own net expanded scale (gated with the boost, same re-read).
-		var LBOOST =
-			parseFloat(getComputedStyle(nav).getPropertyValue('--nav-links-boost')) || 1;
 		// Trigger thresholds: expand only at (essentially) the top of the page,
 		// compact once you've scrolled away. The gap between the two lines is
 		// hysteresis — trackpad jitter around a single line can't make the bar
@@ -246,29 +197,16 @@ const onProject = onHome || path.startsWith('/projects/');
 		var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 		var q = onHome ? 0 : 1; // matches the stylesheet default before the first setQ
 
-		// Set q (vars live on <html>: main/footer ride --q too). The links'
-		// counter-scale is a NONLINEAR function of q (they must land at a net
-		// --nav-links-scale while riding inside the wrapper's --nav-logo-scale),
-		// so it can't be a pure calc() — both vars are set together here, the
-		// single writer. Keep the formula's endpoints in step with the static
-		// --q-links fallback in global.css.
-		// Crossing the boost gate changes what q-links must be AT REST (1/boost at
-		// q = 0), so the last-written var goes stale: re-read and re-paint. Keep
-		// the query in step with the --nav-boost media query in global.css.
-		window.matchMedia('(min-width: 1200px)').addEventListener('change', function () {
-			BOOST = parseFloat(getComputedStyle(nav).getPropertyValue('--nav-boost')) || 1;
-			LBOOST = parseFloat(getComputedStyle(nav).getPropertyValue('--nav-links-boost')) || 1;
-			setQ(q);
-		});
-
+		// Set q (vars live on <html>: main/footer ride --q too). Every other
+		// geometry var is a pure calc() on this one in global.css, so this is the
+		// whole writer. (It used to also write --q-links, the Projects/About
+		// links' nonlinear counter-scale, which no calc() could express; that
+		// went with the links on 2026-08-01, and with it the boost-gate
+		// matchMedia listener that kept the formula's inputs fresh.)
 		var setQ = function (v) {
 			v = Math.max(0, Math.min(1, v));
 			q = v;
 			root.style.setProperty('--q', String(v));
-			root.style.setProperty(
-				'--q-links',
-				((LBOOST - (LBOOST - LINKS) * v) / (BOOST - (BOOST - LOGO) * v)).toFixed(5)
-			);
 		};
 		// A tween in flight: its rAF handle and destination. tweenTarget doubles
 		// as "the state we're heading to" for the hysteresis in qFromScroll.
@@ -286,8 +224,9 @@ const onProject = onHome || path.startsWith('/projects/');
 		};
 
 		// The trigger animation: glide q to `to` from wherever it is now. rAF-
-		// driven (not a CSS transition) because --q-links is a nonlinear function
-		// of q that only setQ can keep exact. Retargetable mid-flight — a fresh
+		// driven rather than a CSS transition on --q: the var is unregistered, so
+		// it can't be transitioned, and the rAF loop is also what let the removed
+		// --q-links formula stay exact mid-flight. Retargetable mid-flight — a fresh
 		// call cancels the old tween and continues from the current q, so rapid
 		// direction changes fold into one motion. Reduced motion snaps.
 		var tweenTo = function (to) {
@@ -536,12 +475,12 @@ const onProject = onHome || path.startsWith('/projects/');
 		// fine: the wipes/draws ride clip-path and dash channels, orthogonal
 		// to the --q transforms, so the two compose instead of fighting.
 		// Don't start the entrance on type that's about to change under it.
-		// The wordmark and links wipe by clipping a PERCENTAGE of their own
-		// boxes, so a webfont swap mid-wipe re-resolves the clip against a new
+		// The wordmark wipes by clipping a PERCENTAGE of its own box, so a
+		// webfont swap mid-wipe re-resolves the clip against a new
 		// box AND re-sets the glyphs inside it, in one frame. Measured 07-29
 		// (dev, warm): Satoshi landed ~250ms into the draw and snapped the
 		// wordmark 435px → 348px, throwing the reveal edge ~83px backwards
-		// mid-motion; the links and the underline they carry jump with it.
+		// mid-motion.
 		// Only the left of the bar moves — the icons are SVG, immune to font
 		// metrics — which is exactly how it reads. Frame pacing was clean
 		// throughout (16.7ms median, no gap over 25ms), so this is a layout
@@ -616,128 +555,6 @@ const onProject = onHome || path.startsWith('/projects/');
 				document.removeEventListener('readystatechange', onReady);
 				arrive();
 			});
-		}
-	})();
-</script>
-
-<script is:inline>
-	// ── Sliding nav-link underline (cross-page arrival) ──
-	// Like the nav's collapse animation, the underline's Projects↔About slide
-	// can't tween across an MPA page load on its own. So we persist where the
-	// underline was sitting when a page is left, and on arrival diff it against
-	// this page's active link: same machinery as the nav-state script above.
-	//
-	//   1. pagehide: store the link the underline currently sits under (which the
-	//      hover/focus handlers keep up to date), NOT just this page's active
-	//      link. If the visitor hovered the link they then clicked, the underline
-	//      already slid there — so the destination must start from THAT spot, or
-	//      it would visibly reset and replay the same slide a second time.
-	//   2. On arrival: find this page's active link. Paint the underline resting
-	//      under it — unless a fresh, DIFFERENT spot was carried over, in which
-	//      case paint it under the OLD spot and release it to slide to the new
-	//      one. (Hover-then-click lands with carried === active → no replay; a
-	//      navigation that didn't touch the nav, e.g. a project card, still
-	//      slides.)
-	//
-	// Runs inline (pre-paint) so the underline is placed before first paint: no
-	// flash of it at the destination before the slide, and adding `has-slider`
-	// here retires the CSS fallback underline in the same frame. Measurements use
-	// offsetLeft/offsetWidth (untransformed layout space), so they're unaffected
-	// by the compact scale and identical on both pages.
-	(function () {
-		var links = document.querySelector('#site-nav .nav-links');
-		if (!links) return;
-		var underline = links.querySelector('.nav-underline');
-		var items = links.querySelectorAll('a[data-nav-link]');
-		if (!underline || !items.length) return;
-		// JS is driving the slider now — drop the per-link CSS fallback underline.
-		links.classList.add('has-slider');
-
-		var active = null;
-		var activeKey = null;
-		for (var i = 0; i < items.length; i++) {
-			if (items[i].getAttribute('aria-current') === 'page') {
-				active = items[i];
-				activeKey = items[i].getAttribute('data-nav-link');
-			}
-		}
-		if (!active) return;
-
-		// Place the underline under `link`. With animate=false the move is snapped
-		// (transitions suppressed and flushed) so it can't tween from a stale
-		// spot; with animate=true it rides the CSS transition and glides.
-		var place = function (link, animate) {
-			// Record which link the underline now sits under, so pagehide can carry
-			// the live position across the navigation (the module hover handlers
-			// update this too — keep the two in step).
-			underline.dataset.at = link.getAttribute('data-nav-link') || '';
-			var cs = getComputedStyle(link);
-			var padL = parseFloat(cs.paddingLeft) || 0;
-			var padR = parseFloat(cs.paddingRight) || 0;
-			var x = link.offsetLeft + padL;
-			var w = Math.max(0, link.offsetWidth - padL - padR);
-			if (!animate) underline.style.transition = 'none';
-			underline.style.transform = 'translateX(' + x + 'px)';
-			underline.style.width = w + 'px';
-			if (!animate) {
-				void underline.offsetWidth;
-				underline.style.transition = '';
-			}
-		};
-
-		// Where the underline sat on the page we just left — the slide's starting
-		// point, if fresh and different from this page's active link.
-		var from = null;
-		try {
-			var raw = sessionStorage.getItem('nav-underline');
-			sessionStorage.removeItem('nav-underline');
-			if (raw) {
-				var sep = raw.lastIndexOf(':');
-				var key = raw.slice(0, sep);
-				if (Date.now() - +raw.slice(sep + 1) < 10000 && key !== activeKey) {
-					from = links.querySelector('a[data-nav-link="' + key + '"]');
-				}
-			}
-		} catch (e) {}
-
-		// Carry the underline's live spot to the next page — captured when the
-		// visitor COMMITS a navigation (a link click), not on pagehide. By pagehide
-		// the link has lost focus and the unload-time focus/hover springback has
-		// already snapped the underline back to the active link, which was
-		// overwriting the carried spot and making the destination replay a slide
-		// the visitor had just seen on hover. The bubble phase runs after each
-		// link's own handler, so a click that only scrolls in place (the Projects
-		// link on home calls preventDefault) is skipped, as are new-tab/modified
-		// clicks that don't navigate this tab.
-		document.addEventListener('click', function (e) {
-			var a = e.target && e.target.closest && e.target.closest('a[href]');
-			if (!a || e.defaultPrevented) return;
-			if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-			try {
-				sessionStorage.setItem(
-					'nav-underline',
-					(underline.dataset.at || activeKey) + ':' + Date.now()
-				);
-			} catch (err) {}
-		});
-
-		var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-		if (from && !reduce) {
-			place(from, false); // paint under the old spot, style flushed
-			// Mark the arrival slide in flight so the module's font/resize realign
-			// doesn't snap it straight to the end (see restUnderline below).
-			underline.dataset.sliding = '1';
-			underline.addEventListener('transitionend', function done() {
-				underline.dataset.sliding = '';
-				underline.removeEventListener('transitionend', done);
-			});
-			// Release on the next frame so the transition animates from the
-			// flushed 'from' state to the active link rather than snapping.
-			requestAnimationFrame(function () {
-				place(active, true);
-			});
-		} else {
-			place(active, false); // no slide to replay — just rest under active
 		}
 	})();
 </script>
@@ -922,7 +739,8 @@ const onProject = onHome || path.startsWith('/projects/');
 	// whichever one is hovered or focused, and carrying that icon's label. When
 	// moving between icons it slides + resizes; on appearance it wipes in left
 	// to right, and on hide it wipes back out right to left (no slide from the
-	// corner, no fade) — the same in/out grammar as the nav links' underline.
+	// corner, no fade) — the same in/out grammar as the project cards' title
+	// underline.
 	const group = document.getElementById('contact-group');
 	const pill = group?.querySelector<HTMLElement>('.contact-slider');
 	const pillText = pill?.querySelector<HTMLElement>('.contact-slider-text');
@@ -974,7 +792,7 @@ const onProject = onHome || path.startsWith('/projects/');
 
 		// Slide the current text out to the right, then slide `text` in from the
 		// left — one continuous left-to-right motion, the same direction as the
-		// pill's entrance wipe and the nav-link underline — used for the copy
+		// pill's entrance wipe and the card title underline — used for the copy
 		// feedback, so "Copied!" animates in and back without resizing the pill
 		// (which clips the outgoing/incoming text via its overflow: hidden).
 		const swapText = (text: string) => {
@@ -1005,7 +823,7 @@ const onProject = onHome || path.startsWith('/projects/');
 				pill.style.opacity = '1';
 				place(icon, text); // slide + resize to the new icon
 			} else {
-				// Appear with a left-to-right wipe (matching the nav-link
+				// Appear with a left-to-right wipe (matching the card title
 				// underline) rather than a fade: kill transitions, position it
 				// fully clipped from the right edge, then release the clip so the
 				// label reveals left to right. Reduced motion just snaps it in.
@@ -1023,7 +841,7 @@ const onProject = onHome || path.startsWith('/projects/');
 		const hide = () => {
 			visible = false;
 			// Wipe out right-to-left — the entrance wipe played in reverse, the
-			// same in/out symmetry as the nav links' underline (which grows from
+			// same in/out symmetry as the card title underline (which grows from
 			// and retracts toward its left edge). Opacity stays 1; the pill is
 			// hidden purely by the clip. Reduced motion snaps it away instead.
 			if (reduce) {
@@ -1219,75 +1037,5 @@ const onProject = onHome || path.startsWith('/projects/');
 				}, 80);
 			});
 		});
-	}
-
-	// ── Sliding nav-link underline (interactivity) ──
-	// The inline script above already positioned the underline under the active
-	// link (and replayed any cross-page slide). This adds the live behaviour:
-	// the underline follows the cursor/focus to whichever link is hovered, and
-	// springs back to the active link when the pointer or focus leaves. Moving
-	// between the two links slides it across (each link's mouseenter repositions
-	// it), matching the contact pills' slide + resize grammar.
-	const navLinksEl = document.querySelector<HTMLElement>('#site-nav .nav-links');
-	const navUnderline = navLinksEl?.querySelector<HTMLElement>('.nav-underline');
-	if (navLinksEl && navUnderline) {
-		navLinksEl.classList.add('has-slider'); // defensive: inline script may have been skipped
-		const navItems = Array.from(navLinksEl.querySelectorAll<HTMLAnchorElement>('a[data-nav-link]'));
-		const activeItem = () =>
-			navItems.find((a) => a.getAttribute('aria-current') === 'page') ?? navItems[0];
-		const reduceUnderline = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-		// Slide (or, with animate=false, snap) the underline under `link`. Widths
-		// are measured in the container's untransformed layout space, so the
-		// numbers are correct whether the nav is expanded or compact.
-		const placeUnderline = (link: HTMLElement | undefined, animate: boolean) => {
-			if (!link) return;
-			// Keep the carried-position record current (mirrors the inline place()).
-			navUnderline.dataset.at = link.getAttribute('data-nav-link') ?? '';
-			const cs = getComputedStyle(link);
-			const padL = parseFloat(cs.paddingLeft) || 0;
-			const padR = parseFloat(cs.paddingRight) || 0;
-			const x = link.offsetLeft + padL;
-			const w = Math.max(0, link.offsetWidth - padL - padR);
-			if (!animate) navUnderline.style.transition = 'none';
-			navUnderline.style.transform = `translateX(${x}px)`;
-			navUnderline.style.width = `${w}px`;
-			if (!animate) {
-				void navUnderline.offsetWidth;
-				navUnderline.style.transition = '';
-			}
-		};
-
-		const slide = !reduceUnderline;
-		navItems.forEach((link) => {
-			link.addEventListener('mouseenter', () => placeUnderline(link, slide));
-			link.addEventListener('focus', () => placeUnderline(link, slide));
-		});
-		// Spring back to the active link once hover/focus leaves the group.
-		navLinksEl.addEventListener('mouseleave', () => placeUnderline(activeItem(), slide));
-		navLinksEl.addEventListener('focusout', (e) => {
-			if (!navLinksEl.contains(e.relatedTarget as Node)) placeUnderline(activeItem(), slide);
-		});
-
-		// Re-rest the underline (no animation) whenever the links' geometry can
-		// shift out from under it: the web font swapping in after first paint, or
-		// a viewport resize (including crossing the sm breakpoint where the links
-		// appear, and the compact ⇄ expanded change on the home page).
-		const restUnderline = () => {
-			// Don't yank the underline to the active link mid-arrival-slide (the
-			// inline script flags that with data-sliding); let the glide finish.
-			if (navUnderline.dataset.sliding === '1') return;
-			placeUnderline(activeItem(), false);
-		};
-		document.fonts?.ready.then(restUnderline);
-		let underlineResizeTimer = 0;
-		window.addEventListener(
-			'resize',
-			() => {
-				window.clearTimeout(underlineResizeTimer);
-				underlineResizeTimer = window.setTimeout(restUnderline, 100);
-			},
-			{ passive: true }
-		);
 	}
 </script>

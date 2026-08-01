@@ -189,14 +189,15 @@
 	--dur-card: 300ms;
 	--dur-draw: 420ms;
 
-	/* ── The travelling pair ──
-	   The nav's two sliders — the shared underline moving between Projects and
-	   About, and the ink pill moving between the contact icons — are the only
-	   things on the site that TRAVEL a distance on hover. Everything else in
-	   the motion scale above is a wipe, a fade or a scale: gestures that happen
-	   in place, where --nav-ease's pure deceleration is right because there's
-	   no body going anywhere.
-	   These two are different. At --dur-gesture on --nav-ease the underline
+	/* ── The travelling slider ──
+	   The nav's ink pill, moving between the contact icons, is the only thing on
+	   the site that TRAVELS a distance on hover. Everything else in the motion
+	   scale above is a wipe, a fade or a scale: gestures that happen in place,
+	   where --nav-ease's pure deceleration is right because there's no body
+	   going anywhere. (Until 08-01 it had a twin — the shared underline that
+	   moved between the Projects and About links — and the pair is what these
+	   tokens were cut against.)
+	   At --dur-gesture on --nav-ease the underline
 	   arrived the instant it left (07-31, Hiro: "a little too snappy"), which
 	   reads as the underline being redrawn under the new link rather than the
 	   same underline crossing to it — and the whole point of one shared slider
@@ -400,53 +401,38 @@ body {
    contents sit at the old padding midpoint, half that, 2.75rem.
 
    --q defaults to 1 (compact, zero shift — safe for any page without the
-   nav) and the home page's masthead flips it to 0. --q-links (the links'
-   nonlinear counter-scale, see .nav-links below) is always written together
-   with --q by Nav.astro's setQ; the static value here (0.7 / 0.42) covers
-   interior pages and no-JS — keep in step. */
+   nav) and the home page's masthead flips it to 0. Nav.astro's setQ is its
+   only writer; every other var below is a pure calc() on it. */
 html {
 	--q: 1;
-	--q-links: 1.6667;
 	--nav-shift: 5.5rem;
 	--nav-shift-inner: 2.75rem;
-	/* Expanded-state magnification for the wordmark ALONE: the left cluster's
-	   scale runs boost → --nav-logo-scale instead of 1 → --nav-logo-scale, and
-	   the links counter-scale the boost away (see --q-links below), so only the
-	   name grows. Pure transform through the same channel the collapse uses —
+	/* Expanded-state magnification for the wordmark: the left cluster's
+	   scale runs boost → --nav-logo-scale instead of 1 → --nav-logo-scale.
+	   (Until 08-01 the cluster also held the Projects/About links, which
+	   counter-scaled the boost away so only the name grew; the wordmark is
+	   the whole cluster now.) Pure transform through the same channel the
+	   collapse uses —
 	   layout and the compact bar are untouched. Lives on html (not #site-nav)
 	   because the :has() fallback below must resolve it. Wide viewports only:
 	   below the gate the boosted wordmark (its layout box doesn't grow) would
 	   visually run into the contact icons. Keep the gate in step with the
 	   matchMedia listener in Nav.astro. */
 	--nav-boost: 1;
-	/* Baseline seat: vertically-centered links float visibly above the boosted
-	   wordmark's baseline, so at q = 0 they translate down EXACTLY onto it —
-	   the two texts share a bottom line, the same call as the compact bar's
-	   --nav-seat-compact below (2026-07-23; supersedes the earlier "a hair
-	   high reads better" back-off), the seat tweening away with the collapse.
-	   The value is the measured baseline gap ÷ the boost — the translate runs
-	   in .nav-left's pre-scale space, so the wrapper multiplies it back up.
-	   --nav-icon-seat brings the right cluster's centers down onto the seated
-	   links' glyph centers (measured; NOT boost-divided — the wrappers sit
-	   outside the scaled .nav-left): the masthead is a tall hero lockup, so
-	   centering the icons in its full height would float them mid-air —
-	   they read as part of the baseline-seated secondary row instead. Both
-	   gated with the boost: at ×1 the centered float is the ordinary nav
-	   idiom and stays. */
-	--nav-seat: 0rem;
+	/* Baseline seat for the right cluster: it drops the contact icons' and
+	   toggle's centers out of the masthead's vertical middle onto the line the
+	   Projects/About links used to hold — their cap-height midpoint, which this
+	   value was measured against (see the gated block below). The masthead is a
+	   tall hero lockup, so centering the icons in its full height floats them
+	   mid-air; seated, they read as the secondary row beside the name.
+	   NOT boost-divided (the wrappers sit outside the scaled .nav-left), and
+	   gated with the boost: at ×1 the centered float is the ordinary nav idiom
+	   and stays.
+	   08-01: the links this was measured onto are GONE, so the number no longer
+	   aligns the icons to anything on the page — it just holds the position
+	   Hiro signed off on. Re-seat it against the wordmark if the masthead's
+	   right cluster ever looks unmoored. */
 	--nav-icon-seat: 0rem;
-	/* Compact-bar seat — the LINKS only. Flex-centring floats their baseline
-	   ~1.3px above the wordmark's; this nudges them down onto it so the two
-	   texts share a bottom line (the underline then drops just below the
-	   name's baseline, where the text used to sit). The icons/toggle stay
-	   flex-centred: the compact bar's centreline IS the wordmark's optical
-	   centre, and standalone glyphs read by their geometric centre — the
-	   baseline nudge is a text-to-text concern that shouldn't drag them down.
-	   Width-independent — the compact bar is identical at every viewport — so
-	   ungated, unlike the masthead seats above; the * --q term in the
-	   transform zeroes it at q = 0, leaving the expanded state alone. Runs in
-	   .nav-left's pre-scale space (×0.42): 0.162rem ≈ 1.29px. */
-	--nav-seat-compact: 0.162rem;
 	/* The compact sizes of the two secondary clusters. They live up here rather
 	   than on #site-nav with --nav-logo-scale because the boosts below are
 	   defined as EQUAL to them, and a custom property can only reference one
@@ -455,59 +441,39 @@ html {
 	   --nav-icon-scale is 0.70, up from an original 0.62: at 0.62 the ~1.9px
 	   strokes read a size class smaller beside the bold compact wordmark, and
 	   the ~34px hit boxes ran well under touch-target guidance (the contact
-	   icons are the only nav actions on phones, where the links are sm:-gated). */
-	--nav-links-scale: 0.7;
+	   icons are the only nav actions on phones). */
 	--nav-icon-scale: 0.7;
-	/* ── The name grows a lot; the secondary line grows a little ──
-	   The links' net expanded scale runs to --nav-links-boost instead of 1, and
-	   the right cluster's uniform miniature runs --nav-icon-boost → 0.7 instead
-	   of 1 → 0.7 (still anchored flush right). Both cancel at q = 1: the compact
+	/* ── The name grows a lot; the icons grow a little ──
+	   The right cluster's uniform miniature runs --nav-icon-boost → 0.7 instead
+	   of 1 → 0.7 (still anchored flush right), cancelling at q = 1: the compact
 	   bar never changes.
-	   07-31, Hiro: the links and icons should "just extend downward without
-	   growing" — so both were PINNED to their compact scales. Before that they
-	   were boosted to 1.06 and 1.12 at ≥1200px (and an ungated 1 below the gate,
-	   still ~1.43× the compact links), which made the masthead read as a uniform
+	   07-31, Hiro: the secondary row should "just extend downward without
+	   growing" — so it was PINNED to its compact scale. Before that it was
+	   boosted to 1.12 at ≥1200px, which made the masthead read as a uniform
 	   magnification of the whole bar — the wordmark was the biggest thing in it
 	   but not the only thing changing, so the size step didn't single it out.
-	   08-01, Hiro: BOTH come off the pin — the links and the icons together, one
-	   shared factor of 1.25 on the 0.7 compact scale. So the 1.25rem links render
-	   16.63px compact / 20.78px expanded and the glyphs 25.27px / 31.58px, while
-	   the wordmark still runs 19.95px → 60.8px. That ratio is the whole point:
-	   the secondary line steps up enough to feel like part of the masthead, the
-	   name steps up three times as far and stays the hero. 1.1 was tried first
-	   and Hiro called it too little; the pre-07-31 1.51×/1.6× is the other edge,
-	   where the bar reads as a uniform magnification.
-	   ONE factor for both clusters on purpose — the pre-07-31 geometry stepped
-	   them unevenly (1.06 vs 1.12) and the secondary line read as two sizes.
+	   08-01, Hiro: off the pin, a factor of 1.25 on the 0.7 compact scale, so
+	   the glyphs render 25.27px compact / 31.58px expanded while the wordmark
+	   runs 19.95px → 60.8px. That ratio is the whole point: the icons step up
+	   enough to feel like part of the masthead, the name steps up three times as
+	   far and stays the hero. 1.1 was tried first and Hiro called it too little;
+	   the pre-07-31 1.6× is the other edge, where the bar reads as a uniform
+	   magnification. (The Projects/About links carried the same 1.25 factor
+	   through their own --nav-links-boost — one factor for both clusters, so the
+	   secondary line never read as two sizes — until they came out on 08-01.)
 	   UNGATED, unlike the wordmark's own boost: Hiro's call (08-01) after seeing
 	   it gated to ≥1200px, where a narrower window showed no change at all.
-	   Below the gate the secondary line is the only thing that grows — the
-	   wordmark doesn't — and that is the accepted trade. Nothing needs
-	   re-measuring down there: both seats are 0 below 1200px, so the links stay
-	   flex-centred and grow about their own centre, measured dead level with the
-	   icons at every width down to 660px (links are sm:-gated away below that).
-	   LITERALS, not calc(var(--nav-links-scale) * 1.25): Nav.astro parseFloats
-	   --nav-links-boost straight out of getComputedStyle for its q-links formula,
-	   and an unregistered custom property hands back calc() text unevaluated —
-	   parseFloat would read NaN and fall back to 1. --nav-icon-boost needs no JS
-	   (its cluster's transform is pure calc on --q, below) but stays a literal
-	   too, so the two read as the pair they are.
-	   The ≥1200px seats are cut to these numbers; re-measure both if either
-	   moves. The icons' own growth does NOT move their seat — each button scales
-	   about its own centre — but the links' does, since a taller cap height at
-	   the same baseline lifts the midpoint the icons are centred on. */
-	--nav-links-boost: 0.875;
+	   Below the gate the icons are the only thing that grows — the wordmark
+	   doesn't — and that is the accepted trade. Nothing needs re-measuring down
+	   there: the seat is 0 below 1200px, so the icons stay flex-centred and grow
+	   about their own centre.
+	   A LITERAL, not calc(var(--nav-icon-scale) * 1.25): an unregistered custom
+	   property hands calc() text back unevaluated, so anything parseFloat-ing it
+	   out of getComputedStyle reads NaN. Nothing does today — the cluster's
+	   transform is pure calc on --q, below — but the links' twin token was read
+	   that way by Nav.astro, and the trap is worth staying clear of.
+	   The ≥1200px seat is cut to this number; re-measure it if this moves. */
 	--nav-icon-boost: 0.875;
-	/* Name→links air dial for the masthead ONLY (compact always keeps the
-	   ml-7 layout gap): a translate, not margin — margin is layout and would
-	   leak into the compact bar. Runs in .nav-left's pre-scale space like
-	   --nav-seat, hence visual px ÷ boost; negative pulls tighter than
-	   proportional. 07-22 shipped +0.49rem (~12px extra air, rationale: the
-	   then-lifted links needed horizontal separation); 07-23 Hiro asked to
-	   tighten — now 0, i.e. the masthead gap is exactly the compact gap
-	   magnified, consistent with the boost's pure-scale construction. The
-	   token stays (keyframes reference it) as the redial point. */
-	--nav-gap: 0rem;
 	/* Contact-gap dial for the masthead ONLY: how much TIGHTER than the
 	   pure-scale spread each gap between the contact icons sits at q = 0
 	   (07-24, Hiro: the magnified gaps read too airy — and again 08-01, once
@@ -522,7 +488,7 @@ html {
 	   (they sit 1.67px apart at 0.24rem); past that the targets overlap and
 	   the only tightening left is the buttons' 0.5rem padding, which is
 	   compact-bar and touch-target territory.
-	   A translate like --nav-gap — each button shifts right by this per contact
+	   A translate, not a layout gap — each button shifts right by this per contact
 	   gap between it and the right-anchored cluster edge, so every intra-contact
 	   gap shrinks by exactly this much; the toggle's deliberate ml-8 separation
 	   and the compact bar keep their layout gaps. Riding (1 − --q) is what keeps
@@ -538,56 +504,41 @@ html {
 	--nav-toggle-tighten: 0rem;
 }
 
-/* Only the wordmark's boost and the two seats are gated. The links' and icons'
-   boosts left this block on 07-31 when they were pinned to their compact scales
-   — and the tighten dials went with them, since they existed only to take back
-   air the magnification added. Their 08-01 step back up (0.77 each, see
-   --nav-links-boost above) stayed OUT of the gate on purpose: Hiro wants the
-   secondary line slightly larger in the masthead at every width, not only where
-   the wordmark grows.
-   The seats stay gated: they're the masthead's baseline lockup, and below the
-   gate there's no boosted wordmark to seat onto. */
+/* Only the wordmark's boost and the icon seat are gated. The icons' boost left
+   this block on 07-31 when it was pinned to the compact scale — and the tighten
+   dials went with it, since they existed only to take back air the
+   magnification added. Its 08-01 step back up (see --nav-icon-boost above)
+   stayed OUT of the gate on purpose: Hiro wants the secondary row slightly
+   larger in the masthead at every width, not only where the wordmark grows.
+   The seat stays gated: it's the masthead's baseline lockup, and below the gate
+   there's no boosted wordmark to seat onto. */
 @media (min-width: 1200px) {
 	html {
 		--nav-boost: 1.28; /* 2.5rem wordmark reads ~3.2rem expanded */
-		/* Re-measured 07-31 for the pinned links (were 0.488rem / 0.59rem).
-		   Both had to move: the links counter-scale about their box's vertical
-		   centre, so shrinking them from 0.828 to 0.547 of the wrapper pulls
-		   their baseline UP toward that centre, and the seat has to make up the
-		   difference. The icon seat follows in lockstep, as it always must.
-		   Measured in Chrome with the webfonts loaded, at the resting expanded
-		   state: baselines off a zero-height inline-block probe (its bottom
-		   margin edge rests on the baseline), the links' glyph centre off the
-		   CAP-HEIGHT midpoint — not the ink extents of the word, which let the
-		   j in "Projects" drag the centre 1.75px low. That metric is the one
-		   the old values were cut to: at 0.59rem the icon centres measured
-		   0.04px off the links' cap midpoint, which is what confirms it.
-		   Both now measure 0.00px: links' baseline on the wordmark's, icon
-		   centres on the links' glyph centres — the 07-23 alignment calls,
-		   which the shipped values had drifted 2.77px off at the baseline.
-		   Re-measured again 08-01 for the stepped-up secondary line (were
-		   0.726rem / 0.896rem at the 07-31 pin), both moving the opposite way
-		   from 07-31 for the same two reasons: the links counter-scale about
-		   their box's vertical CENTRE, so growing them (0.547 → 0.684 of the
-		   wrapper) pushes their baseline back DOWN away from it and the seat
-		   gives up what it made up; and a
-		   taller cap height at the same baseline lifts the cap MIDPOINT, so the
-		   icons follow it up. Both alignments land where they were, to 0.01px. */
-		--nav-seat: 0.666rem;
+		/* Measured, not dialled — but against a row that has since been
+		   removed. Through 08-01 this sat the icon centres on the Projects/About
+		   links' glyph centres, taken off the CAP-HEIGHT midpoint (not the word's
+		   ink extents, which let the j in "Projects" drag the centre 1.75px low),
+		   with the links themselves seated onto the wordmark's baseline by a
+		   companion --nav-seat. Both were re-measured twice as the links' scale
+		   moved — 0.488/0.59 → 0.726/0.896 at the 07-31 pin → 0.666/0.817 when
+		   they stepped back up — each time landing the two alignments to 0.01px.
+		   The links came out later the same day. This value is what survives:
+		   the height the right cluster has always dropped to, now holding on its
+		   own. Nothing on the page marks that line any more, so if the cluster
+		   ever reads unmoored, re-measure against the wordmark rather than
+		   nudging. */
 		--nav-icon-seat: 0.817rem;
 	}
 }
 
 html:has(#site-nav[data-home='true']) {
 	--q: 0;
-	/* Counter the wrapper's boost down to the links' own net boost (setQ's
-	   formula gives the same links-boost/boost at q = 0 — keep in step). */
-	--q-links: calc(var(--nav-links-boost) / var(--nav-boost));
 }
 
 /* The wordmark's compact scale — the one scale that still differs between the
-   two states, and so the only one left here. Its siblings --nav-links-scale and
-   --nav-icon-scale moved up to html on 07-31; see the note there. */
+   two states, and so the only one left here. Its sibling --nav-icon-scale moved
+   up to html on 07-31; see the note there. */
 #site-nav {
 	--nav-logo-scale: 0.42;
 }
@@ -633,102 +584,66 @@ footer {
 	z-index: -1;
 }
 
-/* Left cluster: wordmark + links scale as one unit from --nav-boost (expanded)
-   toward --nav-logo-scale (compact), anchored at the left edge (origin-left in
-   the markup). At q = 1 the boost cancels out — the compact bar is identical
-   at every viewport width. */
+/* Left cluster (the wordmark) scales from --nav-boost (expanded) toward
+   --nav-logo-scale (compact), anchored at the left edge (origin-left in the
+   markup). At q = 1 the boost cancels out — the compact bar is identical at
+   every viewport width. */
 #site-nav .nav-left {
 	scale: calc(var(--nav-boost) - (var(--nav-boost) - var(--nav-logo-scale)) * var(--q));
 }
 
-/* The .nav-left wrapper scales the links along with the wordmark and the gap
-   at BOTH ends: boosted up at q = 0, down toward the logo scale at q = 1. They
-   counter-scale inside it to land at their own net size each time — and since
-   07-31 that net size is --nav-links-scale at BOTH ends, so the counter-scale
-   is now doing nothing but holding the links still inside a wrapper that
-   isn't. Their position and leading whitespace still track the logo exactly:
-   the links sit further right in the masthead because the name beside them is
-   bigger, not because they are. The counter-scale is nonlinear in --q (net ÷
-   wrapper), so it rides its own JS-written var. */
-#site-nav .nav-links {
-	transform: translateX(calc(var(--nav-gap) * (1 - var(--q))))
-		translateY(calc(var(--nav-seat) * (1 - var(--q)) + var(--nav-seat-compact) * var(--q)))
-		scale(var(--q-links));
+/* ── Hero: the About link ──
+   The home page's only route to /about since the nav links came out, so it
+   borrows the project card's title gesture — underline wipes in left-to-right,
+   arrow tilts to ↗ — rather than inventing a second "this goes somewhere"
+   idiom for one link. Three differences, all because this is a lone link and
+   not a card: it plays on the link's own :hover (a card drives its title from
+   the whole card); it runs on --dur-gesture, since there's no 300ms card
+   motion to keep pace with; and the arrow is DRAWN AT REST rather than wiping
+   in with the underline. On a card the arrow is a flourish — the image, the
+   frame and the whole card's cursor already say "link". Here it's the
+   affordance itself: without it this is one muted word above a grid, and
+   nothing marks it as the only way to the about page until the cursor is
+   already on it. So the hover gesture is the tilt and the underline; the
+   arrow's presence isn't part of it. */
+.hero-link {
+	transition: color var(--dur-tap) ease;
 }
-
-/* Nav links share one underline that glides between them: it rests under the
-   active section link, follows the cursor on hover/focus, and slides across when
-   you navigate between Projects and About (positioned by the scripts in
-   Nav.astro). The container is the slider's positioning context and offset
-   parent — the script measures each link's offsetLeft/offsetWidth in this
-   untransformed space, so the numbers stay stable across the compact scale and
-   are identical on both pages. */
-.nav-links {
-	position: relative;
+/* The line is on the WORD, not the whole <a> — the arrow sits outside it, the
+   same split the card makes with .project-card__title inside its <h3>. */
+.hero-link__text {
+	display: inline-block;
+	background-image: linear-gradient(currentColor, currentColor);
+	background-repeat: no-repeat;
+	background-position: left bottom;
+	background-size: 0% 1px;
+	padding-bottom: 2px;
+	transition: background-size var(--dur-gesture) var(--nav-ease);
 }
-
-/* No-JS fallback: without the script to drive the shared slider, each active
-   link draws its own hairline underline (the scaleX reveal is gated on
-   reduced-motion below, so it just snaps in for users who opt out). Once the
-   script takes over it adds `.has-slider`, which retires these in favour of the
-   single gliding underline. */
-.nav-links a {
-	position: relative;
-	/* Hover color on the buttons' tap clock (Tailwind's transition-colors,
-	   which these links used to carry, ran a different 150ms/curve combo).
-	   Transform rides the contact icons' springy release, so a released press
-	   settles with the same recoil (the press-in snap is a :active duration
-	   override below). */
-	transition:
-		color var(--dur-tap) ease,
-		transform 0.26s cubic-bezier(0.34, 1.2, 0.64, 1);
-}
-
-.nav-links a::after {
-	content: "";
-	position: absolute;
-	left: 0.5rem;
-	right: 0.5rem;
-	bottom: 0.3rem;
-	height: 1px;
-	background: currentColor;
-	transform: scaleX(0);
-	transform-origin: left;
-}
-
-.nav-links a:hover::after,
-.nav-links a:focus-visible::after,
-.nav-links a[aria-current="page"]::after {
-	transform: scaleX(1);
-}
-
-.nav-links.has-slider a::after {
-	display: none;
-}
-
-.nav-links a[aria-current="page"] {
+.hero-link:hover,
+.hero-link:focus-visible {
 	color: var(--ink);
 }
-
-/* The shared gliding underline. Hidden until the script positions it (width 0),
-   then given an explicit x (translateX) and width per target link. It lives
-   inside .nav-links, so it inherits the compact scale along with the links it
-   sits under. Its slide is motion-gated below. */
-.nav-underline {
-	position: absolute;
-	left: 0;
-	bottom: 0.3rem;
-	height: 1px;
-	width: 0;
-	background: var(--ink);
-	transform: translateX(0);
-	transform-origin: left;
-	pointer-events: none;
+.hero-link:hover .hero-link__text,
+.hero-link:focus-visible .hero-link__text {
+	background-size: 100% 1px;
+}
+.hero-link__arrow {
+	transform: rotate(0deg);
+	transform-origin: 50% 50%;
+	transition: transform var(--dur-gesture) var(--nav-ease);
+}
+/* Half the underline's duration in, so the tilt reads as the underline's
+   consequence — the same overlap the card's arrow keeps inside --dur-card. */
+.hero-link:hover .hero-link__arrow,
+.hero-link:focus-visible .hero-link__arrow {
+	transform: rotate(-45deg);
+	transition: transform var(--dur-gesture) var(--nav-ease) calc(var(--dur-gesture) * 0.5);
 }
 
 /* ── Project card: title underline ──
    Wipes in left-to-right on hover/focus of the whole card — the same
-   nav-underline gesture used elsewhere. A gradient "line" whose width grows
+   underline gesture the nav links used to carry. A gradient "line" whose width grows
    0% → 100%, so it sweeps from the left. Lives here (not a component-scoped
    <style>) so it can't be missed by Vite's dev-time style injection. */
 .project-card__title {
@@ -742,17 +657,24 @@ footer {
 	background-repeat: no-repeat;
 	background-position: left bottom;
 	background-size: 0% 2px;
-	/* 1px: the line hugs the title, reading as part of it rather than a rule
-	   under it. This is the floor, and it's tighter than it looks. The band is
-	   painted at the *bottom* of the padding box, so its top edge lands at
-	   (padding-bottom − 2px) relative to the content box: the gap to a
-	   descender is `padding − 0.544px` at md, from Supreme 700's real metrics
-	   (1000upm, hhea 980/−280, y yMin −205) against md:leading-tight on
-	   1.3rem — 2.46px at 3, 1.46px at 2, 0.46px at 1, and an overlap at 0.
-	   So "Shipyard" and "Discovery" clear the line by half a pixel here and
-	   will read as touching at some zoom levels. Below md the line-height is
-	   loose enough that there's ~3px to spare. */
-	padding-bottom: 1px;
+	/* The line hugs the title, reading as part of it rather than a rule under
+	   it — so this is the smallest padding that still clears a descender, and
+	   it is tighter than it looks. The band is painted at the *bottom* of the
+	   padding box, so its top edge lands at (padding-bottom − 2px) relative to
+	   the content box; every extra px of padding buys exactly 1px of clearance
+	   over the y in "Shipyard" and "Discovery".
+
+	   MEASURED, and it moves with the face and the size — both of which changed
+	   on 2026-08-01. At 1px this cleared by 0.46px under Supreme 700 at 1.3rem;
+	   under Satoshi 700 at md's 1.1rem the same 1px OVERLAPPED the descender by
+	   0.88px, with the band crossing the tail of the y. 3px puts it back to
+	   +1.12px at md (and ~4px below md, where the looser line-height gives more
+	   room). Re-measure if either the face or the title size moves again: probe
+	   the baseline with a zero-height inline-block appended into the title, add
+	   canvas measureText('y').actualBoundingBoxDescent taken at 8× the rendered
+	   size (it quantises to whole px at these sizes), and compare against the
+	   element's bottom − 2px. */
+	padding-bottom: 3px;
 	transition: background-size var(--dur-card) var(--nav-ease);
 }
 .project-card:hover .project-card__title,
@@ -1130,14 +1052,12 @@ footer {
 		border-color var(--dur-tap) ease;
 }
 
-/* The right cluster follows the links down onto the masthead's shared line:
-   at q = 0 both wrappers seat by --nav-icon-seat (icon centers on the seated
-   links' centers — measured, and unlike --nav-seat NOT boost-divided: these
-   sit outside the scaled .nav-left), tweening away with the collapse. On the
-   wrappers, not the buttons, so the close-ranks math below and the hover
-   pills inside them ride along untouched. No compact term (cf. the links'
-   --nav-seat-compact): compact icons rest flex-centred on the bar's
-   centreline. */
+/* The right cluster drops onto the masthead's secondary line: at q = 0 both
+   wrappers seat by --nav-icon-seat (measured against the Projects/About links
+   that used to hold that line — see the token), tweening away with the
+   collapse. On the wrappers, not the buttons, so the close-ranks math below and
+   the hover pills inside them ride along untouched. No compact term: compact
+   icons rest flex-centred on the bar's centreline. */
 #site-nav #contact-group,
 #site-nav #theme-toggle-wrap {
 	transform: translateY(calc(var(--nav-icon-seat) * (1 - var(--q))));
@@ -1230,9 +1150,6 @@ html:is(.nav-intro-collapse, .nav-intro-expand) #site-nav .nav-inner {
 html:is(.nav-intro-collapse, .nav-intro-expand) #site-nav .nav-left {
 	animation: nav-tween-logo var(--dur-nav) var(--nav-intro-ease) var(--nav-intro-dir) both;
 }
-html:is(.nav-intro-collapse, .nav-intro-expand) #site-nav .nav-links {
-	animation: nav-tween-links var(--dur-nav) var(--nav-intro-ease) var(--nav-intro-dir) both;
-}
 html:is(.nav-intro-collapse, .nav-intro-expand) #site-nav .btn-icon {
 	animation: nav-tween-icon var(--dur-nav) var(--nav-intro-ease) var(--nav-intro-dir) both;
 }
@@ -1278,27 +1195,6 @@ html:is(.nav-intro-collapse, .nav-intro-expand) #site-nav::after {
 	}
 	to {
 		scale: var(--nav-logo-scale);
-	}
-}
-
-/* The links' counter-scale is nonlinear in q (net --nav-links-scale ÷ the
-   wrapper's shrinking scale). The scroll-scrub era approximated that curve
-   with piecewise keyframe stops, but stops CANNOT be used here: the timing
-   function applies to each keyframe segment separately, so intermediate
-   stops fall out of sync with the single-segment animations above — the
-   wrapper finished collapsing while the links were still segments behind,
-   which made them visibly grow back to size at the end. One eased segment
-   stays in lockstep instead: the endpoints are exact (1.6667 = the static
-   --q-links fallback; keep in step with setQ in Nav.astro), and the
-   mid-flight deviation from the exact curve — the links riding a couple of
-   pixels large while the whole cluster is in motion — is imperceptible. */
-@keyframes nav-tween-links {
-	from {
-		transform: translateX(var(--nav-gap)) translateY(var(--nav-seat))
-			scale(calc(var(--nav-links-boost) / var(--nav-boost)));
-	}
-	to {
-		transform: translateX(0) translateY(var(--nav-seat-compact)) scale(1.6667);
 	}
 }
 
@@ -1370,9 +1266,7 @@ html:is(.nav-intro-collapse, .nav-intro-expand) #site-nav::after {
    classes on a timer just past the last animation; every 'to' frame equals
    the natural rest state, so that handoff is invisible too. Reduced motion
    never adds the classes — the bar just paints at rest. */
-html:is(.nav-intro-draw, .nav-intro-wipe) #site-nav .nav-logo,
-html:is(.nav-intro-draw, .nav-intro-wipe) #site-nav .nav-links,
-html:is(.nav-intro-draw, .nav-intro-wipe) #site-nav .nav-underline {
+html:is(.nav-intro-draw, .nav-intro-wipe) #site-nav .nav-logo {
 	clip-path: inset(0 100% 0 0);
 }
 html.nav-intro-wipe #site-nav .btn-icon {
@@ -1439,12 +1333,6 @@ html.nav-intro-draw .theme-fill-rect {
 
 html:is(.nav-intro-draw, .nav-intro-wipe).nav-intro-go #site-nav .nav-logo {
 	animation: nav-load-wipe var(--dur-nav) var(--nav-ease) both;
-}
-html:is(.nav-intro-draw, .nav-intro-wipe).nav-intro-go #site-nav .nav-links {
-	animation: nav-load-wipe var(--dur-nav) var(--nav-ease) 90ms both;
-}
-html:is(.nav-intro-draw, .nav-intro-wipe).nav-intro-go #site-nav .nav-underline {
-	animation: nav-load-wipe var(--dur-gesture) var(--nav-ease) 190ms both;
 }
 /* Wipe variant buttons: delays stagger left→right off each button's
    --nav-icon-r (email r=4 … twitter r=1, toggle unset → 0 → 440ms tail). */
@@ -1613,29 +1501,6 @@ html.reveal-skip .reveal {
    above, which must list `transform` or its ID specificity would silence
    these. All transform-only for cheap compositing; off under reduced-motion. */
 @media (prefers-reduced-motion: no-preference) {
-	.nav-links a::after {
-		transition: transform var(--dur-gesture) var(--nav-ease);
-	}
-
-	/* Pressed: the text link dips with the same scale-in as the contact icons
-	   and theme toggle, so every nav control shares one tap gesture. Snap in
-	   fast (the duration override); the base rule's spring eases it back on
-	   release. Only Projects/About match — the wordmark is a separate <a>
-	   outside .nav-links. */
-	.nav-links a:active {
-		transform: scale(0.94);
-		transition-duration: 0.09s;
-	}
-
-	/* The shared underline slides + resizes between links on the travelling
-	   pair (see --dur-slide); under reduced motion it just snaps to each
-	   target (no transition declared). */
-	.nav-underline {
-		transition:
-			transform var(--dur-slide) var(--ease-slide),
-			width var(--dur-slide) var(--ease-slide);
-	}
-
 	.icon-email,
 	.icon-linkedin,
 	.icon-github,
