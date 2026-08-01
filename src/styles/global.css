@@ -4,10 +4,18 @@
 	--font-heading: "Supreme", "Segoe UI", system-ui, -apple-system, sans-serif;
 	--font-body: "Satoshi", "Segoe UI", system-ui, -apple-system, sans-serif;
 
-	/* ── Light theme (default) ── */
+	/* ── Light theme ──
+	   No longer the default — dark is (see Layout.astro). These values live on
+	   :root because that's the cascade's base, not because light is the site's
+	   resting state; :root[data-theme="dark"] below overrides them and is what
+	   a first-time visitor gets.
+
+	   Cooled to match the dark ground: the cream (#fefcf7, hue 89° / chroma
+	   0.007) became a pale blue-white at hue 250°. The two themes now share a
+	   temperature instead of being a warm paper and a neutral charcoal. */
 	color-scheme: light;
-	--paper: #fefcf7;
-	--ink: #0a0a08;
+	--paper: #f7fcff;
+	--ink: #080a0c;
 	/* Secondary text. Rebalanced 07-26 from #333029 (12.84:1): at that value the
 	   light theme's "soft" ink was 66% of full ink's contrast where dark's is
 	   37% — barely muted, so metadata competed with the headings above it and,
@@ -17,18 +25,22 @@
 	   by the same amount rather than by the same-looking hex. Hue and chroma
 	   held; lightness only. Clears AA for small text with room (every consumer
 	   — card year/role, footer, about copy, nav links, contact icons — is
-	   under 19px). */
-	--ink-soft: #59564e;
+	   under 19px). Now 7.10:1 / 37.0% on the cooled paper — the RULE is the
+	   proportion, not the hex, so the ground move re-solved the value rather
+	   than invalidating it. */
+	--ink-soft: #50575d;
 	--line: rgba(0, 0, 0, 0.22); /* card/tag borders */
 	--line-strong: rgba(0, 0, 0, 0.4); /* hover borders */
 	--line-soft: rgba(0, 0, 0, 0.12); /* quiet borders (theme toggle) */
-	--surface: #ffffff; /* cards, tags, nav buttons */
-	--surface-sunken: #f4f2ec; /* card image bed, active states */
+	/* Not pure white any more: on a tinted ground a #ffffff card reads as a
+	   different material rather than a raised sheet of the same one. */
+	--surface: #fcffff; /* cards, tags, nav buttons */
+	--surface-sunken: #edf2f8; /* card image bed, active states */
 
-	--btn-bg: #efece6;
-	--btn-bg-hover: #e5e0d6;
-	--btn-bg-active: #dad4c8;
-	--btn-text: #1a1917;
+	--btn-bg: #edf2f8;
+	--btn-bg-hover: #d8e1ea;
+	--btn-bg-active: #cbd5e0;
+	--btn-text: #080a0c;
 	--btn-border: rgba(0, 0, 0, 0.18);
 
 	/* Darkened from #7a94c9 (07-31). That value failed WCAG 1.4.11's 3:1 floor
@@ -37,15 +49,24 @@
 	   under its own floor. Hue and chroma held, lightness only: 3.86:1 against
 	   --paper and 3.96:1 against --surface. Found while measuring a page-ground
 	   change that was explored and reverted the same day; the bug predates it
-	   and is independent of it. */
-	--focus-ring: #6680b3;
+	   and is independent of it. Re-solved for the cooled paper: 3.40:1 against
+	   --paper, 3.49:1 against --surface. */
+	--focus-ring: #7089bb;
 
 	/* ── The dye ──
-	   ONE colour on the site, and it's the wordmark. A traditional Japanese
-	   dye from the washi grounds exploration (07-25): there they were
+	   ONE colour on the site, and it's the wordmark. It began as a traditional
+	   Japanese dye from the washi grounds exploration (07-25): there they were
 	   BACKGROUNDS, here it's a foreground, which is a different contrast
 	   problem — a value that works as a ground says nothing about whether it
-	   reads as ink on one.
+	   reads as ink on one. The current value has moved off the traditional
+	   list (see the note on the token itself) but the constraint is unchanged.
+
+	   The wordmark is a 落款 — the artist's seal. That's the argument for
+	   colouring the name at all, it's why the colour keeps returning to the
+	   red band across seven rounds of retuning, and it's the reason the current
+	   value is MORE saturated than the dye it replaced rather than less: real
+	   seal paste is vivid vermilion, not weathered pigment. A hue that can't
+	   read as a seal has to answer for it.
 
 	   This was a five-token palette for two days (07-25 → 07-27) — a dye for
 	   the wordmark, one per contact icon. The icon dyes were worn at rest,
@@ -61,38 +82,60 @@
 	   rendered colour's actual chroma, since an out-of-gamut request clamps
 	   silently and near L=0 reports full saturation while rendering black. */
 
-	/* 柿渋色 kakishibu-iro, persimmon tannin — the traditional dye value,
-	   untouched, exactly as the grounds exploration recorded it.
+	/* Hue 20.0°, chroma 0.205 — a crimson, replacing 柿渋色 kakishibu-iro
+	   (persimmon tannin, hue 31.2° / chroma 0.136) 2026-07-31.
+
+	   NAME IT HONESTLY: this is not a traditional dye transcribed. The
+	   exploration called it 韓紅 karakurenai, but that dye sits at 22.9°; 20.0°
+	   falls between 真紅 shinku (18.8°) and 臙脂 enji (20.7°), and the chroma is
+	   above all three. It's a chosen value in the crimson band, picked for a
+	   signal-red read — cleaner and more technical than the earthy rust, which
+	   is what was asked for. Say "crimson", not a dye name, unless it's snapped
+	   to one.
+
+	   Two things moved and only one was the point. The HUE came off the orange
+	   side of red; the CHROMA went up 0.136 → 0.205, undoing the sabi greying
+	   (traditional chroma × 0.75) that made the old dye read as pigment rather
+	   than signal. The sabi step is what "washi" cost the palette, and removing
+	   it is most of what reads as "clean" here.
 
 	   Depth, not legibility, sets this value. Contrast doubles as a depth cue
 	   (atmospheric perspective), so the largest element in the bar reading as
 	   the faintest puts it visually BEHIND the links it should lead — size and
 	   weight do not override that. The mark must therefore out-contrast
-	   --ink-soft beside it: 8.93:1 against the links' 7.15:1, ranking 2nd in
+	   --ink-soft beside it: 8.90:1 against the links' 7.10:1, ranking 2nd in
 	   the bar behind only the active link.
 
-	   Note this dye was here originally and was blamed for nothing — the depth
-	   problem surfaced only during a detour through gold, and the real cause
-	   was --ink-soft sitting at 12.84:1 (see its note above). At that value
-	   NOTHING could rank 2nd, this dye included. Fixing the muted ink is what
-	   made the traditional value work as-is.
+	   SATURATION IS PAID FOR IN CONTRAST, and this is the trap in any retune.
+	   Pushing chroma at a fixed lightness makes a red darker in luminance, so
+	   the first thing that breaks is the lead over the links, not legibility.
+	   Three candidate directions were built at their intended chroma and all
+	   three sat BEHIND the links (0.94–0.99×) until lightness was solved back
+	   up. If this is ever pushed further, move L and re-measure — do not read
+	   "more saturated" as a single dial.
 
 	   IF THIS IS EVER RECOLOURED, SWEEP THE HUE CIRCLE FIRST. Sitting forward
 	   means being dark on this paper; being eye-catching means high chroma;
-	   only some hues do both. Max chroma reachable at 7.15:1 on cream, by
+	   only some hues do both. Max chroma reachable at ~7:1 on this paper, by
 	   family: violet 0.30, magenta 0.25, red 0.19, gold 0.095, teal 0.076.
 	   Gold and teal are the floor — a gold wordmark cannot be both vivid and
 	   forward here, and drifts brown as it's pushed back (07-26, three rounds
-	   of retuning before anyone measured; retried 07-27 against the rebalanced
-	   --ink-soft, where it does clear the links at #6b4c00 / 7.70:1 — but only
-	   by 1.08× where this dye clears them by 1.25×, and it was reverted the
-	   same day). Rust sits in the red band, so it has the headroom; a hue that
-	   can't hold chroma at 7:1+ cannot be rescued by tuning.
+	   of retuning before anyone measured; retried 07-27, where it does clear
+	   the links at #6b4c00 / 7.70:1 — but only by 1.08× where this dye clears
+	   them by 1.25×, and it was reverted the same day). Red has the headroom;
+	   a hue that can't hold chroma at 7:1+ cannot be rescued by tuning.
+
+	   THE LIGHT THEME CANNOT EXPRESS THIS CHOICE and it's worth knowing before
+	   anyone retunes here. At the 8.9:1 the depth rule demands on near-white,
+	   red clamps to chroma ~0.17 and every candidate — vermilion, crimson,
+	   scarlet — lands within a few units of #950000. The hue is legible in
+	   DARK, which is the default theme; this value is the same decision seen
+	   through a much narrower window, not a second decision.
 
 	   Per theme, like every other token — the papers are inverted, so the mark
 	   is too. Clears AA-large unaided in both, so nothing on the site leans on
 	   WCAG 1.4.3's logo/brand-name exemption. */
-	--dye-name: #872416; /* — 8.93:1 */
+	--dye-name: #95000d; /* oklch(0.392 0.205 20) — 8.90:1 */
 
 	/* Paper grain: a whisper of washi tooth baked into the paper surfaces
 	   (body + the nav bar and its veil — every surface that paints --paper),
@@ -191,41 +234,52 @@
 }
 
 /* ── Dark theme ── */
-/* A desaturated near-black with only the faintest cool cast (B a hair above R/G)
-   — reads as clean charcoal, not the warm-brown "candlelit" tone that comes off
-   as generic. Text is a neutral off-white rather than cream. Applied via
-   data-theme on <html> (set pre-paint in Layout). */
+/* THIS IS THE DEFAULT THEME (stamped on <html> in Layout.astro, not resolved
+   from the OS). It's the surface the palette is tuned for; light is the
+   counterpart, not the reference.
+
+   A near-black carrying a deliberate blue cast — deeper and cooler than the
+   charcoal it replaced (#151619, hue 271° / chroma 0.006 → hue 250° / 0.010).
+   The old value was a *neutral* dark that only avoided reading warm; this one
+   commits to a direction. Everything above the ground is derived from it in
+   OKLCH: the planes step up in lightness with chroma rising as they go, so a
+   card is a lighter sheet of the same stock rather than a different material. */
 :root[data-theme="dark"] {
 	color-scheme: dark;
-	--paper: #151619;
-	--ink: #e8e9ec;
-	--ink-soft: #8b8d94;
+	--paper: #12141a;
+	--ink: #e6e9ef;
+	--ink-soft: #898e97;
 	--line: rgba(255, 255, 255, 0.12);
 	--line-strong: rgba(255, 255, 255, 0.3);
 	--line-soft: rgba(255, 255, 255, 0.11);
-	--surface: #1d1e22;
-	--surface-sunken: #24262b;
+	--surface: #191c23;
+	--surface-sunken: #20242d;
 
-	--btn-bg: #24262b;
-	--btn-bg-hover: #2e3037;
-	--btn-bg-active: #383a43;
-	--btn-text: #e8e9ec;
+	--btn-bg: #20242d;
+	--btn-bg-hover: #292e3a;
+	--btn-bg-active: #323847;
+	--btn-text: #e6e9ef;
 	--btn-border: rgba(255, 255, 255, 0.14);
 
-	--focus-ring: #8ba3d6;
+	--focus-ring: #586e9e;
 
 	/* The same dye on the charcoal (see the light block for the method). Hue
 	   and chroma match the light value exactly; only lightness differs,
 	   because the paper is inverted.
 
 	   The mark runs LIGHTER here than on paper, not darker: on charcoal a
-	   pale rust is the high-contrast direction, so this is the same "sit
+	   pale crimson is the high-contrast direction, so this is the same "sit
 	   forward of the links" rule as the light block, pointing the other way.
-	   5.63:1 against --ink-soft's 5.46:1. Note it must stay lifted past the
-	   4.52:1 this dye was first given here — that value sat BEHIND the links,
-	   the same depth bug the light theme had, and went unnoticed only because
-	   the gold detour was louder at the time. */
-	--dye-name: #db715e; /* 柿渋色 kakishibu-iro — 5.63:1 */
+	   6.03:1 against --ink-soft's 5.59:1 — a 1.077× lead, up from the 1.032×
+	   the previous rust managed. Note it must stay lifted past the 4.52:1 this
+	   token was first given here — that value sat BEHIND the links, the same
+	   depth bug the light theme had.
+
+	   The dark lead is thin in a way light's 1.25× is not, and always has
+	   been. That's a live dial, not a settled value: if the wordmark should
+	   sit further forward now that dark is the default, raise L and re-measure
+	   rather than reaching for more chroma, which costs contrast (see below). */
+	--dye-name: #ff5966; /* oklch(0.697 0.205 20) — 6.03:1 */
 
 	--theme-fill-x: -9px;
 	--grain: none;
