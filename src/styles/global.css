@@ -404,27 +404,46 @@ html {
 	   icons are the only nav actions on phones, where the links are sm:-gated). */
 	--nav-links-scale: 0.7;
 	--nav-icon-scale: 0.7;
-	/* ── Only the NAME grows ──
+	/* ── The name grows a lot; the secondary line grows a little ──
 	   The links' net expanded scale runs to --nav-links-boost instead of 1, and
 	   the right cluster's uniform miniature runs --nav-icon-boost → 0.7 instead
 	   of 1 → 0.7 (still anchored flush right). Both cancel at q = 1: the compact
 	   bar never changes.
-	   Both are now PINNED to their compact scales, so the secondary line renders
-	   at exactly one size in both states and the masthead is made by the
-	   wordmark growing and the bar getting taller — nothing else. 07-31, Hiro:
-	   the links and icons should "just extend downward without growing".
-	   Before this they were boosted too (1.06 and 1.12 at ≥1200px, and an
-	   ungated 1 below the gate, which is still ~1.43× the compact links). The
-	   masthead read as a uniform magnification of the whole bar; the wordmark
-	   was the biggest thing in it but not the only thing changing, so the size
-	   step didn't single it out.
-	   Keeping them as tokens rather than deleting the terms: every formula and
-	   keyframe stays intact and this is one edit to reverse. Note the geometry
-	   this collapses — with boost = scale the icons' translate term is
-	   distance × (1 − 0.7) at BOTH endpoints, so the entire right cluster is
-	   pixel-identical expanded and compact apart from its --nav-icon-seat drop. */
-	--nav-links-boost: var(--nav-links-scale);
-	--nav-icon-boost: var(--nav-icon-scale);
+	   07-31, Hiro: the links and icons should "just extend downward without
+	   growing" — so both were PINNED to their compact scales. Before that they
+	   were boosted to 1.06 and 1.12 at ≥1200px (and an ungated 1 below the gate,
+	   still ~1.43× the compact links), which made the masthead read as a uniform
+	   magnification of the whole bar — the wordmark was the biggest thing in it
+	   but not the only thing changing, so the size step didn't single it out.
+	   08-01, Hiro: BOTH come off the pin — the links and the icons together, one
+	   shared factor of 1.25 on the 0.7 compact scale. So the 1.25rem links render
+	   16.63px compact / 20.78px expanded and the glyphs 25.27px / 31.58px, while
+	   the wordmark still runs 19.95px → 60.8px. That ratio is the whole point:
+	   the secondary line steps up enough to feel like part of the masthead, the
+	   name steps up three times as far and stays the hero. 1.1 was tried first
+	   and Hiro called it too little; the pre-07-31 1.51×/1.6× is the other edge,
+	   where the bar reads as a uniform magnification.
+	   ONE factor for both clusters on purpose — the pre-07-31 geometry stepped
+	   them unevenly (1.06 vs 1.12) and the secondary line read as two sizes.
+	   UNGATED, unlike the wordmark's own boost: Hiro's call (08-01) after seeing
+	   it gated to ≥1200px, where a narrower window showed no change at all.
+	   Below the gate the secondary line is the only thing that grows — the
+	   wordmark doesn't — and that is the accepted trade. Nothing needs
+	   re-measuring down there: both seats are 0 below 1200px, so the links stay
+	   flex-centred and grow about their own centre, measured dead level with the
+	   icons at every width down to 660px (links are sm:-gated away below that).
+	   LITERALS, not calc(var(--nav-links-scale) * 1.25): Nav.astro parseFloats
+	   --nav-links-boost straight out of getComputedStyle for its q-links formula,
+	   and an unregistered custom property hands back calc() text unevaluated —
+	   parseFloat would read NaN and fall back to 1. --nav-icon-boost needs no JS
+	   (its cluster's transform is pure calc on --q, below) but stays a literal
+	   too, so the two read as the pair they are.
+	   The ≥1200px seats are cut to these numbers; re-measure both if either
+	   moves. The icons' own growth does NOT move their seat — each button scales
+	   about its own centre — but the links' does, since a taller cap height at
+	   the same baseline lifts the midpoint the icons are centred on. */
+	--nav-links-boost: 0.875;
+	--nav-icon-boost: 0.875;
 	/* Name→links air dial for the masthead ONLY (compact always keeps the
 	   ml-7 layout gap): a translate, not margin — margin is layout and would
 	   leak into the compact bar. Runs in .nav-left's pre-scale space like
@@ -437,20 +456,25 @@ html {
 	--nav-gap: 0rem;
 	/* Contact-gap dial for the masthead ONLY: how much TIGHTER than the
 	   pure-scale spread each gap between the contact icons sits at q = 0
-	   (07-24, Hiro: the magnified gaps read too airy). ZERO since 07-31 and the
-	   dial is now largely spent: the airiness WAS the boost magnifying the
-	   gaps, and with --nav-icon-boost pinned to the compact scale there is no
-	   magnification left to shave — the expanded gaps are already the compact
-	   gaps exactly. The 0.32rem it used to hold at ≥1200px would now shave ~6px
-	   off a ~5px gap and lap the glyphs over each other. A translate like
-	   --nav-gap — each button shifts right by this per contact gap between it
-	   and the right-anchored cluster edge, so every intra-contact gap shrinks
-	   by exactly this much; the toggle's deliberate ml-8 separation and the
-	   compact bar keep their layout gaps. Applied BEFORE the buttons' scale,
-	   so the value is visual px as written. Gated with the boost below: the
-	   airiness is the boost magnifying the gaps, and the ungated narrow
-	   masthead keeps its full touch-target breathing room. */
-	--nav-icon-tighten: 0rem;
+	   (07-24, Hiro: the magnified gaps read too airy — and again 08-01, once
+	   the 0.875 step had put the magnification back). Zeroed on 07-31 when the
+	   pinned --nav-icon-boost left nothing to shave; live again at 0.24rem.
+	   The value is not a taste guess. It's cut so the expanded glyph-to-glyph
+	   gap EQUALS the compact bar's: 22.86px → 18.30px against compact's
+	   18.29px. So the masthead's icons hold the same absolute spacing while the
+	   glyphs themselves are 1.25× bigger — which is what "tighter" reads as,
+	   and it gives the cluster a stop worth returning to rather than a number
+	   someone nudged. Ceiling is ~0.328rem, where the 48.2px hit boxes touch
+	   (they sit 1.67px apart at 0.24rem); past that the targets overlap and
+	   the only tightening left is the buttons' 0.5rem padding, which is
+	   compact-bar and touch-target territory.
+	   A translate like --nav-gap — each button shifts right by this per contact
+	   gap between it and the right-anchored cluster edge, so every intra-contact
+	   gap shrinks by exactly this much; the toggle's deliberate ml-8 separation
+	   and the compact bar keep their layout gaps. Riding (1 − --q) is what keeps
+	   the compact bar out of it. Applied BEFORE the buttons' scale, so the value
+	   is visual px as written. Ungated, like the boosts it corrects. */
+	--nav-icon-tighten: 0.24rem;
 	/* Same dial for the contacts ↔ toggle gap (07-24, follow-up ask): every
 	   contact button crosses that gap exactly once, so the term rides
 	   min(r, 1) — all contacts shift right by this, the toggle holds the
@@ -460,11 +484,13 @@ html {
 	--nav-toggle-tighten: 0rem;
 }
 
-/* Only the wordmark's boost and the two seats are gated now. The links' and
-   icons' boosts left this block on 07-31 when they were pinned to their compact
-   scales (see --nav-links-boost above) — they no longer vary with anything, so
-   there's nothing width-dependent left to gate — and the tighten dials went with
-   them, since they existed only to take back air the magnification added.
+/* Only the wordmark's boost and the two seats are gated. The links' and icons'
+   boosts left this block on 07-31 when they were pinned to their compact scales
+   — and the tighten dials went with them, since they existed only to take back
+   air the magnification added. Their 08-01 step back up (0.77 each, see
+   --nav-links-boost above) stayed OUT of the gate on purpose: Hiro wants the
+   secondary line slightly larger in the masthead at every width, not only where
+   the wordmark grows.
    The seats stay gated: they're the masthead's baseline lockup, and below the
    gate there's no boosted wordmark to seat onto. */
 @media (min-width: 1200px) {
@@ -484,9 +510,17 @@ html {
 		   0.04px off the links' cap midpoint, which is what confirms it.
 		   Both now measure 0.00px: links' baseline on the wordmark's, icon
 		   centres on the links' glyph centres — the 07-23 alignment calls,
-		   which the shipped values had drifted 2.77px off at the baseline. */
-		--nav-seat: 0.726rem;
-		--nav-icon-seat: 0.896rem;
+		   which the shipped values had drifted 2.77px off at the baseline.
+		   Re-measured again 08-01 for the stepped-up secondary line (were
+		   0.726rem / 0.896rem at the 07-31 pin), both moving the opposite way
+		   from 07-31 for the same two reasons: the links counter-scale about
+		   their box's vertical CENTRE, so growing them (0.547 → 0.684 of the
+		   wrapper) pushes their baseline back DOWN away from it and the seat
+		   gives up what it made up; and a
+		   taller cap height at the same baseline lifts the cap MIDPOINT, so the
+		   icons follow it up. Both alignments land where they were, to 0.01px. */
+		--nav-seat: 0.666rem;
+		--nav-icon-seat: 0.817rem;
 	}
 }
 
