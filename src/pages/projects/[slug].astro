@@ -16,11 +16,12 @@ const { project } = Astro.props;
 <Layout title={`${project.title} — Hiro Eernisse`} description={project.blurb}>
 	<Nav />
 
-	<main class="mx-auto max-w-[1280px] px-5 py-12">
-		{/* No back link up here on purpose: the nav is sticky, so its Projects
-		    link never leaves the viewport, and a second one this close read as
-		    two of the same control. The footer's does the job the nav link
-		    can't — see there. */}
+	<main class="mx-auto max-w-[960px] px-5 py-12">
+		{/* No back link up here on purpose. It used to be that the sticky nav's
+		    Projects link never left the viewport, so a second one this close read
+		    as two of the same control; that link is gone (08-01), and the reason
+		    is now simply that the footer's does the job better — it returns you
+		    to the card you came from, at the scroll position you left it. */}
 
 		{/* Dateline is the year alone — the company already reads off the prose
 		    below, and tags/Visit were dropped from this page (both still live in
@@ -31,7 +32,7 @@ const { project } = Astro.props;
 		</header>
 
 		{/* Reading matter is capped at --measure (see global.css) — ~11 words a
-		    line — while the page itself spans the nav's full 1280px, which the
+		    line — while the page itself spans the nav's full 960px, which the
 		    images below fill.
 
 		    No "Background" / "Work" headings: two paragraphs in one screen give
@@ -64,7 +65,7 @@ const { project } = Astro.props;
 	    position you left it (Nav.astro's nav-return / returnY), where the nav
 	    link lands on the top of the list. Worth its place down here, several
 	    thousand pixels of screenshots below where you started. */}
-	<footer class="mx-auto max-w-[1280px] px-5 py-10">
+	<footer class="mx-auto max-w-[960px] px-5 py-10">
 		<a
 			href={`/#project-${project.slug}`}
 			data-projects-link

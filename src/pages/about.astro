@@ -6,8 +6,15 @@ import Nav from '../components/Nav.astro';
 <Layout title="About — Hiro Eernisse" description="About Hiro Eernisse, design engineer.">
 	<Nav />
 
-	<main class="mx-auto max-w-[1280px] px-5 py-12 sm:py-16">
-		<div class="flex flex-col gap-12 lg:flex-row lg:items-start lg:justify-between lg:gap-20">
+	<main class="mx-auto max-w-[960px] px-5 py-12 sm:py-16">
+		{/* Stacked, not side by side. It was prose-beside-photo until 08-02, when
+		    the page came in to 960px: the figure held 26rem of that, which left
+		    the prose ~346px and about FIVE words a line against a 10–12 target.
+		    There is no breakpoint that rescues it — the container is capped below
+		    the width the two-column version needs, so the row would never get its
+		    room back. Stacking gives the prose the full measure and costs only
+		    the composition, which was the weaker reason of the two. */}
+		<div class="flex flex-col gap-12">
 			<div class="max-w-[var(--measure)] space-y-6 text-lg leading-relaxed">
 				<h1 class="reveal mb-12 text-3xl font-bold tracking-tight text-[var(--ink)] sm:text-4xl" style="--i: 0">はじめまして。</h1>
 				<p class="reveal" style="--base: 700ms; --i: 0">I'm a Design Engineer based in the San Francisco Bay Area.</p>
@@ -17,7 +24,11 @@ import Nav from '../components/Nav.astro';
 				</p>
 				<p class="reveal" style="--base: 700ms; --i: 2">Outside of work, I play heavy metal drums and hike.</p>
 			</div>
-			<figure class="reveal w-full max-w-[18rem] shrink-0 sm:max-w-[22rem] lg:w-[26rem] lg:max-w-none" style="--base: 180ms; --i: 0">
+			{/* The lg overrides came off with the row — 26rem was sized to hold its
+			    half of a two-column page, and stacked it would just be a large
+			    photo. Capped at the measure instead, so its edges line up with the
+			    prose above it. */}
+			<figure class="reveal w-full max-w-[18rem] sm:max-w-[22rem]" style="--base: 180ms; --i: 0">
 				<img
 					src="/images/me.webp"
 					alt="Hiro Eernisse"
