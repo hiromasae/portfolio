@@ -65,12 +65,14 @@ const {
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="generator" content={Astro.generator} />
 		<meta name="description" content={description} />
-		<!-- Satoshi from Fontshare — the site's only face -->
-		<link rel="preconnect" href="https://api.fontshare.com" crossorigin />
-		<link rel="preconnect" href="https://cdn.fontshare.com" crossorigin />
+		<!-- Archivo from Google Fonts — the site's only face. A variable face, so
+		     400/500/600/700 all come from one file; unlike Satoshi it has a real
+		     semibold, though nothing on the site asks for one yet. -->
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link
 			rel="stylesheet"
-			href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap"
+			href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap"
 		/>
 		<title>{title}</title>
 	</head>

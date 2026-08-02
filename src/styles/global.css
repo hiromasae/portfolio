@@ -2,7 +2,7 @@
 
 :root {
 	/* One face for the whole site — headings included. */
-	--font-sans: "Satoshi", "Segoe UI", system-ui, -apple-system, sans-serif;
+	--font-sans: "Archivo", "Segoe UI", system-ui, -apple-system, sans-serif;
 
 	/* ── Light theme: Tokyo Night Light ──
 	   No longer the default — dark is (see Layout.astro). These values live on
@@ -191,18 +191,20 @@
 	/* ── Reading measure ──
 	   The cap on any column of running prose (About's intro, a project's
 	   Background and Work). Set for SCANNABILITY, not for the page's grid: the
-	   pages themselves span the nav's 1280px, and only reading matter is
+	   pages themselves span the nav's 960px, and only reading matter is
 	   pulled in to this width — so images and cards still fill the page.
-	   32rem = 608px at the 19px base. Measured in Chrome with Satoshi
-	   actually loaded (fallback metrics are wider and will lie): every
-	   prose block on the site runs 9.8–11.5 words a line, mean 10.8,
-	   against a 10–12 target. Suma's is the low one only because its
-	   words are longer — by characters it sits with the rest at ~60.
-	   It is a WIDTH, not a character count, because the
-	   two sizes in play (--text-lg prose, base-size Work lines) should share
-	   one left and right edge down the page. Re-measure if the base font
-	   size or the body face changes. */
-	--measure: 32rem;
+	   35rem = 665px at the 19px base. Measured in Chrome with the webfont
+	   actually loaded (fallback metrics differ and will lie), against a
+	   10–12 words-a-line target.
+	   It is a WIDTH, not a character count, because the two sizes in play
+	   (--text-lg prose, base-size Work lines) should share one left and right
+	   edge down the page.
+	   Was 32rem, cut for Satoshi. Archivo sets wider at the same size, which
+	   dropped every block to ~8–10 words a line, so the width went up to hold
+	   the same LINE rather than the same number. This is exactly the
+	   "re-measure if the body face changes" the old note called for — it just
+	   came due sooner than expected. */
+	--measure: 35rem;
 }
 
 /* ── Dark theme: Tokyo Night ── */
@@ -646,17 +648,19 @@ footer {
 	   the content box; every extra px of padding buys exactly 1px of clearance
 	   over the y in "Shipyard" and "Discovery".
 
-	   MEASURED, and it moves with the face and the size — both of which changed
-	   on 2026-08-01. At 1px this cleared by 0.46px under Supreme 700 at 1.3rem;
-	   under Satoshi 700 at md's 1.1rem the same 1px OVERLAPPED the descender by
-	   0.88px, with the band crossing the tail of the y. 3px puts it back to
-	   +1.12px at md (and ~4px below md, where the looser line-height gives more
-	   room). Re-measure if either the face or the title size moves again: probe
+	   MEASURED, and it moves with the face — which is now three faces deep, so
+	   take the value on trust only as far as the face it was cut against. At 1px
+	   it cleared by 0.46px under Supreme 700 at 1.3rem; the same 1px OVERLAPPED
+	   by 0.88px under Satoshi 700 at 1.1rem (08-01), which 3px fixed; and Archivo
+	   700 at 1.1rem (08-02) has a shallower descender again, so 3px went slack at
+	   +3.25px and the line stopped hugging. Back to 1px, which measures +1.25px
+	   here. Three faces, three different right answers, and the only thing that
+	   carried across is the procedure. Re-measure whenever the face moves: probe
 	   the baseline with a zero-height inline-block appended into the title, add
 	   canvas measureText('y').actualBoundingBoxDescent taken at 8× the rendered
 	   size (it quantises to whole px at these sizes), and compare against the
 	   element's bottom − 2px. */
-	padding-bottom: 3px;
+	padding-bottom: 1px;
 	transition: background-size var(--dur-card) var(--nav-ease);
 }
 .project-card:hover .project-card__title,
