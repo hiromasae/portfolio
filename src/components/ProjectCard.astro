@@ -11,48 +11,35 @@ const { project } = Astro.props;
 	href={`/projects/${project.slug}`}
 	class:list={[
 		'project-card group flex flex-col gap-4 scroll-mt-24 rounded-[1.5px]',
-		'transition-[scale,translate] duration-[var(--dur-card)] ease-out',
-		/* origin-top, not the default centre: scaling about the centre lifts the
-		   top edge by half the growth, so the heading rose on hover while the
-		   meta gap below it was opening — two conflicting reads of the same
-		   gesture. Anchored at the top, the heading holds its line and the whole
-		   card grows downward, the same direction the gap opens. */
-		'origin-top',
-		'hover:scale-[1.02] focus-within:scale-[1.02] active:scale-[0.99]',
-		/* The lift. A scale about a pinned top edge displaces every part in
-		   proportion to its distance from that edge, so no two parts of the card
-		   travel together and the whole thing would read as separate pieces
-		   resizing rather than one object moving. This translate is the only
-		   displacement they all share.
+		/* Interior padding for the hover panel, cancelled by a matching negative
+		   margin so the CONTENT stays exactly where it was on the grid — the
+		   leftmost card's year and title still line up with the nav and footer.
+		   The panel itself is what needed the room: without it the tint would
+		   stop on the year's cap-height and flush against the image's edges.
+		   Sized against the gutters it now grows into. Each card reaches 0.75rem
+		   past its column on both sides, and the column gap is gap-x-6 (1.5rem),
+		   so two neighbouring panels meet exactly and never overlap; the row gap
+		   (gap-y-10, 2.5rem) has a full rem to spare. If either gutter is
+		   tightened again, this padding has to come down with it. */
+		'p-3 -m-3',
+		/* THE HOVER ZOOM IS GONE (2026-08-02, Hiro: don't make the card grow).
+		   What used to sit here was `hover:scale-[1.02] focus-within:scale-[1.02]`
+		   plus an `origin-top` that existed only to serve it — scaling about the
+		   default centre lifted the card's top edge by half the growth, so the
+		   heading rose while the gap below it opened, two conflicting reads of one
+		   gesture. With no scale there is no origin to argue about.
 
-		   IT IS NOW VERY NEARLY RIGID, WHICH IT WAS NOT WHEN IT WAS CHOSEN, and
-		   nobody decided that — the card got shorter twice. Re-measured
-		   2026-08-02 on the 319px card (960px page, and the role line gone from
-		   the block above): year 0px, title +0.54, image top edge +1.46, bottom
-		   edge +6.38. Squaring THAT takes a 3.2px lift, and the shipped value is
-		   3px — so the card now travels as one object to within a fifth of a
-		   pixel, by accident.
-
-		   The 3px was cut against a ~765px card, where the bottom edge dropped
-		   ~15.3px and squaring it would have taken a 15.4px lift that was far too
-		   much; the note here used to say, correctly, that 3px deliberately did
-		   NOT square it. Both statements were true of their own card. What the
-		   lift buys hasn't changed: the top edge comes off the page instead of
-		   staying pinned, and the metadata participates — it has no border of its
-		   own, so without this the frame's shadow was the only depth cue and only
-		   the image appeared to rise.
-
-		   The consequence to know: this value is a function of card HEIGHT, so it
-		   drifts every time the card's contents or the page width change. If the
-		   card grows again, 3px stops squaring it and the old "deliberately not
-		   rigid" reading comes back on its own.
-
-		   Same duration and curve as the zoom, so the two are one gesture.
-		   Press cancels it (active:translate-y-0), pairing with the 0.99 scale
-		   so the card settles back onto the page under the finger. */
-		'hover:-translate-y-[3px] focus-within:-translate-y-[3px] active:translate-y-0',
-		'motion-reduce:hover:scale-100 motion-reduce:focus-within:scale-100 motion-reduce:active:scale-100',
-		'motion-reduce:hover:translate-y-0 motion-reduce:focus-within:translate-y-0',
+		   The press scale STAYS. It is a shrink, not a growth, and it is the only
+		   thing on the card that answers a pointer-down — the ask was about the
+		   card swelling under the cursor, which this is the opposite of. */
+		'origin-top active:scale-[0.99]',
+		'motion-reduce:active:scale-100',
+		/* The lift (translate) and its transition both live in global.css now, with
+		   the travelling panel — the panel has to rise by exactly the same
+		   distance or it lags behind the card standing on it, so the value is a
+		   custom property the script can read rather than a number in a class
+		   name. See the .project-card block there, which also records why the
+		   long-running argument about how far to lift is finally over. */
 		'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]',
 	]}
 >
@@ -72,23 +59,42 @@ const { project } = Astro.props;
 		    is that the role line went (2026-08-02, Hiro) — with nothing left for
 		    the year to share, its choice was its own line or nothing.
 
-		    Not an eyebrow label: a bare numeral in the numeral colour, no
-		    uppercase and no letterspacing, so it reads as a date rather than as a
-		    kicker announcing the heading. */}
-		<p class="text-[0.85rem] leading-snug tabular-nums text-[var(--ink-num)]">{project.year}</p>
-		{/* Title-only underline that wipes in left-to-right on hover/focus — the
-		    site's shared underline gesture — alongside the card zoom. The underline
-		    targets .project-card__title in global.css. */}
+		    Not an eyebrow label: a bare numeral, no uppercase and no letterspacing,
+		    so it reads as a date rather than as a kicker announcing the heading.
+
+		    Body ink, NOT --ink-num (2026-08-02, Hiro — the day after the numerals
+		    took the syntax orange). The accent was cut to lift the year out of the
+		    muted line without promoting the whole line; on a card whose title had
+		    just taken the blue, that put two accent colours in a four-line block and
+		    the orange won the entrance. Plain ink keeps the year quiet and lets the
+		    title lead. --ink-num is still live on the project pages' datelines, so
+		    the token is not orphaned — but the two headers no longer match here, and
+		    that was the argument for the year taking its own line at all. */}
+		<p class="text-[0.85rem] leading-snug tabular-nums text-[var(--ink)]">{project.year}</p>
+		{/* The underline is back (2026-08-02, Hiro), so the <span> is too: it exists
+		    to stop the line at the words, keeping the decorative arrow outside it.
+		    Targets .project-card__title in global.css. */}
 		{/* Stepped down a size when the list went two-up (2026-08-01): at half the
 		    old column width, 1.3rem titles ran to three lines on the longer ones
 		    and the card read as a headline with a picture under it rather than a
 		    piece of work with a name. */}
-		<h3 class="text-base font-bold tracking-tight text-[var(--ink-title)] md:text-[1.1rem] md:leading-tight">
+		{/* 600, down from 700 (2026-08-02, Hiro). This was tried twice before and
+		    reverted both times (500 and 600, 07-24) — but under Supreme, and the
+		    face has changed twice since. Archivo's 700 is a heavier cut than
+		    Supreme's was, and it's now carrying --ink-title's blue as well, so the
+		    weight and the colour were both shouting. 600 is a real file in the
+		    loaded range (400;500;600;700 in Layout.astro), not a rounding — see
+		    the .btn note in global.css for what happens when it isn't.
+		    500 is the next step down and also real, if this still reads heavy. */}
+		<h3 class="text-base font-semibold tracking-tight text-[var(--ink-title)] md:text-[1.1rem] md:leading-tight">
 			<span class="project-card__title">{project.title}</span>
-			{/* A right-pointing arrow that wipes in left-to-right once the title
-			    underline finishes, then tilts up to point ↗. Choreography lives
-			    with the underline rules in global.css (.project-card__arrow).
-			    Decorative — the whole card is the link. */}
+			{/* A right-pointing arrow that appears on hover with the underline,
+			    neither of them animated. It has been through three states in one
+			    day (2026-08-02) — wiping in and tilting to ↗, then drawn at rest on
+			    every card, now hidden until hover — so read the .project-card__arrow
+			    note in global.css before changing it rather than inferring intent
+			    from whichever state you happened to find. Decorative; the whole
+			    card is the link. */}
 			<svg
 				viewBox="0 0 24 24"
 				fill="none"

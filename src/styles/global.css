@@ -66,11 +66,31 @@
 	--surface: #f2f3f6; /* cards, tags, nav buttons */
 	--surface-sunken: #d5d6db; /* card image bed — Tokyo Night Light's own ground */
 
-	--btn-bg: #d5d6db;
-	--btn-bg-hover: #c6c7cd;
-	--btn-bg-active: #b6b7be;
-	--btn-text: #343b58;
-	--btn-border: rgba(52, 59, 88, 0.18);
+	/* ── The button is a SOLID INK CHIP, not a tinted surface ──
+	   2026-08-02, Hiro: the hero's About button should carry a light background
+	   and dark text so it's more noticeable on the page. Taken as INVERT THE
+	   PAPER rather than literally "light bg" in both themes — on the light theme
+	   a light chip on light paper is the least noticeable thing possible, which
+	   is the opposite of the ask. So the button wears the page's own two colours
+	   swapped: --ink as the ground, --paper as the text. Dark theme (the site
+	   default, and the one this was asked against) gets exactly what was
+	   described; light theme gets the same IDEA — maximum separation from the
+	   page — pointing the other way.
+	   Contrast comes free and is the best on the site: it's the --ink/--paper
+	   pair inverted, so 9.13:1 here and 11.45:1 in dark, identical to body text.
+	   Hover moves the ground one step toward the paper (lighter here, lighter
+	   there too — a solid chip brightening reads as "live" in both), active one
+	   step past the rest value in the other direction so press is unmistakably
+	   not hover. Both hold well over AA against the unchanged text colour.
+	   The border matches the ground rather than sitting a shade off it: on a
+	   solid chip a contrasting hairline reads as a stroke around the shape
+	   instead of the shape's own edge. It stays in the rule so the box keeps its
+	   exact size across themes and hover states. */
+	--btn-bg: #343b58; /* --ink */
+	--btn-bg-hover: #434b70;
+	--btn-bg-active: #262b42;
+	--btn-text: #e9eaee; /* --paper */
+	--btn-border: #343b58;
 
 	/* Tokyo Night Light's blue, verbatim. The ring is a UI boundary, so WCAG
 	   1.4.11's 3:1 is the bar it has to clear against every ground it can land
@@ -286,11 +306,14 @@
 	--surface: #1a1b26; /* night's own background, verbatim */
 	--surface-sunken: #1f2335; /* storm's bg_dark, verbatim */
 
-	--btn-bg: #1f2335;
-	--btn-bg-hover: #24283b; /* storm's bg, verbatim */
-	--btn-bg-active: #292e42; /* bg_highlight, verbatim */
-	--btn-text: #c0caf5;
-	--btn-border: rgba(192, 202, 245, 0.14);
+	/* The inverted chip on the night ground — see the light block for the
+	   reasoning. This is the theme the ask was made against: a light background
+	   with dark text, literally. */
+	--btn-bg: #c0caf5; /* --ink */
+	--btn-bg-hover: #d5dcf8;
+	--btn-bg-active: #a9b6e8;
+	--btn-text: #13131a; /* --paper */
+	--btn-border: #c0caf5;
 
 	/* Tokyo Night's blue, verbatim — 7.34:1 against --paper, 6.79:1 against
 	   --surface, both well clear of WCAG 1.4.11's 3:1 floor for non-text. Same
@@ -628,135 +651,222 @@ footer {
 	scale: calc(var(--nav-boost) - (var(--nav-boost) - var(--nav-logo-scale)) * var(--q));
 }
 
-/* ── Hero: the About link ──
-   The home page's only route to /about since the nav links came out, so it
-   borrows the project card's title gesture — underline wipes in left-to-right,
-   arrow tilts to ↗ — rather than inventing a second "this goes somewhere"
-   idiom for one link. Three differences, all because this is a lone link and
-   not a card: it plays on the link's own :hover (a card drives its title from
-   the whole card); it runs on --dur-gesture, since there's no 300ms card
-   motion to keep pace with; and the arrow is DRAWN AT REST rather than wiping
-   in with the underline. On a card the arrow is a flourish — the image, the
-   frame and the whole card's cursor already say "link". Here it's the
-   affordance itself: without it this is one muted word above a grid, and
-   nothing marks it as the only way to the about page until the cursor is
-   already on it. So the hover gesture is the tilt and the underline; the
-   arrow's presence isn't part of it. */
-.hero-link {
-	transition: color var(--dur-tap) ease;
-}
-/* The line is on the WORD, not the whole <a> — the arrow sits outside it, the
-   same split the card makes with .project-card__title inside its <h3>. */
-.hero-link__text {
-	display: inline-block;
-	background-image: linear-gradient(currentColor, currentColor);
-	background-repeat: no-repeat;
-	background-position: left bottom;
-	background-size: 0% 1px;
-	padding-bottom: 2px;
-	transition: background-size var(--dur-gesture) var(--nav-ease);
-}
-.hero-link:hover,
-.hero-link:focus-visible {
-	color: var(--ink);
-}
-.hero-link:hover .hero-link__text,
-.hero-link:focus-visible .hero-link__text {
-	background-size: 100% 1px;
-}
-.hero-link__arrow {
-	transform: rotate(0deg);
-	transform-origin: 50% 50%;
-	transition: transform var(--dur-gesture) var(--nav-ease);
-}
-/* Half the underline's duration in, so the tilt reads as the underline's
-   consequence — the same overlap the card's arrow keeps inside --dur-card. */
-.hero-link:hover .hero-link__arrow,
-.hero-link:focus-visible .hero-link__arrow {
-	transform: rotate(-45deg);
-	transition: transform var(--dur-gesture) var(--nav-ease) calc(var(--dur-gesture) * 0.5);
-}
+/* ── Hero: the About button ──
+   Nothing here any more. The home page's route to /about was a bare text link
+   wearing the project card's gesture (underline wipe + a ↗ arrow drawn at rest,
+   since on a lone link the arrow was the affordance rather than a flourish);
+   on 2026-08-02 it became a plain .btn, which supplies its own affordance and
+   needs no rules of its own. Kept as a marker so the missing block doesn't read
+   as an oversight — see index.astro's hero for what stands. */
 
 /* ── Project card: title underline ──
-   Wipes in left-to-right on hover/focus of the whole card — the same
-   underline gesture the nav links used to carry. A gradient "line" whose width grows
-   0% → 100%, so it sweeps from the left. Lives here (not a component-scoped
-   <style>) so it can't be missed by Vite's dev-time style injection. */
+   Back, 2026-08-02 (Hiro), a few hours after being removed for the panel. It
+   answers the hover alongside the travelling panel now rather than instead of
+   it: the panel says WHICH card, the underline says the title is the link.
+   Driven by the whole card, not by the title's own :hover — the entire <a> is
+   the link.
+
+   IT NO LONGER WIPES (Hiro, same day: "just make it appear"). It was a gradient
+   band whose width grew 0% → 100% over --dur-card, sweeping left to right; now
+   the two states are the same two background-sizes with nothing between them.
+   The declaration stays a background gradient rather than becoming
+   text-decoration because the size, colour and the descender clearance below are
+   all still doing their jobs — only the transition went.
+
+   This leaves the panel as the ONLY thing on the card that animates on hover,
+   which is the point: one motion, and the rest of the card simply changes
+   state. */
 .project-card__title {
 	/* inline-block, NOT inline: an inline element's padding doesn't grow the
-	   line box, so a line painted 3px below the text landed outside the line
-	   box — where the header row's overflow-hidden
-	   (which parks "View" off-card) clipped it invisible. An inline-block's
-	   padding is real layout, so the underline always sits inside the box. */
+	   line box, so a line painted below the text can land outside the box (and
+	   outside any ancestor's overflow clip, where it disappears). */
 	display: inline-block;
-	/* currentColor, not --ink: the title took --ink-title on 08-02 and the line
-	   under it has to travel with it, or the underline reads as a rule the
-	   heading happens to sit on. Same reason the hero link's line does. */
+	/* currentColor, not --ink: the title wears --ink-title, and the line under it
+	   has to travel with it or it reads as a rule the heading happens to sit on. */
 	background-image: linear-gradient(currentColor, currentColor);
 	background-repeat: no-repeat;
 	background-position: left bottom;
 	background-size: 0% 2px;
-	/* The line hugs the title, reading as part of it rather than a rule under
-	   it — so this is the smallest padding that still clears a descender, and
-	   it is tighter than it looks. The band is painted at the *bottom* of the
-	   padding box, so its top edge lands at (padding-bottom − 2px) relative to
-	   the content box; every extra px of padding buys exactly 1px of clearance
-	   over the y in "Shipyard" and "Discovery".
+	/* The line hugs the title, so this is the smallest padding that still clears
+	   a descender. The band paints at the BOTTOM of the padding box, so its top
+	   edge lands at (padding-bottom − 2px) from the content box; every extra px
+	   buys exactly 1px of clearance over the y in "Shipyard" and "Discovery".
 
-	   MEASURED, and it moves with the face — which is now three faces deep, so
-	   take the value on trust only as far as the face it was cut against. At 1px
-	   it cleared by 0.46px under Supreme 700 at 1.3rem; the same 1px OVERLAPPED
-	   by 0.88px under Satoshi 700 at 1.1rem (08-01), which 3px fixed; and Archivo
-	   700 at 1.1rem (08-02) has a shallower descender again, so 3px went slack at
-	   +3.25px and the line stopped hugging. Back to 1px, which measures +1.25px
-	   here. Three faces, three different right answers, and the only thing that
-	   carried across is the procedure. Re-measure whenever the face moves: probe
-	   the baseline with a zero-height inline-block appended into the title, add
-	   canvas measureText('y').actualBoundingBoxDescent taken at 8× the rendered
-	   size (it quantises to whole px at these sizes), and compare against the
-	   element's bottom − 2px. */
+	   MEASURED, and it moves with the face — three faces, three answers: 1px
+	   cleared by 0.46px under Supreme 700/1.3rem; the same 1px OVERLAPPED by
+	   0.88px under Satoshi 700/1.1rem, which 3px fixed; Archivo 700/1.1rem has a
+	   shallower descender again, so 3px went slack at +3.25px and 1px measured
+	   +1.25px. Restored at 1px. The title has since dropped to 600, a lighter cut
+	   of the same face — descender DEPTH barely moves with weight (the stroke
+	   thins, the outline doesn't climb), so 1px still clears; re-measure only if
+	   the face or the size moves.
+	   Procedure: probe the baseline with a zero-height inline-block appended into
+	   the title, add canvas measureText('y').actualBoundingBoxDescent taken at 8×
+	   the rendered size (it quantises to whole px at these sizes), and compare
+	   against the element's bottom − 2px. */
 	padding-bottom: 1px;
-	transition: background-size var(--dur-card) var(--nav-ease);
+	/* No transition, by instruction. Do not "restore" one as a cleanup. */
 }
 .project-card:hover .project-card__title,
 .project-card:focus-within .project-card__title {
 	background-size: 100% 2px;
 }
-/* ── Project card: title arrow ──
-   Sequenced after the underline, with overlap: the → wipes in left-to-right
-   from ~25% through the underline wipe, then tilts -45° to point ↗ halfway
-   through its own wipe. Overlapping keeps the left-to-right read while
-   settling the whole gesture in ~375ms instead of the 700ms a strict chain
-   costs — the delays are fractions of the tokens, so the choreography can't
-   drift out of sync. The base rule carries the exit transition (quick, no
-   delays) so un-hovering retracts everything at once instead of replaying the
-   stagger in reverse.
 
-   THE FRACTIONS ARE BOUNDED BY --dur-card, not chosen for feel. Everything
-   else on the card — zoom, lift, underline, shadow — has landed at 300ms.
-   These were 0.55 and 0.85, which put the tilt at 335–535ms: it began 35ms
-   AFTER the card had come to rest, with nothing else in flight, so it read as
-   a second event rather than part of the first one. At 0.25 and 0.5 the tilt
-   runs 175–375ms, starting while the card is still moving and trailing it by
-   75ms. If either token or fraction is retuned, keep the tilt's START inside
-   the card's own window — that overlap is what binds the arrow to the card. */
+/* ── Project card: the arrow appears on hover ──
+   2026-08-02, Hiro, in three steps on one day: it wiped in and tilted to ↗;
+   then the animation came off and it sat drawn at rest on every card; now it is
+   hidden at rest and simply appears with the underline. Worth following the arc
+   — the end state is not the start state, and "keep the arrow" from step two
+   meant keep the glyph, not keep it visible.
+
+   Opacity, not clip-path, and no transition: it appears the way the underline
+   does, which is instantly. (The clip-path it once used was a WIPE — the thing
+   being removed — and leaving it at inset(0 100% 0 0) is what would have made
+   the arrow permanently invisible if only the hover half had been deleted.)
+
+   Opacity rather than display or visibility so the glyph keeps its box at rest:
+   the title's line height and the h3's width are the same hovered and not, so
+   nothing reflows and no text shifts under the cursor.
+
+   It stays a right arrow rather than the -45° ↗ the old tilt reached: ↗ is the
+   site's "leaves the site" mark (see .btn-quiet's note on why that one declines
+   to rotate), and these cards go to internal project pages. */
 .project-card__arrow {
-	clip-path: inset(0 100% 0 0);
-	transform: rotate(0deg);
-	transform-origin: 50% 50%;
-	transition:
-		clip-path var(--dur-gesture) var(--nav-ease),
-		transform var(--dur-gesture) var(--nav-ease);
+	opacity: 0;
 }
 .project-card:hover .project-card__arrow,
 .project-card:focus-within .project-card__arrow {
-	clip-path: inset(0 0 0 0);
-	transform: rotate(-45deg);
-	transition:
-		clip-path var(--dur-gesture) var(--nav-ease) calc(var(--dur-card) * 0.25),
-		transform var(--dur-gesture) var(--nav-ease)
-			calc(var(--dur-card) * 0.25 + var(--dur-gesture) * 0.5);
+	opacity: 1;
 }
+/* ── Project card: the travelling panel ──
+   ONE panel for the whole grid, not a background on each card (2026-08-02,
+   Hiro: it should move between cards as you go from one to the next). So this
+   is the site's THIRD slider, joining the nav's contact pill. It keeps
+   --dur-slide, the duration those travellers share, but NOT --ease-slide — it
+   runs its own --ease-panel, declared on #project-list, because this panel's
+   travel is 3.5× the pill's and a shared percentage overshoot doesn't survive
+   that. Read both notes before retiming either.
+
+   What the shared token stands for still applies here: things that TRAVEL need
+   a curve with weight, because a pure deceleration reads as the object being
+   redrawn somewhere else rather than moving. This is the largest travelling
+   object on the site, so it needs that most — it just needs it measured in
+   pixels rather than percent.
+
+   Everything about WHERE it goes is script (see index.astro): position and size
+   are written as a transform plus width/height, measured off the hovered card's
+   offset box. The rules here only say how it moves and what it looks like.
+
+   Transform + width/height rather than top/left/right/bottom: the transform is
+   composited, and while width/height do lay out, they lay out an absolutely
+   positioned element with no in-flow siblings, so the reflow is confined to
+   this one box and never touches the grid.
+
+   --surface is deliberately the FAINT choice: against --paper it is one plane
+   step, not a highlight (#13131a → #1a1b26 dark, #e9eaee → #f2f3f6 light). The
+   panel should be felt rather than read.
+
+   z-index 0 AND first in the DOM. Either alone would do it — the cards paint
+   later — but the reveal animation gives each grid item a filled animation, and
+   an element with a filled animation can hold a stacking context in some
+   engines, which would make z-index sorting between the panel and a card
+   unreliable. DOM order does not care. Keep this element first.
+
+   Two consequences of the panel that live in the markup, not here:
+   the card's p-3/-m-3 pair (the panel needs interior room; the negative margin
+   keeps the content on its original grid lines — do not remove one without the
+   other), and the frame's border compositing over --surface instead of --paper
+   while the panel is under it, so a hovered card's border is a slightly
+   different colour. That is --line being translucent, the same mechanism
+   documented on the frame itself, and it reads as the border settling onto the
+   sheet with everything else. */
+#project-list {
+	/* The panel's containing block AND the offsetParent its coordinates are
+	   measured against. Both come from this one declaration — if it goes, the
+	   script silently measures against the page instead. */
+	position: relative;
+	/* ── The panel's own curve ──
+	   NOT --ease-slide, and this is the one place on the site where a slider
+	   deliberately leaves the shared travelling pair. The reason is that the
+	   token's 2.99% overshoot is a PROPORTION, and it was cut against the nav
+	   pill's 134px travel, where it lands as 4.0px — small enough to read as the
+	   slider settling. This panel crosses 471px between columns, so the same
+	   2.99% arrives as 14.1px of overshoot: no longer a settle, a lurch, which is
+	   what Hiro called momentum (2026-08-02, "reduce momentum effect").
+	   Solved for the pill's ABSOLUTE overshoot rather than its percentage —
+	   0.85%, which is 4.0px across this panel's travel, the same distance the
+	   pill has always moved past its target. So the two sliders still agree about
+	   how much a moving object overruns; they just no longer agree about it as a
+	   fraction of a journey whose lengths differ by 3.5×.
+	   Only y1 moved (1.3 → 1.17). x1 = 0.34 is what holds the curve back at the
+	   start so the panel leaves slowly, and that is the part carrying the sense
+	   of mass — keep it. Duration is unchanged and still --dur-slide. */
+	--ease-panel: cubic-bezier(0.34, 1.17, 0.5, 1);
+}
+.card-panel {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 0;
+	height: 0;
+	z-index: 0;
+	border-radius: 1.5px;
+	background: var(--surface);
+	opacity: 0;
+	/* Never a hover target itself: it sits under the cursor constantly, and a
+	   panel that could take the pointer would fight the card it is under. */
+	pointer-events: none;
+	transition:
+		transform var(--dur-slide) var(--ease-panel),
+		width var(--dur-slide) var(--ease-panel),
+		height var(--dur-slide) var(--ease-panel),
+		opacity var(--dur-gesture) var(--nav-ease);
+}
+.card-panel.is-visible {
+	opacity: 1;
+}
+
+/* Reduced motion: the panel still appears and still marks the hovered card —
+   it just stops travelling, snapping between cards instead. Opacity keeps its
+   transition so the appearance is still a fade rather than a flash; only the
+   three geometry properties are dropped. Restated in full rather than
+   overriding transition-property, because the durations are a positional list
+   and trimming the front would slide opacity onto --dur-slide. */
+@media (prefers-reduced-motion: reduce) {
+	.card-panel {
+		transition: opacity var(--dur-gesture) var(--nav-ease);
+	}
+}
+
+/* ── Project card: THE LIFT IS GONE ──
+   Removed 2026-08-02 (Hiro), the last survivor of the old hover. The card no
+   longer moves at all on hover: the panel slides in behind it, the underline and
+   arrow appear, and the card itself holds perfectly still.
+
+   The history is worth one paragraph because this value absorbed a lot of
+   argument for something that ended up deleted. It was 3px, and the question was
+   always how much of the hover ZOOM's spread it should cancel — a scale about a
+   pinned top edge displaces every part of the card by a different amount, so the
+   lift was the one displacement they all shared. The right answer differed on
+   every card height the site ever had (765px, 319px, 349px), and on one of them
+   3px was accidentally perfect. Then the zoom went, which made the lift a pure
+   translate and the whole question moot; now the lift has gone too, so the
+   question is not just moot but gone.
+
+   The thing to NOT rediscover: the panel had to subtract this distance from its
+   own position, or it floated above a card standing on nothing, which meant a
+   --card-lift custom property on #project-list and a reduced-motion branch in
+   the script for when the card's translate is pinned to 0. All of that machinery
+   came out with the lift. If a lift is ever reintroduced, the panel has to learn
+   about it again — it does not follow for free.
+
+   The press scale stays (active:scale-[0.99] in the markup), so a pointer-down
+   still registers. */
+.project-card {
+	position: relative;
+	transition: scale var(--dur-card) ease-out;
+}
+
 /* ── Project card: lift shadow ──
    Hover/focus only, fading in over --dur-card so it lands with the zoom and
    the title underline. At REST the card casts nothing: --line is translucent,
@@ -782,8 +892,11 @@ footer {
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.project-card__title,
-	.project-card__arrow,
+	/* Only the frame's shadow is left to suppress. The title underline and the
+	   arrow now have no transitions in the first place (both just appear), and
+	   the card's own translate went with the lift — .project-card keeps only the
+	   press scale, which reduced motion already pins via motion-reduce:active
+	   in the markup. */
 	.project-card__frame {
 		transition: none;
 	}
@@ -823,7 +936,11 @@ footer {
 
 .btn:hover {
 	background: var(--btn-bg-hover);
-	border-color: var(--line-strong);
+	/* Tracks the ground rather than jumping to --line-strong, which is what this
+	   said while the button was a tinted surface: on a solid chip that hairline
+	   appeared out of nowhere on hover and read as a stroke drawn around the
+	   shape. The edge belongs to the chip, so it moves with it. */
+	border-color: var(--btn-bg-hover);
 }
 
 .btn:active {
@@ -871,6 +988,11 @@ footer {
 }
 
 /* ── Quiet link: label underline + arrow ──
+   NOTE (2026-08-02): the card's underline this was mirrored from no longer
+   exists — the card hovers to a faint panel now, and this is the last underline
+   on the site. What follows describes the pair as it was designed; the
+   relationship is history rather than something you can still see side by side.
+
    The project card's gesture RUN BACKWARDS, because the link means the
    opposite thing. On the card the underline wipes left-to-right toward an
    arrow sitting on the right, which then wipes in and tilts to ↗ ("out").
@@ -889,9 +1011,11 @@ footer {
    the site), and there's no second meaning here for a rotation to encode,
    so it would be decoration. The nudge is the whole idea. */
 .btn-quiet__label {
-	/* inline-block for the same reason as .project-card__title: an inline
-	   element's padding doesn't grow the line box, so the underline can land
-	   outside it. */
+	/* inline-block, NOT inline: an inline element's padding doesn't grow the
+	   line box, so the underline can land outside it — and outside any ancestor's
+	   overflow-hidden, which is where it gets clipped invisible. (The card's
+	   title carried the same note until its underline was removed; stated in full
+	   here now that this is the only place it applies.) */
 	display: inline-block;
 	background-image: linear-gradient(currentColor, currentColor);
 	background-repeat: no-repeat;

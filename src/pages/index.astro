@@ -14,17 +14,35 @@ import { projects } from '../data/projects';
 		    there since the nav links came out (2026-08-01). Held to --measure and
 		    the about page's own opening line, in its type size, so arriving from
 		    either direction reads as one voice. */}
-		<section class="pt-10 pb-14 sm:pt-12">
-			<p class="reveal max-w-[var(--measure)] text-lg leading-relaxed" style="--i: 0">
-				I'm a Design Engineer based in the San Francisco Bay Area.
+		{/* Centred, both lines, each on its own axis (2026-08-02, Hiro). This
+		    REPLACES the shared-left-edge lockup from earlier the same day, and the
+		    reason it can: that arrangement existed because the second line was a
+		    bare text link that had to read as hanging off the sentence, which a
+		    second centring axis would have broken. It's a button now — a boxed
+		    control is self-evidently its own object, so it doesn't need the
+		    sentence's left edge to say so, and the hero reads as one deliberate
+		    centred block instead. */}
+		<section class="pt-16 pb-20 text-center sm:pt-20 sm:pb-24">
+			{/* Still capped at --measure so a wide viewport can't run the line out
+			    past a readable length; mx-auto centres the box the cap creates. */}
+			<p class="reveal mx-auto max-w-[var(--measure)] text-lg leading-relaxed" style="--i: 0">
+				I design product interfaces and then go build them.
 			</p>
-			{/* Same wipe-in underline and tilting arrow as a project card title, so
-			    the site has one "this goes somewhere" gesture — but with the arrow
-			    drawn at rest, since here it's the affordance and not a flourish
-			    (see .hero-link in global.css). */}
-			<p class="reveal mt-4" style="--i: 1">
-				<a href="/about" class="hero-link group text-lg text-[var(--ink-soft)]">
-					<span class="hero-link__text">About</span>
+			{/* The page's only route to /about, so it's the site's one real button.
+			    mt-6 rather than the old link's mt-4 — a control needs more air off
+			    the line above it than a word set in the same size did.
+
+			    The arrow is DRAWN AT REST and doesn't animate, unlike the project
+			    cards' (which appear on hover). Different job: on a card the arrow
+			    is a flourish on something already obviously clickable — bordered
+			    image, whole-card cursor, a panel that lights up. Here it's the only
+			    thing distinguishing a button that navigates from a button that
+			    performs an action, and that's information you want before you
+			    hover, not after. .btn's flex + gap owns the spacing, so the glyph
+			    needs no margin of its own. */}
+			<p class="reveal mt-6" style="--i: 1">
+				<a href="/about" class="btn">
+					About Hiro Eernisse
 					<svg
 						viewBox="0 0 24 24"
 						fill="none"
@@ -33,7 +51,7 @@ import { projects } from '../data/projects';
 						stroke-linecap="round"
 						stroke-linejoin="round"
 						aria-hidden="true"
-						class="hero-link__arrow ml-2 inline-block h-[1.05rem] w-[1.05rem] align-[-0.125em]"
+						class="inline-block h-[0.85rem] w-[0.85rem]"
 					>
 						<line x1="4" y1="12" x2="19" y2="12"></line>
 						<polyline points="12 5 19 12 12 19"></polyline>
@@ -48,7 +66,12 @@ import { projects } from '../data/projects';
 			    gap only has to separate two cards side by side, while the row gap
 			    also has to out-space the gap INSIDE a card (title → image), or a
 			    card's image reads as belonging to the title below it. */}
-			<div id="project-list" class="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2">
+			<div id="project-list" class="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2">
+				{/* The hover panel — one for the whole grid, sliding to whichever card
+				    is hovered or focused. MUST STAY FIRST: it's kept under the cards by
+				    DOM order as well as z-index (see .card-panel in global.css).
+				    Absolutely positioned, so it claims no grid track. */}
+				<div class="card-panel" aria-hidden="true"></div>
 				{/* +2: the hero's two lines hold --i 0 and 1, so the whole page reveals
 				    as one top-down cascade instead of the first cards arriving
 				    alongside the hero. */}
@@ -66,3 +89,134 @@ import { projects } from '../data/projects';
 	</footer>
 
 </Layout>
+
+{/* ── The travelling hover panel ──
+    Drives .card-panel to whichever card is hovered or focused. Built on the
+    same shape as the nav's contact pill (Nav.astro): a shared element that
+    SLIDES between targets when one is already showing, and snaps into place
+    with transitions suppressed when it first appears — otherwise the entrance
+    animates from wherever the last card left it, or from 0,0 on the first
+    hover, which reads as the panel flying in from the corner.
+
+    All geometry comes from offsetLeft/Top/Width/Height, never
+    getBoundingClientRect: offset values are the UNTRANSFORMED layout box. This
+    mattered more when the card lifted 3px on hover — a rect read mid-transition
+    had the panel chasing a moving target — and the card is still scaled while
+    pressed, so the reason hasn't fully gone away. Keep it regardless: a panel
+    that measures its target's transform will always be one gesture behind.
+
+    But they must be ACCUMULATED up the offsetParent chain, not read once — see
+    offsetIn below. A card's offsetParent is not #project-list: it's the .reveal
+    wrapper in between, because .reveal runs a transform animation with
+    fill-mode `both`, and an element with a filling transform animation is a
+    containing block for as long as the fill lasts, which is forever. Read
+    directly, every card reports the same offsetLeft/Top (-14, -14 — its own
+    negative margin inside its wrapper) and the panel never leaves the first
+    card. Accumulating also survives the opposite case: under html.reveal-skip
+    the animation is off, .reveal stops being a containing block, and the walk
+    simply has one less hop. */}
+<script>
+	const list = document.getElementById('project-list');
+	const panel = list?.querySelector<HTMLElement>('.card-panel');
+
+	if (list && panel) {
+		const cards = Array.from(list.querySelectorAll<HTMLElement>('.project-card'));
+		// The card no longer lifts on hover (2026-08-02), so the panel simply lands
+		// on the card's own box. This used to read a --card-lift property off the
+		// list and subtract it here, with a reduced-motion branch because the lift
+		// was pinned to 0 under that setting and the two had to agree. All of it
+		// came out with the lift; see the note in global.css if one comes back.
+		let visible = false;
+		let current: HTMLElement | null = null;
+
+		// Sum offsetLeft/Top from `el` up to (not including) `root`, following the
+		// offsetParent chain rather than the DOM parent chain. Terminates on the
+		// root because #project-list is position: relative, so it is the first
+		// positioned ancestor any chain from inside the grid can reach; the null
+		// check is a guard against that ever changing silently.
+		const offsetIn = (el: HTMLElement, root: HTMLElement) => {
+			let x = 0;
+			let y = 0;
+			let node: HTMLElement | null = el;
+			while (node && node !== root) {
+				x += node.offsetLeft;
+				y += node.offsetTop;
+				node = node.offsetParent as HTMLElement | null;
+			}
+			return { x, y };
+		};
+
+		const place = (card: HTMLElement) => {
+			const { x, y } = offsetIn(card, list);
+			panel.style.width = `${card.offsetWidth}px`;
+			panel.style.height = `${card.offsetHeight}px`;
+			panel.style.transform = `translate(${x}px, ${y}px)`;
+		};
+
+		const show = (card: HTMLElement) => {
+			current = card;
+			if (visible) {
+				place(card); // slide + resize to the new card
+				return;
+			}
+			// First appearance: kill the transition, land on the card, force the
+			// reflow so the browser doesn't coalesce the two states, then let the
+			// class fade it up. Only opacity animates here.
+			panel.style.transition = 'none';
+			place(card);
+			void panel.offsetWidth;
+			panel.style.transition = '';
+			panel.classList.add('is-visible');
+			visible = true;
+		};
+
+		const hide = () => {
+			visible = false;
+			current = null;
+			panel.classList.remove('is-visible');
+		};
+
+		// Crossing the gutter between two cards briefly leaves every card, which
+		// would hide the panel and re-show it at the new one — killing the slide
+		// that is the whole point. A short grace delay lets the next enter cancel
+		// the hide, so a sweep across the grid stays one continuous move; pausing
+		// in the gutter still clears it.
+		let gapHideTimer = 0;
+		cards.forEach((card) => {
+			card.addEventListener('mouseenter', () => {
+				window.clearTimeout(gapHideTimer);
+				show(card);
+			});
+			card.addEventListener('mouseleave', () => {
+				window.clearTimeout(gapHideTimer);
+				gapHideTimer = window.setTimeout(hide, 90);
+			});
+		});
+		list.addEventListener('mouseleave', () => {
+			window.clearTimeout(gapHideTimer);
+			hide();
+		});
+
+		// Keyboard: the panel follows focus too, so tabbing through the grid marks
+		// the same card the underline and the lift do.
+		list.addEventListener('focusin', (e) => {
+			const card = (e.target as HTMLElement).closest<HTMLElement>('.project-card');
+			if (card) show(card);
+		});
+		list.addEventListener('focusout', (e) => {
+			if (!list.contains(e.relatedTarget as Node)) hide();
+		});
+
+		// The grid reflows on resize (one column below sm), so every offset the
+		// panel is holding goes stale. Re-place rather than hide — the pointer may
+		// still be over the same card — and do it with transitions off, since the
+		// panel isn't travelling anywhere, it's being corrected.
+		window.addEventListener('resize', () => {
+			if (!visible || !current) return;
+			panel.style.transition = 'none';
+			place(current);
+			void panel.offsetWidth;
+			panel.style.transition = '';
+		});
+	}
+</script>
