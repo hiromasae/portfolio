@@ -23,30 +23,36 @@
 	   ink contrast (19.19:1 → 7.57:1). That is the theme, not a slip — but it is
 	   what forces the muting proportion below. */
 	color-scheme: light;
-	--paper: #d5d6db; /* Tokyo Night Light editor background, verbatim */
-	--ink: #343b58; /* Tokyo Night Light foreground, verbatim — 7.57:1 */
+	/* 08-02: stepped one further from the dark ground at Hiro's ask ("light mode
+	   bg lighter"). #d5d6db, Tokyo Night Light's own editor background, moves
+	   DOWN to --surface-sunken rather than leaving the palette — so the theme's
+	   ground is still on the page, just as the recessed plane. The paper above
+	   it is derived: same hue, lifted in OKLCH.
+	   This is what bought back the muting depth — see --ink-soft. */
+	--paper: #e9eaee;
+	--ink: #343b58; /* Tokyo Night Light foreground, verbatim — 9.13:1 */
 	/* Secondary text. THE RULE HERE IS A PROPORTION, NOT A HEX: both themes must
 	   mute by the same fraction of their own ink contrast, or the same-looking
 	   grey reads as two different degrees of quiet on two different grounds
 	   (07-26). What the proportion IS moved on 08-01, and not by choice.
 
-	   It was 37% (light 7.10:1 under a 19.19:1 ink). Tokyo Night's inks carry far
-	   less contrast — 10.59:1 dark, 7.57:1 light — so 37% would put this at
-	   2.80:1 here and 3.92:1 in dark, both well under AA for text this size, and
-	   every consumer (card year/role, footer, the about caption) is under 19px.
-	   AA is the floor that can't move, so the proportion gave way: 60.8% is the
-	   tightest muting that still clears 4.6:1 in the theme with the least
-	   headroom, which is this one. Dark then takes the SAME 60.8% rather than
-	   its own tighter floor, because equality across themes is the actual rule.
+	   It was 37% (light 7.10:1 under a 19.19:1 ink). Tokyo Night's inks carry
+	   less contrast, so 37% would land under AA for text this size, and every
+	   consumer (card year/role, footer, the about caption) is under 19px. AA is
+	   the floor that can't move, so the proportion gives way to whatever the
+	   theme with the least headroom can afford — always this one.
 
-	   Know the cost: 60.8% is shallower than the 37% this site was tuned to, and
-	   near the 66% that was called "barely muted" when it was fixed in July. The
-	   only way back to a deep mute is a higher-contrast ink — i.e. a darker ink
-	   than Tokyo Night Light ships. That's a palette decision, not a tuning one.
+	   08-01 that was 60.8%, which was shallow enough to be worth apologising for:
+	   near the 66% that got called "barely muted" when it was fixed in July.
+	   08-02 the grounds moved apart (Hiro's ask, for its own reasons) and the ink
+	   picked up 1.56 points of contrast for free — 7.57:1 → 9.13:1 — so the same
+	   AA floor now sits at 50.4%. That is most of the way back, and it came from
+	   the ground rather than from tuning here, which is the point: this token
+	   has no value of its own, only a proportion and a floor.
 
 	   Solved in the hue of Tokyo Night's comment #565f89 (which is itself 1.96:1
-	   here — unusable for body text); lightness only. 4.60:1. */
-	--ink-soft: #515a84;
+	   here — unusable for body text); lightness only. 4.63:1. */
+	--ink-soft: #5d6691;
 	/* Tinted with the ink rather than pure black: on a lavender-grey ground a
 	   neutral black hairline reads as a foreign material. Alphas unchanged. */
 	--line: rgba(52, 59, 88, 0.22); /* card/tag borders */
@@ -57,18 +63,18 @@
 	   the same stock rather than a different material. The sunken bed is stepped
 	   DOWN from --paper in OKLCH with chroma raised slightly, the same
 	   construction the dark block uses in the other direction. */
-	--surface: #e1e2e7; /* cards, tags, nav buttons */
-	--surface-sunken: #c6c7cd; /* card image bed, active states */
+	--surface: #f2f3f6; /* cards, tags, nav buttons */
+	--surface-sunken: #d5d6db; /* card image bed — Tokyo Night Light's own ground */
 
-	--btn-bg: #c6c7cd;
-	--btn-bg-hover: #b6b7be;
-	--btn-bg-active: #a6a7ae;
+	--btn-bg: #d5d6db;
+	--btn-bg-hover: #c6c7cd;
+	--btn-bg-active: #b6b7be;
 	--btn-text: #343b58;
 	--btn-border: rgba(52, 59, 88, 0.18);
 
 	/* Tokyo Night Light's blue, verbatim. The ring is a UI boundary, so WCAG
 	   1.4.11's 3:1 is the bar it has to clear against every ground it can land
-	   on — 5.20:1 against --paper and 5.84:1 against --surface, so it has room
+	   on — 6.28:1 against --paper and 6.81:1 against --surface, so it has room
 	   this time (the previous ring shipped under its own floor for a while). */
 	--focus-ring: #34548a;
 
@@ -224,29 +230,33 @@
    lighter sheet of the same paper rather than a different material. */
 :root[data-theme="dark"] {
 	color-scheme: dark;
-	--paper: #1a1b26; /* night background, verbatim */
-	--ink: #c0caf5; /* foreground, verbatim — 10.59:1 */
-	/* 60.8% of --ink, the same proportion the light block carries — see the long
-	   note there for why that number moved from 37% and what it costs. Dark has
-	   more headroom than light and could mute harder on its own (AA would allow
-	   42.5% here), but equality across the two themes is the rule, so it takes
-	   light's floor. Solved in the hue of Tokyo Night's comment #565f89, which
-	   is 2.76:1 on this ground and fails AA outright. 6.45:1. */
-	--ink-soft: #939dcb;
+	/* 08-02: one step darker at Hiro's ask. Like the light block, the ground it
+	   replaced didn't leave the palette — #1a1b26 is now --surface, so night's
+	   own background became the raised sheet and the three planes are still all
+	   real Tokyo Night values but for this one, derived in OKLCH from it. */
+	--paper: #13131a;
+	--ink: #c0caf5; /* foreground, verbatim — 11.45:1 */
+	/* 50.4% of --ink, the same proportion the light block carries — see the long
+	   note there for why the number moved off 37% and why it improved on 08-02.
+	   Dark has more headroom than light and could mute harder on its own (AA
+	   would allow 40.2% here), but equality across the two themes is the rule,
+	   so it takes light's floor. Solved in the hue of Tokyo Night's comment
+	   #565f89, which is 2.35:1 on this ground and fails AA outright. 5.76:1. */
+	--ink-soft: #838eba;
 	/* Tinted with the ink, like the light block's. Alphas unchanged. */
 	--line: rgba(192, 202, 245, 0.12);
 	--line-strong: rgba(192, 202, 245, 0.3);
 	--line-soft: rgba(192, 202, 245, 0.11);
-	--surface: #1f2335; /* storm's bg_dark, verbatim */
-	--surface-sunken: #24283b; /* storm's bg, verbatim */
+	--surface: #1a1b26; /* night's own background, verbatim */
+	--surface-sunken: #1f2335; /* storm's bg_dark, verbatim */
 
-	--btn-bg: #24283b;
-	--btn-bg-hover: #292e42; /* bg_highlight, verbatim */
-	--btn-bg-active: #3b4261; /* fg_gutter, verbatim */
+	--btn-bg: #1f2335;
+	--btn-bg-hover: #24283b; /* storm's bg, verbatim */
+	--btn-bg-active: #292e42; /* bg_highlight, verbatim */
 	--btn-text: #c0caf5;
 	--btn-border: rgba(192, 202, 245, 0.14);
 
-	/* Tokyo Night's blue, verbatim — 6.79:1 against --paper, 6.18:1 against
+	/* Tokyo Night's blue, verbatim — 7.34:1 against --paper, 6.79:1 against
 	   --surface, both well clear of WCAG 1.4.11's 3:1 floor for non-text. */
 	--focus-ring: #7aa2f7;
 
