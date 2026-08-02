@@ -170,14 +170,12 @@
 	   the load intro's sweep keyframes can target rest in either theme. */
 	--theme-fill-x: 0px;
 
-	/* Single easing for the whole nav collapse/expand ensemble. The motion is
-	   assembled from independent transitions — the FLIP translateY (set inline
-	   from Nav.astro's scripts, also on <main>/<footer>, hence :root), the
-	   icons' translateX/scale below, and the Tailwind `ease-out` classes on
-	   the logo/links — and every piece must ride the same curve: if the
-	   horizontal and vertical components ease differently, their per-frame
-	   disagreement bends the straight glide into a visible swing. Keep this
-	   equal to Tailwind's --ease-out (used by the markup classes). */
+	/* The site's default easing. It was cut for the nav's collapse/expand
+	   ensemble — a motion assembled from independent transitions that all had
+	   to ride one curve, or their per-frame disagreement would bend the glide
+	   into a visible swing — and outlived it as the curve every wipe, fade and
+	   sweep on the site uses. Keep it equal to Tailwind's --ease-out (used by
+	   the markup classes). */
 	--nav-ease: cubic-bezier(0, 0, 0.2, 1);
 
 	/* ── Motion duration scale ──
@@ -188,10 +186,11 @@
 	     nav links (unified here: they previously rode Tailwind's 150ms default).
 	   --dur-gesture: the standard wipe/slide gesture — underlines, pills,
 	     the card arrow, the theme sweep.
-	   --dur-nav: the nav ensemble tween. Nav.astro's rAF tween reads this via
-	     getComputedStyle and About's reveal hold derives from it, so changing
-	     it here retimes the scroll trigger, the cross-page intro keyframes,
-	     and the content hold together.
+	   --dur-nav: the bar's own beat — now only the wordmark's wipe in the load
+	     intro, which is longer than a --dur-gesture wipe because it's the
+	     widest thing on the bar. It was the collapse/expand tween's duration,
+	     shared by the rAF tween, the cross-page keyframes and the content
+	     hold; all three are gone.
 	   --dur-card: the project card's hover pair — zoom (ProjectCard.astro's
 	     duration-[var(--dur-card)]) and title underline, kept equal so the two
 	     read as one gesture.
@@ -229,6 +228,18 @@
 	   reads as two events. */
 	--dur-slide: 320ms;
 	--ease-slide: cubic-bezier(0.34, 1.3, 0.5, 1);
+
+	/* ── The pop ──
+	   The hover label's entrance and exit (see .contact-slider-in). Its own
+	   named group rather than values off the scale above, for the same reason
+	   the travelling pair has one: the in and the out are deliberately
+	   ASYMMETRIC — 280 against 130 — and the pair only makes sense read
+	   together. The spring is a hair stiffer than --ease-slide (1.45 against
+	   1.3): the slider is carrying a body across a distance and wants weight,
+	   where this is a small thing appearing in place and wants snap. */
+	--dur-pop-in: 280ms;
+	--dur-pop-out: 130ms;
+	--ease-pop: cubic-bezier(0.34, 1.45, 0.5, 1);
 
 	/* ── Reading measure ──
 	   The cap on any column of running prose (About's intro, a project's
@@ -326,13 +337,6 @@ html {
 	/* Bump the base scale so nav + content read larger overall (16px → 19px) */
 	font-size: 118.75%;
 	scroll-behavior: smooth;
-	/* The nav's height changes on scroll (see Nav.astro's q model): crossing
-	   the top of the page triggers the bar's collapse/expand tween, which
-	   moves the content below. Scroll anchoring would see that shift and
-	   re-adjust scrollY to compensate — a feedback loop (scroll → shrink →
-	   anchor re-scrolls → shrink more). The q model owns the relationship
-	   between scroll and geometry; anchoring must stay out. */
-	overflow-anchor: none;
 	/* Always reserve the scrollbar gutter so short pages (e.g. About) don't
 	   shift horizontally relative to long, scrollable ones (e.g. Home). */
 	scrollbar-gutter: stable;
@@ -414,218 +418,42 @@ body {
 	transition: none !important;
 }
 
-/* ── Triggered masthead: the q model ──
-   The bar shrinks as two clusters that each scale as one unit — the left
-   cluster (.nav-left: wordmark + links) toward --nav-logo-scale, anchored at
-   its left edge, and the right cluster (contact icons + toggle) toward
-   --nav-icon-scale, anchored at the nav's right edge — so within each cluster
-   every gap stays exactly proportionate to the elements around it.
+/* ── Nav geometry ──
+   The bar has ONE state. Both its type and its buttons are authored at full
+   size and SCALED DOWN into it — the wordmark at --nav-logo-scale, the
+   buttons at --nav-icon-scale — rather than being set small. For the icons
+   that's structural: they're stroked artwork whose 2px weight is drawn
+   against a 24-unit viewBox, and scaling the BUTTON (never the SVG's own
+   box) keeps the weight proportionate without re-rastering the glyph every
+   frame a hover transform runs on it.
 
-   Every part of the geometry is a function of ONE progress value --q
-   (0 = expanded masthead, 1 = compact bar). --q rests at exactly 0 or 1: on
-   the home page, crossing the top of the page triggers a timed tween between
-   the two states (driven by Nav.astro's scripts — expanded only at the top,
-   compact once you've scrolled away); interior pages pin --q to 1.
-
-   CRUCIALLY, the motion is TRANSFORM-ONLY: the nav's layout is pinned at the
-   compact bar (fixed .nav-pad padding below), and the expanded masthead is
-   created by translating the bar's contents and the whole page down as
-   --q → 0. Transforms never reflow, so the tween costs style + composite
-   only — an earlier version animated the padding itself and re-laid-out the
-   entire document on every frame, which felt laggy. The shift distances:
-   page (main/footer) moves the full former height delta, 5.5rem; the bar's
-   contents sit at the old padding midpoint, half that, 2.75rem.
-
-   --q defaults to 1 (compact, zero shift — safe for any page without the
-   nav) and the home page's masthead flips it to 0. Nav.astro's setQ is its
-   only writer; every other var below is a pure calc() on it. */
-html {
-	--q: 1;
-	--nav-shift: 5.5rem;
-	--nav-shift-inner: 2.75rem;
-	/* Expanded-state magnification for the wordmark: the left cluster's
-	   scale runs boost → --nav-logo-scale instead of 1 → --nav-logo-scale.
-	   (Until 08-01 the cluster also held the Projects/About links, which
-	   counter-scaled the boost away so only the name grew; the wordmark is
-	   the whole cluster now.) Pure transform through the same channel the
-	   collapse uses —
-	   layout and the compact bar are untouched. Lives on html (not #site-nav)
-	   because the :has() fallback below must resolve it. Wide viewports only:
-	   below the gate the boosted wordmark (its layout box doesn't grow) would
-	   visually run into the contact icons. Keep the gate in step with the
-	   matchMedia listener in Nav.astro. */
-	--nav-boost: 1;
-	/* Baseline seat for the right cluster: it drops the contact icons' and
-	   toggle's centers out of the masthead's vertical middle onto the line the
-	   Projects/About links used to hold — their cap-height midpoint, which this
-	   value was measured against (see the gated block below). The masthead is a
-	   tall hero lockup, so centering the icons in its full height floats them
-	   mid-air; seated, they read as the secondary row beside the name.
-	   NOT boost-divided (the wrappers sit outside the scaled .nav-left), and
-	   gated with the boost: at ×1 the centered float is the ordinary nav idiom
-	   and stays.
-	   08-01: the links this was measured onto are GONE, so the number no longer
-	   aligns the icons to anything on the page — it just holds the position
-	   Hiro signed off on. Re-seat it against the wordmark if the masthead's
-	   right cluster ever looks unmoored. */
-	--nav-icon-seat: 0rem;
-	/* The compact sizes of the two secondary clusters. They live up here rather
-	   than on #site-nav with --nav-logo-scale because the boosts below are
-	   defined as EQUAL to them, and a custom property can only reference one
-	   declared on itself or an ancestor. (Nav.astro reads both off the nav via
-	   getComputedStyle; custom properties inherit, so that still resolves.)
-	   --nav-icon-scale is 0.70, up from an original 0.62: at 0.62 the ~1.9px
-	   strokes read a size class smaller beside the bold compact wordmark, and
-	   the ~34px hit boxes ran well under touch-target guidance (the contact
-	   icons are the only nav actions on phones). */
-	--nav-icon-scale: 0.7;
-	/* ── The name grows a lot; the icons grow a little ──
-	   The right cluster's uniform miniature runs --nav-icon-boost → 0.7 instead
-	   of 1 → 0.7 (still anchored flush right), cancelling at q = 1: the compact
-	   bar never changes.
-	   07-31, Hiro: the secondary row should "just extend downward without
-	   growing" — so it was PINNED to its compact scale. Before that it was
-	   boosted to 1.12 at ≥1200px, which made the masthead read as a uniform
-	   magnification of the whole bar — the wordmark was the biggest thing in it
-	   but not the only thing changing, so the size step didn't single it out.
-	   08-01, Hiro: off the pin, a factor of 1.25 on the 0.7 compact scale, so
-	   the glyphs render 25.27px compact / 31.58px expanded while the wordmark
-	   runs 19.95px → 60.8px. That ratio is the whole point: the icons step up
-	   enough to feel like part of the masthead, the name steps up three times as
-	   far and stays the hero. 1.1 was tried first and Hiro called it too little;
-	   the pre-07-31 1.6× is the other edge, where the bar reads as a uniform
-	   magnification. (The Projects/About links carried the same 1.25 factor
-	   through their own --nav-links-boost — one factor for both clusters, so the
-	   secondary line never read as two sizes — until they came out on 08-01.)
-	   UNGATED, unlike the wordmark's own boost: Hiro's call (08-01) after seeing
-	   it gated to ≥1200px, where a narrower window showed no change at all.
-	   Below the gate the icons are the only thing that grows — the wordmark
-	   doesn't — and that is the accepted trade. Nothing needs re-measuring down
-	   there: the seat is 0 below 1200px, so the icons stay flex-centred and grow
-	   about their own centre.
-	   A LITERAL, not calc(var(--nav-icon-scale) * 1.25): an unregistered custom
-	   property hands calc() text back unevaluated, so anything parseFloat-ing it
-	   out of getComputedStyle reads NaN. Nothing does today — the cluster's
-	   transform is pure calc on --q, below — but the links' twin token was read
-	   that way by Nav.astro, and the trap is worth staying clear of.
-	   The ≥1200px seat is cut to this number; re-measure it if this moves. */
-	--nav-icon-boost: 0.875;
-	/* Contact-gap dial for the masthead ONLY: how much TIGHTER than the
-	   pure-scale spread each gap between the contact icons sits at q = 0
-	   (07-24, Hiro: the magnified gaps read too airy — and again 08-01, once
-	   the 0.875 step had put the magnification back). Zeroed on 07-31 when the
-	   pinned --nav-icon-boost left nothing to shave; live again at 0.24rem.
-	   The value is not a taste guess. It's cut so the expanded glyph-to-glyph
-	   gap EQUALS the compact bar's: 22.86px → 18.30px against compact's
-	   18.29px. So the masthead's icons hold the same absolute spacing while the
-	   glyphs themselves are 1.25× bigger — which is what "tighter" reads as,
-	   and it gives the cluster a stop worth returning to rather than a number
-	   someone nudged. Ceiling is ~0.328rem, where the 48.2px hit boxes touch
-	   (they sit 1.67px apart at 0.24rem); past that the targets overlap and
-	   the only tightening left is the buttons' 0.5rem padding, which is
-	   compact-bar and touch-target territory.
-	   A translate, not a layout gap — each button shifts right by this per contact
-	   gap between it and the right-anchored cluster edge, so every intra-contact
-	   gap shrinks by exactly this much; the toggle's deliberate ml-8 separation
-	   and the compact bar keep their layout gaps. Riding (1 − --q) is what keeps
-	   the compact bar out of it. Applied BEFORE the buttons' scale, so the value
-	   is visual px as written. Ungated, like the boosts it corrects. */
-	--nav-icon-tighten: 0.24rem;
-	/* Same dial for the contacts ↔ toggle gap (07-24, follow-up ask): every
-	   contact button crosses that gap exactly once, so the term rides
-	   min(r, 1) — all contacts shift right by this, the toggle holds the
-	   edge. Separate from --nav-icon-tighten so the two gaps retune
-	   independently; the toggle keeps SOME extra separation on purpose (it's
-	   what sets it apart from the contacts cluster). */
-	--nav-toggle-tighten: 0rem;
-}
-
-/* Only the wordmark's boost and the icon seat are gated. The icons' boost left
-   this block on 07-31 when it was pinned to the compact scale — and the tighten
-   dials went with it, since they existed only to take back air the
-   magnification added. Its 08-01 step back up (see --nav-icon-boost above)
-   stayed OUT of the gate on purpose: Hiro wants the secondary row slightly
-   larger in the masthead at every width, not only where the wordmark grows.
-   The seat stays gated: it's the masthead's baseline lockup, and below the gate
-   there's no boosted wordmark to seat onto. */
-@media (min-width: 1200px) {
-	html {
-		--nav-boost: 1.28; /* 2.5rem wordmark reads ~3.2rem expanded */
-		/* Measured, not dialled — but against a row that has since been
-		   removed. Through 08-01 this sat the icon centres on the Projects/About
-		   links' glyph centres, taken off the CAP-HEIGHT midpoint (not the word's
-		   ink extents, which let the j in "Projects" drag the centre 1.75px low),
-		   with the links themselves seated onto the wordmark's baseline by a
-		   companion --nav-seat. Both were re-measured twice as the links' scale
-		   moved — 0.488/0.59 → 0.726/0.896 at the 07-31 pin → 0.666/0.817 when
-		   they stepped back up — each time landing the two alignments to 0.01px.
-		   The links came out later the same day. This value is what survives:
-		   the height the right cluster has always dropped to, now holding on its
-		   own. Nothing on the page marks that line any more, so if the cluster
-		   ever reads unmoored, re-measure against the wordmark rather than
-		   nudging. */
-		--nav-icon-seat: 0.817rem;
-	}
-}
-
-html:has(#site-nav[data-home='true']) {
-	--q: 0;
-}
-
-/* The wordmark's compact scale — the one scale that still differs between the
-   two states, and so the only one left here. Its sibling --nav-icon-scale moved
-   up to html on 07-31; see the note there. */
+   Until 2026-08-02 all of this was a function of one progress value --q
+   (0 = expanded masthead, 1 = compact bar) that the home page tweened as the
+   scroll crossed the top of the page: the bar grew into a hero lockup and
+   collapsed as you scrolled away, carrying the whole document down with it.
+   The masthead is gone, and with it the scroll watcher, the rAF tween, the
+   cross-page state handoff, the paper veil that backed the taller bar, and
+   the boost/seat/tighten tokens that shaped the expanded end of the range.
+   What survives here is the geometry that state always rested at. It's in
+   git if it's ever wanted back — don't try to reconstruct it from these
+   numbers, which are only ever one end of it. */
 #site-nav {
 	--nav-logo-scale: 0.42;
+	/* 0.70, up from an original 0.62: at 0.62 the ~1.9px strokes read a size
+	   class smaller beside the bold wordmark, and the ~34px hit boxes ran well
+	   under touch-target guidance (the contact icons are the only nav actions
+	   on phones). */
+	--nav-icon-scale: 0.7;
 }
 
-/* Layout pinned compact; the masthead's extra height is transform-made. */
 #site-nav .nav-pad {
 	padding-block: 0.25rem;
 }
 
-#site-nav .nav-inner {
-	transform: translateY(calc(var(--nav-shift-inner) * (1 - var(--q))));
-}
-
-/* The page rides below the masthead: everything after the sticky bar shifts
-   down by the same amount the bar's box gave up. (No fixed-position elements
-   live inside these, so the containing block a transform creates is safe.) */
-main,
-footer {
-	transform: translateY(calc(var(--nav-shift) * (1 - var(--q))));
-}
-
-/* The masthead's opaque backdrop below the pinned box: content scrolled
-   partway through the range tucks y px under the masthead (it always did —
-   the taller layout box used to cover it), so this paper veil extends the
-   bar's painted extent to its VISUAL height, sized by scaleY — flat paper,
-   so the scale is invisible and its bottom edge IS the bar's visual
-   bottom. (The grain rides along and technically stretches with the scale,
-   but only mid-tween and at 5% opacity — imperceptible; at both resting
-   states the veil is unscaled or invisible.) Negative z-index keeps it
-   under the bar's own contents while the nav's z-40 stacking context still
-   paints it over the page. */
-#site-nav::after {
-	content: '';
-	position: absolute;
-	top: 100%;
-	left: 0;
-	right: 0;
-	height: var(--nav-shift);
-	background: var(--paper);
-	background-image: var(--grain);
-	transform-origin: top;
-	transform: scaleY(calc(1 - var(--q)));
-	z-index: -1;
-}
-
-/* Left cluster (the wordmark) scales from --nav-boost (expanded) toward
-   --nav-logo-scale (compact), anchored at the left edge (origin-left in the
-   markup). At q = 1 the boost cancels out — the compact bar is identical at
-   every viewport width. */
+/* The wordmark is authored at 2.5rem and scaled down, anchored at its left
+   edge (origin-left in the markup) so it sits against the container's edge. */
 #site-nav .nav-left {
-	scale: calc(var(--nav-boost) - (var(--nav-boost) - var(--nav-logo-scale)) * var(--q));
+	scale: var(--nav-logo-scale);
 }
 
 /* ── Hero: the About link ──
@@ -942,6 +770,29 @@ footer {
 	transition: color var(--dur-tap) ease;
 }
 
+/* ── Hit boxes tile edge to edge ──
+   The drawn buttons sit 0.2625rem apart (the 0.375rem layout gap × the 0.7
+   close-ranks scale), and that sliver used to be dead ground: crossing it
+   dropped the hover, and lingering there cleared the label after the grace
+   delay. This pseudo extends each button's hit region by HALF the layout gap
+   on every side, so neighbouring regions meet exactly — sweeping the row is
+   one continuous hover and the label just slides along.
+
+   Half the LAYOUT gap, not half the drawn gap, and that's not an approximation:
+   the pseudo is inside the button, so it scales with it, and 0.1875rem × 0.7
+   is 0.13125rem — precisely half the 0.2625rem it has to close. Retune it only
+   against --nav-icon-scale's gap, never by eye.
+
+   A pseudo rather than padding because padding would change the 2.9rem box the
+   close-ranks translate in the nav is cut against. Vertical by the same amount,
+   which is pure forgiveness for a diagonal approach; it can't reach the pill
+   below (that's 0.3rem down and pointer-events: none anyway). */
+.btn-icon::after {
+	content: '';
+	position: absolute;
+	inset: -0.1875rem;
+}
+
 .btn-icon:hover {
 	color: var(--ink);
 }
@@ -997,21 +848,49 @@ footer {
 	transform: translateX(var(--theme-fill-x, 0px));
 }
 
-/* Shared sliding label: a single ink pill that glides between the contact
-   icons, always sitting just below whichever one is hovered or focused and
-   carrying its destination text. Position and width are driven entirely by
-   script (see Nav.astro); the transitions here make the move a smooth slide.
+/* ── Shared sliding label ──
+   A single ink pill that glides between the contact icons, always sitting just
+   below whichever one is hovered or focused and carrying its destination text.
+
+   TWO elements, and the division of labour is the whole design:
+
+     .contact-slider     the POSITIONER. Its transform is WHERE the pill is
+                         (script writes translateX per icon) and its transition
+                         is the slide between icons. Nothing else may use
+                         either channel.
+     .contact-slider-in  the visible box, and the only thing that plays the
+                         entrance and exit.
+
+   That split exists because both jobs want `transform`. An entrance written on
+   the positioner would re-fire every time the pill slid to the next icon —
+   which is exactly what it must not do, since the point of one shared pill is
+   that it's the same object arriving, not a label redrawn under the new icon.
+
    `left: 0` + a translateX from script keeps the transform origin stable so
-   the width animation grows/shrinks evenly. */
+   the width animation grows/shrinks evenly. Width is set in px by script (it
+   measures each label with a hidden clone) so it can be transitioned at all. */
 .contact-slider {
 	position: absolute;
 	top: 100%;
 	left: 0;
+	width: 0;
 	margin-top: 0.3rem;
-	display: inline-flex;
+	pointer-events: none;
+	transform: translateX(0) translateX(-50%);
+	/* The travelling pair (see --dur-slide): this pill is a body that moves and
+	   must read as one. */
+	transition:
+		transform var(--dur-slide) var(--ease-slide),
+		width var(--dur-slide) var(--ease-slide);
+	z-index: 60;
+}
+
+.contact-slider-in {
+	display: flex;
 	align-items: center;
 	justify-content: center;
 	gap: 0.3rem;
+	width: 100%;
 	padding: 0.25rem 0.5rem;
 	border-radius: 0.11rem;
 	background: var(--ink);
@@ -1020,41 +899,70 @@ footer {
 	font-weight: 500;
 	line-height: 1;
 	white-space: nowrap;
+	/* Hidden until the first entrance plays. Both animations are `both`-filled,
+	   so whichever ran last holds its end frame and this base only ever shows
+	   before the first hover. */
 	opacity: 0;
-	pointer-events: none;
-	transform: translateX(0) translateX(-50%);
-	clip-path: inset(0 0 0 0);
-	/* Position and width ride the travelling pair (see --dur-slide) — this pill
-	   and the nav underline are the site's two sliders and must read as the
-	   same kind of object in motion. The clip-path wipe does NOT: appearing and
-	   disappearing are in-place gestures, so they stay on --dur-gesture with the
-	   rest of the wipes. (Only the slide between two icons is ever seen at the
-	   slide duration — an entrance snaps into position with transitions off
-	   before releasing the clip, see showAt in Nav.astro.) */
-	transition:
-		transform var(--dur-slide) var(--ease-slide),
-		width var(--dur-slide) var(--ease-slide),
-		clip-path var(--dur-gesture) var(--nav-ease),
-		opacity 0.1s ease;
-	z-index: 60;
+	/* Clips the copy-feedback text roll ("Copied!" slides in from the edge). */
 	overflow: hidden;
 }
 
-/* Reduced motion snaps the pill between icons, matching the underline (whose
-   slide is declared inside a no-preference block). This gap predates the
-   travelling pair — the pill's slide was never gated, it was just short enough
-   at 0.1s to pass for a snap — and lengthening it to --dur-slide is what makes
-   gating it necessary. The clip-path wipe is already suppressed from the
-   script side (see the `reduce` branches of showAt/hide in Nav.astro), which
-   is why only these two survive here.
-   Restated in full rather than overriding transition-property alone: the base
-   rule's durations are a positional list, so dropping two properties off the
-   front would slide clip-path and opacity onto --dur-slide. */
+/* ── The pop ──
+   Chosen 2026-08-02 from a twenty-variant exploration (see the artifact linked
+   in the session notes; fade, wipe, unfurl, hinge, bloom and the rest were the
+   alternatives). The label springs open from 80% and leaves by shrinking —
+   scale and opacity only, so it composites for free and can't disturb the
+   slide underneath it.
+   The exit is deliberately less than half the entrance and rides --nav-ease
+   rather than the spring: arriving is the event, leaving is an
+   acknowledgement, and an exit that springs on the way out reads as the label
+   being reluctant to go. */
+.contact-slider.is-in .contact-slider-in {
+	animation: pill-pop-in var(--dur-pop-in) var(--ease-pop) both;
+}
+.contact-slider.is-out .contact-slider-in {
+	animation: pill-pop-out var(--dur-pop-out) var(--nav-ease) both;
+}
+
+@keyframes pill-pop-in {
+	from {
+		opacity: 0;
+		transform: scale(0.8);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+@keyframes pill-pop-out {
+	from {
+		opacity: 1;
+		transform: scale(1);
+	}
+	to {
+		opacity: 0;
+		transform: scale(0.9);
+	}
+}
+
+/* Reduced motion: the pill snaps between icons (matching the underline, whose
+   slide is declared inside a no-preference block — the pill's slide was never
+   gated while it was 0.1s, short enough to pass for a snap, and lengthening it
+   to --dur-slide is what made gating it necessary), and the pop becomes the
+   state change it stands for. The `animation: none` overrides above MUST come
+   with an explicit opacity or the pill would never appear at all — the base
+   state below is hidden and the animation is what was revealing it. */
 @media (prefers-reduced-motion: reduce) {
 	.contact-slider {
-		transition:
-			clip-path var(--dur-gesture) var(--nav-ease),
-			opacity 0.1s ease;
+		transition: none;
+	}
+	.contact-slider.is-in .contact-slider-in {
+		animation: none;
+		opacity: 1;
+	}
+	.contact-slider.is-out .contact-slider-in {
+		animation: none;
+		opacity: 0;
 	}
 }
 
@@ -1081,236 +989,86 @@ footer {
 	display: block;
 }
 
-/* Larger contact icons at the top of the page; shrinking with --q. The size
-   change is a `transform: scale` on the *button*, not a width/height on the
-   SVG: resizing an SVG's box re-rasters the glyph every frame. Scaling the
-   button stays cheap, and the per-icon hover transforms (which live on the
-   SVG itself) compose cleanly on top. */
+/* The size change is a `transform: scale` on the *button*, not a width/height
+   on the SVG: resizing an SVG's box re-rasters the glyph every frame. Scaling
+   the button stays cheap, and the per-icon hover transforms (which live on the
+   SVG itself) compose cleanly on top.
+
+   Colour rides the pop pair, like the lift and the label — one object, one
+   clock (2026-08-02). It used to run on --dur-tap, which put the glyph at full
+   ink less than half way through a gesture the rest of which was still
+   arriving. The overshoot does extrapolate colour a few percent past --ink for
+   about a frame; at this stroke weight that is not resolvable, and it is worth
+   it to keep a single easing across every channel. */
 #site-nav .btn-icon {
 	transition:
-		color var(--dur-tap) ease,
-		background-color var(--dur-tap) ease,
-		border-color var(--dur-tap) ease;
+		color var(--dur-pop-out) var(--nav-ease),
+		background-color var(--dur-pop-out) var(--nav-ease),
+		border-color var(--dur-pop-out) var(--nav-ease);
+}
+#site-nav .btn-icon:hover {
+	transition:
+		color var(--dur-pop-in) var(--ease-pop),
+		background-color var(--dur-pop-in) var(--ease-pop),
+		border-color var(--dur-pop-in) var(--ease-pop);
 }
 
-/* The right cluster drops onto the masthead's secondary line: at q = 0 both
-   wrappers seat by --nav-icon-seat (measured against the Projects/About links
-   that used to hold that line — see the token), tweening away with the
-   collapse. On the wrappers, not the buttons, so the close-ranks math below and
-   the hover pills inside them ride along untouched. No compact term: compact
-   icons rest flex-centred on the bar's centreline. */
-#site-nav #contact-group,
-#site-nav #theme-toggle-wrap {
-	transform: translateY(calc(var(--nav-icon-seat) * (1 - var(--q))));
-}
+/* ── Close ranks ──
+   Every button's box is 2.9rem (0.5rem padding ×2 + a 1.9rem glyph) and the
+   contacts sit on a 0.375rem gap, but each button is scaled about its OWN
+   centre — which shrinks the glyphs and leaves the gaps between them at full
+   size, so the cluster reads loose. Each button therefore also translates
+   back toward its cluster's anchor in proportion to its distance from it:
+   the cluster then contracts as one uniform miniature, gaps and all, and its
+   drawn spacing stays exactly proportionate to the glyphs.
 
-/* The whole right cluster (contact icons + theme toggle) shrinks as one
-   uniform miniature anchored to the nav's right edge — glyphs AND the gaps
-   between them all scale toward --nav-icon-scale, and the cluster's right
-   edge stays flush at every q. Each button scales about its own center, so to
-   hold the cluster similar its center must also move right in proportion to
-   its distance from that edge — that distance is half its own 2.9rem box
-   (0.5rem padding ×2 + 1.9rem glyph) plus one box-and-gap (2.9rem + 0.375rem)
-   per button between it and the edge (--nav-icon-r, set in Nav.astro's
-   markup; the toggle is the last button, r = 0). The min() term adds the
-   toggle gap's extra width over an icon gap (its ml-8, 2rem, vs
-   contact-group's gap-1.5, 0.375rem), which every contact button crosses
-   exactly once; no flex gap on .nav-inner may add to these. Both terms are
-   linear in --q, so the cluster rides the tween exactly with the wordmark. */
-#site-nav .btn-icon {
-	/* The scale runs --nav-icon-boost → --nav-icon-scale; the translate term is
-	   (1 − scale(q)) as ever, which for a boost above 1 goes negative at q = 0
-	   — buttons shift LEFT, so the magnified cluster still ends flush right.
-	   The --nav-icon-tighten term then pulls the masthead's contact gaps in
-	   past the pure-scale spread: rightward by one tighten per contact gap
-	   between the button and the cluster's right anchor — max(r − 1, 0)
-	   contact gaps plus the toggle gap once (min(r, 1), its own
-	   --nav-toggle-tighten dial), so the toggle (r = 0) holds still and its
-	   separation shrinks without collapsing into the cluster. Fades with
-	   (1 − --q): the compact close-ranks math stays exact. */
+   The two clusters have different anchors because they sit differently in
+   the bar. The contacts contract about their own CENTRE — --nav-icon-c is a
+   button's signed offset from it in box-and-gap pitches (set in Nav.astro's
+   markup: −1.5 … 1.5 for four), so the drawn cluster stays centred on the
+   layout box the markup centres in the bar. The toggle stands alone against
+   the container's right edge, so it contracts about that edge, half its own
+   box away. Note the LAYOUT boxes stay full size either way — the contact
+   group's is wider than what it draws, which is only a problem if it ever
+   grows enough to reach the wordmark. */
+#site-nav #contact-group .btn-icon {
 	transform: translateX(
-			calc(
-				(
-						2.9rem / 2 + (2.9rem + 0.375rem) * var(--nav-icon-r, 0) +
-							(2rem - 0.375rem) * min(var(--nav-icon-r, 0), 1)
-					) *
-					(
-						1 - var(--nav-icon-boost) +
-							(var(--nav-icon-boost) - var(--nav-icon-scale)) * var(--q)
-					) +
-					(
-						var(--nav-icon-tighten) * max(var(--nav-icon-r, 0) - 1, 0) +
-							var(--nav-toggle-tighten) * min(var(--nav-icon-r, 0), 1)
-					) *
-					(1 - var(--q))
-			)
+			calc(-1 * var(--nav-icon-c, 0) * (2.9rem + 0.375rem) * (1 - var(--nav-icon-scale)))
 		)
-		scale(
-			calc(
-				var(--nav-icon-boost) - (var(--nav-icon-boost) - var(--nav-icon-scale)) * var(--q)
-			)
-		); /* glyph at q=1: ~1.18rem */
+		scale(var(--nav-icon-scale)); /* glyph: ~1.33rem */
 }
-
-/* ── Cross-page intro: compositor-driven ──
-   Arriving from another page, the bar tweens from the state it was left in
-   (carried via sessionStorage — see Nav.astro) to this page's resting state.
-   That tween runs during the busiest window of a page's life — parsing,
-   module evaluation, font loads — where a JS rAF tween (which also recalcs
-   the whole document's styles every frame via --q) visibly drops frames. So
-   the intro plays these keyframes instead: the same geometry as the --q
-   calc() rules above, transform/scale-only, so once started it runs on the
-   compositor and load-time main-thread stalls can't stutter it.
-
-   Handoffs: Nav.astro paints the carried --q geometry pre-paint, then at
-   'interactive' snaps --q to rest and adds the direction class in the same
-   frame — the animation's first frame equals the geometry already painted.
-   Removing the class (animationend, or a scroll aborting the intro) lands on
-   the identical --q rest geometry. Both switches are invisible.
-
-   The expand direction replays the same keyframes reversed; its ease-in
-   timing function, played backwards, becomes the same decelerating curve as
-   the collapse. Keyframe endpoints must keep in step with the --q calc()
-   rules above and setQ in Nav.astro; the duration rides --dur-nav, which
-   tweenTo reads too, so the two can't drift apart. */
-html.nav-intro-collapse {
-	--nav-intro-dir: normal;
-	--nav-intro-ease: cubic-bezier(0.33, 1, 0.68, 1); /* ≈ tweenTo's ease-out cubic */
-}
-html.nav-intro-expand {
-	--nav-intro-dir: reverse;
-	--nav-intro-ease: cubic-bezier(0.32, 0, 0.67, 0); /* ease-in cubic: reversed = ease-out */
-}
-html:is(.nav-intro-collapse, .nav-intro-expand) main,
-html:is(.nav-intro-collapse, .nav-intro-expand) footer {
-	animation: nav-tween-page var(--dur-nav) var(--nav-intro-ease) var(--nav-intro-dir) both;
-}
-html:is(.nav-intro-collapse, .nav-intro-expand) #site-nav .nav-inner {
-	animation: nav-tween-inner var(--dur-nav) var(--nav-intro-ease) var(--nav-intro-dir) both;
-}
-html:is(.nav-intro-collapse, .nav-intro-expand) #site-nav .nav-left {
-	animation: nav-tween-logo var(--dur-nav) var(--nav-intro-ease) var(--nav-intro-dir) both;
-}
-html:is(.nav-intro-collapse, .nav-intro-expand) #site-nav .btn-icon {
-	animation: nav-tween-icon var(--dur-nav) var(--nav-intro-ease) var(--nav-intro-dir) both;
-}
-html:is(.nav-intro-collapse, .nav-intro-expand) #site-nav :is(#contact-group, #theme-toggle-wrap) {
-	animation: nav-tween-actions var(--dur-nav) var(--nav-intro-ease) var(--nav-intro-dir) both;
-}
-html:is(.nav-intro-collapse, .nav-intro-expand) #site-nav::after {
-	animation: nav-tween-veil var(--dur-nav) var(--nav-intro-ease) var(--nav-intro-dir) both;
-}
-
-/* The keyframes run in the collapse direction: from expanded masthead (q = 0)
-   to compact bar (q = 1). */
-@keyframes nav-tween-veil {
-	from {
-		transform: scaleY(1);
-	}
-	to {
-		transform: scaleY(0);
-	}
-}
-
-@keyframes nav-tween-page {
-	from {
-		transform: translateY(var(--nav-shift));
-	}
-	to {
-		transform: translateY(0);
-	}
-}
-
-@keyframes nav-tween-inner {
-	from {
-		transform: translateY(var(--nav-shift-inner));
-	}
-	to {
-		transform: translateY(0);
-	}
-}
-
-@keyframes nav-tween-logo {
-	from {
-		scale: var(--nav-boost);
-	}
-	to {
-		scale: var(--nav-logo-scale);
-	}
-}
-
-/* The right cluster's wrappers carry the icon seat (their buttons animate
-   nav-tween-icon separately; the two transforms compose). */
-@keyframes nav-tween-actions {
-	from {
-		transform: translateY(var(--nav-icon-seat));
-	}
-	to {
-		transform: translateY(0);
-	}
-}
-
-@keyframes nav-tween-icon {
-	from {
-		transform: translateX(
-				calc(
-					(
-							2.9rem / 2 + (2.9rem + 0.375rem) * var(--nav-icon-r, 0) +
-								(2rem - 0.375rem) * min(var(--nav-icon-r, 0), 1)
-						) *
-						(1 - var(--nav-icon-boost)) +
-						var(--nav-icon-tighten) * max(var(--nav-icon-r, 0) - 1, 0) +
-						var(--nav-toggle-tighten) * min(var(--nav-icon-r, 0), 1)
-				)
-			)
-			scale(var(--nav-icon-boost));
-	}
-	to {
-		transform: translateX(
-				calc(
-					(
-							2.9rem / 2 + (2.9rem + 0.375rem) * var(--nav-icon-r, 0) +
-								(2rem - 0.375rem) * min(var(--nav-icon-r, 0), 1)
-						) *
-						(1 - var(--nav-icon-scale))
-				)
-			)
-			scale(var(--nav-icon-scale));
-	}
+#site-nav #theme-toggle-wrap .btn-icon {
+	transform: translateX(calc(2.9rem / 2 * (1 - var(--nav-icon-scale))))
+		scale(var(--nav-icon-scale));
 }
 
 /* ── Load intro: the bar's entrance on a hard load ──
-   Played only on arrivals with no fresh carried nav state — a reload, a first
-   visit, an external referrer (gated in Nav.astro; internal navigations get
-   the cross-page tween above instead, never both). Two variants, chosen by
-   the resting state:
+   Played only on arrivals that aren't an internal navigation — a reload, a
+   first visit, an external referrer (gated in Nav.astro; clicking through the
+   site gets no entrance, so the bar isn't re-introduced on every page).
 
-   nav-intro-wipe (rest compact — interior pages, mid-scroll reloads): every
-   element wipes in left→right with the contact pill's clip-path grammar,
-   delays marching across the bar — wordmark, links, underline, then each
-   button. Clip-only, so it's orthogonal to the --q geometry and composites
-   for free during the load window.
-
-   nav-intro-draw (rest expanded — home at the top): the same wipes for the
-   type, but the icons stroke-draw their outlines (each shape's measured
-   length rides in --len, so one dash animation draws every one of them
-   edge-to-edge over the same duration; see the dash-hold comment below for
-   why true units, not pathLength) and the theme toggle draws its circle
-   then sweeps its ink into
-   the resting half — the same rightward sweep a click plays, one
+   The wordmark wipes in left→right with the contact pill's clip-path grammar,
+   then the icons stroke-draw their outlines (each shape's measured length
+   rides in --len, so one dash animation draws every one of them edge-to-edge
+   over the same duration; see the dash-hold comment below for why true units,
+   not pathLength), and finally the theme toggle draws its circle and sweeps
+   its ink into the resting half — the same rightward sweep a click plays, one
    pattern-period (18 units) of travel ending exactly on --theme-fill-x.
 
-   The variant class is added PRE-PAINT by Nav.astro's inline script: the
-   rules without .nav-intro-go are static hidden holds equal to each
-   animation's first frame, so first paint shows nothing of the bar and the
-   'go' handoff (added at 'interactive') is invisible. Cleanup removes both
-   classes on a timer just past the last animation; every 'to' frame equals
-   the natural rest state, so that handoff is invisible too. Reduced motion
-   never adds the classes — the bar just paints at rest. */
-html:is(.nav-intro-draw, .nav-intro-wipe) #site-nav .nav-logo {
-	clip-path: inset(0 100% 0 0);
-}
-html.nav-intro-wipe #site-nav .btn-icon {
+   This is the flourish the EXPANDED masthead used to get; the compact bar had
+   a shorter variant where the buttons wiped in like the type rather than
+   drawing (nav-intro-wipe, ~780ms against this one's ~1350ms). With the
+   masthead gone the bar plays the draw at every arrival — Hiro's call
+   (2026-08-02) when the two variants collapsed into one.
+
+   The class is added PRE-PAINT by Nav.astro's inline script: the rules
+   without .nav-intro-go are static hidden holds equal to each animation's
+   first frame, so first paint shows nothing of the bar and the 'go' handoff
+   (added at 'interactive') is invisible. Cleanup removes both classes on a
+   timer just past the last animation; every 'to' frame equals the natural
+   rest state, so that handoff is invisible too. Reduced motion never adds the
+   classes — the bar just paints at rest. */
+html.nav-intro-draw #site-nav .nav-logo {
 	clip-path: inset(0 100% 0 0);
 }
 /* The draw variant's dash setup lives ONLY in two transient places — this
@@ -1372,23 +1130,17 @@ html.nav-intro-draw .theme-fill-rect {
 	transform: translateX(calc(var(--theme-fill-x) - 20px));
 }
 
-html:is(.nav-intro-draw, .nav-intro-wipe).nav-intro-go #site-nav .nav-logo {
+html.nav-intro-draw.nav-intro-go #site-nav .nav-logo {
 	animation: nav-load-wipe var(--dur-nav) var(--nav-ease) both;
 }
-/* Wipe variant buttons: delays stagger left→right off each button's
-   --nav-icon-r (email r=4 … twitter r=1, toggle unset → 0 → 440ms tail). */
-html.nav-intro-wipe.nav-intro-go #site-nav .btn-icon {
-	animation: nav-load-wipe var(--dur-gesture) var(--nav-ease)
-		calc(240ms + (4 - var(--nav-icon-r, 0)) * 50ms) both;
-}
-/* Draw variant: contacts stroke-draw on the same r-stagger, wider spacing;
-   the toggle circle draws last, then the ink pours in. `backwards`, NOT
-   `both`: the delay still holds the first (hidden) frame, but the dash must
-   die with the animation so each icon snaps to clean undashed rendering at
-   its own finish (see the hold above). */
+/* The contacts stroke-draw in markup order, left→right off each button's
+   --nav-icon-i (0…3, set in Nav.astro); the toggle circle draws last, then
+   the ink pours in. `backwards`, NOT `both`: the delay still holds the first
+   (hidden) frame, but the dash must die with the animation so each icon snaps
+   to clean undashed rendering at its own finish (see the hold above). */
 html.nav-intro-draw.nav-intro-go #contact-group .btn-icon svg :is(path, rect) {
 	animation: nav-load-stroke var(--dur-draw) var(--nav-ease)
-		calc(240ms + (4 - var(--nav-icon-r, 0)) * 90ms) backwards;
+		calc(240ms + var(--nav-icon-i, 0) * 90ms) backwards;
 }
 html.nav-intro-draw.nav-intro-go .theme-toggle svg > circle {
 	animation: nav-load-stroke var(--dur-draw) var(--nav-ease) 600ms backwards;
@@ -1443,39 +1195,28 @@ html.nav-intro-draw.nav-intro-go .theme-fill-rect {
    via --hold and the persistent reveal-* classes Nav.astro's inline script
    sets pre-paint:
 
-   reveal-hold        cross-page tween — the bar lands after --dur-nav, plus
-                      a 90ms beat before the content takes the stage;
-   reveal-hold-wipe   load intro, compact: the content enters as the intro's
-                      FINAL gesture begins — the last button's wipe at its
-                      440ms stagger tail (see the load-intro rules above) —
-                      overlapping the landing instead of waiting it out, so
-                      the longer fixed choreography doesn't read as a stall;
-   reveal-hold-draw   load intro, expanded: a deeper overlap — the draw's
-                      choreography runs long (icon draws to ~1020ms, ink
-                      sweep to 1200ms), so the content enters when the
-                      toggle, the intro's LAST icon, starts drawing its
-                      circle (its 600ms delay above): the type is long
-                      landed, the contact draws are mid-flight, and the
-                      final draw + ink sweep finish over the arriving
-                      cards.
+   reveal-hold-draw   the load intro is coming, and it OVERLAPS rather than
+                      finishing first: the draw's choreography runs long
+                      (icon draws to ~1020ms, ink sweep to 1200ms), so the
+                      content enters when the toggle, the intro's LAST icon,
+                      starts drawing its circle (its 600ms delay above) —
+                      the type is long landed, the contact draws are
+                      mid-flight, and the final draw + ink sweep finish over
+                      the arriving cards. Waiting the intro out instead
+                      reads as a stall.
 
    reveal-hold-land   the Projects nav link — a landing on the TOP of the
-                      list. The bar is already compact (no entrance to wait
-                      out), so this is just a short beat to clear the
+                      list. No entrance to wait out (an internal navigation
+                      gets none), so this is just a short beat to clear the
                       'interactive' landing scroll before the same cascade a
                       fresh home load plays.
 
    Keep these values in step with the load-intro delays above and Nav.astro's
-   cleanup timers.
+   cleanup timer. An internal navigation with no landing intent takes neither
+   class and the cascade plays at once — the bar is already there.
 
    reveal-skip (a projects landing resting on a specific card mid-list — Back
    to projects) reveals everything at rest: no entrance above the target. */
-html.reveal-hold {
-	--hold: calc(var(--dur-nav) + 90ms);
-}
-html.reveal-hold-wipe {
-	--hold: 440ms;
-}
 html.reveal-hold-draw {
 	--hold: 600ms;
 }
@@ -1524,13 +1265,25 @@ html.reveal-skip .reveal {
 #site-nav .btn-icon > svg {
 	width: 1.9rem;
 	height: 1.9rem;
-	/* `color` rides the buttons' tap clock so the glyph's --ink-soft → --ink
-	   fade lands with the rest of the hover feedback rather than snapping
-	   ahead of the lift. Listed here so the :active duration override below
-	   catches it too — a press snaps colour and transform together. */
-	transition:
-		transform 0.26s cubic-bezier(0.34, 1.2, 0.64, 1),
-		color var(--dur-tap) ease;
+	/* ── The lift runs on the label's clock ──
+	   Hovering an icon starts two things at once: the glyph lifts and the pill
+	   pops in under it. They're one gesture on one object, so they get one pair
+	   of timings — the pop's (2026-08-02, Hiro). That means the lift is now
+	   ASYMMETRIC like the pop is, which a single transition can't express: this
+	   base rule is the state the glyph returns TO, so it carries the OUT timing,
+	   and the :hover rule below carries the IN. Both were 0.26s on their own
+	   spring before, close enough to the pop's 280ms that only the drop-back
+	   really changes — it used to take the same 260ms as the rise and now leaves
+	   in 130ms with the label.
+	   `color` is deliberately NOT listed: the glyph paints with currentColor and
+	   simply inherits the button's own colour transition (see #site-nav
+	   .btn-icon above, which is on the same pair). Transitioning it here as well
+	   would animate a value that is already animating — a transition of a
+	   transition, which lags behind both. */
+	transition: transform var(--dur-pop-out) var(--nav-ease);
+}
+#site-nav .btn-icon:hover > svg {
+	transition: transform var(--dur-pop-in) var(--ease-pop);
 }
 
 /* ── Per-icon hover motion ──
@@ -1572,15 +1325,17 @@ html.reveal-skip .reveal {
 	/* The theme toggle presses too — same scale-in as the contacts, minus the
 	   lift it never had. The scale rides the svg's `transform`, a separate
 	   channel from the fill's sweep (keyframes on the inner rect), so pressing
-	   mid-swap can't disturb the slide. Snap-in speed and the springy release
-	   come from the shared #site-nav .btn-icon > svg transition rules. */
+	   mid-swap can't disturb the slide. Snap-in speed and the release come from
+	   the shared #site-nav .btn-icon > svg transition rules. */
 	.theme-toggle:active > svg {
 		transform: scale(0.9);
 	}
 
-	/* Snap in fast on press, ease back on release. Uses ID-level specificity so
-	   it beats the base `#site-nav .btn-icon > svg` transition, which otherwise
-	   locks every direct-child icon to the softer 0.26s spring. */
+	/* Snap in fast on press, ease back on release. Overriding transition-duration
+	   alone is what lets this beat BOTH transition shorthands above (the rest
+	   state's and the hover state's): it matches their ID-level specificity and
+	   comes later in the file, so a press wins whether or not the pointer is
+	   also hovering — which it always is. */
 	#site-nav .btn-icon:active > svg {
 		transition-duration: 0.09s;
 	}
