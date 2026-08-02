@@ -4,7 +4,9 @@ export interface Project {
 	company: string;
 	year: string;
 	tags: string[];
-	/** One-line "what I did" shown under the card title. */
+	/** One-line "what I did". No longer rendered — it came off the cards
+	    2026-08-02, leaving the year alone above the title. Kept for the same
+	    reason as the fields below. */
 	role: string;
 	blurb: string;
 	problem: string;
@@ -13,10 +15,11 @@ export interface Project {
 	work: string;
 	cover: string;
 	images: string[];
-	/** `tags`, `company` and `link` are no longer rendered anywhere (dropped
-	    from the detail page 2026-07-29; the cards only ever used year, title,
-	    role and cover). Kept because they're real facts that are a nuisance to
-	    re-gather — delete them if they're still unused later. */
+	/** `tags`, `company`, `link` and now `role` are no longer rendered anywhere
+	    (tags/company/link dropped from the detail page 2026-07-29, role from the
+	    cards 2026-08-02; the cards now use only year, title and cover). Kept
+	    because they're real facts that are a nuisance to re-gather — delete them
+	    if they're still unused later. */
 	link?: string;
 }
 

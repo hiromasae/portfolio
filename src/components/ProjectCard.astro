@@ -20,19 +20,32 @@ const { project } = Astro.props;
 		'origin-top',
 		'hover:scale-[1.02] focus-within:scale-[1.02] active:scale-[0.99]',
 		/* The lift. A scale about a pinned top edge displaces every part in
-		   proportion to its distance from that edge — title 0px, role line
-		   +0.73, image top edge +1.61, card bottom edge +15.3 — so no two parts
-		   of the card travel together and the whole thing reads as separate
-		   pieces resizing rather than one object moving. This translate is the
-		   only displacement they share.
+		   proportion to its distance from that edge, so no two parts of the card
+		   travel together and the whole thing would read as separate pieces
+		   resizing rather than one object moving. This translate is the only
+		   displacement they all share.
 
-		   It does NOT make the motion rigid: at 3px the top of the card rises
-		   while the bottom edge still drops ~12px, and squaring that would take
-		   a 15.4px lift, which is far too much. What it buys is the top edge
-		   coming off the page instead of staying pinned, and the metadata
-		   participating in the lift — it has no border of its own, so without
-		   this the frame's shadow was the only depth cue on the card and only
+		   IT IS NOW VERY NEARLY RIGID, WHICH IT WAS NOT WHEN IT WAS CHOSEN, and
+		   nobody decided that — the card got shorter twice. Re-measured
+		   2026-08-02 on the 319px card (960px page, and the role line gone from
+		   the block above): year 0px, title +0.54, image top edge +1.46, bottom
+		   edge +6.38. Squaring THAT takes a 3.2px lift, and the shipped value is
+		   3px — so the card now travels as one object to within a fifth of a
+		   pixel, by accident.
+
+		   The 3px was cut against a ~765px card, where the bottom edge dropped
+		   ~15.3px and squaring it would have taken a 15.4px lift that was far too
+		   much; the note here used to say, correctly, that 3px deliberately did
+		   NOT square it. Both statements were true of their own card. What the
+		   lift buys hasn't changed: the top edge comes off the page instead of
+		   staying pinned, and the metadata participates — it has no border of its
+		   own, so without this the frame's shadow was the only depth cue and only
 		   the image appeared to rise.
+
+		   The consequence to know: this value is a function of card HEIGHT, so it
+		   drifts every time the card's contents or the page width change. If the
+		   card grows again, 3px stops squaring it and the old "deliberately not
+		   rigid" reading comes back on its own.
 
 		   Same duration and curve as the zoom, so the two are one gesture.
 		   Press cancels it (active:translate-y-0), pairing with the 0.99 scale
@@ -48,6 +61,21 @@ const { project } = Astro.props;
 	{/* The column has exactly two children, so this gap is the whole
 	    title/metadata rhythm — no per-child margins fighting it. */}
 	<div class="flex min-w-0 flex-col gap-1">
+		{/* Dateline above the title, mirroring the project page's header — the two
+		    now open the same way, so arriving on a detail page reads as the card
+		    you clicked, enlarged.
+
+		    This REVERSES the earlier call, and the old reasoning is worth keeping
+		    because it was sound at the time: the year used to lead the role line
+		    instead of taking a line of its own, since spending a whole line of
+		    rhythm on four characters pushed the title down the block. What changed
+		    is that the role line went (2026-08-02, Hiro) — with nothing left for
+		    the year to share, its choice was its own line or nothing.
+
+		    Not an eyebrow label: a bare numeral in the numeral colour, no
+		    uppercase and no letterspacing, so it reads as a date rather than as a
+		    kicker announcing the heading. */}
+		<p class="text-[0.85rem] leading-snug tabular-nums text-[var(--ink-num)]">{project.year}</p>
 		{/* Title-only underline that wipes in left-to-right on hover/focus — the
 		    site's shared underline gesture — alongside the card zoom. The underline
 		    targets .project-card__title in global.css. */}
@@ -75,19 +103,6 @@ const { project } = Astro.props;
 				<polyline points="12 5 19 12 12 19"></polyline>
 			</svg>
 		</h3>
-		{/* One-line "what I did" under the title, so the role reads before the image.
-		    The year leads this line rather than taking a dateline of its own above
-		    the title: it's the thinnest fact on the card and a whole line of rhythm
-		    for four characters pushed the title off the top of the block. Same size
-		    and tone as the role, so the two read as one quiet metadata line and the
-		    title stays the only thing above it. */}
-		{/* Down with the title for the two-up list; the card's own width is the
-		    measure now, so no max-w is needed on top of it. */}
-		<p class="text-[0.85rem] leading-snug text-[var(--ink-soft)]">
-			<span class="tabular-nums text-[var(--ink-num)]">{project.year}</span>
-			<span aria-hidden="true"> · </span>
-			{project.role}
-		</p>
 	</div>
 
 	{/* The image is the card: it carries the border. The whole link zooms and
