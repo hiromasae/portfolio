@@ -55,7 +55,7 @@ const { project } = Astro.props;
 		    old column width, 1.3rem titles ran to three lines on the longer ones
 		    and the card read as a headline with a picture under it rather than a
 		    piece of work with a name. */}
-		<h3 class="text-base font-bold tracking-tight text-[var(--ink)] md:text-[1.1rem] md:leading-tight">
+		<h3 class="text-base font-bold tracking-tight text-[var(--ink-title)] md:text-[1.1rem] md:leading-tight">
 			<span class="project-card__title">{project.title}</span>
 			{/* A right-pointing arrow that wipes in left-to-right once the title
 			    underline finishes, then tilts up to point ↗. Choreography lives
@@ -84,7 +84,7 @@ const { project } = Astro.props;
 		{/* Down with the title for the two-up list; the card's own width is the
 		    measure now, so no max-w is needed on top of it. */}
 		<p class="text-[0.85rem] leading-snug text-[var(--ink-soft)]">
-			<span class="tabular-nums">{project.year}</span>
+			<span class="tabular-nums text-[var(--ink-num)]">{project.year}</span>
 			<span aria-hidden="true"> · </span>
 			{project.role}
 		</p>

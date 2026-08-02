@@ -75,11 +75,47 @@
 	/* Tokyo Night Light's blue, verbatim. The ring is a UI boundary, so WCAG
 	   1.4.11's 3:1 is the bar it has to clear against every ground it can land
 	   on — 6.28:1 against --paper and 6.81:1 against --surface, so it has room
-	   this time (the previous ring shipped under its own floor for a while). */
+	   this time (the previous ring shipped under its own floor for a while).
+	   Deliberately the SAME blue as --ink-title below: a focused card shows a
+	   ring the colour of the title inside it, which reads as one object being
+	   picked out rather than two systems overlapping. */
 	--focus-ring: #34548a;
 
+	/* ── Titles and numerals: the syntax accents ──
+	   2026-08-02, Hiro: colour the headings and titles with Tokyo Night's syntax
+	   colours. The site now reads a little like a source file — the wordmark is
+	   the keyword it always was, every TITLE takes the theme's blue, and every
+	   NUMERAL takes its orange.
+
+	   One blue for all titles, not one per level: offered a per-level mapping
+	   (page h1s as functions, card titles as types) and a per-project mapping
+	   (four hues on one screen), Hiro took the restrained one. So a heading is a
+	   heading — the colour marks the CLASS of thing, and nothing inside that
+	   class is ranked by hue. What still ranks is the mark: --dye-name leads
+	   --ink-title by 1.11× here, so the wordmark stays the most forward piece of
+	   type on the page (the same depth rule the dye block below explains, now
+	   answering to a second competitor).
+
+	   --ink-num is the smaller call. Years are the only numerals on the site and
+	   they already sat in the muted line; orange lifts them out of it without
+	   promoting the whole line, which is what a numeric literal does in an
+	   editor. It rides ON --ink-soft's line, so it must clear AA on its own:
+	   5.03:1 here, and it is the tightest of the four accents in either theme —
+	   check it first if the light ground ever moves again.
+
+	   Both verbatim Tokyo Night Light. Titles run 24-38px and card titles 21px
+	   bold, so all of them clear WCAG's large-text bar with room; the numerals
+	   are small text and clear the full 4.5:1. */
+	--ink-title: #34548a; /* 6.28:1 — 1.36× the muted text */
+	--ink-num: #965027; /* 5.03:1 */
+
 	/* ── The dye ──
-	   ONE colour on the site, and it's the wordmark. It began as a traditional
+	   The wordmark — and until 08-02 the ONLY colour on the site, which is no
+	   longer the claim to make: the titles and numerals above are colour too.
+	   What survives is that the mark is the only thing wearing THIS colour, and
+	   that it out-contrasts everything it sits beside.
+
+	   It began as a traditional
 	   Japanese dye from the washi grounds exploration (07-25); it spent seven
 	   rounds of retuning in the red band as a 落款, the artist's seal, which was
 	   the argument for colouring the name at all. On 2026-08-01 it left that
@@ -257,8 +293,14 @@
 	--btn-border: rgba(192, 202, 245, 0.14);
 
 	/* Tokyo Night's blue, verbatim — 7.34:1 against --paper, 6.79:1 against
-	   --surface, both well clear of WCAG 1.4.11's 3:1 floor for non-text. */
+	   --surface, both well clear of WCAG 1.4.11's 3:1 floor for non-text. Same
+	   blue as --ink-title, deliberately; see the light block. */
 	--focus-ring: #7aa2f7;
+
+	/* The syntax accents on the night ground (see the light block for the
+	   reasoning). Both verbatim Tokyo Night. */
+	--ink-title: #7aa2f7; /* 7.34:1 — 1.27× the muted text */
+	--ink-num: #ff9e64; /* 9.09:1 */
 
 	/* The same magenta on the night ground (see the light block for the method
 	   and the depth rule). This is Tokyo Night's magenta verbatim, not a
@@ -647,7 +689,10 @@ footer {
 	   (which parks "View" off-card) clipped it invisible. An inline-block's
 	   padding is real layout, so the underline always sits inside the box. */
 	display: inline-block;
-	background-image: linear-gradient(var(--ink), var(--ink));
+	/* currentColor, not --ink: the title took --ink-title on 08-02 and the line
+	   under it has to travel with it, or the underline reads as a rule the
+	   heading happens to sit on. Same reason the hero link's line does. */
+	background-image: linear-gradient(currentColor, currentColor);
 	background-repeat: no-repeat;
 	background-position: left bottom;
 	background-size: 0% 2px;

@@ -27,8 +27,8 @@ const { project } = Astro.props;
 		    below, and tags/Visit were dropped from this page (both still live in
 		    projects.ts). */}
 		<header class="reveal" style="--i: 0">
-			<p class="text-sm tabular-nums text-[var(--ink-soft)]">{project.year}</p>
-			<h1 class="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">{project.title}</h1>
+			<p class="text-sm tabular-nums text-[var(--ink-num)]">{project.year}</p>
+			<h1 class="mt-2 text-3xl font-bold tracking-tight text-[var(--ink-title)] sm:text-4xl">{project.title}</h1>
 		</header>
 
 		{/* Reading matter is capped at --measure (see global.css) — ~11 words a
