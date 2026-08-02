@@ -13,9 +13,12 @@ import { projects } from '../data/projects';
 		    says what the name does and hands off to About — the page's only route
 		    there since the nav links came out (2026-08-01). Held to --measure and
 		    the about page's own opening line, in its type size, so arriving from
-		    either direction reads as one voice. */}
+		    either direction reads as one voice. That size stepped down from
+		    text-lg to the base 19px on 08-02 when About's body did (Hiro's ask,
+		    for About); this followed it rather than break the match, which is
+		    the whole reason the two are written the same. */}
 		<section class="pt-10 pb-14 sm:pt-12">
-			<p class="reveal max-w-[var(--measure)] text-lg leading-relaxed" style="--i: 0">
+			<p class="reveal max-w-[var(--measure)] text-base leading-relaxed" style="--i: 0">
 				I'm a Design Engineer based in the San Francisco Bay Area.
 			</p>
 			{/* Same wipe-in underline and tilting arrow as a project card title, so
@@ -23,7 +26,7 @@ import { projects } from '../data/projects';
 			    drawn at rest, since here it's the affordance and not a flourish
 			    (see .hero-link in global.css). */}
 			<p class="reveal mt-4" style="--i: 1">
-				<a href="/about" class="hero-link group text-lg text-[var(--ink-soft)]">
+				<a href="/about" class="hero-link group text-base text-[var(--ink-soft)]">
 					<span class="hero-link__text">About</span>
 					<svg
 						viewBox="0 0 24 24"

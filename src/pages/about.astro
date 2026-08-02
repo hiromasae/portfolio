@@ -1,34 +1,159 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Nav from '../components/Nav.astro';
+
+// PROTOTYPE — these four are MY placeholders, not Hiro's picks. They're real
+// djent/prog records purely so the tiles carry realistic name lengths while the
+// composition is judged; replace the whole array.
+//
+// `cover` is a path under public/images/albums/ (square source, 400px+ — they
+// render at 115px but retina doubles that). Omit it and the entry falls back to
+// a named tile, which is what makes this previewable before any art exists.
+// Alt text is "artist — title" per cover: the grid carries no visible captions,
+// so alt is the ONLY place the names live for a screen reader.
+const albums = [
+	{ artist: 'Periphery', title: 'Periphery II' },
+	{ artist: 'Meshuggah', title: 'ObZen' },
+	{ artist: 'TesseracT', title: 'Altered State' },
+	{ artist: 'Animals as Leaders', title: 'The Joy of Motion' },
+];
 ---
 
 <Layout title="About — Hiro Eernisse" description="About Hiro Eernisse, design engineer.">
 	<Nav />
 
 	<main class="mx-auto max-w-[960px] px-5 py-12 sm:py-16">
-		{/* Stacked, not side by side. It was prose-beside-photo until 08-02, when
-		    the page came in to 960px: the figure held 26rem of that, which left
-		    the prose ~346px and about FIVE words a line against a 10–12 target.
-		    There is no breakpoint that rescues it — the container is capped below
-		    the width the two-column version needs, so the row would never get its
-		    room back. Stacking gives the prose the full measure and costs only
-		    the composition, which was the weaker reason of the two. */}
-		<div class="flex flex-col gap-12">
-			<div class="max-w-[var(--measure)] space-y-6 text-lg leading-relaxed">
-				<h1 class="reveal mb-12 text-3xl font-bold tracking-tight text-[var(--ink-title)] sm:text-4xl" style="--i: 0">はじめまして。</h1>
-				<p class="reveal" style="--base: 700ms; --i: 0">I'm a Design Engineer based in the San Francisco Bay Area.</p>
-				<p class="reveal" style="--base: 700ms; --i: 1">
-					I build with AI, but I make the decisions that matter myself. Taste, and knowing how a
-					person moves through a product, is still human work.
-				</p>
-				<p class="reveal" style="--base: 700ms; --i: 2">Outside of work, I play heavy metal drums and hike.</p>
+		{/* Side by side again from lg, after one day stacked. The row died on
+		    08-02 when the page came in to 960px: the figure held 26rem of that,
+		    which left the prose ~346px — about FIVE words a line at the 21.4px
+		    it was set in. Both of those numbers moved on Hiro's ask, and the row
+		    came back with them. The prose is 19px now and the figure is 19rem,
+		    so the text column takes 504px at lg: 26.5 times its own font size,
+		    against the 31 that --measure holds. Narrower than the site's reading
+		    cap on purpose (Hiro: "narrower"), and 1.6× the width that killed the
+		    row. Below lg there is no room for two columns at any of these
+		    numbers, so it still stacks and the prose keeps its own 28rem cap —
+		    close enough to the row's 504px that the two states read as one
+		    measure rather than two.
+
+		    NOT --measure: that token is the site's reading cap, shared with the
+		    home hero and the project pages, and this column is narrower than it
+		    for a layout reason that doesn't apply to them. */}
+		<div class="flex flex-col gap-12 lg:flex-row lg:items-start lg:gap-10">
+			<div class="max-w-[28rem] lg:min-w-0 lg:max-w-none lg:flex-1">
+				{/* Same size as the section heading below, not the 3xl/4xl page title
+				    it was (Hiro, 08-02). The masthead already carries the name at
+				    full size on every page, so this h1 is a greeting rather than a
+				    title, and at the section heading's size the column reads as two
+				    equal blocks under one photo instead of a hero with a footnote.
+				    The wave is decorative — aria-hidden, or it reads out as "waving
+				    hand" in the middle of a Japanese greeting.
+
+				    mb-4, matching the section heading's mt-4 to its list: the 3rem
+				    that used to sit here was cut for a 4xl page title, and at this
+				    size it read as a hole rather than a hero's breathing room. Both
+				    headings now hold their content at the same distance, and the
+				    only big gap left in the column is the 3rem BETWEEN the two
+				    blocks — which is the rhythm, tight inside, loose between. */}
+				<h1 class="reveal mb-4 text-xl font-bold tracking-tight" style="--i: 0">
+					はじめまして。<span aria-hidden="true">👋</span>
+				</h1>
+				<div class="space-y-6 text-base leading-relaxed">
+					<p class="reveal" style="--base: 700ms; --i: 0">I'm a Design Engineer based in the San Francisco Bay Area.</p>
+					<p class="reveal" style="--base: 700ms; --i: 1">
+						I build with AI, but I make the decisions that matter myself. Taste, and knowing how a
+						person moves through a product, is still human work.
+					</p>
+				</div>
+				{/* Started as the bio's closing line — "Outside of work, I play heavy
+				    metal drums and hike," a sentence doing a list's job at the end
+				    of a paragraph run — and was promoted to a section on 08-02,
+				    then filled out to four entries the same day. A real heading, NOT
+				    the small-bold uppercase kicker this codebase has dropped twice
+				    (see the project page). It takes the reveal slot the removed line
+				    held, so the cascade is unchanged.
+
+				    The emojis are decoration on top of words that already say the
+				    same thing, so they're aria-hidden: a screen reader would
+				    otherwise hear "Playing drums drum".
+
+				    Leading the row (Hiro, 08-02), so each one gets a fixed 1.25em
+				    slot rather than riding on its own advance width — that's what
+				    puts the LABELS on one left edge, which is the only reason to
+				    hang icons off the front of a list. It's a width, not a clip, so a wider glyph
+				    later spills into the gap instead of losing a pixel. */}
+				<section class="reveal mt-12" style="--base: 700ms; --i: 2">
+					<h2 class="text-xl font-bold tracking-tight">Personal Interests</h2>
+					<ul class="mt-4 space-y-2 text-base leading-relaxed">
+						<li class="flex items-baseline gap-2">
+							<span aria-hidden="true" class="w-[1.25em] shrink-0">🥁</span>
+							<span>Playing drums</span>
+						</li>
+						<li class="flex items-baseline gap-2">
+							<span aria-hidden="true" class="w-[1.25em] shrink-0">👾</span>
+							<span>Video game design &amp; pixel art</span>
+						</li>
+						<li class="flex items-baseline gap-2">
+							<span aria-hidden="true" class="w-[1.25em] shrink-0">🎬</span>
+							<span>Tokusatsu (Godzilla, Ultraman, etc.)</span>
+						</li>
+						<li class="flex items-baseline gap-2">
+							<span aria-hidden="true" class="w-[1.25em] shrink-0">🥾</span>
+							<span>Enjoying nature and hiking</span>
+						</li>
+					</ul>
+				</section>
+				{/* PROTOTYPE (08-02) — covers, not titles. A list of album NAMES
+				    under the interests list would have been a second bulleted list
+				    in a 504px column, reading as more of the first; sleeves are the
+				    version that earns the space, because cover art carries taste
+				    without a sentence and this becomes the only other image on the
+				    page.
+
+				    Four across at lg: (504 − 3 × 14.25) / 4 = 115px a tile, which
+				    is about the floor at which a sleeve is still recognisable
+				    rather than a swatch. Two-up below sm, where the column is
+				    narrow enough that four would fall under 75px. Squares on
+				    purpose — every sleeve is square, so aspect-square means no art
+				    is ever cropped and the row has one flat baseline.
+
+				    Same 1.5px radius and --line border as the photo, so the two
+				    image elements read as one material. bg-clip-padding on the
+				    fallback tiles: --line is translucent, so without it the tile's
+				    own --surface-sunken paints THROUGH the border and the edge
+				    lands a different colour than the photo's identical one. */}
+				<section class="reveal mt-12" style="--base: 700ms; --i: 3">
+					<h2 class="text-xl font-bold tracking-tight">Favorite albums</h2>
+					<ul class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+						{albums.map((album) => (
+							<li>
+								{album.cover ? (
+									<img
+										src={album.cover}
+										alt={`${album.artist} — ${album.title}`}
+										class="aspect-square w-full rounded-[1.5px] border border-[var(--line)] object-cover"
+									/>
+								) : (
+									<div
+										class="flex aspect-square items-end rounded-[1.5px] border border-[var(--line)] bg-[var(--surface-sunken)] bg-clip-padding p-2"
+										role="img"
+										aria-label={`${album.artist} — ${album.title}`}
+									>
+										<span aria-hidden="true" class="text-[0.7rem] leading-tight text-[var(--ink-soft)]">
+											{album.artist} — {album.title}
+										</span>
+									</div>
+								)}
+							</li>
+						))}
+					</ul>
+				</section>
 			</div>
-			{/* The lg overrides came off with the row — 26rem was sized to hold its
-			    half of a two-column page, and stacked it would just be a large
-			    photo. Capped at the measure instead, so its edges line up with the
-			    prose above it. */}
-			<figure class="reveal w-full max-w-[18rem] sm:max-w-[22rem]" style="--base: 180ms; --i: 0">
+			{/* Fixed 19rem at lg so the flex-1 column above resolves to a known
+			    width (see the note there); it is the last thing in the row, so
+			    shrink-0 keeps the prose taking the slack rather than the photo.
+			    Below lg the row is gone and the old stacked caps stand. */}
+			<figure class="reveal w-full max-w-[18rem] sm:max-w-[22rem] lg:w-[19rem] lg:max-w-none lg:shrink-0" style="--base: 180ms; --i: 0">
 				<img
 					src="/images/me.webp"
 					alt="Hiro Eernisse"
