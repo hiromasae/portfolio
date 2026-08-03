@@ -332,7 +332,7 @@
 	--dur-draw: 420ms;
 
 	/* ── The travelling slider ──
-	   The nav's ink pill, moving between the contact icons, is the only thing on
+	   The nav's hover label, moving between the contact icons, is the only thing on
 	   the site that TRAVELS a distance on hover. Everything else in the motion
 	   scale above is a wipe, a fade or a scale: gestures that happen in place,
 	   where --nav-ease's pure deceleration is right because there's no body
@@ -355,7 +355,14 @@
 	   rather than as a separate wobble at the end of the move.
 	   Width rides the same pair so a slide between two differently-sized links
 	   stays ONE motion — a slider that arrives before it finishes resizing
-	   reads as two events. */
+	   reads as two events.
+
+	   2026-08-03: a monotone LONG SETTLE was tried here and reverted the same
+	   day — 480ms on cubic-bezier(0.16, 1, 0.3, 1), same launch (43.1% of the
+	   travel inside 40ms either way) with the weight moved out of the overshoot
+	   and into a long tail, 99% at 297ms against this curve's 142ms. Hiro's
+	   pick from a thirteen-variant exploration of the travel, reverted on
+	   seeing it in the bar. The overshoot stands. */
 	--dur-slide: 320ms;
 	--ease-slide: cubic-bezier(0.34, 1.3, 0.5, 1);
 
@@ -741,6 +748,53 @@ body {
    anything tighter has to come out of the padding, not out of here. */
 #site-nav .nav-logo {
 	line-height: 1;
+
+	/* ── The hover underline ──
+	   2026-08-03. The mark is the site's home link and the only thing in the
+	   bar that reads as type rather than a control, so it was the one hoverable
+	   thing answering with colour alone (it doesn't even do that — it's
+	   --dye-name in both states). This is its affordance.
+
+	   It FADES (Hiro's pick over a wipe and over the card title's
+	   no-transition appear): the wipe grammar belongs to things that travel
+	   left-to-right, and the mark is two letters wide — a 200ms wipe across
+	   ~28 drawn px is a flicker with a direction, which reads as a glitch
+	   rather than a gesture.
+
+	   text-decoration, NOT the background-gradient band the quiet link uses,
+	   and the reason is the opposite of that one's. There the band earns its
+	   keep: the wipe needs a background-size to animate, and "Back to projects"
+	   has descenders that need measured clearance. Here nothing wipes, "HE" has
+	   no descenders, and the decoration anchors to the BASELINE for free — which
+	   is what makes it survive the leading above. A band sits at the bottom of
+	   the BOX, so it would have hung a third of a line low before line-height: 1
+	   and jumped when that landed; the decoration never moved. It also stays out
+	   of layout, which is what the block above is protecting: the row's floor is
+	   the button box now, and padding here is the one thing that could push the
+	   mark back past it.
+
+	   Both lengths are authored /--nav-logo-scale because the whole mark is
+	   drawn at 2.5rem and scaled into the bar, so they land at 2px and 3px on
+	   screen whatever that scale is — they were measured at 0.42 and are
+	   unchanged at 0.47. 2px is the site's line weight, and the 3px gap is cut
+	   against the contact icons' drawn stroke beside it (2 units of a 24-unit
+	   box at 1.9rem, ~2.0px at --nav-icon-scale 0.66). */
+	text-decoration: underline;
+	text-decoration-color: transparent;
+	text-decoration-thickness: calc(2px / var(--nav-logo-scale));
+	text-underline-offset: calc(3px / var(--nav-logo-scale));
+	transition: text-decoration-color var(--dur-gesture) var(--nav-ease);
+}
+
+#site-nav .nav-logo:hover,
+#site-nav .nav-logo:focus-visible {
+	text-decoration-color: currentColor;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	#site-nav .nav-logo {
+		transition: none;
+	}
 }
 
 /* ── Hero: the About button ──
@@ -1229,8 +1283,15 @@ body {
    A pseudo rather than padding because padding would change the 2.9rem box the
    close-ranks translate in the nav is cut against. Vertical by the same amount,
    which is pure forgiveness for a diagonal approach; it can't reach the pill
-   below (that's 0.3rem down and pointer-events: none anyway). */
-.btn-icon::after {
+   below (that's 0.3rem down and pointer-events: none anyway).
+
+   CONTACTS ONLY (2026-08-03, Hiro). This was on every .btn-icon, which handed
+   the theme toggle the same overspill — but the toggle stands alone at the far
+   right with nothing beside it, so there was no gap for it to close and the
+   extra ring was just an invisible box reaching past the glyph. Its hover
+   region is now exactly the drawn button (2.9rem × --nav-icon-scale, ~32px).
+   Anything that gives the toggle a neighbour brings this back for it. */
+#contact-group .btn-icon::after {
 	content: '';
 	position: absolute;
 	inset: -0.1875rem;
@@ -1292,8 +1353,10 @@ body {
 }
 
 /* ── Shared sliding label ──
-   A single ink pill that glides between the contact icons, always sitting just
-   below whichever one is hovered or focused and carrying its destination text.
+   A single label that glides between the contact icons, always sitting just
+   below whichever one is hovered or focused and naming it. It wore an ink chip
+   until 2026-08-03 and is bare text now (see .contact-slider-in); it is still
+   ONE object that moves, which is what every rule below is protecting.
 
    TWO elements, and the division of labour is the whole design:
 
@@ -1317,6 +1380,9 @@ body {
 	top: 100%;
 	left: 0;
 	width: 0;
+	/* The gap under the button box. Untouched through the chip coming off and
+	   the faint one going back on (2026-08-03), so the label's top edge has sat
+	   in the same place throughout. */
 	margin-top: 0.3rem;
 	pointer-events: none;
 	transform: translateX(0) translateX(-50%);
@@ -1334,10 +1400,40 @@ body {
 	justify-content: center;
 	gap: 0.3rem;
 	width: 100%;
+	/* ── A faint chip, not an ink one ──
+	   2026-08-03, in two moves on one day. The chip was SOLID --ink with
+	   --paper text, and Hiro removed it outright ("it looks too much like a
+	   button") — correctly: a filled, radiused rectangle sitting among four
+	   real buttons wore the one costume the one non-control in the row
+	   shouldn't. Then, having seen it as bare text: "give the pill a faint bg
+	   and make the text color lighter."
+	   So the chip is back, at a fraction of its old weight — and it took a
+	   third pass to find that fraction. --surface (one plane step, 1.08:1
+	   against --paper) was too little to register at this size: it is the
+	   travelling panel's token, and that panel is 200× the area, which is what
+	   lets it be felt rather than read. A label two words wide has no such
+	   room. --surface-sunken is the next plate the palette has — 1.19:1 in
+	   dark, 1.21:1 in light — and it reads as a chip without drawing an edge.
+
+	   The plate also buys back what the bare-text stage gave up: the label
+	   hangs below the bar over whatever is scrolling under it, and it carries
+	   its own backdrop down there again.
+
+	   The text is --ink. "Lighter", asked on the dark theme where the label
+	   really is lighter for it (#838eba → #c0caf5), reads as MORE CONTRAST
+	   rather than higher lightness — so it maps per theme like every other
+	   token here, and on the light theme the same instruction lands as
+	   #5d6691 → #343b58. Following the word literally there would wash the
+	   label out on its own plate. 9.63:1 in dark, 7.57:1 in light.
+	   Note this is the top of the ink scale: anything lighter still in dark
+	   means a value the site does not have, brighter than any text on it.
+
+	   Padding and radius come back with the fill; the script's measurer is a
+	   clone of this element, so the widths it writes follow them automatically. */
 	padding: 0.25rem 0.5rem;
 	border-radius: 0.11rem;
-	background: var(--ink);
-	color: var(--paper);
+	background: var(--surface-sunken);
+	color: var(--ink);
 	font-size: 0.7rem;
 	font-weight: 500;
 	line-height: 1;
