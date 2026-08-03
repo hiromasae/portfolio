@@ -577,24 +577,40 @@ body {
 
 /* ── The two hairlines ──
    Drawn as pseudo-elements rather than borders because a border can only be one
-   flat colour, and these fade at their ends (see --rule). Kept in ONE rule so
-   the pair cannot drift apart: the bar's bottom edge and the break above the
-   projects list are the same device, and the only thing that differs is which
-   edge of its box each one sits on.
+   flat colour, and these fade at their ends (see --rule). One device for
+   indexing the page, and they share the --rule gradient — but they differ in
+   LENGTH, and that difference is the whole point: the bar's line is the
+   underside of a band that spans the window, while the projects line is a break
+   inside the content column. See the note in index.astro.
 
-   Both hosts already needed to be positioned for this, and neither was — nor
-   does either now steal a containing block from anything: the contact group
+   THE BAR'S LINE SPANS THE VIEWPORT (2026-08-03, second pass). It rode inside
+   the page's horizontal padding for a few hours earlier the same day — the same
+   912.5px as the projects rule — and that is what brought us back here: the
+   bar's paper is full-bleed and it is sticky, so scrolled content passes under
+   it out to both window edges, and a rule that stops short of them leaves ~260px
+   a side (at 1440) where content dissolves into paper with no edge to explain
+   the cut. It read as clipping. An opaque band needs its edge drawn across
+   everything it covers. The column is still legible in the bar through its
+   CONTENTS, which are inset further still (see the interior inset below).
+
+   Which is why the two are no longer one rule: the bar's hangs off #site-nav
+   itself rather than .nav-pad, because #site-nav is the full-bleed box and
+   left/right: 0 on it is the viewport minus the scrollbar gutter, for free. Do
+   NOT reach for 100vw here — that measures past the gutter and would overflow
+   the page by the scrollbar's width. #site-nav is already positioned (it is
+   sticky), so it needed nothing added to host this; .nav-pad's own
+   position: relative came out with the rule, since it was only ever there for
+   it. Neither host steals a containing block from anything: the contact group
    positions against .nav-inner, and the travelling card panel against
    #project-list, both further in.
 
    They also stopped adding their 1px to layout when they stopped being borders,
    so the bar is 70px rather than 71 and the projects section starts a pixel
    higher. Nothing is measured off either number. */
-#site-nav .nav-pad,
 #projects {
 	position: relative;
 }
-#site-nav .nav-pad::after,
+#site-nav::after,
 #projects::before {
 	content: '';
 	position: absolute;
@@ -604,7 +620,10 @@ body {
 	background: var(--rule);
 	pointer-events: none;
 }
-#site-nav .nav-pad::after {
+/* The bar carries no padding of its own — the vertical padding lives on
+   .nav-pad, further in — so the nav's bottom edge and the pad's are the same
+   line, and this sits exactly where the old .nav-pad::after did. */
+#site-nav::after {
 	bottom: 0;
 }
 #projects::before {
@@ -699,10 +718,13 @@ body {
 
 /* ── The bar's interior inset ──
    2026-08-03, Hiro: bring the wordmark and the theme toggle inward off the
-   column edges. It goes on the ROW, not on .nav-pad, because .nav-pad carries
-   the bottom hairline and that has to keep spanning the full column width — the
-   bar's contents sit inside its rule, the way a card's contents sit inside its
-   border.
+   column edges. It goes on the ROW rather than on .nav-pad or the 960px shell,
+   so it insets the bar's CONTENTS and nothing else — which is what let the
+   hairline change its length later the same day without touching this. It was
+   written when the rule was column-width and the contents sat inside it, the
+   way a card's contents sit inside its border; the rule now spans the window,
+   so the contents are inset from the column and the column is inset from the
+   rule. Same nesting, one more step.
 
    THE TWO SIDES ARE NOT EQUAL, and that is what makes them look equal. The
    wordmark draws from its box's left edge, so its ink lands exactly at whatever
@@ -716,8 +738,9 @@ body {
 
    What this costs: the wordmark no longer lines up with the leftmost card's
    year and the footer's copyright, which all sit on the column edge. The bar is
-   now its own inset unit, bounded by its rule. If that alignment is ever wanted
-   back, this is the rule that broke it. */
+   its own inset unit. If that alignment is ever wanted back, this is the rule
+   that broke it — and it is worth knowing that the hairline can no longer stand
+   in for the column, so nothing else in the bar marks it. */
 #site-nav .nav-inner {
 	padding-left: var(--nav-inset);
 	padding-right: calc(var(--nav-inset) - 0.5rem * var(--nav-icon-scale));
