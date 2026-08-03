@@ -79,8 +79,9 @@ const onHome = path === '/';
 					);
 				})
 			}
-			{/* One shared ink pill that glides between the icons on hover/focus,
-			    carrying the hovered icon's label. Positioned entirely by script.
+			{/* One shared label that glides between the icons on hover/focus,
+			    naming the hovered one. Positioned entirely by script. Bare text
+			    since 2026-08-03 — it wore an ink chip before that.
 			    The ↗ shows only for external (new-tab) links.
 
 			    TWO elements, and the split is load-bearing: the outer span is the
@@ -543,8 +544,9 @@ const onHome = path === '/';
 	}
 
 	// ── Sliding contact label ──
-	// A single ink pill glides between the contact icons, always sitting under
-	// whichever one is hovered or focused, and carrying that icon's label. When
+	// A single label glides between the contact icons, always sitting under
+	// whichever one is hovered or focused, and naming it. (Still called the pill
+	// throughout: it wore an ink chip until 2026-08-03.) When
 	// moving between icons it slides + resizes — the one motion this pill has.
 	// Appearing and disappearing are the POP (2026-08-02, Hiro's pick from a
 	// twenty-variant exploration): it springs open from 80% and leaves by
@@ -814,12 +816,19 @@ const onHome = path === '/';
 			togglePill.classList.add('is-out');
 		};
 
-		toggleWrap.addEventListener('mouseenter', showPill);
-		toggleWrap.addEventListener('mouseleave', hidePill);
-		toggleWrap.addEventListener('focusin', showPill);
-		toggleWrap.addEventListener('focusout', (e) => {
-			if (!toggleWrap.contains(e.relatedTarget as Node)) hidePill();
-		});
+		// On the BUTTON, not the wrapper (2026-08-03). The wrapper's box is the
+		// button's FULL-SIZE 2.9rem layout box, but the button is drawn at
+		// --nav-icon-scale and translated toward the container's right edge — so
+		// the wrapper reaches ~16px further left than the glyph does, and hovering
+		// that strip used to pop the label while the glyph itself stayed at rest.
+		// Harmless when the contacts' hit pseudo gave the toggle spill of its own;
+		// plainly wrong now that its region is exactly the drawn button (see the
+		// hit-box block in global.css). The pill is pointer-events: none, so it
+		// can't take the hover away from the button it hangs under.
+		themeToggle.addEventListener('mouseenter', showPill);
+		themeToggle.addEventListener('mouseleave', hidePill);
+		themeToggle.addEventListener('focus', showPill);
+		themeToggle.addEventListener('blur', hidePill);
 
 		// Roll to the new label after a click flips the theme. This listener
 		// registers after the flip handler above, so themeLabel() already
