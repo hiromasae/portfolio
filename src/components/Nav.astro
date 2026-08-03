@@ -15,7 +15,24 @@ const onHome = path === '/';
 	    and scaled down into it — see the nav geometry block in global.css,
 	    which also records the expanded masthead this replaced (removed
 	    2026-08-02). */}
-	<div class="nav-pad mx-auto max-w-[960px] px-5">
+	<div class="mx-auto max-w-[960px] px-5">
+		{/* The bar's bottom hairline. It rides INSIDE the page's horizontal padding
+		    (2026-08-03, Hiro: only span the width of the page), so it starts and
+		    ends on the same edges as the wordmark above it, the leftmost card's
+		    year below, and the rule over the projects list — one column edge that
+		    everything on the page answers to. The paper it sits under still runs
+		    full-bleed, which is the point of the change: the bar reads as the page
+		    column continuing up, not as a separate band across the window.
+
+		    It is drawn in global.css (the .nav-pad::after rule) rather than as a
+		    border here, because it fades out at both ends and a border can only
+		    be one flat colour. That rule also draws the projects list's — the two
+		    are one device for indexing the page and share the --rule gradient.
+
+		    The vertical padding lives here rather than on the row inside, so the
+		    line sits under the padding — at the bar's true bottom edge — instead
+		    of tight against the icons. */}
+		<div class="nav-pad">
 		{/* `relative` positions the contact group, which is centred on this box
 		    rather than laid out between its neighbours: the wordmark is far wider
 		    than the toggle, so in flow the cluster would sit noticeably right of
@@ -174,6 +191,7 @@ const onHome = path === '/';
 					<span class="contact-slider-text"></span>
 				</span>
 			</span>
+		</div>
 		</div>
 		</div>
 	</div>

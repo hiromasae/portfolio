@@ -31,10 +31,28 @@ import { projects } from '../data/projects';
 		    control is self-evidently its own object, so it doesn't need the
 		    sentence's left edge to say so, and the hero reads as one deliberate
 		    centred block instead. */}
-		<section class="pt-16 pb-20 text-center sm:pt-20 sm:pb-24">
+		{/* Padding stepped up one full stop 2026-08-03 (Hiro: let the hero breathe
+		    more) — 64/80 → 96/112, and 80/96 → 112/128 from sm up. The 1rem
+		    top/bottom ASYMMETRY is deliberate and survives the increase: the space
+		    below has to separate the hero from the projects grid, while the space
+		    above only has to clear the nav bar, which is already a ruled edge. */}
+		<section class="pt-24 pb-28 text-center sm:pt-28 sm:pb-32">
 			{/* Still capped at --measure so a wide viewport can't run the line out
 			    past a readable length; mx-auto centres the box the cap creates. */}
-			<p class="reveal mx-auto max-w-[var(--measure)] text-lg leading-relaxed" style="--i: 0">
+			{/* --ink-hero, a step PAST the body ink away from the paper (2026-08-03,
+			    Hiro: this line and the button should contrast more, closer to
+			    white). It briefly went the other way, to --ink-soft, on a reading
+			    of "lighter" as quieter — wrong, and the correction is worth
+			    keeping: in the dark theme this line already sat near the top of
+			    the range, so "lighter" could only have meant brighter.
+			    This makes the sentence the highest-contrast text on the site,
+			    ahead of body ink. That is the point — it is the page's opening
+			    statement and the only thing above the rule — but it does mean the
+			    hero now out-contrasts the wordmark, so if the mark ever needs to
+			    lead again, it is this token it has to answer to. See --ink-hero in
+			    global.css for why the two themes are proportional rather than
+			    inverse. */}
+			<p class="reveal mx-auto max-w-[var(--measure)] text-lg leading-relaxed text-[var(--ink-hero)]" style="--i: 0">
 				I design product interfaces and then go build them.
 			</p>
 			{/* The page's only route to /about, so it's the site's one real button.
@@ -70,7 +88,24 @@ import { projects } from '../data/projects';
 		</section>
 
 		{/* Projects */}
-		<section id="projects" class="scroll-mt-20 pb-16">
+		{/* The second of the page's two hairlines (2026-08-03, Hiro), the first
+		    being the nav's own bottom edge. Drawn in global.css (#projects::before)
+		    off the shared --rule gradient, which fades both of them out at their
+		    ends — so they read as one device: the page is indexed into a bar, an
+		    opening statement and a body of work.
+
+		    This one is held to the CONTENT column rather than run full-bleed like
+		    the nav's. Different jobs — the nav's line is the underside of a bar
+		    that spans the viewport, while this one is a break inside the column,
+		    and it lands on the same left edge as the leftmost card's year, the
+		    wordmark above it and the copyright below. A full-bleed rule here would
+		    read as a second bar rather than as a division of the text block.
+
+		    The space is deliberately lopsided: the hero keeps its full breathing
+		    room above the line, and the list opens at pt-12 below it, so the rule
+		    belongs to the section it introduces rather than floating between two
+		    equal gaps. */}
+		<section id="projects" class="scroll-mt-20 pt-12 pb-16 sm:pt-14">
 			{/* Two columns from sm up. The gaps are uneven on purpose: the column
 			    gap only has to separate two cards side by side, while the row gap
 			    also has to out-space the gap INSIDE a card (title → image), or a
@@ -165,12 +200,25 @@ import { projects } from '../data/projects';
 		const show = (card: HTMLElement) => {
 			current = card;
 			if (visible) {
-				place(card); // slide + resize to the new card
+				// Slide + resize to the new card, and restart the compress that rides
+				// along with it (see @keyframes panel-compress in global.css — the
+				// panel gives up 3.5% of its size while it's moving). A CSS animation
+				// only re-runs if it's removed and re-added with a reflow in between,
+				// and the reflow has to happen while the class is OFF or the browser
+				// coalesces the two states and the animation simply continues from
+				// where the last hop left it. Placing after the flush keeps the
+				// transform change and the animation start in the same frame.
+				panel.classList.remove('is-sliding');
+				void panel.offsetWidth;
+				place(card);
+				panel.classList.add('is-sliding');
 				return;
 			}
 			// First appearance: kill the transition, land on the card, force the
 			// reflow so the browser doesn't coalesce the two states, then let the
-			// class fade it up. Only opacity animates here.
+			// class fade it up. Only opacity animates here — and no compress, since
+			// nothing has travelled: the panel is being placed, not moved.
+			panel.classList.remove('is-sliding');
 			panel.style.transition = 'none';
 			place(card);
 			void panel.offsetWidth;
@@ -183,6 +231,9 @@ import { projects } from '../data/projects';
 			visible = false;
 			current = null;
 			panel.classList.remove('is-visible');
+			// Drop the compress too, or a hop cut short by leaving the grid leaves a
+			// part-compressed panel behind for the next appearance to snap in at.
+			panel.classList.remove('is-sliding');
 		};
 
 		// Crossing the gutter between two cards briefly leaves every card, which
