@@ -125,7 +125,15 @@
 
 	   Both verbatim Tokyo Night Light. Titles run 24-38px and card titles 21px
 	   bold, so all of them clear WCAG's large-text bar with room; the numerals
-	   are small text and clear the full 4.5:1. */
+	   are small text and clear the full 4.5:1.
+
+	   ONE EXCEPTION, added the same day: the about page's two headings dropped
+	   back to --ink (Hiro's ask). Both had just come down to the body's own
+	   size-class — the greeting stopped being a 4xl page title and now sits at
+	   the section heading's 23.75px — and at that size, in a single narrow
+	   column, two blue lines among five lines of ink read as highlighting rather
+	   than as structure. The accent is still the rule everywhere it marks a
+	   title that OUTSIZES its body: card titles, project h1s, the home page. */
 	--ink-title: #34548a; /* 6.28:1 — 1.36× the muted text */
 	--ink-num: #965027; /* 5.03:1 */
 
@@ -262,8 +270,12 @@
 	--ease-pop: cubic-bezier(0.34, 1.45, 0.5, 1);
 
 	/* ── Reading measure ──
-	   The cap on any column of running prose (About's intro, a project's
-	   Background and Work). Set for SCANNABILITY, not for the page's grid: the
+	   The cap on any column of running prose — the home hero and a project's
+	   Background and Work. NOT the about page: its prose column went back
+	   beside the photo on 08-02 and is cut narrower than this by the row's
+	   arithmetic (see about.astro). So this token has two consumers, both of
+	   them full-width single columns, and the one layout that has to share its
+	   line with something else opts out. Set for SCANNABILITY, not for the page's grid: the
 	   pages themselves span the nav's 960px, and only reading matter is
 	   pulled in to this width — so images and cards still fill the page.
 	   35rem = 665px at the 19px base. Measured in Chrome with the webfont

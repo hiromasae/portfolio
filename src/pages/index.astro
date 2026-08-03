@@ -11,9 +11,18 @@ import { projects } from '../data/projects';
 	<main class="mx-auto max-w-[960px] px-5">
 		{/* Hero. The masthead above already carries the name at full size, so this
 		    says what the name does and hands off to About — the page's only route
-		    there since the nav links came out (2026-08-01). Held to --measure and
-		    the about page's own opening line, in its type size, so arriving from
-		    either direction reads as one voice. */}
+		    there since the nav links came out (2026-08-01). Held to --measure so a
+		    wide viewport can't run the line out past a readable length.
+
+		    It used to be the about page's opening line verbatim, matched to its
+		    type size so arriving from either direction read as one voice. That
+		    stopped being true when this line became its own sentence: the two
+		    pages now open differently on purpose, the home page saying what the
+		    work IS and About saying who does it. The size match went with it —
+		    about-page had followed About's 08-02 step down to the base 19px on
+		    THIS line too, and that change was dropped when the two branches were
+		    merged, since there is no longer a shared sentence to keep in step.
+		    If the two are ever written the same again, re-match the size. */}
 		{/* Centred, both lines, each on its own axis (2026-08-02, Hiro). This
 		    REPLACES the shared-left-edge lockup from earlier the same day, and the
 		    reason it can: that arrangement existed because the second line was a
