@@ -11,46 +11,63 @@ const onHome = path === '/';
 	data-home={onHome ? 'true' : 'false'}
 	class="sticky top-0 z-40 bg-[var(--paper)]"
 >
-	{/* The bar's whole geometry — vertical padding (height), wordmark scale,
-	    icon close-ranks slide — derives from one progress value --q
-	    (0 = expanded masthead, 1 = compact bar) via calc() in global.css. On
-	    the home page the scripts below TRIGGER a timed tween of --q between
-	    the two states when the scroll crosses the top of the page: expanded
-	    only at the top, compact once you've scrolled away. */}
+	{/* The bar has one state. Its type and buttons are authored at full size
+	    and scaled down into it — see the nav geometry block in global.css,
+	    which also records the expanded masthead this replaced (removed
+	    2026-08-02). */}
 	<div class="nav-pad mx-auto max-w-[960px] px-5">
-		{/* No flex gap here: it would also open up between the contact group and
-		    the theme toggle, breaking the compact close-ranks math in global.css
-		    (which assumes one uniform 0.375rem gap between all buttons). */}
-		<div class="nav-inner flex items-center">
+		{/* `relative` positions the contact group, which is centred on this box
+		    rather than laid out between its neighbours: the wordmark is far wider
+		    than the toggle, so in flow the cluster would sit noticeably right of
+		    the bar's centre. Out of flow it also can't push the toggle around, so
+		    the row's height comes from the two buttons alone. */}
+		<div class="nav-inner relative flex items-center">
 			{/* Left cluster: the wordmark alone since the Projects/About links came
-			    out (2026-08-01). The wrapper still carries the q-driven scale (see
-			    .nav-left in global.css) rather than the <a> itself — it's the
-			    cluster the masthead tween and the load intro both address, and it's
-			    where a second element beside the name would go back. */}
+			    out (2026-08-01). The wrapper still carries the scale-down (see
+			    .nav-left in global.css) rather than the <a> itself — it's where a
+			    second element beside the name would go back. */}
 			<div class="nav-left relative flex origin-left items-center">
-				{/* The wordmark carries 柿渋色 kakishibu-iro (persimmon tannin) rather
-				    than --ink — the one piece of type on the site that is a mark
-				    rather than reading matter. --dye-name is tuned for DEPTH, not just
-				    legibility: it has to out-contrast the rest of the bar or the
-				    biggest thing in it reads as the furthest back. Lightening
-				    it on the light theme is a hierarchy regression, not a taste
-				    call, and the HUE is what makes both possible at once — see the
-				    dye block in global.css before recolouring. */}
-				<a href="/" class="nav-logo text-[2.5rem] font-bold tracking-tight text-[var(--dye-name)]">
-					Hiro Eernisse
+				{/* The monogram carries --dye-name rather than --ink — the one piece
+				    of type on the site that is a mark rather than reading matter.
+				    --dye-name is tuned for DEPTH, not just legibility: it has to
+				    out-contrast the rest of the bar or the biggest thing in it reads as
+				    the furthest back. Lightening it on the light theme is a hierarchy
+				    regression, not a taste call, and the HUE is what makes both possible
+				    at once — see the dye block in global.css before recolouring.
+
+				    Initials since 2026-08-02 (was the full "Hiro Eernisse"). The
+				    accessible name has to say what the mark can't: "HE" alone reads as
+				    two letters to a screen reader, and this is the site's home link. */}
+				<a
+					href="/"
+					class="nav-logo text-[2.5rem] font-bold tracking-tight text-[var(--dye-name)]"
+					aria-label="Hiro Eernisse — home"
+				>
+					HE
 				</a>
 			</div>
 
-		<div id="contact-group" class="relative ml-auto flex items-center gap-1.5 self-center">
+		{/* Centred on the bar itself (2026-08-02). The layout box is wider than
+		    what the cluster draws — the buttons are scaled down inside it — but
+		    both are centred on the same line, so the drawn icons land on the
+		    bar's centre. See the close-ranks block in global.css. */}
+		<div
+			id="contact-group"
+			class="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5"
+		>
 			{
 				contacts.map((c, i) => {
 					const isEmail = c.href.startsWith('mailto:');
 					const hoverLabel = isEmail ? 'Copy email' : c.label;
+					// --nav-icon-i is markup order, which the load intro's draw stagger
+					// marches along; --nav-icon-c is the same position as a signed offset
+					// from the cluster's centre, in box-and-gap pitches, which is what the
+					// close-ranks translate in global.css needs.
 					return (
 						<a
 							href={c.href}
 							class="btn-icon"
-							style={`--nav-icon-r: ${contacts.length - i}`}
+							style={`--nav-icon-i: ${i}; --nav-icon-c: ${i - (contacts.length - 1) / 2}`}
 							aria-label={hoverLabel}
 							data-label={hoverLabel}
 							data-copy={isEmail ? c.href.replace('mailto:', '') : undefined}
@@ -64,23 +81,31 @@ const onHome = path === '/';
 			}
 			{/* One shared ink pill that glides between the icons on hover/focus,
 			    carrying the hovered icon's label. Positioned entirely by script.
-			    The ↗ shows only for external (new-tab) links. */}
+			    The ↗ shows only for external (new-tab) links.
+
+			    TWO elements, and the split is load-bearing: the outer span is the
+			    POSITIONER (its transform is where the pill is, its transition is the
+			    slide between icons) and the inner one is the visible box that plays
+			    the pop. Putting the pop on the outer span would replay it on every
+			    slide, since the slide moves the same transform property. */}
 			<span class="contact-slider" aria-hidden="true">
-				<span class="contact-slider-text"></span>
-				<svg
-					class="contact-slider-ext"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-					stroke-linecap="square"
-					stroke-linejoin="miter"
-					aria-hidden="true"
-				>
-					<path d="M15 3h6v6" />
-					<path d="M10 14 21 3" />
-					<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-				</svg>
+				<span class="contact-slider-in">
+					<span class="contact-slider-text"></span>
+					<svg
+						class="contact-slider-ext"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="square"
+						stroke-linejoin="miter"
+						aria-hidden="true"
+					>
+						<path d="M15 3h6v6" />
+						<path d="M10 14 21 3" />
+						<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+					</svg>
+				</span>
 			</span>
 		</div>
 
@@ -94,14 +119,14 @@ const onHome = path === '/';
 		    clipPath, keeps the motion working in Safari), so light→dark can
 		    wrap — ink exits through the circle's right edge while the twin
 		    rect pours in from the left. See the theme-swap block in
-		    global.css. Wider ml-8 gap sets it apart from the contacts; the
-		    close-ranks slide in global.css hard-codes both gaps and every
-		    button's 2.9rem box, which the default .btn-icon padding + 1.9rem
-		    glyph give this button already (the gap now rides on the wrapper,
-		    same layout). The button is named for the theme a click switches TO
-		    (play/pause-style); the script keeps aria-label and the hover pill
-		    on the same text. */}
-		<div id="theme-toggle-wrap" class="relative ml-8 flex self-center">
+		    global.css. `ml-auto` holds it at the bar's right edge — with the
+		    contacts centred out of flow it's the only thing left in the row
+		    after the wordmark. Its close-ranks translate in global.css assumes
+		    the same 2.9rem box as the contacts, which the default .btn-icon
+		    padding + 1.9rem glyph give it already. The button is named for the
+		    theme a click switches TO (play/pause-style); the script keeps
+		    aria-label and the hover pill on the same text. */}
+		<div id="theme-toggle-wrap" class="relative ml-auto flex self-center">
 			{/* The pre-JS name. Dark is the site's default (stamped on <html> in
 			    Layout.astro), so the button starts out offering the way OUT of
 			    it; the script's syncThemeState corrects this on load for a
@@ -145,7 +170,9 @@ const onHome = path === '/';
 			    toggle into the contacts cluster. See the toggle-label block in
 			    the script below. */}
 			<span class="contact-slider" aria-hidden="true">
-				<span class="contact-slider-text"></span>
+				<span class="contact-slider-in">
+					<span class="contact-slider-text"></span>
+				</span>
 			</span>
 		</div>
 		</div>
@@ -153,136 +180,43 @@ const onHome = path === '/';
 </nav>
 
 <script is:inline>
-	// ── Triggered masthead: the q model ──
-	// One progress value q (0 = expanded masthead, 1 = compact bar) drives the
-	// nav's entire geometry through calc() in global.css — vertical padding,
-	// wordmark scale, icon close-ranks slide are all functions of q, so
-	// the bar and its contents move as one unit BY CONSTRUCTION. q rests at
-	// exactly 0 or 1: on the home page, crossing the top of the page TRIGGERS
-	// a timed tween between the two states (expanded only at the top, compact
-	// once you've scrolled away); interior pages pin q to 1.
-	//
-	// This inline script owns everything that must happen pre-paint:
-	//   - paint this load's q (from scrollY — or the q carried across an MPA
-	//     navigation, so interior→home-top tweens open instead of snapping)
+	// ── Arrival choreography ──
+	// Everything that must happen pre-paint:
 	//   - the projects-landing intent (position the page before first paint)
-	//   - the cross-page intro: start the compositor-side intro keyframes at
-	//     'interactive' (readyState 'interactive' fires before module scripts
-	//     evaluate, so the intro can't be starved by the module chain — in
-	//     dev, the Vite client — on a slow round trip)
-	// The scroll watcher that fires the trigger lives in the module script
-	// below, which reuses window.__navQ installed here: one source for the
-	// q math.
+	//   - the load intro: the bar's entrance, whose compositor-side keyframes
+	//     (global.css) start at 'interactive' — readyState 'interactive' fires
+	//     before module scripts evaluate, so the intro can't be starved by the
+	//     module chain (in dev, the Vite client) on a slow round trip
+	//   - the reveal-* classes the content cascade keys off
+	//
+	// Until 2026-08-02 it also owned the "q model": the bar's geometry was a
+	// progress value tweened between an expanded masthead and the compact bar,
+	// triggered by the scroll crossing the top of the home page and handed
+	// across MPA navigations through sessionStorage so the two pages' bars
+	// joined up. The masthead is gone. All that survives of the handoff is the
+	// internal-navigation flag below, which still decides whether the bar
+	// introduces itself on arrival.
 	(function () {
 		var nav = document.getElementById('site-nav');
 		if (!nav) return;
 		var onHome = nav.dataset.home === 'true';
 		var root = document.documentElement;
-		// The masthead's height delta (the --nav-shift the page rides on in
-		// global.css, 5.5rem) — the distance the page and veil travel between
-		// the two states. Keep in step with the CSS.
-		var RANGE = 5.5 * (parseFloat(getComputedStyle(root).fontSize) || 19);
-		// The ensemble tween's duration — read from the --dur-nav token so the
-		// rAF tween here and the cross-page intro keyframes in global.css (which
-		// ride the same var) always run at the same speed. parseFloat drops the
-		// "ms" suffix; keep the token in ms.
-		var DUR =
-			parseFloat(getComputedStyle(root).getPropertyValue('--dur-nav')) || 260;
-		// Trigger thresholds: expand only at (essentially) the top of the page,
-		// compact once you've scrolled away. The gap between the two lines is
-		// hysteresis — trackpad jitter around a single line can't make the bar
-		// oscillate.
-		var EXPAND_AT = 8;
-		var COLLAPSE_AT = 32;
 		var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-		var q = onHome ? 0 : 1; // matches the stylesheet default before the first setQ
 
-		// Set q (vars live on <html>: main/footer ride --q too). Every other
-		// geometry var is a pure calc() on this one in global.css, so this is the
-		// whole writer. (It used to also write --q-links, the Projects/About
-		// links' nonlinear counter-scale, which no calc() could express; that
-		// went with the links on 2026-08-01, and with it the boost-gate
-		// matchMedia listener that kept the formula's inputs fresh.)
-		var setQ = function (v) {
-			v = Math.max(0, Math.min(1, v));
-			q = v;
-			root.style.setProperty('--q', String(v));
-		};
-		// A tween in flight: its rAF handle and destination. tweenTarget doubles
-		// as "the state we're heading to" for the hysteresis in qFromScroll.
-		var raf = 0;
-		var tweenTarget = null;
-
-		// The state (0 or 1) the current scroll position calls for. Hysteresis:
-		// measured against the state we're in (or already tweening toward), so
-		// the answer only flips when the scroll crosses the relevant line.
-		var qFromScroll = function () {
-			if (!onHome) return 1;
-			var y = window.scrollY;
-			var state = tweenTarget !== null ? tweenTarget : q >= 0.5 ? 1 : 0;
-			return state === 1 ? (y < EXPAND_AT ? 0 : 1) : y > COLLAPSE_AT ? 1 : 0;
-		};
-
-		// The trigger animation: glide q to `to` from wherever it is now. rAF-
-		// driven rather than a CSS transition on --q: the var is unregistered, so
-		// it can't be transitioned, and the rAF loop is also what let the removed
-		// --q-links formula stay exact mid-flight. Retargetable mid-flight — a fresh
-		// call cancels the old tween and continues from the current q, so rapid
-		// direction changes fold into one motion. Reduced motion snaps.
-		var tweenTo = function (to) {
-			if (to === (tweenTarget !== null ? tweenTarget : q)) return;
-			cancelAnimationFrame(raf);
-			if (reduce) {
-				tweenTarget = null;
-				setQ(to);
-				return;
-			}
-			tweenTarget = to;
-			var from = q;
-			var t0 = performance.now();
-			var step = function (now) {
-				var t = Math.min(1, (now - t0) / DUR);
-				var e = 1 - Math.pow(1 - t, 3); // ease-out cubic
-				setQ(from + (to - from) * e);
-				if (t < 1) {
-					raf = requestAnimationFrame(step);
-				} else {
-					tweenTarget = null;
-				}
-			};
-			raf = requestAnimationFrame(step);
-		};
-
-		// The bar's current VISUAL height: its layout box is pinned compact, and
-		// the masthead's extra height is the page shift still un-collapsed.
-		var visualNavH = function () {
-			return nav.offsetHeight + RANGE * (1 - q);
-		};
-		// Shared with the module script's trigger watcher.
-		window.__navQ = {
-			setQ: setQ,
-			range: RANGE,
-			get: function () {
-				return q;
-			},
-			fromScroll: qFromScroll,
-			tweenTo: tweenTo,
-			visualNavH: visualNavH,
-		};
-
+		// Stamp the clock on the way out, so the next page of the site can tell
+		// it was reached from inside (see `internal` below).
 		window.addEventListener('pagehide', function () {
 			try {
-				sessionStorage.setItem('nav-q', q.toFixed(4) + ':' + Date.now());
+				sessionStorage.setItem('nav-from', String(Date.now()));
 			} catch (e) {}
 		});
 
 		// A pending "show projects" intent — set when a projects link is clicked on
 		// another page. The flag holds '1' for the top of the list or a project
-		// slug for a specific card. Handled entirely here, not in the module
-		// script: the nav paints compact up front (no flash of the tall masthead)
-		// and the scroll to the projects view runs at 'interactive' — before any
-		// module script, and before first paint in practice — so the page opens
-		// already resting on the target instead of visibly jumping to it.
+		// slug for a specific card. Handled here, not in the module script, so the
+		// scroll to the projects view runs at 'interactive' — before any module
+		// script, and before first paint in practice — and the page opens already
+		// resting on the target instead of visibly jumping to it.
 		var projectsIntent = null;
 		if (onHome) {
 			try {
@@ -315,93 +249,73 @@ const onHome = path === '/';
 		// would flash the top of the page for a frame before snapping down to the
 		// card. Content stays hidden until positioned; arrive() always lifts it.
 		if (projectsIntent) document.documentElement.classList.add('projects-landing');
-		// This load's resting state: from the exact remembered position, the
-		// projects view (compact), or wherever the browser put us — expanded
-		// only when that spot is the top of the page.
-		var restY = projectsIntent ? (returnY !== null ? returnY : RANGE) : window.scrollY;
-		var restQ = onHome ? (restY > COLLAPSE_AT ? 1 : 0) : 1;
 
-		// The q carried over from the page we just left, if fresh. The age cap
-		// means returning to a stale tab (e.g. from an external site much later)
-		// paints at rest instead of replaying an old tween.
-		var carried = null;
+		// Did we arrive from another page of the site? The age cap means returning
+		// to a stale tab (e.g. from an external site much later) reads as a fresh
+		// arrival and gets the entrance.
+		var internal = false;
 		try {
-			var raw = sessionStorage.getItem('nav-q');
-			sessionStorage.removeItem('nav-q');
-			if (raw) {
-				var sep = raw.lastIndexOf(':');
-				if (Date.now() - +raw.slice(sep + 1) < 10000) carried = +raw.slice(0, sep);
-			}
+			var stamp = sessionStorage.getItem('nav-from');
+			sessionStorage.removeItem('nav-from');
+			if (stamp) internal = Date.now() - +stamp < 10000;
 		} catch (e) {}
-		if (carried !== null && !(carried >= 0 && carried <= 1)) carried = null;
 
-		var animate = !reduce && carried !== null && Math.abs(carried - restQ) > 0.02;
-
-		// ── Load intro: the bar's entrance on a hard load ──
-		// Only for arrivals that AREN'T an internal navigation: a fresh carried
-		// q means we just left another page of the site (the cross-page tween
-		// above owns those — one entrance per arrival, never two), EXCEPT a
-		// reload, which also carries a fresh q (pagehide fires) but should
-		// still get the entrance. First visits and external arrivals have no
-		// fresh carried q and qualify. The variant follows the resting state —
-		// the expanded masthead gets the draw flourish, the compact bar the
-		// staggered wipe (keyframes + hidden holds in global.css). The class
-		// goes on pre-paint so first paint holds the bar hidden at each
-		// animation's first frame; runLoadIntro releases it at 'interactive'.
+		// ── Load intro: the bar's entrance ──
+		// Only for arrivals that AREN'T an internal navigation — clicking through
+		// the site shouldn't re-introduce the bar on every page — EXCEPT a reload,
+		// which also stamps the clock on its way out (pagehide fires) but should
+		// still get the entrance. First visits and external arrivals qualify. A
+		// projects landing skips it: that arrival opens mid-list, where an
+		// entrance above the target is beside the point. The class goes on
+		// pre-paint so first paint holds the bar hidden at the animation's first
+		// frame (the holds in global.css); runLoadIntro releases it at
+		// 'interactive'.
 		var navType = '';
 		try {
 			var navEntry = performance.getEntriesByType('navigation')[0];
 			if (navEntry) navType = navEntry.type;
 		} catch (e) {}
-		var loadIntro =
-			!reduce && !animate && !projectsIntent && (carried === null || navType === 'reload')
-				? restQ === 0
-					? 'nav-intro-draw'
-					: 'nav-intro-wipe'
-				: null;
-		if (loadIntro) root.classList.add(loadIntro);
+		var loadIntro = !reduce && !projectsIntent && (!internal || navType === 'reload');
+		if (loadIntro) root.classList.add('nav-intro-draw');
 
 		// ── Content reveal coordination ──
 		// The pages' .reveal cascades (global.css) start after whatever entrance
 		// the bar is playing, keyed off classes captured here — pre-paint, where
-		// this load's arrival shape is decided. PERSISTENT classes on purpose,
-		// not the nav-intro-* ones: those are removed at cleanup, and an
+		// this load's arrival shape is decided. PERSISTENT classes on purpose, not
+		// the nav-intro-draw one: that is removed at cleanup, and an
 		// animation-delay that changes mid-flight restarts the animation.
-		//   reveal-hold-land: the Projects nav link — a landing on the TOP of the
-		//     list, where the first card sits under the compact bar exactly as on
-		//     a fresh home load, so the cascade plays; a short beat first clears
-		//     the 'interactive' landing scroll.
+		//   reveal-hold-land: a landing on the TOP of the list, where the first
+		//     card sits under the bar exactly as on a fresh home load, so the
+		//     cascade plays; a short beat first clears the 'interactive' landing
+		//     scroll.
 		//   reveal-skip: a landing resting on a specific card mid-list (Back to
-		//     projects) — content reveals at rest, no entrance above the target.
-		//   reveal-hold: a cross-page tween is coming — wait out --dur-nav.
-		//   reveal-hold-draw / -wipe: a load intro is coming — wait out that
-		//     variant's fixed choreography.
+		//     projects) — content reveals at rest.
+		//   reveal-hold-draw: a load intro is coming — overlap its choreography.
+		// An ordinary internal navigation takes none of them: the bar is already
+		// there, so the cascade plays at once.
 		if (projectsIntent === '1') root.classList.add('reveal-hold-land');
 		else if (projectsIntent) root.classList.add('reveal-skip');
-		else if (animate) root.classList.add('reveal-hold');
 		else if (loadIntro) {
-			root.classList.add(loadIntro === 'nav-intro-draw' ? 'reveal-hold-draw' : 'reveal-hold-wipe');
+			root.classList.add('reveal-hold-draw');
 			// The bar and the content enter as one choreography, so they wait on
 			// the type as one too — see whenTypeSettled below. The cascade is
 			// PAUSED (rule in Layout.astro's critical block) rather than given a
-			// bigger --hold: the holds are tuned against the intro's fixed
-			// delays, so pausing shifts the whole sequence intact, where
-			// rewriting animation-delay mid-flight would restart it.
+			// bigger --hold: the hold is tuned against the intro's fixed delays, so
+			// pausing shifts the whole sequence intact, where rewriting
+			// animation-delay mid-flight would restart it.
 			root.classList.add('reveal-wait');
 		}
 
-		// Paint pre-paint at the starting q (carried if tweening, else rest).
-		setQ(animate ? carried : restQ);
-		if (!animate && !projectsIntent && !loadIntro) return;
+		if (!projectsIntent && !loadIntro) return;
 
 		// Land on the projects view: the exact remembered position when we have
 		// one, otherwise the intended card (or the top of the list) ~12px under
-		// the compact bar (a one-shot copy of goToProjects in the module script
-		// below — keep the two in step). For a card, the browser's native
-		// fragment scroll has already positioned the page pre-paint (the link
-		// navigates to /#project-<slug>); this settles the final position and
-		// drops the hash off the URL. 'instant' overrides the stylesheet's
-		// `scroll-behavior: smooth`; a landing must not glide.
+		// the bar (a one-shot copy of goToProjects in the module script below —
+		// keep the two in step). For a card, the browser's native fragment scroll
+		// has already positioned the page pre-paint (the link navigates to
+		// /#project-<slug>); this settles the final position and drops the hash
+		// off the URL. 'instant' overrides the stylesheet's `scroll-behavior:
+		// smooth`; a landing must not glide.
 		var landOnProjects = function () {
 			if (returnY !== null) {
 				window.scrollTo({ top: returnY, behavior: 'instant' });
@@ -410,90 +324,32 @@ const onHome = path === '/';
 					(projectsIntent !== '1' && document.getElementById('project-' + projectsIntent)) ||
 					document.getElementById('project-list');
 				if (el) {
-					// The bar's VISUAL height on purpose: the element's rect rides
-					// the page shift, and rect − visualH is q-invariant, so this is
-					// the right target whatever q is painted right now (mirrors
-					// compactTargetY in the module script below — keep in step).
-					var y = el.getBoundingClientRect().top + window.scrollY - visualNavH() - 12;
+					var y = el.getBoundingClientRect().top + window.scrollY - nav.offsetHeight - 12;
 					window.scrollTo({ top: Math.max(y, 0), behavior: 'instant' });
 				}
 			}
-			setQ(qFromScroll()); // q must agree with wherever we landed
 			if (location.hash) history.replaceState(null, '', '/');
 		};
 
-		// Cross-page intro: from the carried geometry (painted pre-paint above)
-		// to this page's resting state. Deliberately NOT the JS tween — this
-		// runs during the busiest window of a page's life (parsing, module
-		// evaluation, font loads), where a rAF tween that recalcs the whole
-		// document's styles per frame visibly drops frames. Instead --q snaps
-		// to rest and the nav-intro-* class plays the compositor-side keyframes
-		// in global.css: their first frame equals the carried geometry already
-		// painted, and removing the class lands on the same --q rest geometry,
-		// so both handoffs are invisible and main-thread stalls can't stutter
-		// the motion. A scroll mid-intro aborts to rest (the module watcher
-		// then treats it like any other scroll).
-		var runIntro = function () {
-			var from = q;
-			// Recompute rest instead of reusing restQ: back/forward scroll
-			// restoration can land before this runs (e.g. returning to a
-			// scrolled-down home), and the restored position may already match.
-			var to = qFromScroll();
-			setQ(to);
-			if (Math.abs(from - to) < 0.02) {
-				// No tween after all — release the content hold so the reveal
-				// doesn't wait out a bar that's already at rest. (The delay
-				// recompute can jump a just-started reveal a few frames in;
-				// this path is rare and the jump beats a phantom wait.)
-				root.classList.remove('reveal-hold');
-				return;
-			}
-			var cls = to === 1 ? 'nav-intro-collapse' : 'nav-intro-expand';
-			var fallback = 0;
-			var done = function (e) {
-				// Only a nav-tween animation may end the intro; other animations
-				// (e.g. the theme toggle's) bubble the same event.
-				if (e && e.type === 'animationend' && String(e.animationName).indexOf('nav-tween') !== 0)
-					return;
-				window.clearTimeout(fallback);
-				root.classList.remove(cls);
-				window.removeEventListener('scroll', done);
-				document.removeEventListener('animationend', done);
-			};
-			root.classList.add(cls);
-			document.addEventListener('animationend', done);
-			window.addEventListener('scroll', done, { passive: true });
-			// Insurance: never leave the intro class stuck if animationend is lost.
-			fallback = window.setTimeout(done, DUR + 140);
-		};
-
-		// Release the load intro's animations (the variant class was added
-		// pre-paint above; global.css holds everything at first-frame until
-		// .nav-intro-go). Cleanup is a plain timer just past the last fixed
-		// CSS delay+duration — every 'to' frame equals rest, so removing the
-		// classes mid-forwards-fill is invisible. A scroll during the intro is
-		// fine: the wipes/draws ride clip-path and dash channels, orthogonal
-		// to the --q transforms, so the two compose instead of fighting.
 		// Don't start the entrance on type that's about to change under it.
 		// The wordmark wipes by clipping a PERCENTAGE of its own box, so a
-		// webfont swap mid-wipe re-resolves the clip against a new
-		// box AND re-sets the glyphs inside it, in one frame. Measured 07-29
-		// (dev, warm): Satoshi landed ~250ms into the draw and snapped the
-		// wordmark 435px → 348px, throwing the reveal edge ~83px backwards
-		// mid-motion.
-		// Only the left of the bar moves — the icons are SVG, immune to font
-		// metrics — which is exactly how it reads. Frame pacing was clean
-		// throughout (16.7ms median, no gap over 25ms), so this is a layout
-		// jump and not jank: nothing about how the animation is driven can fix
-		// it, only what it runs on top of.
+		// webfont swap mid-wipe re-resolves the clip against a new box AND
+		// re-sets the glyphs inside it, in one frame. Measured 07-29 (dev, warm):
+		// Satoshi landed ~250ms into the draw and snapped the wordmark 435px →
+		// 348px, throwing the reveal edge ~83px backwards mid-motion. Only the
+		// left of the bar moves — the icons are SVG, immune to font metrics —
+		// which is exactly how it reads. Frame pacing was clean throughout
+		// (16.7ms median, no gap over 25ms), so this is a layout jump and not
+		// jank: nothing about how the animation is driven can fix it, only what
+		// it runs on top of.
 		//
-		// Waiting costs nothing visible — the bar is held hidden pre-paint
-		// until 'go' either way, so this just lands the entrance a beat later
-		// on type that then holds still. The race is the insurance: a slow,
-		// blocked or offline CDN must not swallow the entrance, so at 1200ms
-		// it plays over the fallback exactly as it does today. Fonts already
-		// pending by here (they start at first layout, before 'interactive'),
-		// so fonts.ready can't resolve early on an empty set.
+		// Waiting costs nothing visible — the bar is held hidden pre-paint until
+		// 'go' either way, so this just lands the entrance a beat later on type
+		// that then holds still. The race is the insurance: a slow, blocked or
+		// offline CDN must not swallow the entrance, so at 1200ms it plays over
+		// the fallback exactly as it does today. Fonts already pending by here
+		// (they start at first layout, before 'interactive'), so fonts.ready
+		// can't resolve early on an empty set.
 		var whenTypeSettled = function (run) {
 			if (!document.fonts || !document.fonts.ready) return run();
 			var fired = false;
@@ -506,37 +362,26 @@ const onHome = path === '/';
 			window.setTimeout(once, 1200);
 		};
 
+		// Release the intro's animations (the class was added pre-paint above;
+		// global.css holds everything at first-frame until .nav-intro-go).
+		// Cleanup is a plain timer just past the last fixed CSS delay+duration —
+		// every 'to' frame equals rest, so removing the classes mid-forwards-fill
+		// is invisible. A scroll during the intro is fine: the wipe and draws ride
+		// clip-path and dash channels, which nothing else on the bar touches.
 		var runLoadIntro = function () {
 			whenTypeSettled(function () {
-				// Scroll restoration can move the rest state between first paint
-				// and now (same recompute as runIntro), and the type wait widens
-				// that window — a scroll during it stands the intro down here.
-				// The hidden hold was drawn for restQ's variant; if the state
-				// changed, stand down — the bar just paints at rest, no entrance.
-				if (qFromScroll() !== restQ) {
-					// Stand down the content hold with the intro (same rare-jump
-					// trade as runIntro's bail).
-					root.classList.remove(
-						loadIntro,
-						'reveal-wait',
-						'reveal-hold-draw',
-						'reveal-hold-wipe'
-					);
-					return;
-				}
 				// Both clocks start in the same frame, which is the point of the
 				// pause — the cascade's hold is measured from the intro's start.
 				root.classList.add('nav-intro-go');
 				root.classList.remove('reveal-wait');
 				window.setTimeout(function () {
-					root.classList.remove(loadIntro, 'nav-intro-go');
-				}, loadIntro === 'nav-intro-draw' ? 1350 : 780);
+					root.classList.remove('nav-intro-draw', 'nav-intro-go');
+				}, 1350);
 			});
 		};
 
 		// 'interactive' means main and the cards exist and layout is measurable;
-		// it fires before module scripts evaluate. The landing scroll runs first
-		// so the intro's resting state reflects the final scroll position.
+		// it fires before module scripts evaluate.
 		var arrive = function () {
 			if (projectsIntent) {
 				try {
@@ -545,8 +390,7 @@ const onHome = path === '/';
 					root.classList.remove('projects-landing');
 				}
 			}
-			if (animate) runIntro();
-			else if (loadIntro) runLoadIntro();
+			if (loadIntro) runLoadIntro();
 		};
 		if (document.readyState !== 'loading') {
 			arrive();
@@ -605,30 +449,21 @@ const onHome = path === '/';
 	});
 
 	const nav = document.getElementById('site-nav');
-	// The q machinery (states + trigger tween) is installed pre-paint by the
-	// inline script above — see there for the model. This module adds the
-	// scroll watcher that fires the trigger, and the projects-link behaviours.
-	const navQ = (window as any).__navQ;
-	if (nav && navQ) {
+	if (nav) {
 		const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 		// ── "Projects" → projects section ──
 		// The projects list is the top of the home page, sitting directly under
-		// the masthead. A plain #projects anchor lands too near the top (the bar
-		// would sit mid-collapse); instead we scroll to the spot where the bar is
-		// fully compact and the first card sits just beneath it. Cross-page, a
-		// sessionStorage flag carries the intent so the home page lands there
-		// directly (see the inline script's `projectsIntent`).
+		// the bar. A plain #projects anchor lands the first card under the sticky
+		// bar; instead we scroll to the spot where it sits just beneath it.
+		// Cross-page, a sessionStorage flag carries the intent so the home page
+		// lands there directly (see the inline script's `projectsIntent`).
 		const PROJECTS_FLAG = 'nav-projects';
 
 		// The y that rests `el` ~12px under the bar (mirrored by the inline
-		// script's `landOnProjects` — keep the two in step). Uses the bar's
-		// current VISUAL height on purpose: the element's rect rides the page
-		// shift, and the two change together as q does, so their difference is
-		// q-invariant — the same answer at any scroll state, including the
-		// final one.
+		// script's `landOnProjects` — keep the two in step).
 		const compactTargetY = (el) => {
-			const top = el.getBoundingClientRect().top + window.scrollY - navQ.visualNavH();
+			const top = el.getBoundingClientRect().top + window.scrollY - nav.offsetHeight;
 			return Math.max(top - 12, 0);
 		};
 
@@ -675,12 +510,10 @@ const onHome = path === '/';
 
 		// ── Wordmark → top of the page ──
 		// On home the wordmark's href="/" points at the page we're already on, so
-		// letting it navigate reloads the projects list to show it again: the bar
-		// plays its cross-page expand and every card cascades back in behind it.
-		// The visitor asked for the top of the list they're already reading, not a
-		// fresh arrival — so scroll there in place and let the scroll watcher fire
-		// the masthead trigger on the way up, exactly as scrolling by hand does.
-		// Off home the link navigates normally (that IS a fresh arrival).
+		// letting it navigate reloads the projects list to show it again. The
+		// visitor asked for the top of the list they're already reading, not a
+		// fresh arrival — so scroll there in place. Off home the link navigates
+		// normally (that IS a fresh arrival).
 		const logo = nav.querySelector<HTMLAnchorElement>('.nav-logo');
 		logo?.addEventListener('click', (e) => {
 			if (nav.dataset.home !== 'true') return;
@@ -707,40 +540,18 @@ const onHome = path === '/';
 				} catch (err) {}
 			});
 		});
-
-		// ── Home masthead trigger ──
-		// The bar has exactly two resting states: the expanded masthead at the
-		// top of the page and the compact bar everywhere else. Each scroll frame
-		// asks fromScroll which state the position calls for (with hysteresis,
-		// see the inline script) and hands it to tweenTo — which no-ops when
-		// already there or already heading there, so this fires the timed tween
-		// only on an actual threshold crossing.
-		if (nav.dataset.home === 'true') {
-			let ticking = false;
-			const apply = () => {
-				ticking = false;
-				navQ.tweenTo(navQ.fromScroll());
-			};
-			window.addEventListener(
-				'scroll',
-				() => {
-					if (!ticking) {
-						ticking = true;
-						requestAnimationFrame(apply);
-					}
-				},
-				{ passive: true }
-			);
-		}
 	}
 
 	// ── Sliding contact label ──
 	// A single ink pill glides between the contact icons, always sitting under
 	// whichever one is hovered or focused, and carrying that icon's label. When
-	// moving between icons it slides + resizes; on appearance it wipes in left
-	// to right, and on hide it wipes back out right to left (no slide from the
-	// corner, no fade) — the same in/out grammar as the project cards' title
-	// underline.
+	// moving between icons it slides + resizes — the one motion this pill has.
+	// Appearing and disappearing are the POP (2026-08-02, Hiro's pick from a
+	// twenty-variant exploration): it springs open from 80% and leaves by
+	// shrinking. Those live entirely in CSS, driven by the is-in / is-out
+	// classes set below — see the pop block in global.css. Everything between
+	// showAt and hide (placement, measurement, the copy-feedback roll) is
+	// independent of which gesture is in force.
 	const group = document.getElementById('contact-group');
 	const pill = group?.querySelector<HTMLElement>('.contact-slider');
 	const pillText = pill?.querySelector<HTMLElement>('.contact-slider-text');
@@ -750,10 +561,14 @@ const onHome = path === '/';
 
 		// Hidden clone of the pill, used to measure the exact width each label
 		// needs — including the external-link arrow when shown — so the pill's
-		// width can animate to an explicit px value.
+		// width can animate to an explicit px value. Both boxes have to be freed
+		// to shrink-wrap: the outer one is width-driven by script, and the inner
+		// one is width: 100% of it, which would resolve to nothing here.
 		const measurer = pill.cloneNode(true) as HTMLElement;
 		measurer.style.cssText =
-			'position:absolute;visibility:hidden;top:-9999px;left:0;opacity:1;transform:none;transition:none;width:auto;';
+			'position:absolute;visibility:hidden;top:-9999px;left:0;transform:none;transition:none;width:auto;';
+		const measurerIn = measurer.querySelector<HTMLElement>('.contact-slider-in')!;
+		measurerIn.style.cssText = 'width:auto;opacity:1;animation:none;';
 		group.appendChild(measurer);
 		const measurerText = measurer.querySelector<HTMLElement>('.contact-slider-text')!;
 
@@ -820,44 +635,50 @@ const onHome = path === '/';
 
 		const showAt = (icon: HTMLElement, text = labelFor(icon)) => {
 			if (visible) {
-				pill.style.opacity = '1';
-				place(icon, text); // slide + resize to the new icon
-			} else {
-				// Appear with a left-to-right wipe (matching the card title
-				// underline) rather than a fade: kill transitions, position it
-				// fully clipped from the right edge, then release the clip so the
-				// label reveals left to right. Reduced motion just snaps it in.
-				pill.style.transition = 'none';
-				place(icon, text);
-				pill.style.opacity = '1';
-				pill.style.clipPath = reduce ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)';
-				void pill.offsetWidth; // force reflow so the wipe animates from clipped
-				pill.style.transition = '';
-				pill.style.clipPath = 'inset(0 0 0 0)';
-				visible = true;
+				place(icon, text); // already up: this is the slide, no entrance replay
+				return;
 			}
+			// Land in position with the slide suppressed — the pill still carries
+			// the transform and width it was hidden at, so leaving the transition
+			// live would glide it in from the last icon hovered.
+			pill.style.transition = 'none';
+			place(icon, text);
+			void pill.offsetWidth; // reflow, so the restored transition can't see this frame
+			pill.style.transition = '';
+			// Re-trigger the pop from its first frame. Removing is-in and forcing a
+			// reflow before re-adding matters when the exit is still in flight: the
+			// class is already gone in that case, but the animation is not, and
+			// without the reflow the browser can coalesce the two and play nothing.
+			pill.classList.remove('is-out', 'is-in');
+			void pill.offsetWidth;
+			pill.classList.add('is-in');
+			visible = true;
 		};
 
 		const hide = () => {
+			if (!visible) return;
 			visible = false;
-			// Wipe out right-to-left — the entrance wipe played in reverse, the
-			// same in/out symmetry as the card title underline (which grows from
-			// and retracts toward its left edge). Opacity stays 1; the pill is
-			// hidden purely by the clip. Reduced motion snaps it away instead.
-			if (reduce) {
-				pill.style.transition = 'none';
-				pill.style.clipPath = 'inset(0 100% 0 0)';
-				void pill.offsetWidth;
-				pill.style.transition = '';
-				return;
-			}
-			pill.style.clipPath = 'inset(0 100% 0 0)';
+			// Hand over to the exit animation, which is `both`-filled and so holds
+			// the pill hidden at its end frame — nothing to clean up on a timer.
+			pill.classList.remove('is-in');
+			pill.classList.add('is-out');
 		};
 
-		// Show the label only while the cursor is actually over an icon. Slipping
-		// into a gap between two icons doesn't hide instantly — a short grace
-		// delay lets a sweep to the next icon cancel the hide and keep the pill
-		// gliding — but lingering in the gap clears the label.
+		// Show the label only while the cursor is actually over an icon.
+		//
+		// The hide is DEFERRED BY A TICK, not by a delay. Leaving one icon for
+		// the next fires mouseleave and mouseenter from the same pointer move, so
+		// a zero timeout is always cancelled before it can run — which is what
+		// keeps an icon-to-icon move a slide instead of an exit followed by a
+		// fresh entrance. Any real leave hides on the very next tick, in step with
+		// the glyph dropping back.
+		//
+		// This used to be a 90ms grace, which existed to bridge the dead sliver
+		// BETWEEN the icons. The hit boxes tile edge to edge now (see the
+		// .btn-icon::after block in global.css) so there is no sliver left to
+		// bridge, and the 90ms had become a head start the icon's drop got over
+		// the label's — 2026-08-02, Hiro: the two read as disjointed. Restoring a
+		// delay here re-opens that gap; widen the hit boxes instead.
 		let gapHideTimer = 0;
 		icons.forEach((icon) => {
 			icon.addEventListener('mouseenter', () => {
@@ -866,7 +687,7 @@ const onHome = path === '/';
 			});
 			icon.addEventListener('mouseleave', () => {
 				window.clearTimeout(gapHideTimer);
-				gapHideTimer = window.setTimeout(hide, 90);
+				gapHideTimer = window.setTimeout(hide, 0);
 			});
 		});
 		group.addEventListener('mouseleave', () => {
@@ -928,12 +749,14 @@ const onHome = path === '/';
 	if (toggleWrap && themeToggle && togglePill && togglePillText) {
 		const reduceToggle = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-		// Hidden clone for width measurement (mirrors the contact slider's):
-		// the pill's width transition needs explicit px, and the two labels
-		// differ slightly in width.
+		// Hidden clone for width measurement (mirrors the contact slider's, inner
+		// box and all): the pill's width transition needs explicit px, and the
+		// two labels differ slightly in width.
 		const measurer = togglePill.cloneNode(true) as HTMLElement;
 		measurer.style.cssText =
-			'position:absolute;visibility:hidden;top:-9999px;left:0;opacity:1;transform:none;transition:none;width:auto;';
+			'position:absolute;visibility:hidden;top:-9999px;left:0;transform:none;transition:none;width:auto;';
+		measurer.querySelector<HTMLElement>('.contact-slider-in')!.style.cssText =
+			'width:auto;opacity:1;animation:none;';
 		toggleWrap.appendChild(measurer);
 		const measurerText = measurer.querySelector<HTMLElement>('.contact-slider-text')!;
 		const widthFor = (text: string) => {
@@ -945,11 +768,11 @@ const onHome = path === '/';
 		let rollSeq = 0;
 
 		// Rect-based centering rather than pure CSS: the button's visual box
-		// rides the --q close-ranks transform, and rects see transforms — so
-		// the pill lands under the glyph at any nav state (mirrors place()).
-		// The center is CLAMPED to keep the pill inside the scrollport: the
-		// compact bar right-anchors the toggle so near the viewport edge that
-		// a centered pill would cross clientWidth — and scrollbar-gutter:
+		// rides the close-ranks transform, and rects see transforms — so the
+		// pill lands under the glyph rather than under its full-size layout box
+		// (mirrors place()). The center is CLAMPED to keep the pill inside the
+		// scrollport: the bar right-anchors the toggle so near the viewport edge
+		// that a centered pill would cross clientWidth — and scrollbar-gutter:
 		// stable ends painting there, silently shearing the pill's right side.
 		const placePill = (text: string) => {
 			const wRect = toggleWrap.getBoundingClientRect();
@@ -972,30 +795,23 @@ const onHome = path === '/';
 
 		const showPill = () => {
 			if (shown) return;
-			// Same entrance as the contact pill: position while transitions are
-			// off, then release the clip so the label wipes in left to right.
+			// Same pop as the contact pill — the two must appear the same way or
+			// the toggle reads as a different kind of control.
 			togglePill.style.transition = 'none';
 			placePill(themeLabel());
-			togglePill.style.opacity = '1';
-			togglePill.style.clipPath = reduceToggle ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)';
 			void togglePill.offsetWidth;
 			togglePill.style.transition = '';
-			togglePill.style.clipPath = 'inset(0 0 0 0)';
+			togglePill.classList.remove('is-out', 'is-in');
+			void togglePill.offsetWidth;
+			togglePill.classList.add('is-in');
 			shown = true;
 		};
 
 		const hidePill = () => {
+			if (!shown) return;
 			shown = false;
-			// Exit wipe right-to-left, or a snap under reduced motion — the
-			// same out grammar as the contact pill.
-			if (reduceToggle) {
-				togglePill.style.transition = 'none';
-				togglePill.style.clipPath = 'inset(0 100% 0 0)';
-				void togglePill.offsetWidth;
-				togglePill.style.transition = '';
-				return;
-			}
-			togglePill.style.clipPath = 'inset(0 100% 0 0)';
+			togglePill.classList.remove('is-in');
+			togglePill.classList.add('is-out');
 		};
 
 		toggleWrap.addEventListener('mouseenter', showPill);

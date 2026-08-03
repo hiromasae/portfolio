@@ -32,7 +32,7 @@ const { name } = Astro.props;
     stroke-width is 2/scale so the drawn weight stays exactly 2 viewBox units
     after scaling. (NOT vector-effect="non-scaling-stroke": that pins the
     stroke to 2 *screen* px, which at the nav's ~17px render size is far
-    heavier than the others' scaled ~1.4px — and worse as --q shrinks it.)
+    heavier than the others' scaled ~1.4px.)
     Measured painted bounds land all four icons ≥0.6 units clear of the box.
 
     --len on every shape is its measured getTotalLength() (rounded UP a hair),
