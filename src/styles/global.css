@@ -53,6 +53,35 @@
 	   Solved in the hue of Tokyo Night's comment #565f89 (which is itself 1.96:1
 	   here — unusable for body text); lightness only. 4.63:1. */
 	--ink-soft: #5d6691;
+	/* ── Headings that step FORWARD of the body ──
+	   2026-08-03, Hiro: the about page's headings should be lighter, so they
+	   contrast with the body text. Taken the way the button chip was taken —
+	   "lighter" is the DARK theme's word for it, and the light theme gets the
+	   same idea pointing the other way. On paper a lighter heading over lighter
+	   body text is the least separated thing possible, which is the opposite of
+	   the ask, so here the heading goes DARKER. In both themes it is the same
+	   move: one step further from the paper than --ink.
+
+	   This is --ink-soft's mirror and it obeys the same house rule — a
+	   PROPORTION of each theme's own ink contrast, never a shared hex, because
+	   the two grounds carry different amounts of contrast and a shared value
+	   would read as two different degrees of emphasis (see the long note above).
+	   --ink-soft steps back to 50.4%; this steps forward to 125%. 11.42:1 here,
+	   14.26:1 dark. There is no AA question in this direction — the only ceiling
+	   is the paper's own maximum (17.47:1 here, 18.49:1 dark), and 125% leaves
+	   both with room.
+
+	   Solved in --ink's own hue, lightness only, so a heading is the body ink
+	   pushed further rather than a second colour. Light has chroma to spare
+	   (Cmax at this lightness is 0.230 against the ink's 0.051), so the hue is
+	   held exactly; the dark counterpart cannot hold it — see the note there.
+
+	   The about page's three headings are the only consumers. Every other title
+	   on the site wears --ink-title, the blue syntax accent, and this token is
+	   what the about page's documented EXCEPTION to that now resolves to instead
+	   of plain --ink. Read the --ink-title block before pointing anything else
+	   at either one. */
+	--ink-heading: #252c47; /* 11.42:1 — 125% of the ink's contrast */
 	/* Tinted with the ink rather than pure black: on a lavender-grey ground a
 	   neutral black hairline reads as a foreign material. Alphas unchanged. */
 	--line: rgba(52, 59, 88, 0.22); /* card/tag borders */
@@ -127,13 +156,19 @@
 	   bold, so all of them clear WCAG's large-text bar with room; the numerals
 	   are small text and clear the full 4.5:1.
 
-	   ONE EXCEPTION, added the same day: the about page's two headings dropped
-	   back to --ink (Hiro's ask). Both had just come down to the body's own
+	   ONE EXCEPTION, added the same day: the about page's headings dropped back
+	   off this accent (Hiro's ask). They had just come down to the body's own
 	   size-class — the greeting stopped being a 4xl page title and now sits at
 	   the section heading's 23.75px — and at that size, in a single narrow
-	   column, two blue lines among five lines of ink read as highlighting rather
+	   column, blue lines among five lines of ink read as highlighting rather
 	   than as structure. The accent is still the rule everywhere it marks a
-	   title that OUTSIZES its body: card titles, project h1s, the home page. */
+	   title that OUTSIZES its body: card titles, project h1s, the home page.
+
+	   2026-08-03 that exception stopped being "plain --ink": the same headings
+	   now wear --ink-heading, which pushes them one step FURTHER from the paper
+	   than the body instead of matching it. The reasoning above is untouched —
+	   the about page still declines the hue, and separates by contrast, which is
+	   the one channel a heading at the body's own size still has left. */
 	--ink-title: #34548a; /* 6.28:1 — 1.36× the muted text */
 	--ink-num: #965027; /* 5.03:1 */
 
@@ -322,6 +357,21 @@
 	   so it takes light's floor. Solved in the hue of Tokyo Night's comment
 	   #565f89, which is 2.35:1 on this ground and fails AA outright. 5.76:1. */
 	--ink-soft: #838eba;
+	/* 125% of --ink's contrast, the same proportion the light block carries and
+	   the direction the ask was actually made in: brighter than the body text.
+	   14.26:1, under an 18.49:1 ceiling.
+
+	   THE HUE IS NOT HELD HERE, and it isn't a choice. --ink sits at OKLCH
+	   L 0.846 C 0.061 H 274.8, and this lands at L 0.915 — where the sRGB gamut
+	   only affords C 0.041 at that hue, because the blue channel is already
+	   pinned at 255. So the heading is a paler blue than the body, not just a
+	   lighter one, and that is the gamut talking rather than a design decision:
+	   any brighter value on this hue desaturates on the way up. It reads as the
+	   ink approaching white, which is what was wanted.
+	   Consequence for any retune: pushing this token further costs chroma
+	   faster than it buys contrast. Past ~15:1 the tint is essentially gone and
+	   the heading is grey-white. Measure, don't extrapolate. */
+	--ink-heading: #dae1ff; /* 14.26:1 — 125% of the ink's contrast */
 	/* Tinted with the ink, like the light block's. Alphas unchanged. */
 	--line: rgba(192, 202, 245, 0.12);
 	--line-strong: rgba(192, 202, 245, 0.3);
