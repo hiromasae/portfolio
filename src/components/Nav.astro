@@ -532,9 +532,46 @@ const onProject = onHome || path.startsWith('/projects/');
 			}, loadIntro === 'nav-intro-draw' ? 1350 : 780);
 		};
 
+		// Hand the load intro to the compositor only once the browser has actually
+		// PAINTED the hidden hold — NOT at 'interactive'. An animation's clock
+		// starts when its style resolves, not when a frame reaches the screen, and
+		// since the fonts went self-hosted there is nothing render-blocking left in
+		// <head>: 'interactive' now fires in the initial parse burst, well ahead of
+		// the first paint. Starting there spent the intro's opening frames
+		// off-screen, and the earliest-scheduled elements — the wordmark at 0ms and
+		// the links at 90ms, both finished inside 350ms — could complete before
+		// anything was ever displayed, while the icons' 240ms+ delays still had
+		// runway. (Previously the render-blocking Fontshare stylesheet also stalled
+		// this parser-inserted script, so 'interactive' and first paint landed
+		// together and the gap never showed.)
+		//
+		// The second rAF runs after the first frame has been painted, so the clock
+		// starts in step with what's on screen. rAF rather than fonts.ready or
+		// 'load' on purpose: it can't be starved by the module chain (in dev, the
+		// Vite client), and it keeps the intro's start adjacent to first paint,
+		// which is what the .reveal cascade's fixed delays in global.css are
+		// measured against. The timer is insurance — rAF is paused in a background
+		// tab, and the hold hides the bar until the intro releases it, so the
+		// entrance must never be able to simply not arrive.
+		var startLoadIntro = function () {
+			var started = false;
+			var fire = function () {
+				if (started) return;
+				started = true;
+				window.clearTimeout(introFallback);
+				runLoadIntro();
+			};
+			var introFallback = window.setTimeout(fire, 500);
+			requestAnimationFrame(function () {
+				requestAnimationFrame(fire);
+			});
+		};
+
 		// 'interactive' means main and the cards exist and layout is measurable;
 		// it fires before module scripts evaluate. The landing scroll runs first
-		// so the intro's resting state reflects the final scroll position.
+		// so the intro's resting state reflects the final scroll position — it
+		// must stay here, pre-paint, since the projects-landing curtain depends
+		// on the page being positioned before anything is displayed.
 		var arrive = function () {
 			if (projectsIntent) {
 				try {
@@ -544,7 +581,7 @@ const onProject = onHome || path.startsWith('/projects/');
 				}
 			}
 			if (animate) runIntro();
-			else if (loadIntro) runLoadIntro();
+			else if (loadIntro) startLoadIntro();
 		};
 		if (document.readyState !== 'loading') {
 			arrive();
@@ -554,6 +591,73 @@ const onProject = onHome || path.startsWith('/projects/');
 				arrive();
 			});
 		}
+	})();
+</script>
+
+<!-- TEMPORARY DIAGNOSTIC — remove once the load intro is fixed. -->
+<script is:inline>
+	(function () {
+		var L = [];
+		var t = function () { return Math.round(performance.now()); };
+		var logo = document.querySelector('#site-nav .nav-logo');
+		var links = document.querySelector('#site-nav .nav-links');
+		var say = function (m) { L.push(t() + 'ms ' + m); };
+
+		say('script ran; html.class=[' + document.documentElement.className + ']');
+		var cs = function (el) {
+			var s = getComputedStyle(el);
+			return 'clip=' + s.clipPath + ' anim=' + s.animationName +
+				' dur=' + s.animationDuration + ' delay=' + s.animationDelay +
+				' display=' + s.display + ' w=' + Math.round(el.getBoundingClientRect().width);
+		};
+		if (logo) say('logo ' + cs(logo));
+		if (links) say('links ' + cs(links));
+
+		document.addEventListener('animationstart', function (e) {
+			if (e.target === logo || e.target === links)
+				say('START ' + e.animationName + ' on .' + (e.target === logo ? 'nav-logo' : 'nav-links'));
+		});
+		document.addEventListener('animationend', function (e) {
+			if (e.target === logo || e.target === links)
+				say('END   ' + e.animationName + ' on .' + (e.target === logo ? 'nav-logo' : 'nav-links'));
+		});
+
+		try {
+			new PerformanceObserver(function (l) {
+				l.getEntries().forEach(function (e) { say('PAINT ' + e.name); });
+			}).observe({ type: 'paint', buffered: true });
+		} catch (e) {}
+
+		var mo = new MutationObserver(function () {
+			say('html.class=[' + document.documentElement.className + ']');
+			if (logo) say('  logo ' + cs(logo));
+		});
+		mo.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+		// Frame cadence: how often does a frame actually reach the screen during
+		// the intro window? This is what separates "the animation never ran" from
+		// "it ran but the machine only painted twice while it was running".
+		var frames = [];
+		var tick = function () {
+			frames.push(t());
+			if (frames.length < 200 && performance.now() < 2000) requestAnimationFrame(tick);
+		};
+		requestAnimationFrame(tick);
+
+		window.setTimeout(function () {
+			mo.disconnect();
+			say('fonts.status=' + (document.fonts ? document.fonts.status : 'n/a'));
+			// Gaps between frames in the first second — the jank fingerprint.
+			var gaps = [], worst = 0;
+			for (var i = 1; i < frames.length; i++) {
+				var g = frames[i] - frames[i - 1];
+				if (frames[i] < 1000) gaps.push(g);
+				if (g > worst) worst = g;
+			}
+			say('frames in first 1000ms=' + gaps.length + ' worstGap=' + worst + 'ms');
+			say('frame times: ' + frames.slice(0, 30).join(','));
+			console.log('===== NAV INTRO DIAGNOSTIC =====\n' + L.join('\n'));
+		}, 2500);
 	})();
 </script>
 

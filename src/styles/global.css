@@ -1,5 +1,49 @@
 @import "tailwindcss";
 
+/* ── Webfonts (self-hosted) ──
+   Supreme (headings) + Satoshi (body), served from /public/fonts rather than
+   Fontshare. The CDN version cost two serial round trips — the @font-face CSS
+   lived on api.fontshare.com and the woff2s on cdn.fontshare.com, so the font
+   could only START downloading once the stylesheet had landed and parsed. That
+   reliably lost the race against readyState 'interactive', which is what
+   releases the nav's load intro (see runLoadIntro in Nav.astro): the fallback
+   painted, swapped to the real face, and only then did the bar animate in.
+   Same-origin + the preloads in Layout.astro collapse that chain to one hop
+   that starts with the document, so the face is in hand before first paint.
+
+   font-display stays swap as insurance: if a file ever 404s, text renders in
+   the fallback stack below instead of going invisible. Keep the two in step —
+   Nav.astro's document.fonts.ready handler re-rests the nav underline when a
+   swap does happen and moves the links' metrics. */
+@font-face {
+	font-family: "Supreme";
+	src: url("/fonts/supreme-700.woff2") format("woff2");
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: "Satoshi";
+	src: url("/fonts/satoshi-400.woff2") format("woff2");
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: "Satoshi";
+	src: url("/fonts/satoshi-500.woff2") format("woff2");
+	font-weight: 500;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: "Satoshi";
+	src: url("/fonts/satoshi-700.woff2") format("woff2");
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
+}
+
 :root {
 	--font-heading: "Supreme", "Segoe UI", system-ui, -apple-system, sans-serif;
 	--font-body: "Satoshi", "Segoe UI", system-ui, -apple-system, sans-serif;
