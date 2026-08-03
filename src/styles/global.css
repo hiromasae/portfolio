@@ -82,6 +82,28 @@
 	   of plain --ink. Read the --ink-title block before pointing anything else
 	   at either one. */
 	--ink-heading: #252c47; /* 11.42:1 — 125% of the ink's contrast */
+
+	/* ── The hero ink ──
+	   The SECOND forward step, and the two arrived on the same day from
+	   separate branches: --ink-heading at 125% of the ink's contrast for the
+	   about page's headings, this at 133% for the home hero. They are a step
+	   apart on purpose but they are close, and nothing should ever wear both —
+	   at this distance the difference reads as a rendering artefact rather than
+	   a hierarchy. One page, one forward step.
+	   2026-08-03, Hiro: the hero's tagline and its button should contrast MORE,
+	   "closer to white". Taken literally in the dark theme, where the ask was
+	   made — the ink there moves toward white — and mirrored here as the same
+	   move toward this theme's own extreme, which is black. So the two themes
+	   are not the same hex and are not each other's inverse; they are the same
+	   DISTANCE PAST THE INK, away from the paper.
+	   Like --ink-soft, the rule is a proportion rather than a value: 1.33× the
+	   theme's own ink contrast. 12.18:1 here against --ink's 9.13, and 15.29
+	   against 11.45 in dark — 1.334 and 1.335, which is as close as two hexes
+	   get. Retune it as a ratio or the hero reads brighter on one theme than the
+	   other, which is the exact failure --ink-soft exists to document.
+	   Still in the theme's navy, not neutral black: pushing to #000 would give
+	   17.47:1 and drop the only piece of Tokyo Night the body text carries. */
+	--ink-hero: #232839;
 	/* Tinted with the ink rather than pure black: on a lavender-grey ground a
 	   neutral black hairline reads as a foreign material. Alphas unchanged. */
 	--line: rgba(52, 59, 88, 0.22); /* card/tag borders */
@@ -115,11 +137,19 @@
 	   solid chip a contrasting hairline reads as a stroke around the shape
 	   instead of the shape's own edge. It stays in the rule so the box keeps its
 	   exact size across themes and hover states. */
-	--btn-bg: #343b58; /* --ink */
-	--btn-bg-hover: #434b70;
-	--btn-bg-active: #262b42;
+	/* The chip is a solid block of --ink-hero, so the hero's two elements are
+	   the same colour — the sentence written in it, the button cut out of it.
+	   That is the original "wears the page's own two colours swapped" idea with
+	   the hero ink in place of the body ink.
+	   The ladder still reads hover-brighter / press-darker in both themes. Here
+	   that puts hover ON the body ink: rest is past it toward black, so the step
+	   back toward the paper lands exactly on --ink. All three clear AA against
+	   the paper text by a wide margin (12.18 / 9.13 / 14.38). */
+	--btn-bg: var(--ink-hero);
+	--btn-bg-hover: #343b58; /* --ink */
+	--btn-bg-active: #171a28;
 	--btn-text: #e9eaee; /* --paper */
-	--btn-border: #343b58;
+	--btn-border: var(--ink-hero);
 
 	/* Tokyo Night Light's blue, verbatim. The ring is a UI boundary, so WCAG
 	   1.4.11's 3:1 is the bar it has to clear against every ground it can land
@@ -212,6 +242,43 @@
 	   both, so nothing on the site leans on WCAG 1.4.3's logo/brand-name
 	   exemption. */
 	--dye-name: #5a3e8e; /* 5.76:1 — 1.25× the muted text's lead */
+
+	/* ── The page's hairlines ──
+	   One gradient, shared by the nav's bottom edge and the rule over the
+	   projects list, so the two stay the single device they were introduced as.
+	   Declared once here rather than per theme: the var() inside resolves
+	   against whichever theme is active at the point of USE, so this picks up
+	   each theme's own --line-soft without being restated.
+
+	   2026-08-03, Hiro: the rules should gradient and read thinner at their
+	   ends, for depth. A 1px line can't actually taper — there is no half
+	   pixel to taper into — so the taper is done in ALPHA, which is what the eye
+	   reads as a line receding anyway: full strength across the middle, gone at
+	   both ends.
+
+	   The falloff is deliberately not a straight ramp. Three stops per side
+	   (transparent → 45% → full) put most of the rise in the first sixth, so the
+	   line reaches its weight early and then approaches it slowly — a linear
+	   ramp leaves a visible kink at the point it goes solid, which reads as a
+	   join rather than a fade. 16% per side is ~146px on the 912px column, which
+	   is long enough to read as a fade rather than a crop.
+
+	   Measured off the render, the line is at roughly 10% strength where the
+	   wordmark starts and 45% where it ends, and mirrors that under the toggle.
+	   That is the whole effect and not a miss: the bar's outermost content sits
+	   over the softest part of its own edge, so the ends recede and the middle
+	   holds the plane. If the ends ever need to carry more, move the 16%/84%
+	   stops inward rather than raising the token — the peak is shared with the
+	   projects rule and with every other --line-soft border on the site. */
+	--rule: linear-gradient(
+		90deg,
+		transparent 0%,
+		color-mix(in srgb, var(--line-soft) 45%, transparent) 6%,
+		var(--line-soft) 16%,
+		var(--line-soft) 84%,
+		color-mix(in srgb, var(--line-soft) 45%, transparent) 94%,
+		transparent 100%
+	);
 
 	/* Paper grain: a whisper of washi tooth baked into the paper surfaces
 	   (body + the nav bar and its veil — every surface that paints --paper),
@@ -372,6 +439,14 @@
 	   faster than it buys contrast. Past ~15:1 the tint is essentially gone and
 	   the heading is grey-white. Measure, don't extrapolate. */
 	--ink-heading: #dae1ff; /* 14.26:1 — 125% of the ink's contrast */
+
+	/* The hero ink — the second forward step (see the light block on why
+	   nothing wears both). See the light theme's note for the rule. 15.29:1, which is
+	   1.335× this theme's --ink, matching light's 1.334×. This is the direction
+	   the ask was actually made in: a pale lavender-white, still carrying the
+	   fg hue rather than going to #fff (18.49:1), so the hero reads as the
+	   brightest thing on the page without leaving the palette. */
+	--ink-hero: #e4e9fc;
 	/* Tinted with the ink, like the light block's. Alphas unchanged. */
 	--line: rgba(192, 202, 245, 0.12);
 	--line-strong: rgba(192, 202, 245, 0.3);
@@ -382,11 +457,17 @@
 	/* The inverted chip on the night ground — see the light block for the
 	   reasoning. This is the theme the ask was made against: a light background
 	   with dark text, literally. */
-	--btn-bg: #c0caf5; /* --ink */
-	--btn-bg-hover: #d5dcf8;
-	--btn-bg-active: #a9b6e8;
+	/* Same construction as the light theme's (see the note there), pointing the
+	   other way: a solid block of --ink-hero, hover brighter still, press back
+	   down onto the body ink. 15.29 / 16.86 / 11.45 against the chip's dark
+	   text. Hover has ~1.6 points of headroom left before white, which is the
+	   ceiling this ladder is working against — if rest ever goes brighter, hover
+	   has nowhere to go and the press step has to carry the whole gesture. */
+	--btn-bg: var(--ink-hero);
+	--btn-bg-hover: #f2f4fe;
+	--btn-bg-active: #c0caf5; /* --ink */
 	--btn-text: #13131a; /* --paper */
-	--btn-border: #c0caf5;
+	--btn-border: var(--ink-hero);
 
 	/* Tokyo Night's blue, verbatim — 7.34:1 against --paper, 6.79:1 against
 	   --surface, both well clear of WCAG 1.4.11's 3:1 floor for non-text. Same
@@ -487,6 +568,42 @@ body {
 	background-image: var(--grain);
 }
 
+/* ── The two hairlines ──
+   Drawn as pseudo-elements rather than borders because a border can only be one
+   flat colour, and these fade at their ends (see --rule). Kept in ONE rule so
+   the pair cannot drift apart: the bar's bottom edge and the break above the
+   projects list are the same device, and the only thing that differs is which
+   edge of its box each one sits on.
+
+   Both hosts already needed to be positioned for this, and neither was — nor
+   does either now steal a containing block from anything: the contact group
+   positions against .nav-inner, and the travelling card panel against
+   #project-list, both further in.
+
+   They also stopped adding their 1px to layout when they stopped being borders,
+   so the bar is 70px rather than 71 and the projects section starts a pixel
+   higher. Nothing is measured off either number. */
+#site-nav .nav-pad,
+#projects {
+	position: relative;
+}
+#site-nav .nav-pad::after,
+#projects::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	right: 0;
+	height: 1px;
+	background: var(--rule);
+	pointer-events: none;
+}
+#site-nav .nav-pad::after {
+	bottom: 0;
+}
+#projects::before {
+	top: 0;
+}
+
 
 /* ── Instant, synchronized theme swap ──
    Cross-fading colors looks broken: each element interpolates on its own clock
@@ -523,22 +640,107 @@ body {
    git if it's ever wanted back — don't try to reconstruct it from these
    numbers, which are only ever one end of it. */
 #site-nav {
-	--nav-logo-scale: 0.42;
+	/* 0.50, up from 0.42 (2026-08-03) — and it cost nothing in height, which is
+	   the whole reason it moved. The wordmark stopped driving the row when its
+	   leading was cut to 1 (see .nav-logo below): the row is now the 2.9rem
+	   button box at 55.1px, and the mark's line box is 47.5px, so there were
+	   7.6px of headroom sitting unused. At 0.42 the mark drew 21.8px of ink
+	   against the icons' 25.3px — the identity was the smallest drawn thing in
+	   the bar. At 0.50 it drew ~26px and led them.
+	   0.53 is the ceiling: past that the line box passes 55.1px and the mark
+	   starts making the bar taller again.
+	   Then 0.47 (Hiro: nav contents ever so slightly smaller) — a 6% step taken
+	   in step with --nav-icon-scale below, so the bar's two families keep their
+	   relationship and only the whole gets quieter. The mark still leads the
+	   icons, ~24.4px against ~23.8px. */
+	--nav-logo-scale: 0.47;
 	/* 0.70, up from an original 0.62: at 0.62 the ~1.9px strokes read a size
 	   class smaller beside the bold wordmark, and the ~34px hit boxes ran well
 	   under touch-target guidance (the contact icons are the only nav actions
-	   on phones). */
-	--nav-icon-scale: 0.7;
+	   on phones).
+	   0.66 from 2026-08-03, the icons' half of the 6% step above. That guidance
+	   is still the thing to watch: the drawn button is now 36.4px and the
+	   ::after hit region ~41px (it scales with the button, so it stays exactly
+	   half the drawn gap — see the .btn-icon::after note). Comfortably over WCAG
+	   2.2's 24px floor, but this is the token that spends that margin. */
+	--nav-icon-scale: 0.66;
+	/* How far the bar's outermost DRAWN elements sit inside the column edges —
+	   the wordmark on the left, the toggle's glyph on the right. See the
+	   .nav-inner rule below, which spends it asymmetrically to land them equal.
+
+	   1rem = 19px, up from 0.5rem the same day it was introduced. Measured
+	   against the bar's other gaps: the icon glyphs sit 18.3px apart and there
+	   is 22.5px above and below them, so at 9.5px the ENDS were the tightest
+	   spacing in the bar — the outer margin of a box should be its largest gap,
+	   not its smallest, and the hairline made the box legible enough to read
+	   that as a mistake. 19px puts the ends within a pixel of the icons' own
+	   rhythm, so the bar runs on one horizontal unit, and squares the box up
+	   against the 22.5px verticals. */
+	--nav-inset: 1rem;
 }
 
+/* Ended at 0.4rem the same day it moved twice: 0.25 → 0.15 (Hiro: tighter
+   vertical inner padding) → 0.4 (Hiro: slightly taller). The tightening that
+   actually landed was the wordmark's leading below — worth 16px against this
+   token's 9.5 — so the bar sits at 71px having come from 82px, and this last
+   step back up is the ~9px of air that the leading fix over-collected.
+   The floor, if this ever needs to go the other way again, is the 2.9rem button
+   box: at padding 0 the bar is 56px and the buttons are touching the hairline. */
 #site-nav .nav-pad {
-	padding-block: 0.25rem;
+	padding-block: 0.4rem;
+}
+
+/* ── The bar's interior inset ──
+   2026-08-03, Hiro: bring the wordmark and the theme toggle inward off the
+   column edges. It goes on the ROW, not on .nav-pad, because .nav-pad carries
+   the bottom hairline and that has to keep spanning the full column width — the
+   bar's contents sit inside its rule, the way a card's contents sit inside its
+   border.
+
+   THE TWO SIDES ARE NOT EQUAL, and that is what makes them look equal. The
+   wordmark draws from its box's left edge, so its ink lands exactly at whatever
+   padding it is given. The toggle does not: its glyph sits one button padding
+   (0.5rem) inside its drawn box, scaled by --nav-icon-scale, so an equal
+   padding-right would push the visible circle ~6.7px further in than the
+   wordmark and the bar would read as leaning left. Subtracting that distance
+   puts both DRAWN edges on the same inset — which is the only inset anyone can
+   see. It is written as an expression rather than a number so it follows
+   --nav-icon-scale; retune it there, never by eye.
+
+   What this costs: the wordmark no longer lines up with the leftmost card's
+   year and the footer's copyright, which all sit on the column edge. The bar is
+   now its own inset unit, bounded by its rule. If that alignment is ever wanted
+   back, this is the rule that broke it. */
+#site-nav .nav-inner {
+	padding-left: var(--nav-inset);
+	padding-right: calc(var(--nav-inset) - 0.5rem * var(--nav-icon-scale));
 }
 
 /* The wordmark is authored at 2.5rem and scaled down, anchored at its left
    edge (origin-left in the markup) so it sits against the container's edge. */
 #site-nav .nav-left {
 	scale: var(--nav-logo-scale);
+}
+
+/* ── The wordmark's leading IS the bar's height ──
+   `scale` is a transform, so the wordmark occupies its full authored line box
+   in layout — 2.5rem of type at the body's 1.5 leading is 71.25px of row, of
+   which only ~30px is ink once it's scaled to 0.42. That box, not the padding,
+   was what made the bar tall: it out-measured the button boxes (55px) by 16px,
+   and `items-center` split the difference above and below every glyph in the
+   row.
+
+   line-height: 1 hands the row back to the buttons, which are the only things
+   in it whose layout box is close to what they draw. Nothing moves as a result
+   — half-leading is symmetric and the scale is about the box's centre, so the
+   mark stays on the same axis; the bar simply stops reserving room for leading
+   nobody can see.
+
+   This also sets the floor: the row is now the 2.9rem button box, and that is a
+   touch target (see --nav-icon-scale above, raised for exactly that reason), so
+   anything tighter has to come out of the padding, not out of here. */
+#site-nav .nav-logo {
+	line-height: 1;
 }
 
 /* ── Hero: the About button ──
@@ -716,6 +918,56 @@ body {
 	opacity: 1;
 }
 
+/* ── The compress ──
+   2026-08-03, Hiro, chosen off a fourteen-variant study of how this panel could
+   travel (springs, arcs, stretch, distance-scaled durations, a hard cut). The
+   timing did not change: this is still --dur-slide on --ease-panel, exactly the
+   move that was tuned yesterday. What is new is that the panel gives up 3.5% of
+   its size while it is moving and fills back out as it arrives, so momentum is
+   something you can SEE rather than only infer from the curve.
+
+   The profile is DERIVED FROM THE CURVE'S OWN VELOCITY, not drawn by hand:
+   scale = 1 − 0.035 × (speed at t ÷ peak speed). That is why the stops are
+   uneven, and why the animation must run LINEAR — the easing is already baked
+   into the values, and putting --ease-panel on top would ease an eased curve.
+
+   Which means the compress arrives almost immediately rather than mid-flight,
+   and that is correct: --ease-panel's velocity peaks at t≈0, not in the middle.
+   Its start tangent is y1/x1 = 1.17/0.34 = 3.4× linear, so the panel leaves
+   FAST and coasts. (The note above on #project-list reads x1 = 0.34 as holding
+   the curve back at the start — that is the wrong way round, and worth knowing
+   before anyone retunes it. What gives the move its weight is the long tail and
+   the 4px overrun, not a slow launch.) So the panel braces as it goes and
+   swells as it settles, which is the way round a body under acceleration
+   actually behaves.
+
+   Uniform on both axes, deliberately. The study also offered Stretch — elongate
+   along the direction of travel, thin across it, volume held — and that was the
+   more literal squash-and-stretch. It reads as cartoon on a 472px background
+   tint; this reads as mass.
+
+   `scale` as its own property, not folded into `transform`, because the script
+   owns the transform (it is where the panel's position lives) and the two would
+   overwrite each other. They compose: a translate followed by a scale about the
+   element's own centre is the same box either way round. */
+@keyframes panel-compress {
+	0% { scale: 0.9823; }
+	2% { scale: 0.9655; }
+	10% { scale: 0.9696; }
+	22% { scale: 0.9776; }
+	36% { scale: 0.9878; }
+	50% { scale: 0.9954; }
+	66% { scale: 0.9995; }
+	100% { scale: 1; }
+}
+/* Applied only to a SLIDE, and re-triggered per hop by the script (remove →
+   reflow → add). Never on the panel's first appearance: that is a snap into
+   place with transitions suppressed, and a panel that compressed while landing
+   from nowhere would read as a pop rather than as travel. */
+.card-panel.is-sliding {
+	animation: panel-compress var(--dur-slide) linear;
+}
+
 /* Reduced motion: the panel still appears and still marks the hovered card —
    it just stops travelling, snapping between cards instead. Opacity keeps its
    transition so the appearance is still a fade rather than a flash; only the
@@ -725,6 +977,11 @@ body {
 @media (prefers-reduced-motion: reduce) {
 	.card-panel {
 		transition: opacity var(--dur-gesture) var(--nav-ease);
+	}
+	/* Nothing travels here, so there is no velocity for the compress to answer
+	   to — it would be a shape change with no move under it. */
+	.card-panel.is-sliding {
+		animation: none;
 	}
 }
 
