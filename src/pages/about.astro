@@ -39,7 +39,22 @@ const albums = [
 		    NOT --measure: that token is the site's reading cap, shared with the
 		    home hero and the project pages, and this column is narrower than it
 		    for a layout reason that doesn't apply to them. */}
-		<div class="flex flex-col gap-12 lg:flex-row lg:items-start lg:gap-10">
+		{/* col-REVERSE below lg (08-03). The row's DOM order is prose-then-photo,
+		    which is what the lg layout wants; stacked, that put the page's tallest
+		    single element (the photo, 446px at 390px wide) last, so the page ended
+		    on an unlabelled block bigger than anything above it. Reversed, the
+		    stack opens on the photo the same way the lg row does — the photo is
+		    the first thing you see at both widths instead of the first at one and
+		    the last at the other.
+		    flex-col-reverse rather than order-* on the figure: same result, but the
+		    reversal is stated once on the container instead of as a pair of
+		    utilities on a child that has to be read against its sibling. Either way
+		    the DOM order is unchanged, so the reading order stays greeting → prose
+		    → interests → photo.
+		    It also puts the reveal cascade back in visual order down the stack: the
+		    figure enters at --base 180ms and the column at 700ms, so the photo was
+		    already revealing first while sitting last. */}
+		<div class="flex flex-col-reverse gap-12 lg:flex-row lg:items-start lg:gap-10">
 			<div class="max-w-[28rem] lg:min-w-0 lg:max-w-none lg:flex-1">
 				{/* Same size as the section heading below, not the 3xl/4xl page title
 				    it was (Hiro, 08-02). The masthead already carries the name at
@@ -55,10 +70,21 @@ const albums = [
 				    headings now hold their content at the same distance, and the
 				    only big gap left in the column is the 3rem BETWEEN the two
 				    blocks — which is the rhythm, tight inside, loose between. */}
-				<h1 class="reveal mb-4 text-xl font-bold tracking-tight" style="--i: 0">
+				<h1 class="reveal mb-4 text-xl font-bold tracking-tight text-[var(--ink-heading)]" style="--i: 0">
 					はじめまして。<span aria-hidden="true">👋</span>
 				</h1>
-				<div class="space-y-6 text-base leading-relaxed">
+				{/* space-y-5 (23.75px), down from 6 (28.5px) on 08-03. The paragraph
+				    break was 0.92× the 30.875px leading and exactly half the 57px
+				    section gap — close enough to a section break that the prose read
+				    as two blocks rather than one. At 23.75px it is 0.77× the leading
+				    (still clearly a paragraph break, since it exceeds the line gap)
+				    and 0.42× the section gap, so "tight inside, loose between" is
+				    legible as a ratio instead of a factor of two.
+				    The h1 keeps mb-4 rather than opening to match: its 19px is
+				    deliberately equal to the section headings' mt-4 (see above), and
+				    that symmetry is worth more than closing the gap from the other
+				    side. */}
+				<div class="space-y-5 text-base leading-relaxed">
 					<p class="reveal" style="--base: 700ms; --i: 0">I'm a Design Engineer based in the San Francisco Bay Area.</p>
 					<p class="reveal" style="--base: 700ms; --i: 1">
 						I build with AI, but I make the decisions that matter myself. Taste, and knowing how a
@@ -83,7 +109,7 @@ const albums = [
 				    hang icons off the front of a list. It's a width, not a clip, so a wider glyph
 				    later spills into the gap instead of losing a pixel. */}
 				<section class="reveal mt-12" style="--base: 700ms; --i: 2">
-					<h2 class="text-xl font-bold tracking-tight">Personal Interests</h2>
+					<h2 class="text-xl font-bold tracking-tight text-[var(--ink-heading)]">Personal Interests</h2>
 					<ul class="mt-4 space-y-2 text-base leading-relaxed">
 						<li class="flex items-baseline gap-2">
 							<span aria-hidden="true" class="w-[1.25em] shrink-0">🥁</span>
@@ -101,51 +127,6 @@ const albums = [
 							<span aria-hidden="true" class="w-[1.25em] shrink-0">🥾</span>
 							<span>Enjoying nature and hiking</span>
 						</li>
-					</ul>
-				</section>
-				{/* PROTOTYPE (08-02) — covers, not titles. A list of album NAMES
-				    under the interests list would have been a second bulleted list
-				    in a 504px column, reading as more of the first; sleeves are the
-				    version that earns the space, because cover art carries taste
-				    without a sentence and this becomes the only other image on the
-				    page.
-
-				    Four across at lg: (504 − 3 × 14.25) / 4 = 115px a tile, which
-				    is about the floor at which a sleeve is still recognisable
-				    rather than a swatch. Two-up below sm, where the column is
-				    narrow enough that four would fall under 75px. Squares on
-				    purpose — every sleeve is square, so aspect-square means no art
-				    is ever cropped and the row has one flat baseline.
-
-				    Same 1.5px radius and --line border as the photo, so the two
-				    image elements read as one material. bg-clip-padding on the
-				    fallback tiles: --line is translucent, so without it the tile's
-				    own --surface-sunken paints THROUGH the border and the edge
-				    lands a different colour than the photo's identical one. */}
-				<section class="reveal mt-12" style="--base: 700ms; --i: 3">
-					<h2 class="text-xl font-bold tracking-tight">Favorite albums</h2>
-					<ul class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-						{albums.map((album) => (
-							<li>
-								{album.cover ? (
-									<img
-										src={album.cover}
-										alt={`${album.artist} — ${album.title}`}
-										class="aspect-square w-full rounded-[1.5px] border border-[var(--line)] object-cover"
-									/>
-								) : (
-									<div
-										class="flex aspect-square items-end rounded-[1.5px] border border-[var(--line)] bg-[var(--surface-sunken)] bg-clip-padding p-2"
-										role="img"
-										aria-label={`${album.artist} — ${album.title}`}
-									>
-										<span aria-hidden="true" class="text-[0.7rem] leading-tight text-[var(--ink-soft)]">
-											{album.artist} — {album.title}
-										</span>
-									</div>
-								)}
-							</li>
-						))}
 					</ul>
 				</section>
 			</div>
@@ -179,5 +160,64 @@ const albums = [
 				</figcaption>
 			</figure>
 		</div>
+			{/* PROTOTYPE (08-02) — covers, not titles. A list of album NAMES
+			    under the interests list would have been a second bulleted list
+			    reading as more of the first; sleeves are the version that earns the
+			    space, because cover art carries taste without a sentence and this
+			    becomes the only other image on the page.
+
+			    OUT OF THE PROSE COLUMN AND ACROSS THE PAGE (08-03). It sat inside the
+			    504px column, which made the lg row badly bottom-heavy on one side: the
+			    text column ran 690px against the figure's 482px, so the whole
+			    bottom-right quadrant — everything below the caption, beside this grid
+			    — was empty. Lifting this section out takes ~224px off the column, which
+			    lands it at ~466px against the photo's 482px: the two columns now end
+			    within about 16px of each other and the hole is gone. The row above is
+			    still the same two-column arithmetic; this is simply no longer part of it.
+
+			    Four across the full 912.5px: (912.5 − 3 × 14.25) / 4 = 217px a tile,
+			    nearly double the 115px it got inside the column and comfortably clear
+			    of the ~115px floor where a sleeve stops being recognisable and starts
+			    being a swatch. Two-up below sm. Squares on purpose — every sleeve is
+			    square, so aspect-square means no art is ever cropped and the row has
+			    one flat baseline.
+
+			    mt-12 still, but it is now measured from the ROW's bottom rather than
+			    from the interests list, so the 57px reads as the same section break it
+			    always was. --i: 3 is unchanged deliberately: this is still the fourth
+			    thing to reveal, and the cascade should not notice that it changed
+			    parents.
+
+			    Same 1.5px radius and --line border as the photo, so the two image
+			    elements read as one material. bg-clip-padding on the fallback tiles:
+			    --line is translucent, so without it the tile's own --surface-sunken
+			    paints THROUGH the border and the edge lands a different colour than
+			    the photo's identical one. */}
+			<section class="reveal mt-12" style="--base: 700ms; --i: 3">
+				<h2 class="text-xl font-bold tracking-tight text-[var(--ink-heading)]">Favorite albums</h2>
+				<ul class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+					{albums.map((album) => (
+						<li>
+							{album.cover ? (
+								<img
+									src={album.cover}
+									alt={`${album.artist} — ${album.title}`}
+									class="aspect-square w-full rounded-[1.5px] border border-[var(--line)] object-cover"
+								/>
+							) : (
+								<div
+									class="flex aspect-square items-end rounded-[1.5px] border border-[var(--line)] bg-[var(--surface-sunken)] bg-clip-padding p-2"
+									role="img"
+									aria-label={`${album.artist} — ${album.title}`}
+								>
+									<span aria-hidden="true" class="text-[0.7rem] leading-tight text-[var(--ink-soft)]">
+										{album.artist} — {album.title}
+									</span>
+								</div>
+							)}
+						</li>
+					))}
+				</ul>
+			</section>
 	</main>
 </Layout>
