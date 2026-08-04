@@ -428,20 +428,41 @@
 	color-scheme: dark;
 	/* 08-02: one step darker at Hiro's ask. Like the light block, the ground it
 	   replaced didn't leave the palette — #1a1b26 is now --surface, so night's
-	   own background became the raised sheet and the three planes are still all
-	   real Tokyo Night values but for this one, derived in OKLCH from it. */
-	--paper: #13131a;
-	--ink: #c0caf5; /* foreground, verbatim — 11.45:1 */
+	   own background became the raised sheet.
+
+	   08-03: deeper again at Hiro's ask ("deeper and maturer"), and all three
+	   planes are now real Tokyo Night values. The 08-02 ground was derived in
+	   OKLCH from #1a1b26 because nothing in the palette was thought to sit below
+	   it; two things do, and both were simply missed — night's bg_dark #16161e,
+	   and tokyonight.nvim's bg_dark1 #0c0e14, which is this. Going deeper BUYS
+	   contrast rather than spending it (11.45:1 → 11.95:1 on the ink), so the
+	   depth was free; the only thing paid was chroma, since bg_dark1 is cooler
+	   and flatter than the derived ground it replaced (OKLCH C 0.013 at H 270,
+	   against 0.014 at H 285). If the ground ever needs to read RICHER rather
+	   than deeper, that is the dial — and it leaves the palette to turn it.
+
+	   The card now sits 2.58× this ground in luminance, up from 1.68×, so the
+	   raised sheet reads as a genuine plane rather than a half-step. Watch this
+	   number if the ground moves again: past roughly 3× the cards stop reading as
+	   a plane and start reading as lit panels.
+
+	   Every absolute ratio recorded in this block moved with the ground. The
+	   PROPORTIONS did not — they divide out, so --ink-soft is still 50.3% of the
+	   ink and --ink-hero still 1.335× it, across two ground changes in one day.
+	   That is the point of writing the rules as proportions: the ground can move
+	   without retuning a single token. */
+	--paper: #0c0e14;
+	--ink: #c0caf5; /* foreground, verbatim — 11.95:1 */
 	/* 50.4% of --ink, the same proportion the light block carries — see the long
 	   note there for why the number moved off 37% and why it improved on 08-02.
 	   Dark has more headroom than light and could mute harder on its own (AA
 	   would allow 40.2% here), but equality across the two themes is the rule,
 	   so it takes light's floor. Solved in the hue of Tokyo Night's comment
-	   #565f89, which is 2.35:1 on this ground and fails AA outright. 5.76:1. */
+	   #565f89, which is 3.12:1 on this ground and fails AA outright. 6.01:1. */
 	--ink-soft: #838eba;
 	/* 125% of --ink's contrast, the same proportion the light block carries and
 	   the direction the ask was actually made in: brighter than the body text.
-	   14.26:1, under an 18.49:1 ceiling.
+	   14.88:1, under a 19.29:1 ceiling.
 
 	   THE HUE IS NOT HELD HERE, and it isn't a choice. --ink sits at OKLCH
 	   L 0.846 C 0.061 H 274.8, and this lands at L 0.915 — where the sRGB gamut
@@ -453,13 +474,13 @@
 	   Consequence for any retune: pushing this token further costs chroma
 	   faster than it buys contrast. Past ~15:1 the tint is essentially gone and
 	   the heading is grey-white. Measure, don't extrapolate. */
-	--ink-heading: #dae1ff; /* 14.26:1 — 125% of the ink's contrast */
+	--ink-heading: #dae1ff; /* 14.88:1 — 125% of the ink's contrast */
 
 	/* The hero ink — the second forward step (see the light block on why
-	   nothing wears both). See the light theme's note for the rule. 15.29:1, which is
+	   nothing wears both). See the light theme's note for the rule. 15.95:1, which is
 	   1.335× this theme's --ink, matching light's 1.334×. This is the direction
 	   the ask was actually made in: a pale lavender-white, still carrying the
-	   fg hue rather than going to #fff (18.49:1), so the hero reads as the
+	   fg hue rather than going to #fff (19.29:1), so the hero reads as the
 	   brightest thing on the page without leaving the palette. */
 	--ink-hero: #e4e9fc;
 	/* Tinted with the ink, like the light block's. Alphas unchanged. */
@@ -474,25 +495,25 @@
 	   with dark text, literally. */
 	/* Same construction as the light theme's (see the note there), pointing the
 	   other way: a solid block of --ink-hero, hover brighter still, press back
-	   down onto the body ink. 15.29 / 16.86 / 11.45 against the chip's dark
+	   down onto the body ink. 15.95 / 17.59 / 11.95 against the chip's dark
 	   text. Hover has ~1.6 points of headroom left before white, which is the
 	   ceiling this ladder is working against — if rest ever goes brighter, hover
 	   has nowhere to go and the press step has to carry the whole gesture. */
 	--btn-bg: var(--ink-hero);
 	--btn-bg-hover: #f2f4fe;
 	--btn-bg-active: #c0caf5; /* --ink */
-	--btn-text: #13131a; /* --paper */
+	--btn-text: #0c0e14; /* --paper */
 	--btn-border: var(--ink-hero);
 
-	/* Tokyo Night's blue, verbatim — 7.34:1 against --paper, 6.79:1 against
+	/* Tokyo Night's blue, verbatim — 7.66:1 against --paper, 6.79:1 against
 	   --surface, both well clear of WCAG 1.4.11's 3:1 floor for non-text. Same
 	   blue as --ink-title, deliberately; see the light block. */
 	--focus-ring: #7aa2f7;
 
 	/* The syntax accents on the night ground (see the light block for the
 	   reasoning). Both verbatim Tokyo Night. */
-	--ink-title: #7aa2f7; /* 7.34:1 — 1.27× the muted text */
-	--ink-num: #ff9e64; /* 9.09:1 */
+	--ink-title: #7aa2f7; /* 7.66:1 — 1.27× the muted text */
+	--ink-num: #ff9e64; /* 9.49:1 */
 
 	/* The same magenta on the night ground (see the light block for the method
 	   and the depth rule). This is Tokyo Night's magenta verbatim, not a
@@ -990,7 +1011,7 @@ body {
    this one box and never touches the grid.
 
    --surface is deliberately the FAINT choice: against --paper it is one plane
-   step, not a highlight (#13131a → #1a1b26 dark, #e9eaee → #f2f3f6 light). The
+   step, not a highlight (#0c0e14 → #1a1b26 dark, #e9eaee → #f2f3f6 light). The
    panel should be felt rather than read.
 
    z-index 0 AND first in the DOM. Either alone would do it — the cards paint
