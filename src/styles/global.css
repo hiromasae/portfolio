@@ -428,20 +428,41 @@
 	color-scheme: dark;
 	/* 08-02: one step darker at Hiro's ask. Like the light block, the ground it
 	   replaced didn't leave the palette — #1a1b26 is now --surface, so night's
-	   own background became the raised sheet and the three planes are still all
-	   real Tokyo Night values but for this one, derived in OKLCH from it. */
-	--paper: #13131a;
-	--ink: #c0caf5; /* foreground, verbatim — 11.45:1 */
+	   own background became the raised sheet.
+
+	   08-03: deeper again at Hiro's ask ("deeper and maturer"), and all three
+	   planes are now real Tokyo Night values. The 08-02 ground was derived in
+	   OKLCH from #1a1b26 because nothing in the palette was thought to sit below
+	   it; two things do, and both were simply missed — night's bg_dark #16161e,
+	   and tokyonight.nvim's bg_dark1 #0c0e14, which is this. Going deeper BUYS
+	   contrast rather than spending it (11.45:1 → 11.95:1 on the ink), so the
+	   depth was free; the only thing paid was chroma, since bg_dark1 is cooler
+	   and flatter than the derived ground it replaced (OKLCH C 0.013 at H 270,
+	   against 0.014 at H 285). If the ground ever needs to read RICHER rather
+	   than deeper, that is the dial — and it leaves the palette to turn it.
+
+	   The card now sits 2.58× this ground in luminance, up from 1.68×, so the
+	   raised sheet reads as a genuine plane rather than a half-step. Watch this
+	   number if the ground moves again: past roughly 3× the cards stop reading as
+	   a plane and start reading as lit panels.
+
+	   Every absolute ratio recorded in this block moved with the ground. The
+	   PROPORTIONS did not — they divide out, so --ink-soft is still 50.3% of the
+	   ink and --ink-hero still 1.335× it, across two ground changes in one day.
+	   That is the point of writing the rules as proportions: the ground can move
+	   without retuning a single token. */
+	--paper: #0c0e14;
+	--ink: #c0caf5; /* foreground, verbatim — 11.95:1 */
 	/* 50.4% of --ink, the same proportion the light block carries — see the long
 	   note there for why the number moved off 37% and why it improved on 08-02.
 	   Dark has more headroom than light and could mute harder on its own (AA
 	   would allow 40.2% here), but equality across the two themes is the rule,
 	   so it takes light's floor. Solved in the hue of Tokyo Night's comment
-	   #565f89, which is 2.35:1 on this ground and fails AA outright. 5.76:1. */
+	   #565f89, which is 3.12:1 on this ground and fails AA outright. 6.01:1. */
 	--ink-soft: #838eba;
 	/* 125% of --ink's contrast, the same proportion the light block carries and
 	   the direction the ask was actually made in: brighter than the body text.
-	   14.26:1, under an 18.49:1 ceiling.
+	   14.88:1, under a 19.29:1 ceiling.
 
 	   THE HUE IS NOT HELD HERE, and it isn't a choice. --ink sits at OKLCH
 	   L 0.846 C 0.061 H 274.8, and this lands at L 0.915 — where the sRGB gamut
@@ -453,13 +474,13 @@
 	   Consequence for any retune: pushing this token further costs chroma
 	   faster than it buys contrast. Past ~15:1 the tint is essentially gone and
 	   the heading is grey-white. Measure, don't extrapolate. */
-	--ink-heading: #dae1ff; /* 14.26:1 — 125% of the ink's contrast */
+	--ink-heading: #dae1ff; /* 14.88:1 — 125% of the ink's contrast */
 
 	/* The hero ink — the second forward step (see the light block on why
-	   nothing wears both). See the light theme's note for the rule. 15.29:1, which is
+	   nothing wears both). See the light theme's note for the rule. 15.95:1, which is
 	   1.335× this theme's --ink, matching light's 1.334×. This is the direction
 	   the ask was actually made in: a pale lavender-white, still carrying the
-	   fg hue rather than going to #fff (18.49:1), so the hero reads as the
+	   fg hue rather than going to #fff (19.29:1), so the hero reads as the
 	   brightest thing on the page without leaving the palette. */
 	--ink-hero: #e4e9fc;
 	/* Tinted with the ink, like the light block's. Alphas unchanged. */
@@ -474,25 +495,25 @@
 	   with dark text, literally. */
 	/* Same construction as the light theme's (see the note there), pointing the
 	   other way: a solid block of --ink-hero, hover brighter still, press back
-	   down onto the body ink. 15.29 / 16.86 / 11.45 against the chip's dark
+	   down onto the body ink. 15.95 / 17.59 / 11.95 against the chip's dark
 	   text. Hover has ~1.6 points of headroom left before white, which is the
 	   ceiling this ladder is working against — if rest ever goes brighter, hover
 	   has nowhere to go and the press step has to carry the whole gesture. */
 	--btn-bg: var(--ink-hero);
 	--btn-bg-hover: #f2f4fe;
 	--btn-bg-active: #c0caf5; /* --ink */
-	--btn-text: #13131a; /* --paper */
+	--btn-text: #0c0e14; /* --paper */
 	--btn-border: var(--ink-hero);
 
-	/* Tokyo Night's blue, verbatim — 7.34:1 against --paper, 6.79:1 against
+	/* Tokyo Night's blue, verbatim — 7.66:1 against --paper, 6.79:1 against
 	   --surface, both well clear of WCAG 1.4.11's 3:1 floor for non-text. Same
 	   blue as --ink-title, deliberately; see the light block. */
 	--focus-ring: #7aa2f7;
 
 	/* The syntax accents on the night ground (see the light block for the
 	   reasoning). Both verbatim Tokyo Night. */
-	--ink-title: #7aa2f7; /* 7.34:1 — 1.27× the muted text */
-	--ink-num: #ff9e64; /* 9.09:1 */
+	--ink-title: #7aa2f7; /* 7.66:1 — 1.27× the muted text */
+	--ink-num: #ff9e64; /* 9.49:1 */
 
 	/* The same magenta on the night ground (see the light block for the method
 	   and the depth rule). This is Tokyo Night's magenta verbatim, not a
@@ -885,27 +906,33 @@ body {
    Driven by the whole card, not by the title's own :hover — the entire <a> is
    the link.
 
-   IT NO LONGER WIPES (Hiro, same day: "just make it appear"). It was a gradient
-   band whose width grew 0% → 100% over --dur-card, sweeping left to right; now
-   the two states are the same two background-sizes with nothing between them.
-   The declaration stays a background gradient rather than becoming
-   text-decoration because the size, colour and the descender clearance below are
-   all still doing their jobs — only the transition went.
+   IT NO LONGER WIPES (Hiro, 2026-08-02: "just make it appear"). It was a
+   gradient band whose width grew 0% → 100% over --dur-card, sweeping left to
+   right; the sweep is not coming back.
 
-   This leaves the panel as the ONLY thing on the card that animates on hover,
-   which is the point: one motion, and the rest of the card simply changes
-   state. */
+   ASYMMETRIC SINCE 2026-08-03 (Hiro: appear immediately, fade out on unhover).
+   Arriving is instant, leaving is a --dur-card opacity fade. The trick is that a
+   transition is read from the state being animated TO, not from the one being
+   left: the fade lives on the RESTING rule, which is what the element returns to
+   on unhover, and the hover rule sets transition: none so the arrival skips it.
+   That reads as intended — the line meets the cursor at once, then releases
+   rather than snapping off — but it does mean the two halves are configured in
+   different rules, so changing one does NOT change the other. If they ever need
+   to match again, the durations have to be set in both places.
+
+   This also forced the line off background-size and onto an ::after. Opacity is
+   what fades, and the gradient was painted on the title itself, where fading it
+   would have taken the words with it. The pseudo-element carries the same 2px
+   band at the same position, so the measured descender clearance below is
+   unchanged — see padding-bottom. */
 .project-card__title {
 	/* inline-block, NOT inline: an inline element's padding doesn't grow the
 	   line box, so a line painted below the text can land outside the box (and
 	   outside any ancestor's overflow clip, where it disappears). */
 	display: inline-block;
-	/* currentColor, not --ink: the title wears --ink-title, and the line under it
-	   has to travel with it or it reads as a rule the heading happens to sit on. */
-	background-image: linear-gradient(currentColor, currentColor);
-	background-repeat: no-repeat;
-	background-position: left bottom;
-	background-size: 0% 2px;
+	/* The ::after is positioned against this box, so it has to be a containing
+	   block. Nothing else on the title relies on the offset. */
+	position: relative;
 	/* The line hugs the title, so this is the smallest padding that still clears
 	   a descender. The band paints at the BOTTOM of the padding box, so its top
 	   edge lands at (padding-bottom − 2px) from the content box; every extra px
@@ -924,39 +951,41 @@ body {
 	   the rendered size (it quantises to whole px at these sizes), and compare
 	   against the element's bottom − 2px. */
 	padding-bottom: 1px;
-	/* No transition, by instruction. Do not "restore" one as a cleanup. */
 }
-.project-card:hover .project-card__title,
-.project-card:focus-within .project-card__title {
-	background-size: 100% 2px;
-}
-
-/* ── Project card: the arrow appears on hover ──
-   2026-08-02, Hiro, in three steps on one day: it wiped in and tilted to ↗;
-   then the animation came off and it sat drawn at rest on every card; now it is
-   hidden at rest and simply appears with the underline. Worth following the arc
-   — the end state is not the start state, and "keep the arrow" from step two
-   meant keep the glyph, not keep it visible.
-
-   Opacity, not clip-path, and no transition: it appears the way the underline
-   does, which is instantly. (The clip-path it once used was a WIPE — the thing
-   being removed — and leaving it at inset(0 100% 0 0) is what would have made
-   the arrow permanently invisible if only the hover half had been deleted.)
-
-   Opacity rather than display or visibility so the glyph keeps its box at rest:
-   the title's line height and the h3's width are the same hovered and not, so
-   nothing reflows and no text shifts under the cursor.
-
-   It stays a right arrow rather than the -45° ↗ the old tilt reached: ↗ is the
-   site's "leaves the site" mark (see .btn-quiet's note on why that one declines
-   to rotate), and these cards go to internal project pages. */
-.project-card__arrow {
+.project-card__title::after {
+	content: "";
+	position: absolute;
+	/* Insets rather than a width: the band spans the span, which the markup
+	   already holds to the words. bottom: 0 puts it at the foot of the PADDING
+	   box — the same place background-position: left bottom painted it — so the
+	   1px measured above is still what clears the descender. */
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 2px;
+	/* currentColor, not --ink: the title wears --ink-title, and the line under it
+	   has to travel with it or it reads as a rule the heading happens to sit on. */
+	background: currentColor;
 	opacity: 0;
+	/* The LEAVING half — see the block comment. This is the resting rule, so this
+	   is the transition that runs on unhover. */
+	transition: opacity var(--dur-card) ease;
 }
-.project-card:hover .project-card__arrow,
-.project-card:focus-within .project-card__arrow {
+.project-card:hover .project-card__title::after,
+.project-card:focus-within .project-card__title::after {
 	opacity: 1;
+	/* The ARRIVING half: no transition, so the line is simply there. */
+	transition: none;
 }
+
+/* ── Project card: the arrow ──
+   Gone, 2026-08-03 (Hiro: remove the arrow that appears on hover). It ran
+   through four states in two days — wiping in and tilting to ↗, drawn at rest on
+   every card, hidden until hover, removed — and the SVG went with it, so there
+   is no orphaned glyph sitting invisible in the markup. Kept as a marker so the
+   missing block doesn't read as an oversight, and because the arc is worth
+   knowing: bringing one back is a new decision, not a restoration. The underline
+   is now the card's whole hover answer besides the panel. */
 /* ── Project card: the travelling panel ──
    ONE panel for the whole grid, not a background on each card (2026-08-02,
    Hiro: it should move between cards as you go from one to the next). So this
@@ -982,7 +1011,7 @@ body {
    this one box and never touches the grid.
 
    --surface is deliberately the FAINT choice: against --paper it is one plane
-   step, not a highlight (#13131a → #1a1b26 dark, #e9eaee → #f2f3f6 light). The
+   step, not a highlight (#0c0e14 → #1a1b26 dark, #e9eaee → #f2f3f6 light). The
    panel should be felt rather than read.
 
    z-index 0 AND first in the DOM. Either alone would do it — the cards paint
@@ -1267,23 +1296,24 @@ body {
    on the site. What follows describes the pair as it was designed; the
    relationship is history rather than something you can still see side by side.
 
-   The project card's gesture RUN BACKWARDS, because the link means the
-   opposite thing. On the card the underline wipes left-to-right toward an
-   arrow sitting on the right, which then wipes in and tilts to ↗ ("out").
-   Here the arrow sits on the LEFT, so the wipe travels right-to-left and
-   arrives at it, and the arrow answers by nudging further left ("back").
-   Same tokens, same easing — see the .project-card__arrow block above before
-   retiming either.
+   Originally the project card's gesture RUN BACKWARDS, because the link means
+   the opposite thing. On the card the underline wiped left-to-right toward an
+   arrow sitting on the right, which wiped in and tilted to ↗ ("out"). Here the
+   arrow sits on the LEFT, so the wipe travels right-to-left and arrives at it,
+   and the arrow answers by nudging further left ("back").
 
-   The overlap fractions no longer match: the card's moved to 0.25 because it
-   has a zoom and a lift that must contain the arrow's stagger, and this link
-   has neither — it's type on paper, so a 0.55 nudge landing at 365ms trails
-   nothing and reads fine. Divergent on purpose; don't "resync" them without
-   re-reading why the card's number is what it is.
+   THE PAIR IS BROKEN, and deliberately. The card kept none of its half: the
+   wipe went 2026-08-02 (it just appears now), and the arrow went 2026-08-03
+   (removed outright — the .project-card__arrow this used to point at no longer
+   exists). This link is now the site's ONLY wiping underline and its only
+   arrow-on-hover, so nothing here is mirroring anything any more; read it on its
+   own terms. Retiming it affects this link alone, which also means the old
+   warning about resyncing the two overlap fractions is moot — there is no
+   second fraction left to resync to.
 
-   No tilt on this one: the card's -45° is carrying a MEANING (this leaves
-   the site), and there's no second meaning here for a rotation to encode,
-   so it would be decoration. The nudge is the whole idea. */
+   No tilt on this one: the ↗ carries a MEANING (this leaves the site), and
+   there's no second meaning here for a rotation to encode, so it would be
+   decoration. The nudge is the whole idea. */
 .btn-quiet__label {
 	/* inline-block, NOT inline: an inline element's padding doesn't grow the
 	   line box, so the underline can land outside it — and outside any ancestor's
