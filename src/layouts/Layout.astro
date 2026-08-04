@@ -65,14 +65,23 @@ const {
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="generator" content={Astro.generator} />
 		<meta name="description" content={description} />
-		<!-- Archivo from Google Fonts — the site's only face. A variable face, so
-		     400/500/600/700 all come from one file; unlike Satoshi it has a real
-		     semibold, though nothing on the site asks for one yet. -->
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<!-- Archivo — the site's only face. A variable face, so 400/500/600/700
+		     all come from one file; unlike Satoshi it has a real semibold, though
+		     nothing on the site asks for one yet. Self-hosted, with @font-face in
+		     global.css. Preloaded here so the fetch starts with the document
+		     instead of waiting for the stylesheet to parse — the nav holds its
+		     load intro on document.fonts.ready (whenTypeSettled in Nav.astro), so
+		     this hop is directly in front of the entrance. Only the latin subset
+		     is preloaded; latin-ext is unicode-range'd and fetched on demand.
+		     crossorigin is required on font preloads even same-origin (fonts are
+		     always CORS-fetched); without it the preload is discarded and the
+		     font refetched. -->
 		<link
-			rel="stylesheet"
-			href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap"
+			rel="preload"
+			href="/fonts/archivo-latin.woff2"
+			as="font"
+			type="font/woff2"
+			crossorigin
 		/>
 		<title>{title}</title>
 	</head>
