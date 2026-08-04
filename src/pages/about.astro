@@ -27,14 +27,23 @@ const albums = [
 		    08-02 when the page came in to 960px: the figure held 26rem of that,
 		    which left the prose ~346px — about FIVE words a line at the 21.4px
 		    it was set in. Both of those numbers moved on Hiro's ask, and the row
-		    came back with them. The prose is 19px now and the figure is 19rem,
-		    so the text column takes 504px at lg: 26.5 times its own font size,
-		    against the 31 that --measure holds. Narrower than the site's reading
-		    cap on purpose (Hiro: "narrower"), and 1.6× the width that killed the
-		    row. Below lg there is no room for two columns at any of these
-		    numbers, so it still stacks and the prose keeps its own 28rem cap —
-		    close enough to the row's 504px that the two states read as one
-		    measure rather than two.
+		    came back with them. As of 08-03 the prose is 16.625px and the figure
+		    is 17rem, so the text column takes 542px at lg — still well inside
+		    --measure's 665px, which is the "narrower" Hiro asked for and 1.6× the
+		    width that killed the row.
+
+		    Watch the em count here rather than the pixels: 542px at 16.625px is
+		    ~32.6× the font size, up from 26.5 when the prose was 19px in a 504px
+		    column. Smaller type in a slightly wider column moves that number
+		    twice over. ~65 characters a line, so it is still inside the usual
+		    45-75 and there is nothing to fix — but this is the figure to check
+		    before shrinking the photo or the type again, because the column has
+		    less room to give than the pixel width suggests.
+
+		    Below lg there is no room for two columns at any of these numbers, so
+		    it still stacks and the prose keeps its own 28rem cap — close enough
+		    to the row's 542px that the two states read as one measure rather
+		    than two.
 
 		    NOT --measure: that token is the site's reading cap, shared with the
 		    home hero and the project pages, and this column is narrower than it
@@ -73,18 +82,24 @@ const albums = [
 				<h1 class="reveal mb-4 text-xl font-bold tracking-tight text-[var(--ink-heading)]" style="--i: 0">
 					はじめまして。<span aria-hidden="true">👋</span>
 				</h1>
-				{/* space-y-5 (23.75px), down from 6 (28.5px) on 08-03. The paragraph
-				    break was 0.92× the 30.875px leading and exactly half the 57px
-				    section gap — close enough to a section break that the prose read
-				    as two blocks rather than one. At 23.75px it is 0.77× the leading
-				    (still clearly a paragraph break, since it exceeds the line gap)
-				    and 0.42× the section gap, so "tight inside, loose between" is
-				    legible as a ratio instead of a factor of two.
+				{/* text-sm (16.625px), down from base (19px) on 08-03 — Hiro's ask,
+				    applied to the body copy only. The two h2s and the greeting stay
+				    at text-xl, so the step from heading to prose widened, which is
+				    what makes the headings read as headings now rather than as bold
+				    body text.
+
+				    space-y-5 (23.75px) is rem-based and so did NOT move with the
+				    type. Against the old 30.875px leading it was 0.77×; against the
+				    new 27px it is 0.88× — still a paragraph break rather than a
+				    section one, because the rules and the 95px gap below now carry
+				    that job unambiguously. Don't tighten this to restore 0.77×: the
+				    ratio was a proxy for "reads as one block", and the divider makes
+				    the proxy unnecessary.
 				    The h1 keeps mb-4 rather than opening to match: its 19px is
 				    deliberately equal to the section headings' mt-4 (see above), and
 				    that symmetry is worth more than closing the gap from the other
 				    side. */}
-				<div class="space-y-5 text-base leading-relaxed">
+				<div class="space-y-5 text-sm leading-relaxed">
 					<p class="reveal" style="--base: 700ms; --i: 0">I'm a Design Engineer based in the San Francisco Bay Area.</p>
 					<p class="reveal" style="--base: 700ms; --i: 1">
 						I build with AI, but I make the decisions that matter myself. Taste, and knowing how a
@@ -107,10 +122,28 @@ const albums = [
 				    slot rather than riding on its own advance width — that's what
 				    puts the LABELS on one left edge, which is the only reason to
 				    hang icons off the front of a list. It's a width, not a clip, so a wider glyph
-				    later spills into the gap instead of losing a pixel. */}
-				<section class="reveal mt-12" style="--base: 700ms; --i: 2">
+				    later spills into the gap instead of losing a pixel.
+
+				    Ruled off the prose above it on 08-03, with mt-10/pt-10 splitting
+				    47.5px either side of the line. Balanced on purpose: an unbalanced
+				    rule reads as belonging to whichever block it sits nearer, and this
+				    one belongs to neither. Total 95px against the old 57px, which is
+				    the "more space between sections" half of the same ask.
+
+				    --line-soft, not --line: --line is what the photo and the album
+				    tiles draw their edges in, and a divider that matched them would
+				    read as another frame rather than as punctuation between blocks.
+				    border-t on the section rather than an <hr>, because the h2s
+				    already mark the divisions structurally — this is presentation on
+				    top of semantics that exist, not a substitute for them.
+
+				    NOTE this rule spans the PROSE COLUMN (~542px at lg), while the
+				    albums divider below spans the full 912.5px, because that section
+				    sits outside the row. Deliberate, but it is the one place the two
+				    dividers don't line up. */}
+				<section class="reveal mt-10 border-t border-[var(--line-soft)] pt-10" style="--base: 700ms; --i: 2">
 					<h2 class="text-xl font-bold tracking-tight text-[var(--ink-heading)]">Personal Interests</h2>
-					<ul class="mt-4 space-y-2 text-base leading-relaxed">
+					<ul class="mt-4 space-y-2 text-sm leading-relaxed">
 						<li class="flex items-baseline gap-2">
 							<span aria-hidden="true" class="w-[1.25em] shrink-0">🥁</span>
 							<span>Playing drums</span>
@@ -130,11 +163,25 @@ const albums = [
 					</ul>
 				</section>
 			</div>
-			{/* Fixed 19rem at lg so the flex-1 column above resolves to a known
+			{/* Fixed 17rem at lg so the flex-1 column above resolves to a known
 			    width (see the note there); it is the last thing in the row, so
 			    shrink-0 keeps the prose taking the slack rather than the photo.
-			    Below lg the row is gone and the old stacked caps stand. */}
-			<figure class="reveal w-full max-w-[18rem] sm:max-w-[22rem] lg:w-[19rem] lg:max-w-none lg:shrink-0" style="--base: 180ms; --i: 0">
+			    Below lg the row is gone and the old stacked caps stand.
+
+			    Every number here came down a notch on 08-03 (Hiro: "slightly
+			    smaller"): 19rem → 17rem at lg, 18/22rem → 16/20rem stacked, and
+			    the caption with it — 14.25px → 13.3px, icon 3.5 → 3. The caption
+			    shrank alongside the photo rather than holding still, because it is
+			    measured against the image it sits under, not against the prose; a
+			    fixed caption under a smaller photo would have grown in relative
+			    terms and started competing with the body copy that just got
+			    smaller itself.
+
+			    The 2rem the photo gave up went to the prose column, which is why
+			    the note above says 542px rather than the 504px it said yesterday.
+			    The column stays under --measure, so nothing about the row's
+			    reasoning changed — only the split. */}
+			<figure class="reveal w-full max-w-[16rem] sm:max-w-[20rem] lg:w-[17rem] lg:max-w-none lg:shrink-0" style="--base: 180ms; --i: 0">
 				<img
 					src="/images/me.webp"
 					alt="Hiro Eernisse"
@@ -142,9 +189,9 @@ const albums = [
 					height="1040"
 					class="aspect-[4/5] w-full rounded-[1.5px] border border-[var(--line)] object-cover"
 				/>
-				<figcaption class="mt-2.5 flex items-center gap-1.5 text-xs text-[var(--ink-soft)]">
+				<figcaption class="mt-2 flex items-center gap-1.5 text-[0.7rem] text-[var(--ink-soft)]">
 					<svg
-						class="h-3.5 w-3.5 shrink-0"
+						class="h-3 w-3 shrink-0"
 						viewBox="0 0 24 24"
 						fill="none"
 						stroke="currentColor"
@@ -182,18 +229,23 @@ const albums = [
 			    square, so aspect-square means no art is ever cropped and the row has
 			    one flat baseline.
 
-			    mt-12 still, but it is now measured from the ROW's bottom rather than
-			    from the interests list, so the 57px reads as the same section break it
-			    always was. --i: 3 is unchanged deliberately: this is still the fourth
-			    thing to reveal, and the cascade should not notice that it changed
-			    parents.
+			    mt-10/pt-10 with a rule between (08-03), matching the interests
+			    section exactly — 47.5px either side of the line, 95px all in. The
+			    gap is still measured from the ROW's bottom rather than from the
+			    interests list, so on the lg row this rule clears whichever column
+			    runs longer. --i: 3 is unchanged deliberately: this is still the
+			    fourth thing to reveal, and the cascade should not notice that it
+			    changed parents.
+
+			    This rule is the full 912.5px where the interests one is column-width;
+			    see the note there for why they differ.
 
 			    Same 1.5px radius and --line border as the photo, so the two image
 			    elements read as one material. bg-clip-padding on the fallback tiles:
 			    --line is translucent, so without it the tile's own --surface-sunken
 			    paints THROUGH the border and the edge lands a different colour than
 			    the photo's identical one. */}
-			<section class="reveal mt-12" style="--base: 700ms; --i: 3">
+			<section class="reveal mt-10 border-t border-[var(--line-soft)] pt-10" style="--base: 700ms; --i: 3">
 				<h2 class="text-xl font-bold tracking-tight text-[var(--ink-heading)]">Favorite albums</h2>
 				<ul class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
 					{albums.map((album) => (
