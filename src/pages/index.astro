@@ -52,8 +52,19 @@ import { projects } from '../data/projects';
 			    lead again, it is this token it has to answer to. See --ink-hero in
 			    global.css for why the two themes are proportional rather than
 			    inverse. */}
+			{/* Inherits the body's 300. It briefly carried font-normal: the
+			    2026-08-04 APCA audit put this line 0.125px under the floor in the
+			    LIGHT theme (Lc 88.5 wants ≥21.5px at w300; it is 21.375px), so 400
+			    was the minimum that cleared. Hiro asked for it lighter the same
+			    day, knowing that, so 300 stands and this is a deliberate miss, not
+			    an oversight — don't "fix" it back to 400 on sight.
+			    Worth knowing if it ever gets revisited: the shortfall is 0.125px,
+			    so SIZE clears it as easily as weight — text-[1.15rem] (21.85px)
+			    would pass at 300 and keep the lighter drawing. Dark was never the
+			    problem (Lc 93.5, wants 20px at w300); this is a light-theme-only
+			    margin, and it moves with --ink-hero. */}
 			<p class="reveal mx-auto max-w-[var(--measure)] text-lg leading-relaxed text-[var(--ink-hero)]" style="--i: 0">
-				Building with good sense and taste.
+				Design engineering, with good sense and taste.
 			</p>
 			{/* The page's only route to /about, so it's the site's one real button.
 			    mt-6 rather than the old link's mt-4 — a control needs more air off

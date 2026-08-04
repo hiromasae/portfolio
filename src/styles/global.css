@@ -2,7 +2,7 @@
 
 :root {
 	/* One face for the whole site — headings included. */
-	--font-sans: "Archivo", "Segoe UI", system-ui, -apple-system, sans-serif;
+	--font-sans: "Recursive", "Segoe UI", system-ui, -apple-system, sans-serif;
 
 	/* ── Light theme: Tokyo Night Light ──
 	   No longer the default — dark is (see Layout.astro). These values live on
@@ -405,7 +405,25 @@
 	   dropped every block to ~8–10 words a line, so the width went up to hold
 	   the same LINE rather than the same number. This is exactly the
 	   "re-measure if the body face changes" the old note called for — it just
-	   came due sooner than expected. */
+	   came due sooner than expected.
+
+	   ⚠ 2026-08-04, RECURSIVE: this value is now KNOWN-OFF-TARGET and was left
+	   alone deliberately, so don't read 35rem as a measured answer the way the
+	   paragraph above describes. Recursive sets wider again — ~14.6% wider per
+	   em than Archivo — so the same 35rem now yields 9.1 words a line, under the
+	   10–12 target. Measured across all four project pages (8 wrapping
+	   paragraphs, 51 lines), which is where --measure actually governs prose;
+	   the about page sets its own 542px column and the home hero doesn't wrap.
+	   The sweep, same method, if this gets picked up:
+	     35rem  665px   9.10 w/l   ← current
+	     37rem  703px   9.47
+	     39rem  741px  10.09       ← lowest value inside the target
+	     41rem  779px  10.55
+	     43rem  817px  11.05       ← mid-target, but only 71px of margin left
+	                                 either side of the 960px page
+	   Widening is not free the way it was at 32→35rem: the page is 960px, so
+	   the target's mid-point costs nearly all the side margin. If 39rem still
+	   reads short, the other lever is size, not width. */
 	--measure: 35rem;
 }
 
@@ -594,6 +612,42 @@ body {
 	background-image: var(--grain);
 	color: var(--ink);
 	font-family: var(--font-sans);
+	/* ── The weight scale ──
+	   2026-08-04, Hiro: "much lighter across the site". The whole scale moved
+	   down one step rather than only the body, so the INTERVALS survive and the
+	   page still has the same hierarchy, just drawn with less ink:
+	     300  body, and this declaration is the only place it's set
+	     400  secondary UI — .btn-quiet, the pill's label, the card title
+	     500  emphasis — .btn, the wordmark, every h1/h2
+	   Was 400 / 500 / 600–700. The top of the range lost the most (700 → 500),
+	   which is the point: Recursive's 700 is a genuinely heavy cut and the
+	   headings were the loudest thing on the page.
+	   300 is Recursive's floor, not a round number picked for looks — see the
+	   Layout.astro comment for why the fetched range starts exactly there.
+	   NOTE the interaction with the DARK default theme: light ink on a dark
+	   ground reads thinner than the same weight inverted, so 300 is doing more
+	   optical work here than the number suggests. If body text ever looks
+	   fragile, this line is the dial, and the light theme is not the place to
+	   judge it.
+
+	   AUDITED 2026-08-04 against APCA (the WCAG 3 candidate) rather than WCAG 2
+	   contrast, because WCAG 2's ratio ignores stroke weight entirely and this
+	   change is nothing but stroke weight. Method: sample each element's real
+	   composited backdrop — glyphs hidden with `color: transparent` so the
+	   element keeps its own fill, then average the actual screenshot pixels, so
+	   the grain and the bar's veil are included — then score size+weight against
+	   fontLookupAPCA. Both themes, 3 pages.
+	   Result: dropping 400 → 300 pushed exactly THREE elements below the floor,
+	   all of them long-form prose, and each now carries an explicit font-normal
+	   at its own call site: the home hero and the two paragraphs on a project
+	   page. Everything else that fails the floor was already failing at 400 —
+	   the card titles, the year datelines, the album captions, the about page's
+	   16.625px body — so those are contrast problems this change did not create
+	   and weight cannot fix. They are listed in the audit note in
+	   projects/[slug].astro; the worst is the project lead in the dark theme.
+	   The rule this settles on: 300 everywhere, and a local font-normal ONLY
+	   where the floor demands it. Don't raise this line to fix a single block. */
+	font-weight: 300;
 	-webkit-font-smoothing: antialiased;
 	text-rendering: optimizeLegibility;
 }
@@ -938,14 +992,21 @@ body {
 	   edge lands at (padding-bottom − 2px) from the content box; every extra px
 	   buys exactly 1px of clearance over the y in "Shipyard" and "Discovery".
 
-	   MEASURED, and it moves with the face — three faces, three answers: 1px
+	   MEASURED, and it moves with the face — four faces, four answers: 1px
 	   cleared by 0.46px under Supreme 700/1.3rem; the same 1px OVERLAPPED by
 	   0.88px under Satoshi 700/1.1rem, which 3px fixed; Archivo 700/1.1rem has a
 	   shallower descender again, so 3px went slack at +3.25px and 1px measured
-	   +1.25px. Restored at 1px. The title has since dropped to 600, a lighter cut
-	   of the same face — descender DEPTH barely moves with weight (the stroke
-	   thins, the outline doesn't climb), so 1px still clears; re-measure only if
-	   the face or the size moves.
+	   +1.25px. Restored at 1px. Recursive 600/19px measured +1.00px, and after
+	   the weight scale dropped the title to 400 (2026-08-04) it measures
+	   +0.875px. Still clears, so 1px stands — but this is the thinnest margin
+	   any of the four faces has run at, and it is the value to check first if a
+	   descender ever touches the line.
+	   CORRECTION to the note this replaces, which said descender depth "barely
+	   moves with weight (the stroke thins, the outline doesn't climb)": the
+	   depth does barely move, but it moved the opposite way to what that implied
+	   — 600 → 400 made the descender DEEPER, 3.750px → 3.875px, not shallower.
+	   A lighter cut is not automatically a safer one here. Re-measure when the
+	   face, the size, OR the weight moves.
 	   Procedure: probe the baseline with a zero-height inline-block appended into
 	   the title, add canvas measureText('y').actualBoundingBoxDescent taken at 8×
 	   the rendered size (it quantises to whole px at these sizes), and compare
@@ -1214,17 +1275,21 @@ body {
 	padding: 0.55rem 1.1rem;
 	border-radius: 0.11rem;
 	font-size: 0.875rem;
-	/* 700, NOT 600 — Satoshi ships 300/400/500/700/900 and has no semibold
-	   (verified 07-27: asking Fontshare for satoshi@600 returns empty CSS).
-	   A 600 here was never rendering at 600: CSS font matching resolves an
-	   unavailable weight above 500 upward, so the 700 file was already being
-	   used. The cost was a visible FOUT weight jump — the fallback stack's
-	   Segoe UI DOES have a real semibold, so buttons painted at a true 600
-	   and then thickened to 700 the moment Satoshi landed. Declaring the
-	   weight the font actually has makes both sides of the swap agree.
-	   Only 500 and 700 are reachable; 500 is a real design change, not a
-	   rounding, so it stays a deliberate call rather than a silent one. */
-	font-weight: 700;
+	/* The site's emphasis weight — see the scale in the body rule. 700 until
+	   2026-08-04; this is the button, so it takes the same step down as the
+	   headings rather than staying behind as the one heavy thing left.
+	   HISTORY, kept because it is the reason the fetched weight range in
+	   Layout.astro is declared the way it is: under Satoshi this said 700 and
+	   NOT 600, because Satoshi shipped 300/400/500/700/900 with no semibold
+	   (verified 07-27: asking Fontshare for satoshi@600 returned empty CSS).
+	   A 600 was never rendering at 600 — CSS font matching resolves an
+	   unavailable weight above 500 upward, so the 700 file was already in use.
+	   The cost was a visible FOUT weight jump: the fallback stack's Segoe UI
+	   DOES have a real semibold, so buttons painted at a true 600 and then
+	   thickened the moment the webfont landed. Recursive is variable across
+	   300–700, so every weight in that band is now real and this class of bug
+	   can't recur — but only while the fetched range keeps covering the CSS. */
+	font-weight: 500;
 	line-height: 1;
 	text-decoration: none;
 	white-space: nowrap;
@@ -1273,7 +1338,8 @@ body {
 	   fixed value. At 0.5rem the hovered state opened a visible hole. */
 	gap: 0.4rem;
 	font-size: 0.875rem;
-	font-weight: 500;
+	/* Secondary UI weight — was 500, stepped down with the rest 2026-08-04. */
+	font-weight: 400;
 	line-height: 1;
 	color: var(--ink-soft);
 	text-decoration: none;
@@ -1552,7 +1618,13 @@ body {
 	background: var(--surface-sunken);
 	color: var(--ink);
 	font-size: 0.7rem;
-	font-weight: 500;
+	/* Secondary UI weight — was 500, stepped down with the rest 2026-08-04.
+	   The most exposed of the four: at 0.7rem this is the smallest type on the
+	   site, and weight buys more legibility per step down here than anywhere
+	   else. Kept on the scale for consistency, but it is the first thing to put
+	   back to 500 if the label reads thin. The script's width measurer clones
+	   this element, so the widths it writes track the change on their own. */
+	font-weight: 400;
 	line-height: 1;
 	white-space: nowrap;
 	/* Hidden until the first entrance plays. Both animations are `both`-filled,

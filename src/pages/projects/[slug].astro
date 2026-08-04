@@ -28,7 +28,7 @@ const { project } = Astro.props;
 		    projects.ts). */}
 		<header class="reveal" style="--i: 0">
 			<p class="text-sm tabular-nums text-[var(--ink-num)]">{project.year}</p>
-			<h1 class="mt-2 text-3xl font-bold tracking-tight text-[var(--ink-title)] sm:text-4xl">{project.title}</h1>
+			<h1 class="mt-2 text-3xl font-medium tracking-tight text-[var(--ink-title)] sm:text-4xl">{project.title}</h1>
 		</header>
 
 		{/* Reading matter is capped at --measure (see global.css) — ~11 words a
@@ -42,8 +42,23 @@ const { project } = Astro.props;
 		    paragraph is set as a lead (a step up in size, --ink-soft), so the
 		    work paragraph reads as the body it steps down into. */}
 		<section class="reveal mt-8 max-w-[var(--measure)]" style="--i: 1">
-			<p class="text-xl leading-relaxed text-[var(--ink-soft)]">{project.problem}</p>
-			<p class="mt-6 text-lg leading-relaxed">{project.work}</p>
+			{/* Both paragraphs carry font-normal rather than inheriting the body's
+			    300 — the only weight bumps the 2026-08-04 legibility audit
+			    actually required. This is the site's longest-form reading, and at
+			    w300 both fell under the APCA floor: the lead needs ≥32px at w300
+			    for its Lc 64.8 and is 23.75px; the work paragraph needs ≥24px for
+			    its Lc 75.1 and is 21.375px. w400 clears both.
+
+			    ⚠ The lead is only fixed in the LIGHT theme. In dark it sits at
+			    Lc 42.1 — --ink-soft on --paper — and no weight reaches the floor
+			    from there; APCA wants 86px at w300 and 44px at w700. That is a
+			    COLOUR problem, it predates the weight change, and it is the one
+			    real legibility fault on the site: the lead is the first thing read
+			    on every project page and it is the dimmest text on it. Fixing it
+			    means lifting --ink-soft or setting this paragraph in --ink, not
+			    reaching for more weight. */}
+			<p class="text-xl font-normal leading-relaxed text-[var(--ink-soft)]">{project.problem}</p>
+			<p class="mt-6 text-lg font-normal leading-relaxed">{project.work}</p>
 		</section>
 
 		<section class="reveal mt-10 space-y-5" style="--i: 2">
