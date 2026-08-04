@@ -72,9 +72,12 @@ const onHome = path === '/';
 		    what the cluster draws — the buttons are scaled down inside it — but
 		    both are centred on the same line, so the drawn icons land on the
 		    bar's centre. See the close-ranks block in global.css. */}
+		{/* No `gap-*` utility on this box: the gap is --nav-icon-gap in global.css,
+		    because the close-ranks translate and the hit-box pseudo are both cut
+		    against it and the three have to move together. */}
 		<div
 			id="contact-group"
-			class="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5"
+			class="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center"
 		>
 			{
 				contacts.map((c, i) => {
@@ -105,28 +108,41 @@ const onHome = path === '/';
 			    since 2026-08-03 — it wore an ink chip before that.
 			    The ↗ shows only for external (new-tab) links.
 
-			    TWO elements, and the split is load-bearing: the outer span is the
-			    POSITIONER (its transform is where the pill is, its transition is the
-			    slide between icons) and the inner one is the visible box that plays
-			    the pop. Putting the pop on the outer span would replay it on every
-			    slide, since the slide moves the same transform property. */}
+			    THREE elements, and every split is load-bearing:
+			      .contact-slider      the POSITIONER (its transform is where the pill
+			                           is, its transition is the slide between icons)
+			      .contact-slider-in   the visible plate, and the only thing that
+			                           plays the pop. Putting the pop on the positioner
+			                           would replay it on every slide, since the slide
+			                           moves the same transform property.
+			      .contact-slider-stamp the CONTENT, which the copy confirmation
+			                           stamps. It is its own box so the stamp scales
+			                           the whole row — the label and the ↗ together —
+			                           about the plate's centre. Scaling the plate
+			                           would punch the chip itself; scaling the text
+			                           span alone would leave the arrow behind and
+			                           swing the word off-centre on external links.
+			                           (It briefly also held a confirmation tick,
+			                           removed 2026-08-03 — the stamp says it.) */}
 			<span class="contact-slider" aria-hidden="true">
 				<span class="contact-slider-in">
-					<span class="contact-slider-text"></span>
-					<svg
-						class="contact-slider-ext"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="square"
-						stroke-linejoin="miter"
-						aria-hidden="true"
-					>
-						<path d="M15 3h6v6" />
-						<path d="M10 14 21 3" />
-						<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-					</svg>
+					<span class="contact-slider-stamp">
+						<span class="contact-slider-text"></span>
+						<svg
+							class="contact-slider-ext"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="square"
+							stroke-linejoin="miter"
+							aria-hidden="true"
+						>
+							<path d="M15 3h6v6" />
+							<path d="M10 14 21 3" />
+							<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+						</svg>
+					</span>
 				</span>
 			</span>
 		</div>
@@ -579,8 +595,9 @@ const onHome = path === '/';
 	const group = document.getElementById('contact-group');
 	const pill = group?.querySelector<HTMLElement>('.contact-slider');
 	const pillText = pill?.querySelector<HTMLElement>('.contact-slider-text');
+	const pillStamp = pill?.querySelector<HTMLElement>('.contact-slider-stamp');
 
-	if (group && pill && pillText) {
+	if (group && pill && pillText && pillStamp) {
 		const icons = Array.from(group.querySelectorAll<HTMLAnchorElement>('.btn-icon'));
 
 		// Hidden clone of the pill, used to measure the exact width each label
@@ -598,19 +615,17 @@ const onHome = path === '/';
 
 		let visible = false;
 		let resetTimer = 0;
-		let swapSeq = 0;
 		const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 		const labelFor = (icon: HTMLElement) => icon.getAttribute('data-label') ?? '';
 		const isExternal = (icon: HTMLElement) => icon.getAttribute('target') === '_blank';
 
-		// Drop any in-flight roll animation and return the text to a clean,
-		// visible resting state (used before every direct repositioning).
+		// Drop any in-flight stamp and return the label to a clean, visible resting
+		// state (used before every direct repositioning).
 		const resetText = () => {
-			swapSeq++;
-			pillText.style.transition = 'none';
-			pillText.style.transform = 'none';
-			pillText.style.opacity = '1';
+			pillStamp.style.transition = 'none';
+			pillStamp.style.transform = 'none';
+			pillStamp.style.opacity = '1';
 		};
 
 		// Position + size the pill under `icon`, showing `text`. Links that open
@@ -629,32 +644,75 @@ const onHome = path === '/';
 			pill.style.transform = `translateX(${centerX}px) translateX(-50%)`;
 		};
 
-		// Slide the current text out to the right, then slide `text` in from the
-		// left — one continuous left-to-right motion, the same direction as the
-		// pill's entrance wipe and the card title underline — used for the copy
-		// feedback, so "Copied!" animates in and back without resizing the pill
-		// (which clips the outgoing/incoming text via its overflow: hidden).
-		const swapText = (text: string) => {
-			if (reduce) {
-				pillText.textContent = text;
-				return;
-			}
-			const seq = ++swapSeq;
-			pillText.style.transition = 'transform 0.08s ease, opacity 0.08s ease';
-			pillText.style.transform = 'translateX(70%)';
-			pillText.style.opacity = '0';
-			window.setTimeout(() => {
-				if (seq !== swapSeq) return; // superseded
-				pillText.textContent = text;
-				pillText.style.transition = 'none';
-				pillText.style.transform = 'translateX(-70%)';
-				pillText.style.opacity = '0';
-				void pillText.offsetHeight; // reflow so the entry animates
-				pillText.style.transition =
-					'transform 0.12s cubic-bezier(0.34, 1.35, 0.64, 1), opacity 0.1s ease';
-				pillText.style.transform = 'translateX(0)';
-				pillText.style.opacity = '1';
-			}, 80);
+		// ── The copy confirmation: the pill rides the button's press ──
+		// 2026-08-03. The gesture began as Hiro's pick from a fourteen-variant
+		// exploration (roll, odometer both ways, crossfade, pop, wipe, letters,
+		// flip, defocus, stamp, tick, plate flash, colour sweep, countdown) — the
+		// STAMP, which dropped the label in from 135% on a hard 1.6 overshoot.
+		//
+		// It came out because it could not be synchronised with the icon, and the
+		// reason is worth keeping: a stamp lands by SHRINKING (1.35 → 1) while the
+		// pressed glyph releases by GROWING (0.9 → 1). Aligning the start frame
+		// and the duration did nothing, because the two were mirror images —
+		// maximally opposed at exactly the moment both springs overshoot. Same
+		// clock, opposite motion, and it read as two things happening at once.
+		//
+		// So the pill now does what the icon does, on the same events and the same
+		// pair of tokens: it dips to 0.9 on pointerdown over --dur-press, and
+		// springs back to 1 over --dur-pop-in on --ease-pop when the press is let
+		// go — the label changing at the turn. One object with two parts, which is
+		// what the button and its own name should have been all along.
+		//
+		// The earlier roll (out right, in from the left) is also worth not
+		// rediscovering: horizontal is the axis this pill already owns, since its
+		// identity is SLIDING SIDEWAYS between the four icons. A text roll on that
+		// axis inside a box that travels on it is two messages in one channel.
+		// Scale is free precisely because nothing else here uses it.
+
+		// The dip. Every contact icon gets it, not just the one that copies: the
+		// pill hangs under whichever icon is hovered and the press belongs to the
+		// BUTTON, so a pill that sat still under three of the four would be the
+		// same mismatch this block exists to fix.
+		const pressStamp = () => {
+			if (reduce) return;
+			pillStamp.style.transition = `transform var(--dur-press) var(--ease-pop)`;
+			pillStamp.style.transform = 'scale(0.9)';
+			pillStamp.style.opacity = '1';
+		};
+
+		// The release. Mirrors `#site-nav .btn-icon:hover > svg` exactly — on
+		// mouseup :active drops, the pointer is still hovering, and the glyph
+		// returns to its lift on --dur-pop-in / --ease-pop. Same numbers here, so
+		// the two finish on the same frame.
+		const releaseStamp = () => {
+			if (reduce) return;
+			pillStamp.style.transition = `transform var(--dur-pop-in) var(--ease-pop)`;
+			pillStamp.style.transform = 'scale(1)';
+			pillStamp.style.opacity = '1';
+		};
+
+		const stampText = (text: string) => {
+			// The width is deliberately NOT re-measured: the pill stays at the
+			// resting label's width so the plate never resizes under the swap.
+			// "Copied!" is the shorter word, so it simply sits centred in a
+			// rectangle cut for "Copy email" — which is why the gesture scales the
+			// content box (whose centre is the plate's) and not the text span.
+			pillText.textContent = text;
+			if (reduce) return;
+			// Snap to the pressed size and re-grow. On a real click the element is
+			// already at 0.9 and only the opacity blinks — which is the moment the
+			// word changes, and wants marking. On the 1.5s return there was no
+			// press, so this supplies the dip the rebound needs to start from.
+			pillStamp.style.transition = 'none';
+			pillStamp.style.transform = 'scale(0.9)';
+			pillStamp.style.opacity = '0';
+			void pillStamp.offsetHeight; // reflow, so the rebound animates
+			// The ink is much faster than the travel, and on --dur-press: the word
+			// is fully there in the time the glyph would take to dip, so the swap
+			// reads as instant and the spring is only how it settles.
+			pillStamp.style.transition = `transform var(--dur-pop-in) var(--ease-pop), opacity var(--dur-press) ease`;
+			pillStamp.style.transform = 'scale(1)';
+			pillStamp.style.opacity = '1';
 		};
 
 		const showAt = (icon: HTMLElement, text = labelFor(icon)) => {
@@ -705,6 +763,25 @@ const onHome = path === '/';
 		// delay here re-opens that gap; widen the hit boxes instead.
 		let gapHideTimer = 0;
 		icons.forEach((icon) => {
+			// The press. Its release is bound to the WINDOW, not to the icon: a
+			// press dragged off the button never fires pointerup on it, and the pill
+			// must not be left stuck at 0.9. The glyph has the same problem and CSS
+			// solves it for free — :active drops wherever the pointer ends up — so
+			// this is just what it costs to keep a script-driven element honest
+			// beside a state-driven one.
+			// On a real click, pointerup's release and the click handler's stampText
+			// both run before the next paint, so the extra assignment is invisible
+			// rather than a competing animation.
+			icon.addEventListener('pointerdown', () => {
+				pressStamp();
+				const release = () => {
+					window.removeEventListener('pointerup', release);
+					window.removeEventListener('pointercancel', release);
+					releaseStamp();
+				};
+				window.addEventListener('pointerup', release);
+				window.addEventListener('pointercancel', release);
+			});
 			icon.addEventListener('mouseenter', () => {
 				window.clearTimeout(gapHideTimer);
 				showAt(icon);
@@ -726,34 +803,51 @@ const onHome = path === '/';
 			if (!group.contains(e.relatedTarget as Node)) hide();
 		});
 
-		// Copy-to-clipboard: swap the pill text to feedback, then restore. On
-		// success we swap the text only — keeping the rectangle at the "Copy
-		// email" width so it doesn't resize. The (rare) fallback hint is longer,
-		// so that one does resize to stay readable.
+		// Copy-to-clipboard: stamp the confirmation into the pill, then stamp the
+		// label back. Both directions use the same gesture — the return is the
+		// same event running out, not a different one. The (rare) fallback hint is
+		// much longer than either label, so that one goes through place() and does
+		// resize, since a clipped instruction is worse than a moving box.
+		//
+		// ── The stamp fires BEFORE the write, not after it ──
+		// 2026-08-03, Hiro: the stamp has to run with the button's press. It could
+		// not, while it was sequenced after `await navigator.clipboard.writeText`.
+		// The glyph's press gesture is pure CSS :active, so it releases on mouseup
+		// — the same tick as `click` — while an awaited stamp could only start on
+		// a later microtask, once the clipboard promise had settled. Two halves of
+		// one gesture on two different clocks, and the icon always won.
+		//
+		// So the feedback is OPTIMISTIC: claim it, then do it, and correct the
+		// claim if the write rejects. Safe here because a clipboard rejection is a
+		// permission refusal, which comes back immediately rather than late — the
+		// correction lands within a frame or two, and it still tells the truth.
 		icons.forEach((icon) => {
 			const address = icon.dataset.copy;
 			if (!address) return;
-			icon.addEventListener('click', async (e) => {
+			icon.addEventListener('click', (e) => {
 				e.preventDefault();
-				let ok = true;
-				try {
-					await navigator.clipboard.writeText(address);
-				} catch {
-					ok = false;
-				}
 				window.clearTimeout(resetTimer);
-				if (ok) {
-					if (!visible) showAt(icon);
-					swapText('Copied!'); // roll in, same width
-					resetTimer = window.setTimeout(() => {
-						if (visible) swapText(labelFor(icon)); // roll back
-					}, 1500);
-				} else {
-					showAt(icon, 'Press ⌘C to copy'); // longer hint: resize to fit
-					resetTimer = window.setTimeout(() => {
-						if (visible) place(icon, labelFor(icon));
-					}, 1500);
-				}
+
+				// Synchronous, so this frame is the one the press releases on.
+				if (!visible) showAt(icon);
+				stampText('Copied!'); // stamp in
+				resetTimer = window.setTimeout(() => {
+					if (visible) stampText(labelFor(icon)); // stamp back
+				}, 1500);
+
+				// Wrapped rather than called bare: on an insecure origin
+				// navigator.clipboard is undefined, which throws SYNCHRONOUSLY and
+				// would escape a .catch() hung off the call itself. The old
+				// try/await/catch covered that for free; this is what replaces it.
+				Promise.resolve()
+					.then(() => navigator.clipboard.writeText(address))
+					.catch(() => {
+						window.clearTimeout(resetTimer);
+						showAt(icon, 'Press ⌘C to copy'); // longer hint: resize to fit
+						resetTimer = window.setTimeout(() => {
+							if (visible) place(icon, labelFor(icon));
+						}, 1500);
+					});
 			});
 		});
 	}
