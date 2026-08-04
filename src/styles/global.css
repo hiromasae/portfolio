@@ -885,27 +885,33 @@ body {
    Driven by the whole card, not by the title's own :hover — the entire <a> is
    the link.
 
-   IT NO LONGER WIPES (Hiro, same day: "just make it appear"). It was a gradient
-   band whose width grew 0% → 100% over --dur-card, sweeping left to right; now
-   the two states are the same two background-sizes with nothing between them.
-   The declaration stays a background gradient rather than becoming
-   text-decoration because the size, colour and the descender clearance below are
-   all still doing their jobs — only the transition went.
+   IT NO LONGER WIPES (Hiro, 2026-08-02: "just make it appear"). It was a
+   gradient band whose width grew 0% → 100% over --dur-card, sweeping left to
+   right; the sweep is not coming back.
 
-   This leaves the panel as the ONLY thing on the card that animates on hover,
-   which is the point: one motion, and the rest of the card simply changes
-   state. */
+   ASYMMETRIC SINCE 2026-08-03 (Hiro: appear immediately, fade out on unhover).
+   Arriving is instant, leaving is a --dur-card opacity fade. The trick is that a
+   transition is read from the state being animated TO, not from the one being
+   left: the fade lives on the RESTING rule, which is what the element returns to
+   on unhover, and the hover rule sets transition: none so the arrival skips it.
+   That reads as intended — the line meets the cursor at once, then releases
+   rather than snapping off — but it does mean the two halves are configured in
+   different rules, so changing one does NOT change the other. If they ever need
+   to match again, the durations have to be set in both places.
+
+   This also forced the line off background-size and onto an ::after. Opacity is
+   what fades, and the gradient was painted on the title itself, where fading it
+   would have taken the words with it. The pseudo-element carries the same 2px
+   band at the same position, so the measured descender clearance below is
+   unchanged — see padding-bottom. */
 .project-card__title {
 	/* inline-block, NOT inline: an inline element's padding doesn't grow the
 	   line box, so a line painted below the text can land outside the box (and
 	   outside any ancestor's overflow clip, where it disappears). */
 	display: inline-block;
-	/* currentColor, not --ink: the title wears --ink-title, and the line under it
-	   has to travel with it or it reads as a rule the heading happens to sit on. */
-	background-image: linear-gradient(currentColor, currentColor);
-	background-repeat: no-repeat;
-	background-position: left bottom;
-	background-size: 0% 2px;
+	/* The ::after is positioned against this box, so it has to be a containing
+	   block. Nothing else on the title relies on the offset. */
+	position: relative;
 	/* The line hugs the title, so this is the smallest padding that still clears
 	   a descender. The band paints at the BOTTOM of the padding box, so its top
 	   edge lands at (padding-bottom − 2px) from the content box; every extra px
@@ -924,39 +930,41 @@ body {
 	   the rendered size (it quantises to whole px at these sizes), and compare
 	   against the element's bottom − 2px. */
 	padding-bottom: 1px;
-	/* No transition, by instruction. Do not "restore" one as a cleanup. */
 }
-.project-card:hover .project-card__title,
-.project-card:focus-within .project-card__title {
-	background-size: 100% 2px;
-}
-
-/* ── Project card: the arrow appears on hover ──
-   2026-08-02, Hiro, in three steps on one day: it wiped in and tilted to ↗;
-   then the animation came off and it sat drawn at rest on every card; now it is
-   hidden at rest and simply appears with the underline. Worth following the arc
-   — the end state is not the start state, and "keep the arrow" from step two
-   meant keep the glyph, not keep it visible.
-
-   Opacity, not clip-path, and no transition: it appears the way the underline
-   does, which is instantly. (The clip-path it once used was a WIPE — the thing
-   being removed — and leaving it at inset(0 100% 0 0) is what would have made
-   the arrow permanently invisible if only the hover half had been deleted.)
-
-   Opacity rather than display or visibility so the glyph keeps its box at rest:
-   the title's line height and the h3's width are the same hovered and not, so
-   nothing reflows and no text shifts under the cursor.
-
-   It stays a right arrow rather than the -45° ↗ the old tilt reached: ↗ is the
-   site's "leaves the site" mark (see .btn-quiet's note on why that one declines
-   to rotate), and these cards go to internal project pages. */
-.project-card__arrow {
+.project-card__title::after {
+	content: "";
+	position: absolute;
+	/* Insets rather than a width: the band spans the span, which the markup
+	   already holds to the words. bottom: 0 puts it at the foot of the PADDING
+	   box — the same place background-position: left bottom painted it — so the
+	   1px measured above is still what clears the descender. */
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 2px;
+	/* currentColor, not --ink: the title wears --ink-title, and the line under it
+	   has to travel with it or it reads as a rule the heading happens to sit on. */
+	background: currentColor;
 	opacity: 0;
+	/* The LEAVING half — see the block comment. This is the resting rule, so this
+	   is the transition that runs on unhover. */
+	transition: opacity var(--dur-card) ease;
 }
-.project-card:hover .project-card__arrow,
-.project-card:focus-within .project-card__arrow {
+.project-card:hover .project-card__title::after,
+.project-card:focus-within .project-card__title::after {
 	opacity: 1;
+	/* The ARRIVING half: no transition, so the line is simply there. */
+	transition: none;
 }
+
+/* ── Project card: the arrow ──
+   Gone, 2026-08-03 (Hiro: remove the arrow that appears on hover). It ran
+   through four states in two days — wiping in and tilting to ↗, drawn at rest on
+   every card, hidden until hover, removed — and the SVG went with it, so there
+   is no orphaned glyph sitting invisible in the markup. Kept as a marker so the
+   missing block doesn't read as an oversight, and because the arc is worth
+   knowing: bringing one back is a new decision, not a restoration. The underline
+   is now the card's whole hover answer besides the panel. */
 /* ── Project card: the travelling panel ──
    ONE panel for the whole grid, not a background on each card (2026-08-02,
    Hiro: it should move between cards as you go from one to the next). So this
@@ -1267,23 +1275,24 @@ body {
    on the site. What follows describes the pair as it was designed; the
    relationship is history rather than something you can still see side by side.
 
-   The project card's gesture RUN BACKWARDS, because the link means the
-   opposite thing. On the card the underline wipes left-to-right toward an
-   arrow sitting on the right, which then wipes in and tilts to ↗ ("out").
-   Here the arrow sits on the LEFT, so the wipe travels right-to-left and
-   arrives at it, and the arrow answers by nudging further left ("back").
-   Same tokens, same easing — see the .project-card__arrow block above before
-   retiming either.
+   Originally the project card's gesture RUN BACKWARDS, because the link means
+   the opposite thing. On the card the underline wiped left-to-right toward an
+   arrow sitting on the right, which wiped in and tilted to ↗ ("out"). Here the
+   arrow sits on the LEFT, so the wipe travels right-to-left and arrives at it,
+   and the arrow answers by nudging further left ("back").
 
-   The overlap fractions no longer match: the card's moved to 0.25 because it
-   has a zoom and a lift that must contain the arrow's stagger, and this link
-   has neither — it's type on paper, so a 0.55 nudge landing at 365ms trails
-   nothing and reads fine. Divergent on purpose; don't "resync" them without
-   re-reading why the card's number is what it is.
+   THE PAIR IS BROKEN, and deliberately. The card kept none of its half: the
+   wipe went 2026-08-02 (it just appears now), and the arrow went 2026-08-03
+   (removed outright — the .project-card__arrow this used to point at no longer
+   exists). This link is now the site's ONLY wiping underline and its only
+   arrow-on-hover, so nothing here is mirroring anything any more; read it on its
+   own terms. Retiming it affects this link alone, which also means the old
+   warning about resyncing the two overlap fractions is moot — there is no
+   second fraction left to resync to.
 
-   No tilt on this one: the card's -45° is carrying a MEANING (this leaves
-   the site), and there's no second meaning here for a rotation to encode,
-   so it would be decoration. The nudge is the whole idea. */
+   No tilt on this one: the ↗ carries a MEANING (this leaves the site), and
+   there's no second meaning here for a rotation to encode, so it would be
+   decoration. The nudge is the whole idea. */
 .btn-quiet__label {
 	/* inline-block, NOT inline: an inline element's padding doesn't grow the
 	   line box, so the underline can land outside it — and outside any ancestor's
