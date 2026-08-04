@@ -377,6 +377,14 @@
 	--dur-pop-in: 280ms;
 	--dur-pop-out: 130ms;
 	--ease-pop: cubic-bezier(0.34, 1.45, 0.5, 1);
+	/* The dip on pointerdown, third member of the same group: a press snaps in
+	   at well under half the pop's arrival, then RELEASES on --dur-pop-in,
+	   because letting go returns the glyph to its hover state. Promoted from a
+	   bare 0.09s in the :active rule on 2026-08-03, when the contact pill
+	   started riding the press too (Nav.astro's pressStamp) — two elements have
+	   to dip on the same frame for the button and its label to read as one
+	   object, and that cannot survive the number living in two files. */
+	--dur-press: 90ms;
 
 	/* ── Reading measure ──
 	   The cap on any column of running prose — the home hero and a project's
@@ -690,6 +698,30 @@ body {
 	   half the drawn gap — see the .btn-icon::after note). Comfortably over WCAG
 	   2.2's 24px floor, but this is the token that spends that margin. */
 	--nav-icon-scale: 0.66;
+	/* ── The contacts' gap ──
+	   A LAYOUT gap: the buttons are drawn at --nav-icon-scale, so what lands on
+	   screen is this × 0.66. Three rules are cut against it and none of them may
+	   be retuned by eye — the close-ranks translate (which contracts the cluster
+	   on a box-and-gap pitch), the ::after hit boxes (half of it, so neighbouring
+	   regions meet exactly), and the gap on #contact-group itself. It is a token
+	   for that reason: they have to move together or the cluster stops being one
+	   uniform miniature.
+
+	   0.8rem, from 0.375rem (2026-08-03, Hiro: more room between the icons).
+	   The target is the bar's VERTICAL air: at 0.375 the glyphs sat 17.2px apart
+	   while there was 22.5px above and below them, so the cluster was tighter
+	   across than it was deep and read as one crowded object rather than four
+	   controls. 0.8rem draws a 10.0px gap between the button boxes and puts the
+	   GLYPHS 22.6px apart — the same 22.5px, so the cluster now sits on one unit
+	   in both axes.
+	   Smaller steps, if this overshoots: 0.5rem lands the glyphs at 18.8px,
+	   which is --nav-inset (19px) almost exactly; 0.7rem lands them at 21.3px.
+	   What it costs is that --nav-inset is now the bar's TIGHTEST horizontal gap
+	   at 19px, which inverts the argument in that token's own note — the ends
+	   would want ~1.2rem to lead again. Left alone deliberately: the inset holds
+	   the wordmark and the toggle, and widening it moves them, which is not what
+	   was asked for here. */
+	--nav-icon-gap: 0.8rem;
 	/* How far the bar's outermost DRAWN elements sit inside the column edges —
 	   the wordmark on the left, the toggle's glyph on the right. See the
 	   .nav-inner rule below, which spends it asymmetrically to land them equal.
@@ -801,17 +833,35 @@ body {
 	   screen whatever that scale is — they were measured at 0.42 and are
 	   unchanged at 0.47. 2px is the site's line weight, and the 3px gap is cut
 	   against the contact icons' drawn stroke beside it (2 units of a 24-unit
-	   box at 1.9rem, ~2.0px at --nav-icon-scale 0.66). */
+	   box at 1.9rem, ~2.0px at --nav-icon-scale 0.66).
+
+	   ── The fade is ASYMMETRIC (2026-08-03, Hiro) ──
+	   It arrives instantly and leaves on the fade. Same shape as the icons'
+	   lift/pop pair further down, and for the same reason: arriving is the
+	   ANSWER to the cursor — any ramp on it reads as the mark thinking about
+	   it — while leaving is only the state expiring, and a snap there reads as
+	   the line being yanked away.
+	   Written as duration 0s on the hover rule rather than as two transition
+	   declarations: this base rule is the state the mark returns TO, so it is
+	   the one that owns the OUT timing, and the hover rule owns the IN.
+
+	   The out is --dur-pop-out, down from --dur-gesture (Hiro, same day: faster
+	   on the way out). It is the site's exit clock — the glyph's drop-back and
+	   the pill's shrink already run on it — so the mark now leaves on the same
+	   130ms as everything else in the bar, and the pairing is exactly the
+	   pop pair's: instant in, --dur-pop-out out. --dur-gesture is the WIPE/SLIDE
+	   beat, and nothing here travels. */
 	text-decoration: underline;
 	text-decoration-color: transparent;
 	text-decoration-thickness: calc(2px / var(--nav-logo-scale));
 	text-underline-offset: calc(3px / var(--nav-logo-scale));
-	transition: text-decoration-color var(--dur-gesture) var(--nav-ease);
+	transition: text-decoration-color var(--dur-pop-out) var(--nav-ease);
 }
 
 #site-nav .nav-logo:hover,
 #site-nav .nav-logo:focus-visible {
 	text-decoration-color: currentColor;
+	transition-duration: 0s;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1291,17 +1341,24 @@ body {
 }
 
 /* ── Hit boxes tile edge to edge ──
-   The drawn buttons sit 0.2625rem apart (the 0.375rem layout gap × the 0.7
-   close-ranks scale), and that sliver used to be dead ground: crossing it
+   The drawn buttons sit --nav-icon-gap × --nav-icon-scale apart (10.0px at
+   0.8rem and 0.66), and that sliver used to be dead ground: crossing it
    dropped the hover, and lingering there cleared the label after the grace
    delay. This pseudo extends each button's hit region by HALF the layout gap
    on every side, so neighbouring regions meet exactly — sweeping the row is
    one continuous hover and the label just slides along.
 
    Half the LAYOUT gap, not half the drawn gap, and that's not an approximation:
-   the pseudo is inside the button, so it scales with it, and 0.1875rem × 0.7
-   is 0.13125rem — precisely half the 0.2625rem it has to close. Retune it only
-   against --nav-icon-scale's gap, never by eye.
+   the pseudo is inside the button, so it scales with it, and half the layout
+   gap × the scale is precisely half the drawn gap, whatever either token is
+   set to. Which is why it is written as an expression — retune it only at
+   --nav-icon-gap, never by eye.
+
+   Vertically it now reaches 5.0px past the drawn button (it was 2.5px at the
+   old 0.375rem gap), pure forgiveness for a diagonal approach. Still short of
+   the pill: the group's layout box is the FULL-SIZE 2.9rem one, so there are
+   9.4px of slack below the drawn button before its edge, and the pill hangs
+   0.3rem below that — and is pointer-events: none regardless.
 
    A pseudo rather than padding because padding would change the 2.9rem box the
    close-ranks translate in the nav is cut against. Vertical by the same amount,
@@ -1317,7 +1374,7 @@ body {
 #contact-group .btn-icon::after {
 	content: '';
 	position: absolute;
-	inset: -0.1875rem;
+	inset: calc(var(--nav-icon-gap) / -2);
 }
 
 .btn-icon:hover {
@@ -1403,10 +1460,17 @@ body {
 	top: 100%;
 	left: 0;
 	width: 0;
-	/* The gap under the button box. Untouched through the chip coming off and
-	   the faint one going back on (2026-08-03), so the label's top edge has sat
-	   in the same place throughout. */
-	margin-top: 0.3rem;
+	/* The gap under the button box. It held at 0.3rem through the chip coming
+	   off and the faint one going back on (2026-08-03), then 0.2rem later the
+	   same day (Hiro: closer to the icon) — a ~2px lift, deliberately small.
+
+	   Worth knowing before reaching for this again: most of the space under the
+	   glyph is NOT this token. #contact-group's box is the FULL-SIZE 2.9rem
+	   button box while the glyph is drawn at --nav-icon-scale inside it, so
+	   there are ~9px of slack between the drawn icon's bottom edge and the
+	   `top: 100%` this hangs off. This margin is the last ~4px of a ~13px gap.
+	   Anything more than a nudge has to come out of that slack instead. */
+	margin-top: 0.2rem;
 	pointer-events: none;
 	transform: translateX(0) translateX(-50%);
 	/* The travelling pair (see --dur-slide): this pill is a body that moves and
@@ -1465,8 +1529,26 @@ body {
 	   so whichever ran last holds its end frame and this base only ever shows
 	   before the first hover. */
 	opacity: 0;
-	/* Clips the copy-feedback text roll ("Copied!" slides in from the edge). */
+	/* Clips the copy confirmation's stamp, whose first frames are drawn at 135%
+	   and are therefore wider than the plate. */
 	overflow: hidden;
+}
+
+/* The content box the stamp scales. Carries the flex row so the plate above
+   keeps its own job (padding, fill, clip) and the stamp gets a box whose centre
+   is the plate's centre — see the note in Nav.astro's markup.
+
+   It also held a drawn confirmation tick for an hour on 2026-08-03, gated on an
+   .is-copied class. Removed (Hiro): the stamp is the confirmation, and a second
+   mark arriving 0.11s behind it on its own clock split one event into two. If a
+   tick is ever wanted back, this box is where it goes — it exists to scale the
+   label and its companions as one, which is the whole reason a tick beside the
+   word would have worked here at all. */
+.contact-slider-stamp {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.3rem;
 }
 
 /* ── The pop ──
@@ -1575,9 +1657,33 @@ body {
 		border-color var(--dur-pop-in) var(--ease-pop);
 }
 
+/* The cluster's gap is a token because three rules are cut against it — this
+   one, the close-ranks pitch below, and the ::after hit boxes above. It is set
+   here rather than as a Tailwind `gap-*` in the markup so all three read the
+   same source; see --nav-icon-gap for the value and what it is measured
+   against.
+
+   ── The z-index is what puts the pill OVER the bar's hairline ──
+   2026-08-03, Hiro: the rule was painting across the label. The pill already
+   carries z-index: 60, and that was doing nothing, because this box is a
+   STACKING CONTEXT — the markup centres it with Tailwind's -translate-x-1/2 /
+   -translate-y-1/2, and a transform creates one. So the 60 was being resolved
+   among the pill's siblings inside this box, while the box ITSELF entered the
+   bar's stacking order at z-index: auto — and #site-nav::after, being a
+   pseudo-element, comes after every child in paint order and won.
+   Raising the group is the fix rather than raising the pill again: the whole
+   cluster is what has to clear the rule, and it is the outermost box that
+   actually competes with it. The theme toggle's twin pill never had this
+   problem — #theme-toggle-wrap is position: relative with no transform, so it
+   is not a stacking context and its pill's own 60 has always applied. */
+#contact-group {
+	gap: var(--nav-icon-gap);
+	z-index: 60;
+}
+
 /* ── Close ranks ──
    Every button's box is 2.9rem (0.5rem padding ×2 + a 1.9rem glyph) and the
-   contacts sit on a 0.375rem gap, but each button is scaled about its OWN
+   contacts sit on a --nav-icon-gap gap, but each button is scaled about its OWN
    centre — which shrinks the glyphs and leaves the gaps between them at full
    size, so the cluster reads loose. Each button therefore also translates
    back toward its cluster's anchor in proportion to its distance from it:
@@ -1595,7 +1701,7 @@ body {
    grows enough to reach the wordmark. */
 #site-nav #contact-group .btn-icon {
 	transform: translateX(
-			calc(-1 * var(--nav-icon-c, 0) * (2.9rem + 0.375rem) * (1 - var(--nav-icon-scale)))
+			calc(-1 * var(--nav-icon-c, 0) * (2.9rem + var(--nav-icon-gap)) * (1 - var(--nav-icon-scale)))
 		)
 		scale(var(--nav-icon-scale)); /* glyph: ~1.33rem */
 }
@@ -1899,7 +2005,7 @@ html.reveal-skip .reveal {
 	   comes later in the file, so a press wins whether or not the pointer is
 	   also hovering — which it always is. */
 	#site-nav .btn-icon:active > svg {
-		transition-duration: 0.09s;
+		transition-duration: var(--dur-press);
 	}
 
 	/* ── Theme swap ──
