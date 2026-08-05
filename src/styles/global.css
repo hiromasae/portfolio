@@ -151,29 +151,70 @@
 	--btn-text: #e9eaee; /* --paper */
 	--btn-border: var(--ink-hero);
 
-	/* Tokyo Night Light's blue, verbatim. The ring is a UI boundary, so WCAG
+	/* Tokyo Night Light's cyan, verbatim. The ring is a UI boundary, so WCAG
 	   1.4.11's 3:1 is the bar it has to clear against every ground it can land
-	   on — 6.28:1 against --paper and 6.81:1 against --surface, so it has room
+	   on — 7.76:1 against --paper and 8.40:1 against --surface, so it has room
 	   this time (the previous ring shipped under its own floor for a while).
-	   Deliberately the SAME blue as --ink-title below: a focused card shows a
+	   Deliberately the SAME hue as --ink-title below: a focused card shows a
 	   ring the colour of the title inside it, which reads as one object being
-	   picked out rather than two systems overlapping. */
-	--focus-ring: #34548a;
+	   picked out rather than two systems overlapping.
+
+	   It followed the title off the blue on 2026-08-04 to keep that tie intact.
+	   Worth recording that the tie CONSTRAINS the title's hue and not just the
+	   other way round: red was on the table for titles that day and one of the
+	   things against it was that a red focus ring reads as an error state. Cyan
+	   reads as informational, so the pairing survives being seen on a keyboard
+	   user's screen. Any future title hue has to pass that test too. */
+	--focus-ring: #0f4b6e;
 
 	/* ── Titles and numerals: the syntax accents ──
 	   2026-08-02, Hiro: colour the headings and titles with Tokyo Night's syntax
 	   colours. The site now reads a little like a source file — the wordmark is
-	   the keyword it always was, every TITLE takes the theme's blue, and every
-	   NUMERAL takes its orange.
+	   the keyword it always was, every TITLE takes one syntax hue, and every
+	   NUMERAL takes the theme's orange.
 
-	   One blue for all titles, not one per level: offered a per-level mapping
+	   One hue for all titles, not one per level: offered a per-level mapping
 	   (page h1s as functions, card titles as types) and a per-project mapping
 	   (four hues on one screen), Hiro took the restrained one. So a heading is a
 	   heading — the colour marks the CLASS of thing, and nothing inside that
 	   class is ranked by hue. What still ranks is the mark: --dye-name leads
-	   --ink-title by 1.11× here, so the wordmark stays the most forward piece of
+	   --ink-title by 1.16× here, so the wordmark stays the most forward piece of
 	   type on the page (the same depth rule the dye block below explains, now
 	   answering to a second competitor).
+
+	   ── 2026-08-04: THE HUE MOVED, blue → cyan ──
+	   Hiro: the nav logo and the project headings should be something
+	   unconventional, still Tokyo Night, because "purple and blue is everywhere
+	   right now". So this token and --dye-name were repicked as a PAIR, which is
+	   the only way they can be repicked — the depth rule below means the mark's
+	   contrast has to beat the title's in BOTH themes, and the palette's hue
+	   ranking is not the same on the two grounds (teal is the second brightest
+	   accent on the night ground and sixth on paper). Measured every accent
+	   against both papers and enumerated the pairs that survive; most do not.
+
+	   What ruled out the obvious answers: ORANGE is already --ink-num on every
+	   project year, and YELLOW sits in the same band and lands at 4.62:1 here,
+	   dead level with --ink-soft's 4.63 — so green's natural warm partner is
+	   spoken for, and the only warm option left was red, which Hiro rejected as
+	   reading like Christmas beside the green. That pushed the pair to the cool
+	   side of green, and cyan is the furthest into it that still clears the
+	   depth rule on both grounds.
+
+	   The pair now leads 1.15× dark / 1.16× light, against the blue/magenta
+	   pair's 1.09× / 1.11× — so this is BETTER separated than the arrangement it
+	   replaces, not merely different. Also considered and passed over: teal
+	   titles (1.19×/1.18×, but close enough to the green mark to read as one
+	   colour used inconsistently), two depths of green (clean 1.30×, but the
+	   light title fell to 1.03× the muted text — level with the year line it is
+	   supposed to outrank), and dropping the title accent entirely so green
+	   became the site's only colour.
+
+	   KNOWN AND ACCEPTED: this theme's cyan is a deep teal-navy, so on paper the
+	   title still reads faintly blue and the move fully lands only in dark. That
+	   is the VS Code light port's cyan verbatim, and the alternative was leaving
+	   the port for tokyonight-day, whose accents mostly fail AA — the reason the
+	   port was chosen in the first place (08-01). Not worth reopening for one
+	   token.
 
 	   --ink-num is the smaller call. Years are the only numerals on the site and
 	   they already sat in the muted line; orange lifts them out of it without
@@ -190,7 +231,7 @@
 	   off this accent (Hiro's ask). They had just come down to the body's own
 	   size-class — the greeting stopped being a 4xl page title and now sits at
 	   the section heading's 23.75px — and at that size, in a single narrow
-	   column, blue lines among five lines of ink read as highlighting rather
+	   column, coloured lines among five lines of ink read as highlighting rather
 	   than as structure. The accent is still the rule everywhere it marks a
 	   title that OUTSIZES its body: card titles, project h1s, the home page.
 
@@ -199,7 +240,7 @@
 	   than the body instead of matching it. The reasoning above is untouched —
 	   the about page still declines the hue, and separates by contrast, which is
 	   the one channel a heading at the body's own size still has left. */
-	--ink-title: #34548a; /* 6.28:1 — 1.36× the muted text */
+	--ink-title: #0f4b6e; /* cyan, verbatim — 7.76:1, 1.68× the muted text */
 	--ink-num: #965027; /* 5.03:1 */
 
 	/* ── The dye ──
@@ -212,9 +253,14 @@
 	   Japanese dye from the washi grounds exploration (07-25); it spent seven
 	   rounds of retuning in the red band as a 落款, the artist's seal, which was
 	   the argument for colouring the name at all. On 2026-08-01 it left that
-	   band: with the whole site on Tokyo Night, the mark is now the theme's
-	   magenta. Hiro chose it over Tokyo Night's red (which would have kept the
-	   seal reading) and its signature blue.
+	   band: with the whole site on Tokyo Night, the mark became the theme's
+	   magenta, chosen over Tokyo Night's red (which would have kept the seal
+	   reading) and its signature blue.
+
+	   2026-08-04 it left the magenta too, for the theme's GREEN — Hiro wanted
+	   the two accents to stop being purple and blue. See the --ink-title block
+	   above for the pairing that came out of that and why most candidates died;
+	   the two tokens can only be picked together, because of the rule below.
 
 	   This was a five-token palette for two days (07-25 → 07-27) — a dye for the
 	   wordmark, one per contact icon. The icon dyes were worn at rest, then
@@ -228,8 +274,10 @@
 	   value. Contrast doubles as a depth cue (atmospheric perspective), so the
 	   largest element in the bar reading as the faintest puts it visually BEHIND
 	   everything else — size and weight do not override that. The mark must
-	   out-contrast --ink-soft beside it. 5.76:1 against the muted text's 4.60:1
-	   is a 1.25× lead, the same lead the crimson held here.
+	   out-contrast --ink-soft beside it, and since 08-02 it must also lead
+	   --ink-title. 9.03:1 against the muted text's 4.63:1 is a 1.95× lead, and
+	   1.16× over the title — the widest margin the mark has held on paper (the
+	   crimson and the magenta both ran at 1.25× over the muted text).
 
 	   Also still true, and the trap in any retune: SATURATION IS PAID FOR IN
 	   CONTRAST. Pushing chroma at a fixed lightness makes a colour darker in
@@ -237,11 +285,22 @@
 	   not legibility. Move L and re-measure; don't read "more saturated" as a
 	   single dial. Ratios are measured against each theme's --paper.
 
-	   Tokyo Night Light's magenta, verbatim. Per theme, like every other token —
-	   the papers are inverted, so the mark is too. Clears AA-large unaided in
-	   both, so nothing on the site leans on WCAG 1.4.3's logo/brand-name
-	   exemption. */
-	--dye-name: #5a3e8e; /* 5.76:1 — 1.25× the muted text's lead */
+	   NOT verbatim, unlike the dark side and unlike every accent this token has
+	   worn before it. Tokyo Night Light's green is #385f0d, which carries only
+	   6.21:1 here — under the cyan title's 7.76, so the verbatim value would put
+	   a card title in front of the wordmark and invert the whole rule above.
+	   Solved in that green's own hue, lightness only, to 1.15× the title: 86% of
+	   the hue's chroma survives the move (it deepens toward the gamut's edge, so
+	   the clamp bites a little — the same caveat the --ink-heading block records
+	   from the light end). It reads as a dark forest rather than the leaf green
+	   the dark theme wears, which is the light theme doing what it always does
+	   here: the papers are inverted, so the mark is too.
+
+	   The deepening is a straight WIN and not a compromise. The magenta it
+	   replaces sat at 6.95:1; this sits at 9.03:1, so the wordmark is the most
+	   forward it has ever been on paper. Clears AA-large unaided in both themes,
+	   so nothing on the site leans on WCAG 1.4.3's logo/brand-name exemption. */
+	--dye-name: #264500; /* 9.03:1 — 1.95× the muted text, 1.16× the title */
 
 	/* ── The page's hairlines ──
 	   One gradient, shared by the nav's bottom edge and the rule over the
@@ -523,31 +582,38 @@
 	--btn-text: #0c0e14; /* --paper */
 	--btn-border: var(--ink-hero);
 
-	/* Tokyo Night's blue, verbatim — 7.66:1 against --paper, 6.79:1 against
+	/* Tokyo Night's cyan, verbatim — 9.15:1 against --paper, 8.11:1 against
 	   --surface, both well clear of WCAG 1.4.11's 3:1 floor for non-text. Same
-	   blue as --ink-title, deliberately; see the light block. */
-	--focus-ring: #7aa2f7;
+	   hue as --ink-title, deliberately; see the light block, which also records
+	   why the ring's reading constrains which hue the title may take. */
+	--focus-ring: #2ac3de;
 
 	/* The syntax accents on the night ground (see the light block for the
-	   reasoning). Both verbatim Tokyo Night. */
-	--ink-title: #7aa2f7; /* 7.66:1 — 1.27× the muted text */
+	   reasoning, the 2026-08-04 move off the blue, and the pairs that lost).
+	   Both verbatim Tokyo Night — this side needed no solve, unlike the light
+	   theme's mark: the night ground ranks green above cyan on its own. */
+	--ink-title: #2ac3de; /* cyan, verbatim — 9.15:1, 1.52× the muted text */
 	--ink-num: #ff9e64; /* 9.49:1 */
 
-	/* The same magenta on the night ground (see the light block for the method
-	   and the depth rule). This is Tokyo Night's magenta verbatim, not a
-	   lightness-solved counterpart — the theme ships one magenta for dark and a
-	   deeper one for light, and both happen to satisfy the rule as given.
+	/* The same green on the night ground (see the light block for the method,
+	   the depth rule, and the 2026-08-04 repick). Tokyo Night's green verbatim,
+	   not a lightness-solved counterpart — unlike its light-theme counterpart,
+	   which had to be deepened to stay ahead of the title. This ground ranks the
+	   green above the cyan unaided, so the rule holds as shipped.
 
 	   The mark runs LIGHTER here than on paper, not darker: on a dark ground a
-	   pale magenta is the high-contrast direction, so this is the same "sit
+	   leaf green is the high-contrast direction, so this is the same "sit
 	   forward of the muted text" rule as the light block, pointing the other
-	   way. 7.39:1 against the muted text's 6.45:1 — a 1.15× lead.
+	   way. 10.56:1 against the muted text's 6.01:1 — a 1.76× lead, and 1.15×
+	   over the title.
 
-	   That lead is thinner than light's 1.25×, as it has always been on this
-	   side; it is also better than the crimson managed here (1.077×). If the
-	   wordmark should sit further forward, raise L and re-measure rather than
-	   reaching for more chroma, which costs contrast. */
-	--dye-name: #bb9af7; /* 7.39:1 — 1.15× the muted text's lead */
+	   That lead used to be the THIN side — the magenta held 1.15× over the muted
+	   text here against light's 1.25×, and the crimson before it only 1.077×.
+	   Green inverts that: this is now the more comfortable of the two themes,
+	   and neither is anywhere near the floor. If the wordmark should sit further
+	   forward, raise L and re-measure rather than reaching for more chroma,
+	   which costs contrast — and check the title still trails it. */
+	--dye-name: #9ece6a; /* 10.56:1 — 1.76× the muted text, 1.15× the title */
 
 	--theme-fill-x: -9px;
 	--grain: none;
