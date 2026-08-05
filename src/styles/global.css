@@ -444,6 +444,16 @@
 	   to dip on the same frame for the button and its label to read as one
 	   object, and that cannot survive the number living in two files. */
 	--dur-press: 90ms;
+	/* How far the PILL dips, against the glyph's 0.9 (the :active rules at the
+	   foot of this file). Deliberately shallower, and the reason is area, not
+	   taste: scale is a ratio, and the plate is several times the 30px glyph, so
+	   the same 0.9 moves its edges several times as far and the label lurches
+	   while the icon merely clicks. 0.94 equalises the APPARENT travel instead
+	   of the number — chosen 2026-08-04 with the press moved off the content box
+	   onto the whole plate (Hiro: the whole pill and the text within).
+	   The clock is shared, not scaled: both dip over --dur-press and release
+	   over --dur-pop-in, so they still start and finish on the same frames. */
+	--pill-press: 0.94;
 
 	/* ── Reading measure ──
 	   The cap on any column of running prose — the home hero and a project's
@@ -1641,6 +1651,32 @@ body {
 		transform var(--dur-slide) var(--ease-slide),
 		width var(--dur-slide) var(--ease-slide);
 	z-index: 60;
+}
+
+/* ── The press box ──
+   2026-08-04. Dips the whole pill — plate, label and ↗ — while the pointer is
+   down on the button it names, so the two press as one object. Script-driven
+   (Nav.astro's pressPill / releasePill) because it has to answer pointerdown
+   on a SIBLING subtree: the pill is not inside the button, so no :active
+   selector can reach it.
+
+   Why a fourth box rather than the plate itself: the plate's transform belongs
+   to the pop, whose animations are `both`-filled and so keep winning the
+   cascade over any inline style for as long as the class is on — a press
+   written there would simply never render. The same argument put the slide on
+   the positioner and the stamp on the content box; this is the fourth channel
+   and the last one anything here needs.
+
+   `display: block` with no width of its own is what keeps it invisible to
+   layout: the plate's `width: 100%` resolves against this box, which fills the
+   script-driven positioner exactly as the plate used to. It also has to stay
+   transparent to the width MEASURER, which frees the outer and plate boxes to
+   shrink-wrap and reads offsetWidth off the clone — a block box with auto width
+   passes its content's preferred width straight up, so the measurement is
+   unchanged. Give this box a width and both the live pill and the measurer
+   collapse. */
+.contact-slider-press {
+	display: block;
 }
 
 .contact-slider-in {

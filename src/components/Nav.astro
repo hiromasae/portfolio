@@ -108,9 +108,17 @@ const onHome = path === '/';
 			    since 2026-08-03 — it wore an ink chip before that.
 			    The ↗ shows only for external (new-tab) links.
 
-			    THREE elements, and every split is load-bearing:
+			    FOUR elements, and every split is load-bearing. Each owns exactly
+			    one transform channel, which is the whole reason there are four:
 			      .contact-slider      the POSITIONER (its transform is where the pill
 			                           is, its transition is the slide between icons)
+			      .contact-slider-press the PRESS (2026-08-04). Dips the entire pill —
+			                           plate, label and ↗ — while the pointer is down,
+			                           so it presses with the button it names. It has
+			                           to be its own box: the plate's transform is
+			                           owned outright by the pop, whose animations are
+			                           `both`-filled and therefore beat an inline
+			                           style forever after they finish.
 			      .contact-slider-in   the visible plate, and the only thing that
 			                           plays the pop. Putting the pop on the positioner
 			                           would replay it on every slide, since the slide
@@ -118,13 +126,17 @@ const onHome = path === '/';
 			      .contact-slider-stamp the CONTENT, which the copy confirmation
 			                           stamps. It is its own box so the stamp scales
 			                           the whole row — the label and the ↗ together —
-			                           about the plate's centre. Scaling the plate
-			                           would punch the chip itself; scaling the text
-			                           span alone would leave the arrow behind and
-			                           swing the word off-centre on external links.
+			                           about the plate's centre. Scaling the text span
+			                           alone would leave the arrow behind and swing the
+			                           word off-centre on external links. (Punching the
+			                           plate was the thing this box existed to AVOID
+			                           until 2026-08-04; the press does exactly that
+			                           now, one box up, which is why the two gestures
+			                           no longer share an element.)
 			                           (It briefly also held a confirmation tick,
 			                           removed 2026-08-03 — the stamp says it.) */}
 			<span class="contact-slider" aria-hidden="true">
+				<span class="contact-slider-press">
 				<span class="contact-slider-in">
 					<span class="contact-slider-stamp">
 						<span class="contact-slider-text"></span>
@@ -143,6 +155,7 @@ const onHome = path === '/';
 							<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
 						</svg>
 					</span>
+				</span>
 				</span>
 			</span>
 		</div>
@@ -206,10 +219,17 @@ const onHome = path === '/';
 			    deliberately its OWN element rather than the shared slider: the
 			    shared pill gliding across the ml-8 gap would visually annex the
 			    toggle into the contacts cluster. See the toggle-label block in
-			    the script below. */}
+			    the script below.
+			    It carries the press box too (2026-08-04): the toggle is a button
+			    like the other four and its label dips with it. No stamp box —
+			    nothing here copies, and the label's own click gesture is the
+			    horizontal roll, which lives on the text span and so passes
+			    through the press untouched. */}
 			<span class="contact-slider" aria-hidden="true">
-				<span class="contact-slider-in">
-					<span class="contact-slider-text"></span>
+				<span class="contact-slider-press">
+					<span class="contact-slider-in">
+						<span class="contact-slider-text"></span>
+					</span>
 				</span>
 			</span>
 		</div>
@@ -596,8 +616,9 @@ const onHome = path === '/';
 	const pill = group?.querySelector<HTMLElement>('.contact-slider');
 	const pillText = pill?.querySelector<HTMLElement>('.contact-slider-text');
 	const pillStamp = pill?.querySelector<HTMLElement>('.contact-slider-stamp');
+	const pillPress = pill?.querySelector<HTMLElement>('.contact-slider-press');
 
-	if (group && pill && pillText && pillStamp) {
+	if (group && pill && pillText && pillStamp && pillPress) {
 		const icons = Array.from(group.querySelectorAll<HTMLAnchorElement>('.btn-icon'));
 
 		// Hidden clone of the pill, used to measure the exact width each label
@@ -614,7 +635,6 @@ const onHome = path === '/';
 		const measurerText = measurer.querySelector<HTMLElement>('.contact-slider-text')!;
 
 		let visible = false;
-		let resetTimer = 0;
 		const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 		const labelFor = (icon: HTMLElement) => icon.getAttribute('data-label') ?? '';
@@ -658,10 +678,23 @@ const onHome = path === '/';
 		// clock, opposite motion, and it read as two things happening at once.
 		//
 		// So the pill now does what the icon does, on the same events and the same
-		// pair of tokens: it dips to 0.9 on pointerdown over --dur-press, and
-		// springs back to 1 over --dur-pop-in on --ease-pop when the press is let
-		// go — the label changing at the turn. One object with two parts, which is
-		// what the button and its own name should have been all along.
+		// pair of tokens: it dips on pointerdown over --dur-press, and springs
+		// back to 1 over --dur-pop-in on --ease-pop when the press is let go — the
+		// label changing at the turn. One object with two parts, which is what the
+		// button and its own name should have been all along.
+		//
+		// ── 2026-08-04: the dip moved out to the whole pill ──
+		// Hiro: "the whole pill and the text within". It was scaling the CONTENT
+		// box, so the words shrank inside a plate that sat perfectly still — which
+		// is the one thing a chip cannot do while the button under it is being
+		// pressed. It now runs on .contact-slider-press, one box further out, and
+		// takes the plate with it. Two consequences worth knowing:
+		//   · the depth is --pill-press (0.94), NOT the glyph's 0.9 — see the token
+		//     for why a bigger box needs a smaller ratio to travel the same amount;
+		//   · the copy confirmation no longer dips at all. It used to share this
+		//     element, and two nested 0.9s multiply to 0.81 — the word would punch
+		//     twice as deep as the plate carrying it. The swap is an opacity blink
+		//     now and the plate supplies every bit of the motion.
 		//
 		// The earlier roll (out right, in from the left) is also worth not
 		// rediscovering: horizontal is the axis this pill already owns, since its
@@ -673,24 +706,28 @@ const onHome = path === '/';
 		// pill hangs under whichever icon is hovered and the press belongs to the
 		// BUTTON, so a pill that sat still under three of the four would be the
 		// same mismatch this block exists to fix.
-		const pressStamp = () => {
+		const pressPill = () => {
 			if (reduce) return;
-			pillStamp.style.transition = `transform var(--dur-press) var(--ease-pop)`;
-			pillStamp.style.transform = 'scale(0.9)';
-			pillStamp.style.opacity = '1';
+			pillPress.style.transition = `transform var(--dur-press) var(--ease-pop)`;
+			pillPress.style.transform = 'scale(var(--pill-press))';
 		};
 
 		// The release. Mirrors `#site-nav .btn-icon:hover > svg` exactly — on
 		// mouseup :active drops, the pointer is still hovering, and the glyph
 		// returns to its lift on --dur-pop-in / --ease-pop. Same numbers here, so
 		// the two finish on the same frame.
-		const releaseStamp = () => {
+		const releasePill = () => {
 			if (reduce) return;
-			pillStamp.style.transition = `transform var(--dur-pop-in) var(--ease-pop)`;
-			pillStamp.style.transform = 'scale(1)';
-			pillStamp.style.opacity = '1';
+			pillPress.style.transition = `transform var(--dur-pop-in) var(--ease-pop)`;
+			pillPress.style.transform = 'scale(1)';
 		};
 
+		// Blink only, never a scale: the plate's press is already supplying the
+		// motion for the one event that calls this, and a second scale here would
+		// compound with it. (It took a `dip` flag for a few hours on 2026-08-04,
+		// back when a 1.5s timer also stamped the label back unpressed. The
+		// confirmation holds until unhover now, so that caller is gone and the
+		// flag with it.)
 		const stampText = (text: string) => {
 			// The width is deliberately NOT re-measured: the pill stays at the
 			// resting label's width so the plate never resizes under the swap.
@@ -699,19 +736,15 @@ const onHome = path === '/';
 			// content box (whose centre is the plate's) and not the text span.
 			pillText.textContent = text;
 			if (reduce) return;
-			// Snap to the pressed size and re-grow. On a real click the element is
-			// already at 0.9 and only the opacity blinks — which is the moment the
-			// word changes, and wants marking. On the 1.5s return there was no
-			// press, so this supplies the dip the rebound needs to start from.
+			// Blink the ink out and back. The word changes at the turn of the
+			// plate's press, which is the moment that wants marking, and the plate
+			// is already doing the moving. --dur-press means the word is fully
+			// there in the time the glyph takes to dip, so the swap reads as
+			// instant.
 			pillStamp.style.transition = 'none';
-			pillStamp.style.transform = 'scale(0.9)';
 			pillStamp.style.opacity = '0';
 			void pillStamp.offsetHeight; // reflow, so the rebound animates
-			// The ink is much faster than the travel, and on --dur-press: the word
-			// is fully there in the time the glyph would take to dip, so the swap
-			// reads as instant and the spring is only how it settles.
-			pillStamp.style.transition = `transform var(--dur-pop-in) var(--ease-pop), opacity var(--dur-press) ease`;
-			pillStamp.style.transform = 'scale(1)';
+			pillStamp.style.transition = `opacity var(--dur-press) ease`;
 			pillStamp.style.opacity = '1';
 		};
 
@@ -773,11 +806,11 @@ const onHome = path === '/';
 			// both run before the next paint, so the extra assignment is invisible
 			// rather than a competing animation.
 			icon.addEventListener('pointerdown', () => {
-				pressStamp();
+				pressPill();
 				const release = () => {
 					window.removeEventListener('pointerup', release);
 					window.removeEventListener('pointercancel', release);
-					releaseStamp();
+					releasePill();
 				};
 				window.addEventListener('pointerup', release);
 				window.addEventListener('pointercancel', release);
@@ -803,11 +836,26 @@ const onHome = path === '/';
 			if (!group.contains(e.relatedTarget as Node)) hide();
 		});
 
-		// Copy-to-clipboard: stamp the confirmation into the pill, then stamp the
-		// label back. Both directions use the same gesture — the return is the
-		// same event running out, not a different one. The (rare) fallback hint is
-		// much longer than either label, so that one goes through place() and does
-		// resize, since a clipped instruction is worse than a moving box.
+		// Copy-to-clipboard: stamp the confirmation into the pill. The (rare)
+		// fallback hint is much longer than either label, so that one goes through
+		// place() and does resize, since a clipped instruction is worse than a
+		// moving box.
+		//
+		// ── The confirmation holds until you leave the icon ──
+		// 2026-08-04, Hiro: "Copied!" used to time out after 1.5s and stamp the
+		// label back under a pointer that had never moved — the pill answering a
+		// question nobody had re-asked, and worse, undoing its own confirmation
+		// while you were still looking at it. It now stays for exactly as long as
+		// the hover that earned it.
+		//
+		// There is no revert code, and that is the point: hovering AWAY is what
+		// resets it, and every path back into the pill already goes through
+		// place(), which rewrites the label and the width from the icon it is
+		// landing under. So the slide to a neighbour, the return after an exit and
+		// a fresh focus all clear "Copied!" on their own. The same now holds for
+		// the ⌘C hint, which had the same timer and wants the persistence even
+		// more — it is an instruction, and one that vanishes while you are
+		// reaching for the key is the one kind of hint worth nothing.
 		//
 		// ── The stamp fires BEFORE the write, not after it ──
 		// 2026-08-03, Hiro: the stamp has to run with the button's press. It could
@@ -826,14 +874,10 @@ const onHome = path === '/';
 			if (!address) return;
 			icon.addEventListener('click', (e) => {
 				e.preventDefault();
-				window.clearTimeout(resetTimer);
 
 				// Synchronous, so this frame is the one the press releases on.
 				if (!visible) showAt(icon);
-				stampText('Copied!'); // stamp in
-				resetTimer = window.setTimeout(() => {
-					if (visible) stampText(labelFor(icon)); // stamp back
-				}, 1500);
+				stampText('Copied!');
 
 				// Wrapped rather than called bare: on an insecure origin
 				// navigator.clipboard is undefined, which throws SYNCHRONOUSLY and
@@ -842,11 +886,7 @@ const onHome = path === '/';
 				Promise.resolve()
 					.then(() => navigator.clipboard.writeText(address))
 					.catch(() => {
-						window.clearTimeout(resetTimer);
 						showAt(icon, 'Press ⌘C to copy'); // longer hint: resize to fit
-						resetTimer = window.setTimeout(() => {
-							if (visible) place(icon, labelFor(icon));
-						}, 1500);
 					});
 			});
 		});
@@ -864,7 +904,8 @@ const onHome = path === '/';
 	const toggleWrap = document.getElementById('theme-toggle-wrap');
 	const togglePill = toggleWrap?.querySelector<HTMLElement>('.contact-slider');
 	const togglePillText = togglePill?.querySelector<HTMLElement>('.contact-slider-text');
-	if (toggleWrap && themeToggle && togglePill && togglePillText) {
+	const togglePillPress = togglePill?.querySelector<HTMLElement>('.contact-slider-press');
+	if (toggleWrap && themeToggle && togglePill && togglePillText && togglePillPress) {
 		const reduceToggle = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 		// Hidden clone for width measurement (mirrors the contact slider's, inner
@@ -945,6 +986,36 @@ const onHome = path === '/';
 		themeToggle.addEventListener('mouseleave', hidePill);
 		themeToggle.addEventListener('focus', showPill);
 		themeToggle.addEventListener('blur', hidePill);
+
+		// ── The press ──
+		// 2026-08-04, the same gesture the contact pills got, on the same tokens:
+		// the toggle is a button like the other four and its label has no business
+		// standing still while it is pushed. Duplicated rather than shared because
+		// this pill is deliberately a separate element with its own script block
+		// (see the note above) — the twelve lines are the price of that split.
+		//
+		// The release binds to the WINDOW for the reason the contacts' does: a
+		// press dragged off the button never fires pointerup on it, and a
+		// script-driven element has no :active to bail it out.
+		//
+		// Note this rides alongside the click roll rather than fighting it: the
+		// roll translates the TEXT SPAN horizontally, two boxes in, so the plate
+		// can scale underneath it without either gesture touching the other's
+		// transform. That separation is why the label can change identity and be
+		// pressed at the same instant, which is exactly what a click does here.
+		themeToggle.addEventListener('pointerdown', () => {
+			if (reduceToggle) return;
+			togglePillPress.style.transition = `transform var(--dur-press) var(--ease-pop)`;
+			togglePillPress.style.transform = 'scale(var(--pill-press))';
+			const release = () => {
+				window.removeEventListener('pointerup', release);
+				window.removeEventListener('pointercancel', release);
+				togglePillPress.style.transition = `transform var(--dur-pop-in) var(--ease-pop)`;
+				togglePillPress.style.transform = 'scale(1)';
+			};
+			window.addEventListener('pointerup', release);
+			window.addEventListener('pointercancel', release);
+		});
 
 		// Roll to the new label after a click flips the theme. This listener
 		// registers after the flip handler above, so themeLabel() already
