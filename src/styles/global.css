@@ -50,9 +50,21 @@
 	   the ground rather than from tuning here, which is the point: this token
 	   has no value of its own, only a proportion and a floor.
 
+	   2026-08-05 THE FLOOR MOVED: AA → AAA (Hiro, "everything should be AAA in
+	   light mode and dark mode"), and 7:1 on a 9.13:1 ink is a 77.8% muting —
+	   past the 66% that read as "barely muted" in July, so the muted tier now
+	   separates mostly by hue and every accent's lead over it compressed
+	   (title 1.09×, mark 1.27×, from 1.68×/1.95×). That is what AAA costs on
+	   an ink that only carries 9.13:1; the one way to buy the depth back is
+	   more ink contrast — moving --paper or --ink — not this token. The
+	   PROPORTION-EQUALITY rule died in the same pass: dark could not follow
+	   light to 77.8% without ranking its muted tier above its titles (see the
+	   dark block), so the shared rule is now "each theme sits on the AAA
+	   floor", and that is the invariant a future retune should preserve.
+
 	   Solved in the hue of Tokyo Night's comment #565f89 (which is itself 1.96:1
-	   here — unusable for body text); lightness only. 4.63:1. */
-	--ink-soft: #5d6691;
+	   here — unusable for body text); lightness only. 7.10:1. */
+	--ink-soft: #424a73;
 	/* ── Headings that step FORWARD of the body ──
 	   2026-08-03, Hiro: the about page's headings should be lighter, so they
 	   contrast with the body text. Taken the way the button chip was taken —
@@ -66,7 +78,8 @@
 	   PROPORTION of each theme's own ink contrast, never a shared hex, because
 	   the two grounds carry different amounts of contrast and a shared value
 	   would read as two different degrees of emphasis (see the long note above).
-	   --ink-soft steps back to 50.4%; this steps forward to 125%. 11.42:1 here,
+	   --ink-soft steps back to the AAA floor (77.8% since 08-05, 50.4% before
+	   it); this steps forward to 125%. 11.42:1 here,
 	   14.26:1 dark. There is no AA question in this direction — the only ceiling
 	   is the paper's own maximum (17.47:1 here, 18.49:1 dark), and 125% leaves
 	   both with room.
@@ -252,13 +265,18 @@
 	   --ink-num is the smaller call. Years are the only numerals on the site and
 	   they already sat in the muted line; orange lifts them out of it without
 	   promoting the whole line, which is what a numeric literal does in an
-	   editor. It rides ON --ink-soft's line, so it must clear AA on its own:
-	   5.03:1 here, and it is the tightest of the four accents in either theme —
-	   check it first if the light ground ever moves again.
+	   editor. It rides ON --ink-soft's line, so it must clear the floor on its
+	   own — and since the 08-05 AAA pass that floor is 7:1, which the verbatim
+	   #965027 (5.03:1) could not reach. Deepened in the orange's own hue,
+	   lightness only, to 7.24:1 — held one step PAST the muted line's 7.10
+	   deliberately, because a year that trails the line it rides on stops
+	   lifting out of it. NO LONGER VERBATIM; the icon rows keep the verbatim
+	   orange (see --mark-boot), so the tie the marks' comments used to record
+	   is broken, not moved.
 
-	   Both verbatim Tokyo Night Light. Titles run 24-38px and card titles 21px
-	   bold, so all of them clear WCAG's large-text bar with room; the numerals
-	   are small text and clear the full 4.5:1.
+	   The title is verbatim Tokyo Night Light. Titles run 24-38px and card
+	   titles 21px bold, so all of them clear WCAG's large-text bar with room;
+	   the numerals are small text and clear the full 7:1.
 
 	   ONE EXCEPTION, added the same day: the about page's headings dropped back
 	   off this accent (Hiro's ask). They had just come down to the body's own
@@ -273,8 +291,8 @@
 	   than the body instead of matching it. The reasoning above is untouched —
 	   the about page still declines the hue, and separates by contrast, which is
 	   the one channel a heading at the body's own size still has left. */
-	--ink-title: #0f4b6e; /* cyan, verbatim — 7.76:1, 1.68× the muted text */
-	--ink-num: #965027; /* 5.03:1 */
+	--ink-title: #0f4b6e; /* cyan, verbatim — 7.76:1, 1.09× the muted text since the AAA pass */
+	--ink-num: #7b3809; /* 7.24:1 — deepened off verbatim for AAA, see above */
 
 	/* ── The about page's marks ──
 	   One hue per mark, each picked to match the emoji it redraws rather than
@@ -302,7 +320,7 @@
 	--mark-drums: #8c4351; /* red, verbatim — 5.75:1 */
 	--mark-invader: #5a3e8e; /* magenta, verbatim — 6.95:1 */
 	--mark-clapper: #2959aa; /* blue, verbatim — 5.63:1 */
-	--mark-boot: #965027; /* orange, verbatim — 5.03:1, and --ink-num's own value */
+	--mark-boot: #965027; /* orange, verbatim — 5.03:1; was --ink-num's value until the 08-05 AAA pass deepened the numeral */
 	--mark-wave: #704711; /* yellow, DEEPENED from #8f5e15's 4.62 — 6.72:1 */
 
 	/* ── The toolbox marks ──
@@ -371,9 +389,11 @@
 	   largest element in the bar reading as the faintest puts it visually BEHIND
 	   everything else — size and weight do not override that. The mark must
 	   out-contrast --ink-soft beside it, and since 08-02 it must also lead
-	   --ink-title. 9.03:1 against the muted text's 4.63:1 is a 1.95× lead, and
-	   1.16× over the title — the widest margin the mark has held on paper (the
-	   crimson and the magenta both ran at 1.25× over the muted text).
+	   --ink-title. 9.03:1 leads the muted text 1.27× and the title 1.16×.
+	   (Until the 08-05 AAA pass lifted --ink-soft to 7.10, the lead over the
+	   muted text was 1.95× — the widest the mark ever held on paper; the
+	   crimson and the magenta both ran at 1.25×. The compression came from the
+	   floor under the muted text rising, not from this token moving.)
 
 	   Also still true, and the trap in any retune: SATURATION IS PAID FOR IN
 	   CONTRAST. Pushing chroma at a fixed lightness makes a colour darker in
@@ -396,7 +416,7 @@
 	   replaces sat at 6.95:1; this sits at 9.03:1, so the wordmark is the most
 	   forward it has ever been on paper. Clears AA-large unaided in both themes,
 	   so nothing on the site leans on WCAG 1.4.3's logo/brand-name exemption. */
-	--dye-name: #264500; /* 9.03:1 — 1.95× the muted text, 1.16× the title */
+	--dye-name: #264500; /* 9.03:1 — 1.27× the muted text (AAA pass), 1.16× the title */
 
 	/* ── The page's hairlines ──
 	   One gradient, shared by the nav's bottom edge and the rule over the
@@ -730,13 +750,21 @@
 	   without retuning a single token. */
 	--paper: #0c0e14;
 	--ink: #c0caf5; /* foreground, verbatim — 11.95:1 */
-	/* 50.4% of --ink, the same proportion the light block carries — see the long
-	   note there for why the number moved off 37% and why it improved on 08-02.
-	   Dark has more headroom than light and could mute harder on its own (AA
-	   would allow 40.2% here), but equality across the two themes is the rule,
-	   so it takes light's floor. Solved in the hue of Tokyo Night's comment
-	   #565f89, which is 3.12:1 on this ground and fails AA outright. 6.01:1. */
-	--ink-soft: #838eba;
+	/* The AAA floor, NOT light's proportion — the equality rule BROKE here on
+	   2026-08-05 (Hiro: everything AAA in both themes). It had held since
+	   07-26: both themes muted by the same fraction of their own ink contrast,
+	   dark taking light's shallower floor even though it could mute harder
+	   alone. AAA forces light to 77.8%, and 77.8% of this theme's 11.95:1 ink
+	   is 9.3:1 — ABOVE --ink-title's 9.15 and within 3% of the body ink, so
+	   matching proportions would rank the muted tier over the titles and erase
+	   the muting outright. The hierarchy rules (mark > title > muted) outrank
+	   the equality rule, so each theme now sits on its own AAA floor instead:
+	   7.06:1 here, a 59.1% muting against light's 77.8%. Dark therefore mutes
+	   visibly deeper than light — that asymmetry is the accepted cost of AAA,
+	   and the depth this theme keeps is depth light simply cannot afford.
+	   Still solved in the hue of Tokyo Night's comment #565f89, which is
+	   3.12:1 on this ground and fails outright; lightness only. */
+	--ink-soft: #8f9bc7;
 	/* 125% of --ink's contrast, the same proportion the light block carries and
 	   the direction the ask was actually made in: brighter than the body text.
 	   14.88:1, under a 19.29:1 ceiling.
@@ -856,7 +884,7 @@
 	   reasoning, the 2026-08-04 move off the blue, and the pairs that lost).
 	   Both verbatim Tokyo Night — this side needed no solve, unlike the light
 	   theme's mark: the night ground ranks green above cyan on its own. */
-	--ink-title: #2ac3de; /* cyan, verbatim — 9.15:1, 1.52× the muted text */
+	--ink-title: #2ac3de; /* cyan, verbatim — 9.15:1, 1.30× the muted text since the AAA pass */
 	--ink-num: #ff9e64; /* 9.49:1 */
 
 	/* ── The about page's marks ──
@@ -901,8 +929,8 @@
 	   The mark runs LIGHTER here than on paper, not darker: on a dark ground a
 	   leaf green is the high-contrast direction, so this is the same "sit
 	   forward of the muted text" rule as the light block, pointing the other
-	   way. 10.56:1 against the muted text's 6.01:1 — a 1.76× lead, and 1.15×
-	   over the title.
+	   way. 10.56:1 leads the muted text 1.50× (1.76× before the 08-05 AAA pass
+	   lifted --ink-soft to 7.06), and 1.15× over the title.
 
 	   That lead used to be the THIN side — the magenta held 1.15× over the muted
 	   text here against light's 1.25×, and the crimson before it only 1.077×.
@@ -910,7 +938,7 @@
 	   and neither is anywhere near the floor. If the wordmark should sit further
 	   forward, raise L and re-measure rather than reaching for more chroma,
 	   which costs contrast — and check the title still trails it. */
-	--dye-name: #9ece6a; /* 10.56:1 — 1.76× the muted text, 1.15× the title */
+	--dye-name: #9ece6a; /* 10.56:1 — 1.50× the muted text (AAA pass), 1.15× the title */
 
 	--theme-fill-x: -9px;
 	--grain: none;
@@ -1116,6 +1144,36 @@ body {
 }
 #projects::before {
 	top: 0;
+}
+
+/* ── The about card's section rules ──
+   The same device a third time (2026-08-05, Hiro: "match the index rule"). They
+   were flat --line-soft borders and are now the --rule gradient, so all four of
+   the site's rules fade out at their ends and read as one family. Only the
+   PAINT changed here — width, spacing and the -mx-5/px-5 bleed are untouched;
+   see the long note at the section in about.astro before moving any of them.
+
+   BORDER-IMAGE RATHER THAN A PSEUDO-ELEMENT, and that is a deliberate break
+   from the two above. The note up there says a border "can only be one flat
+   colour" — true of border-color, not of border-image, which slices this very
+   gradient into the edge. What forces the difference is the box model: an
+   absolutely-positioned rule stops occupying its 1px (see the 70-not-71 note
+   above), and these two rules sit inside spacing tuned to less than that —
+   40 + 10.8 below against 47.5 + 4.2 above, balanced to 0.9px. Losing the
+   border's pixel would take the gap below each rule to 39 and tip a figure the
+   section note spends a paragraph getting right. The pseudo-element is the
+   better tool where nothing is measured off the line; here something is.
+
+   slice 1 with left/right widths at 0: the corner regions are zero-wide, so the
+   top edge gets the full-width strip and --rule's percentage stops land on the
+   section's content box exactly as they land on the content column at #projects.
+   The stops are proportional, so the fade is shorter in px on a narrower rule —
+   that is the point, not a miss. The solid --line-soft underneath is the
+   fallback and also the gradient's own peak, so a browser without border-image
+   support gets precisely what these rules looked like before today. */
+.card-rule {
+	border-top: 1px solid var(--line-soft);
+	border-image: var(--rule) 1;
 }
 
 

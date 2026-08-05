@@ -49,14 +49,14 @@ const { project } = Astro.props;
 			    for its Lc 64.8 and is 23.75px; the work paragraph needs ≥24px for
 			    its Lc 75.1 and is 21.375px. w400 clears both.
 
-			    ⚠ The lead is only fixed in the LIGHT theme. In dark it sits at
-			    Lc 42.1 — --ink-soft on --paper — and no weight reaches the floor
-			    from there; APCA wants 86px at w300 and 44px at w700. That is a
-			    COLOUR problem, it predates the weight change, and it is the one
-			    real legibility fault on the site: the lead is the first thing read
-			    on every project page and it is the dimmest text on it. Fixing it
-			    means lifting --ink-soft or setting this paragraph in --ink, not
-			    reaching for more weight. */}
+			    ⚠ The dark lead is the site's one RESIDUAL APCA shortfall. The
+			    08-05 AAA pass lifted --ink-soft to 7.06:1 (Lc 42.1 → 48.6), so
+			    the lead is WCAG-AAA clean in both themes now — but APCA still
+			    wants 35px at w400 from that Lc and the lead is 23.75px; no
+			    weight reaches the floor from there. What remains is a COLOUR
+			    gap, not a weight one: closing it fully means setting this
+			    paragraph in --ink. Left standing deliberately — the muted lead
+			    is the design, and it clears every WCAG bar it answers to. */}
 			<p class="text-xl font-normal leading-relaxed text-[var(--ink-soft)]">{project.problem}</p>
 			<p class="mt-6 text-lg font-normal leading-relaxed">{project.work}</p>
 		</section>

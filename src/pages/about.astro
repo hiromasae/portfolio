@@ -308,39 +308,54 @@ const tools = [
 				    --line-soft, not --line: --line is what the photo draws its edge in
 				    (and, until 08-05, the album tiles), and a divider that matched it
 				    would read as another frame rather than as punctuation between
-				    blocks.
-				    border-t on the section rather than an <hr>, because the h2s
+				    blocks. It is now the PEAK of that colour rather than all of it —
+				    .card-rule (08-05) paints the --rule gradient these are drawn with
+				    everywhere else on the site, so the ends fade out the way the nav's
+				    edge and the projects rule do. Only the paint changed; every number
+				    in this note survived it, which is the reason .card-rule stayed a
+				    border instead of becoming a pseudo-element. Read its comment in
+				    global.css before switching it to one.
+				    A border on the section rather than an <hr>, because the h2s
 				    already mark the divisions structurally — this is presentation on
 				    top of semantics that exist, not a substitute for them.
 
-				    THE RULE'S WIDTH HAS BEEN THREE THINGS IN THREE DAYS, so read the
-				    whole arc before moving it a fourth time. ~542px to 08-04, when it
+				    THE RULE'S WIDTH HAS BEEN FOUR THINGS IN THREE DAYS, so read the
+				    whole arc before moving it a fifth time. ~542px to 08-04, when it
 				    sat inside the prose column. Then the full 912.5px, when Hiro
 				    asked for a divider that spanned the page and the section moved
-				    out to become a direct child of main. Now card-width — the section
-				    is back in the column (08-05) and the column is a card.
+				    out to become a direct child of main. Then card-width, when the
+				    section came back into the column (08-05) and the column became a
+				    card. Now CONTENT-width, same day, Hiro's call: the rule stops
+				    where the prose stops instead of bleeding to the card's inner
+				    edges.
 
-				    -mx-5/px-5 is what "contained in the card" means here: the negative
-				    margin cancels the card's padding so the BORDER reaches both inner
-				    edges, and the matching padding puts the content back where it was.
-				    THE TWO MUST MATCH THE CARD'S HORIZONTAL PADDING — they have moved
-				    with it twice in one day (8 → 6 → 5), and a mismatch doesn't fail
-				    loudly: too large a negative margin runs the rule out past the
-				    card's border, too small leaves it inset by the difference. Match
-				    px-*, NOT py-*; the card's padding is asymmetric and only the
-				    horizontal half is what these cancel.
-				    A rule inset by 38px either side would read as an underline under
-				    the heading above it rather than as a division of the card.
+				    Which is why there is no -mx-5/px-5 pair here any more. That pair
+				    was what "contained in the card" used to mean — the negative margin
+				    cancelled the card's px-5 so the BORDER reached both inner edges
+				    and the matching padding put the content back. Plain sections now,
+				    so the border simply spans the content box and needs nothing to
+				    track the card's padding; if that padding moves again, this follows
+				    it for free, which the old pair never did (it chased px-5 through
+				    8 → 6 → 5 in a single day).
 
-				    What survives all three: the rule spans its CONTAINER, whatever the
-				    container currently is. The page was ruled into bands; the card is
-				    now ruled into bands. Same device, smaller scale.
+				    The argument the old pair was answering is still on the record and
+				    was not refuted, only overruled: a rule inset from its container
+				    can read as an underline under the heading above it rather than as
+				    a division. What makes ~23.75px survivable where 38px did not is
+				    that the rule is now flush with the prose on BOTH edges — it lines
+				    up with something, rather than floating inside the card at a width
+				    nothing else shares. If it ever does start reading as an underline,
+				    that is the thing that broke, and the fix is the bleed coming back.
+
+				    What survives all four: the rule spans a column the page already
+				    uses, never an arbitrary width. The page was ruled into bands; the
+				    card is now ruled into bands. Same device, smaller scale.
 
 				    Still NOT full-bleed to the window, and that constraint is
 				    untouched by any of this. The nav's hairline is the site's only
 				    edge-to-edge rule (e69bfec), which is what makes it read as the
 				    bar's own edge rather than as content. */}
-				<section class="-mx-5 mt-10 border-t border-[var(--line-soft)] px-5 pt-[40px]">
+				<section class="card-rule mt-10 pt-[40px]">
 					<h2 class="text-xl font-medium tracking-tight text-[var(--ink-heading)]">Personal Interests</h2>
 					{/* items-start, not items-baseline: an SVG's baseline is its bottom
 					    margin edge, so items-baseline would hang all four marks off the
@@ -376,7 +391,7 @@ const tools = [
 
 				{/* ── Toolbox (2026-08-05) ── Took the slot the albums grid vacated the
 				    same day, and inherits its rule: mt-10/pt-10 either side of a
-				    --line-soft border, the full 912.5px, --i: 3 so the reveal cascade
+				    .card-rule, the full 912.5px, --i: 3 so the reveal cascade
 				    is unchanged. Three ruled bands on the page, one device.
 
 				    It IS an icon-and-label list, same as interests directly above it,
@@ -405,7 +420,7 @@ const tools = [
 				    buttons" and that middle term is now stale. Reintroducing the
 				    device here would quietly undo a removal, on a page that isn't
 				    where the argument happened. */}
-				<section class="-mx-5 mt-10 border-t border-[var(--line-soft)] px-5 pt-[40px]">
+				<section class="card-rule mt-10 pt-[40px]">
 					<h2 class="text-xl font-medium tracking-tight text-[var(--ink-heading)]">Toolbox</h2>
 					{/* One column at every width (Hiro, 08-05). It was 3 × 3 column-major
 					    and then 4 × 2 row-major inside a day; both are gone, and with
