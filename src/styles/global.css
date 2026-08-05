@@ -243,6 +243,69 @@
 	--ink-title: #0f4b6e; /* cyan, verbatim — 7.76:1, 1.68× the muted text */
 	--ink-num: #965027; /* 5.03:1 */
 
+	/* ── The about page's marks ──
+	   One hue per mark, each picked to match the emoji it redraws rather than
+	   to sit in a scheme (Hiro, 08-04) — that is the whole brief, and it is
+	   why the "no honest per-icon colour" finding at the contact icons doesn't
+	   transfer: THOSE four had no inherent colour, so any hue was invented.
+	   A drum is red, an invader is purple, a boot is leather. The colour is
+	   describing the object, which is the one job it can do honestly here.
+
+	   All verbatim Tokyo Night Light except the yellow, and every one clears
+	   AA on its own against --paper — measured, not assumed. They are also
+	   aria-hidden decoration sitting beside a label that says the same thing,
+	   so AA is the floor being cleared for the sighted reader's sake, not a
+	   WCAG obligation these would otherwise fail.
+
+	   THE YELLOW IS DEEPENED, and for the reason the --ink-title block already
+	   records: Tokyo Night Light's #8f5e15 lands at 4.62:1, dead level with
+	   --ink-soft's 4.63. Verbatim would put the greeting's wave at the muted
+	   text's depth while sitting INSIDE an --ink-heading line at 11.42 — the
+	   faintest thing in the boldest line. Solved in the hue's own family,
+	   lightness only, the way --dye-name was. 6.72:1 lands it among the other
+	   four (5.03–6.95) instead of under all of them.
+
+	   Dark's mirror block carries the verbatim night values; see there. */
+	--mark-drums: #8c4351; /* red, verbatim — 5.75:1 */
+	--mark-invader: #5a3e8e; /* magenta, verbatim — 6.95:1 */
+	--mark-clapper: #2959aa; /* blue, verbatim — 5.63:1 */
+	--mark-boot: #965027; /* orange, verbatim — 5.03:1, and --ink-num's own value */
+	--mark-wave: #704711; /* yellow, DEEPENED from #8f5e15's 4.62 — 6.72:1 */
+
+	/* ── The toolbox marks ──
+	   One hue per tool (Hiro, 08-05), and unlike the interests row these have
+	   real brand colours to answer to. The rule: match the brand where it
+	   owns a hue outright, and where two brands want the same one, give it to
+	   whichever owns it more strongly and hand the other its nearest free
+	   neighbour. Every assignment below is defensible against the real mark:
+
+	     astro     purple      the mark and its docs read violet
+	     js        yellow      #f7df1e, exact
+	     tailwind  cyan        #38bdf8, exact
+	     react     teal        #61dafb — greener than Tailwind's sky, and the
+	                           split is what keeps two cyan tools apart
+	     figma     blue        from its own #1abcfe; a five-colour mark owns no
+	                           single hue, so it takes the one nothing else wants
+	     claude    orange      Anthropic's clay #d97757
+	     git       red         #f05032 is red-orange and orange went to Claude
+
+	   GREEN IS NOT AVAILABLE and that is not an oversight — it's --dye-name,
+	   and the wordmark is the only thing on this site that wears it. Eight
+	   hues, one reserved, seven tools: this row is FULL. An eighth tool has to
+	   either share a hue or take green off the mark, and the second is not on
+	   offer. See the --dye-name block.
+
+	   All verbatim Tokyo Night Light except the yellow, which is the same
+	   deepened value --mark-wave carries and for the same reason recorded
+	   there. Every one clears AA against --paper. */
+	--tool-astro: #5a3e8e; /* magenta, verbatim — 6.95:1 */
+	--tool-js: #704711; /* yellow, DEEPENED — 6.72:1, --mark-wave's value */
+	--tool-tailwind: #0f4b6e; /* cyan, verbatim — 7.76:1, --ink-title's value */
+	--tool-react: #33635c; /* teal, verbatim — 5.67:1 */
+	--tool-figma: #2959aa; /* blue, verbatim — 5.63:1 */
+	--tool-claude: #965027; /* orange, verbatim — 5.03:1 */
+	--tool-git: #8c4351; /* red, verbatim — 5.75:1 */
+
 	/* ── The dye ──
 	   The wordmark — and until 08-02 the ONLY colour on the site, which is no
 	   longer the claim to make: the titles and numerals above are colour too.
@@ -595,6 +658,39 @@
 	--ink-title: #2ac3de; /* cyan, verbatim — 9.15:1, 1.52× the muted text */
 	--ink-num: #ff9e64; /* 9.49:1 */
 
+	/* ── The about page's marks ──
+	   The light block carries the reasoning. All five verbatim Tokyo Night
+	   here — including the yellow, which needs no help on this ground: 9.65:1
+	   against the night paper, where its light counterpart had to be deepened
+	   out of a 4.62 tie with the muted text. That asymmetry is the papers
+	   being inverted, the same thing --dye-name does.
+
+	   Every one of these clears its light counterpart by 1.3–1.9×, which is
+	   this theme's usual margin and not a per-mark decision. */
+	--mark-drums: #f7768e; /* red, verbatim — 7.29:1 */
+	--mark-invader: #bb9af7; /* magenta, verbatim — 8.34:1 */
+	--mark-clapper: #7aa2f7; /* blue, verbatim — 7.66:1 */
+	--mark-boot: #ff9e64; /* orange, verbatim — 9.49:1, and --ink-num's own value */
+	--mark-wave: #e0af68; /* yellow, verbatim — 9.65:1 */
+
+	/* ── The toolbox marks ──
+	   The light block carries the hue-to-brand reasoning and the note that
+	   green is unavailable. All seven verbatim Tokyo Night here, including
+	   the yellow, which needs no deepening on this ground.
+
+	   WATCH THE TEAL. At 11.58:1 it is the brightest mark on the page and
+	   sits within 3% of --ink's 11.95 — the labels it introduces. It clears,
+	   but it is the only mark in either row that comes close to levelling
+	   with its own text, and it is the first thing to re-measure if the dark
+	   ground ever moves. Every other tool sits 1.3–1.6× below its label. */
+	--tool-astro: #bb9af7; /* magenta, verbatim — 8.34:1 */
+	--tool-js: #e0af68; /* yellow, verbatim — 9.65:1 */
+	--tool-tailwind: #2ac3de; /* cyan, verbatim — 9.15:1, --ink-title's value */
+	--tool-react: #73daca; /* teal, verbatim — 11.58:1, see above */
+	--tool-figma: #7aa2f7; /* blue, verbatim — 7.66:1 */
+	--tool-claude: #ff9e64; /* orange, verbatim — 9.49:1 */
+	--tool-git: #f7768e; /* red, verbatim — 7.29:1 */
+
 	/* The same green on the night ground (see the light block for the method,
 	   the depth rule, and the 2026-08-04 repick). Tokyo Night's green verbatim,
 	   not a lightness-solved counterpart — unlike its light-theme counterpart,
@@ -707,7 +803,8 @@ body {
 	   all of them long-form prose, and each now carries an explicit font-normal
 	   at its own call site: the home hero and the two paragraphs on a project
 	   page. Everything else that fails the floor was already failing at 400 —
-	   the card titles, the year datelines, the album captions, the about page's
+	   the card titles, the year datelines, the album captions (gone with that
+	   section on 08-05), the about page's
 	   16.625px body — so those are contrast problems this change did not create
 	   and weight cannot fix. They are listed in the audit note in
 	   projects/[slug].astro; the worst is the project lead in the dark theme.
@@ -1574,6 +1671,144 @@ body {
    --dye-name — and that's the point: one colour, so it means something. The
    icons distinguish themselves by silhouette, and the pill names them in
    words. Both are stronger signals than hue, and both were already there. */
+
+/* ── About: the interests marks DO carry colour ──
+   The exception to the block above, and it needs stating because the two
+   sit four lines apart. Those four are ACTIONS in a nav row whose subjects
+   have no colour of their own — GitHub's mark is black and X's is black — so
+   any hue there had to be invented, and invented hue on a control reads as a
+   category palette. These are decoration, and their subjects DO have
+   colours: the hue restates the object rather than encoding anything, which
+   is why per-mark works here and didn't there.
+
+   A hue EACH, from --mark-* above, on Hiro's ask (08-04). The page still
+   declines the accent on its HEADINGS — see the --ink-title block, which
+   records that exception and is untouched by this. The two aren't in
+   tension: that one is about type, where colouring a heading at the body's
+   own size highlights a line of reading matter. These are aria-hidden marks
+   in the margin, the list's bullets, which is the one element a hue can mark
+   without competing with anything.
+
+   The marks stay SUBORDINATE to their own labels, and that's the check worth
+   keeping: every --mark-* lands below --ink in its theme (5.03–6.95 against
+   9.13 light; 7.29–9.65 against 11.95 dark). A mark that out-contrasts the
+   words it introduces has become the content. Re-check this line, not just
+   AA, if any --mark-* is ever retuned. */
+.interest-mark {
+	display: block;
+	flex-shrink: 0;
+	/* 1.2em, up from 1em (Hiro: "slightly larger", 08-04). The ceiling is the
+	   leading: at 1.625em line-height, a mark wider than that has nowhere to
+	   sit and starts driving the row's height instead of riding in it. 1.2
+	   keeps 0.2125em of air either side — see margin-top. */
+	width: 1.2em;
+	height: 1.2em;
+	/* Half the leading's overhang, so the mark centres on the LINE BOX rather
+	   than hanging from the text baseline. Written as the expression it is
+	   because all three terms are live — leading-relaxed on the ul, and the
+	   size right above — and an eyeballed 0.21em would silently go wrong the
+	   next time either moves. Single-line labels only sit dead centre because
+	   they're one line; a wrapped label keeps its mark on the FIRST line,
+	   which is why this isn't items-center on the row. */
+	margin-top: calc((1.625em - 1.2em) / 2);
+}
+.interest-mark svg {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+.interest-mark--drums {
+	color: var(--mark-drums);
+}
+.interest-mark--invader {
+	color: var(--mark-invader);
+}
+.interest-mark--clapper {
+	color: var(--mark-clapper);
+}
+.interest-mark--boot {
+	color: var(--mark-boot);
+}
+
+/* The toolbox marks. Same box and seating as .interest-mark — same size type,
+   so the same expression centres them — and since 08-05 a hue each, from the
+   --tool-* tokens above.
+
+   THIS REVERSES A CALL, and the reversal is worth stating because the old
+   reasoning was sound and someone will rediscover it. These shipped as flat
+   --ink-soft for exactly one day, on the contact-icon finding: brand marks on
+   this site carry no colour, because GitHub's mark is black and X's is black
+   and hue there had to be invented. What made that argument fit the nav and
+   not this row is WHICH brands are in it. Six of these seven own a hue
+   outright — yellow is JavaScript's, cyan is Tailwind's — so the colour isn't
+   invented here, it's reported. The nav's four had nothing to report.
+
+   What the monochrome bought, and what it cost: --ink-soft put every tool
+   mark below every interests mark in contrast, which ranked the two lists for
+   free and kept the section a visitor came for the louder one. That ranking
+   is gone. The two rows now interleave (5.03–7.76 light, 7.29–11.58 dark
+   against interests' 5.03–6.95 and 7.29–9.65), and the LAYOUT is what keeps
+   them apart instead — one tall column against a short wide grid. If the two
+   ever start reading as one run again, that grid is the thing to protect. */
+.tool-mark {
+	display: block;
+	flex-shrink: 0;
+	width: 1.2em;
+	height: 1.2em;
+	margin-top: calc((1.625em - 1.2em) / 2);
+}
+.tool-mark svg {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+.tool-mark--astro {
+	color: var(--tool-astro);
+}
+.tool-mark--js {
+	color: var(--tool-js);
+}
+.tool-mark--tailwind {
+	color: var(--tool-tailwind);
+}
+.tool-mark--react {
+	color: var(--tool-react);
+}
+.tool-mark--figma {
+	color: var(--tool-figma);
+}
+.tool-mark--claude {
+	color: var(--tool-claude);
+}
+.tool-mark--git {
+	color: var(--tool-git);
+}
+
+/* The greeting's wave, inline in the h1 rather than in the margin like the
+   four above — so it is sized in the HEADING's em, not the body's, and rides
+   the text baseline instead of a line box it has to itself.
+
+   0.9em: a hand drawn to a 24-unit box has more silhouette in it than a
+   letter does, so matching the cap height by the numbers draws a wave that
+   out-weighs the greeting it follows. Set by eye against はじめまして at
+   text-xl, which is the only place it appears.
+
+   vertical-align is the whole alignment story here: an inline-block's default
+   baseline is its bottom margin edge, which hangs the whole hand below the
+   text. -0.06em seats the palm on the baseline and lets the fingers rise into
+   the line, which is what the emoji did. */
+.greeting-wave {
+	display: inline-block;
+	width: 0.9em;
+	height: 0.9em;
+	vertical-align: -0.06em;
+	color: var(--mark-wave);
+}
+.greeting-wave svg {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
 
 /* Theme toggle: the classic contrast glyph — a circle half ink, half paper,
    drawn with the icons' 2px square-cap stroke at their exact size, so the
