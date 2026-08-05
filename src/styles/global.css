@@ -1436,6 +1436,31 @@ body {
 	   start so the panel leaves slowly, and that is the part carrying the sense
 	   of mass — keep it. Duration is unchanged and still --dur-slide. */
 	--ease-panel: cubic-bezier(0.34, 1.17, 0.5, 1);
+	/* ── The press clock ──
+	   2026-08-05, Hiro: the card should click down at the nav icons' speed. It
+	   was pressing on --dur-card (300ms) — the card's HOVER clock, which the
+	   press had borrowed for no better reason than sharing an element with the
+	   frame's shadow and the title underline. A press is not a hover: --dur-press
+	   is the token the nav glyph and the contact pill already dip on, and there
+	   is now one press speed across the site.
+
+	   ASYMMETRIC, and the same shape as the nav's: only the dip is on this
+	   token. Letting go drops the :has() below and the card returns on
+	   --dur-card, exactly as the glyph snaps in on --dur-press and releases on
+	   --dur-pop-in — a press should answer instantly and relax at leisure. The
+	   two release figures are 300 against 280, inside a frame of each other, so
+	   the release did not need touching to match either.
+
+	   Why an inherited custom property and not the nav's `transition-duration`
+	   override: the card and the panel both have to read it (the panel is the
+	   ground the card stands on — see the scale line in .card-panel), and the
+	   panel's transition lists FIVE properties. A bare transition-duration would
+	   put the travel on the press clock too, snapping a sliding panel across the
+	   grid in 90ms. Declared here so both consumers inherit one value. */
+	--press-clock: var(--dur-card);
+}
+#project-list:has(.project-card:active) {
+	--press-clock: var(--dur-press);
 }
 .card-panel {
 	position: absolute;
@@ -1466,12 +1491,15 @@ body {
 		width var(--dur-slide) var(--ease-panel),
 		height var(--dur-slide) var(--ease-panel),
 		opacity var(--dur-gesture) var(--nav-ease),
-		/* The press, and it takes the CARD's timing (--dur-card ease-out, see
+		/* The press, and it takes the CARD's timing (--press-clock ease-out, see
 		   .project-card) rather than the panel's own --dur-slide. The panel is
 		   not travelling here, it is being pressed along with the card standing
 		   on it, so it has to answer on that gesture's clock or the ground
-		   arrives after the thing sitting on it. */
-		scale var(--dur-card) ease-out;
+		   arrives after the thing sitting on it. That clock now differs between
+		   the dip and the release (see the token on #project-list), which is
+		   precisely why it is one inherited property and not a number written
+		   into two files. */
+		scale var(--press-clock) ease-out;
 }
 .card-panel.is-visible {
 	opacity: 1;
@@ -1608,7 +1636,10 @@ body {
    still registers. */
 .project-card {
 	position: relative;
-	transition: scale var(--dur-card) ease-out;
+	/* --press-clock, not --dur-card: the dip runs at the nav icons' speed and
+	   the release at the card's own. Both the token and the reasoning live on
+	   #project-list, since the panel underneath has to read the same value. */
+	transition: scale var(--press-clock) ease-out;
 }
 
 /* ── Project card: lift shadow ──
