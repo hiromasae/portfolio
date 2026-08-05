@@ -1,21 +1,39 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Nav from '../components/Nav.astro';
+import Icon from '../components/Icon.astro';
 
-// PROTOTYPE — these four are MY placeholders, not Hiro's picks. They're real
-// djent/prog records purely so the tiles carry realistic name lengths while the
-// composition is judged; replace the whole array.
+// Hiro's own list, 2026-08-05, in his order — not a prototype, unlike the
+// albums array this replaced. Don't reorder it alphabetically or by layer:
+// the sequence is his and it currently runs roughly framework → language →
+// styling → framework → fundamentals → design → AI → vcs → cloud.
 //
-// `cover` is a path under public/images/albums/ (square source, 400px+ — they
-// render at 115px but retina doubles that). Omit it and the entry falls back to
-// a named tile, which is what makes this previewable before any art exists.
-// Alt text is "artist — title" per cover: the grid carries no visible captions,
-// so alt is the ONLY place the names live for a screen reader.
-const albums = [
-	{ artist: 'Periphery', title: 'Periphery II' },
-	{ artist: 'Meshuggah', title: 'ObZen' },
-	{ artist: 'TesseracT', title: 'Altered State' },
-	{ artist: 'Animals as Leaders', title: 'The Joy of Motion' },
+// FLAT, no categories (his call, same day). It was grouped for a few hours
+// under the argument that a bare list of names sitting directly beneath the
+// interests list would read as more of the same list. That risk is real and
+// is now handled by LAYOUT rather than by grouping — see the grid note in
+// the section below.
+//
+// SEVEN since 2026-08-05: HTML/CSS and AWS came out. Both failed the same
+// test — altitude. Everything left is a named product; those two were the
+// substrate and a category. HTML/CSS is assumed of anyone qualified to be
+// reading the page, and Tailwind already implies the CSS; AWS is ~200
+// services and the bare word claims either too much or nothing. Don't add
+// either back without a specific reason, and if a cloud returns, name the
+// service.
+//
+// `icon` names an entry in Icon.astro, and `key` names its colour token
+// (--tool-<key> in global.css). Adding a tool needs BOTH: a drawing that
+// survives a 24-unit box at 2px, and a free hue — the palette has eight and
+// green is spoken for by the wordmark, so the next tool is the tight one.
+const tools = [
+	{ name: 'Astro', icon: 'astro' as const, key: 'astro' },
+	{ name: 'JavaScript', icon: 'javascript' as const, key: 'js' },
+	{ name: 'Tailwind', icon: 'tailwind' as const, key: 'tailwind' },
+	{ name: 'React', icon: 'react' as const, key: 'react' },
+	{ name: 'Figma', icon: 'figma' as const, key: 'figma' },
+	{ name: 'Claude Code', icon: 'claude' as const, key: 'claude' },
+	{ name: 'Git', icon: 'git' as const, key: 'git' },
 ];
 ---
 
@@ -28,17 +46,29 @@ const albums = [
 		    which left the prose ~346px — about FIVE words a line at the 21.4px
 		    it was set in. Both of those numbers moved on Hiro's ask, and the row
 		    came back with them. As of 08-03 the prose is 16.625px and the figure
-		    is 17rem, so the text column takes 542px at lg — still well inside
-		    --measure's 665px, which is the "narrower" Hiro asked for and 1.6× the
+		    is 16rem, so the text column takes 561px at lg — still well inside
+		    --measure's 665px, which is the "narrower" Hiro asked for and 1.7× the
 		    width that killed the row.
 
-		    Watch the em count here rather than the pixels: 542px at 16.625px is
-		    ~32.6× the font size, up from 26.5 when the prose was 19px in a 504px
-		    column. Smaller type in a slightly wider column moves that number
-		    twice over. ~65 characters a line, so it is still inside the usual
-		    45-75 and there is nothing to fix — but this is the figure to check
-		    before shrinking the photo or the type again, because the column has
-		    less room to give than the pixel width suggests.
+		    THE ROW IS A FIXED SUM and that's the thing to understand before
+		    touching any of it: 561 + 47.5 gap + 304 figure = main's 912.5px
+		    exactly. The card cannot get wider without the figure or the gap
+		    getting smaller — there is no slack anywhere else, and widening main
+		    is not local to this page (the footer, the home page and the project
+		    pages all share the 960px cap).
+
+		    17rem → 16rem on 08-05, when Hiro asked for a slightly wider card; the
+		    19px the photo gave up went straight to the column. That is the same
+		    trade made on 08-03 in the other direction, when the photo came down
+		    19rem → 17rem and the 2rem went to the prose. The gap was left alone
+		    both times: 47.5px is the rhythm the sections use inside the card too,
+		    and it is the cheaper thing to protect.
+
+		    Watch the em count here rather than the pixels: the CARD is 561px but
+		    the text inside it is 511.5px after px-5, which is 30.8× the font size
+		    and ~62 characters — inside the usual 45–75. This is the figure to
+		    check before shrinking the photo or the type again, because the column
+		    has less room to give than the pixel width suggests.
 
 		    Below lg there is no room for two columns at any of these numbers, so
 		    it still stacks and the prose keeps its own 28rem cap — close enough
@@ -48,39 +78,155 @@ const albums = [
 		    NOT --measure: that token is the site's reading cap, shared with the
 		    home hero and the project pages, and this column is narrower than it
 		    for a layout reason that doesn't apply to them. */}
-		{/* col-REVERSE below lg (08-03). The row's DOM order is prose-then-photo,
-		    which is what the lg layout wants; stacked, that put the page's tallest
-		    single element (the photo, 446px at 390px wide) last, so the page ended
-		    on an unlabelled block bigger than anything above it. Reversed, the
-		    stack opens on the photo the same way the lg row does — the photo is
-		    the first thing you see at both widths instead of the first at one and
-		    the last at the other.
-		    flex-col-reverse rather than order-* on the figure: same result, but the
-		    reversal is stated once on the container instead of as a pair of
-		    utilities on a child that has to be read against its sibling. Either way
-		    the DOM order is unchanged, so the reading order stays greeting → prose
-		    → interests → photo.
-		    It also puts the reveal cascade back in visual order down the stack: the
-		    figure enters at --base 180ms and the column at 700ms, so the photo was
-		    already revealing first while sitting last. */}
-		<div class="flex flex-col-reverse gap-12 lg:flex-row lg:items-start lg:gap-10">
-			<div class="max-w-[28rem] lg:min-w-0 lg:max-w-none lg:flex-1">
-				{/* Same size as the section heading below, not the 3xl/4xl page title
-				    it was (Hiro, 08-02). The masthead already carries the name at
-				    full size on every page, so this h1 is a greeting rather than a
-				    title, and at the section heading's size the column reads as two
-				    equal blocks under one photo instead of a hero with a footnote.
-				    The wave is decorative — aria-hidden, or it reads out as "waving
-				    hand" in the middle of a Japanese greeting.
+		{/* PLAIN col below lg (Hiro, 08-05): the photo sits UNDER the card. This
+		    reverses flex-col-reverse, which stood from 08-03 on the argument that
+		    the stack should open on the photo the way the lg row's eye does, and
+		    that ending the page on the tallest unlabelled block was worse.
 
-				    mb-4, matching the section heading's mt-4 to its list: the 3rem
-				    that used to sit here was cut for a 4xl page title, and at this
-				    size it read as a hole rather than a hero's breathing room. Both
-				    headings now hold their content at the same distance, and the
-				    only big gap left in the column is the 3rem BETWEEN the two
-				    blocks — which is the rhythm, tight inside, loose between. */}
-				<h1 class="reveal mb-4 text-xl font-medium tracking-tight text-[var(--ink-heading)]" style="--i: 0">
-					はじめまして。<span aria-hidden="true">👋</span>
+		    What changed is that the block below the fold is no longer the
+		    photo — it's the card, which now holds every word on the page. Opening
+		    the stack on a 380px image meant a phone visitor scrolled past the
+		    whole picture before reading who this is. Card first puts the greeting
+		    in the first screen at every width, and the photo becomes the thing
+		    you arrive at rather than the thing you get past.
+
+		    It also makes DOM order, visual order and reveal order the same
+		    sequence for the first time — card, then figure, at both widths. The
+		    reversal used to invert the middle one, which is why the old note had
+		    to explain that the photo revealed first while sitting last. Nothing
+		    needs explaining now; delete this paragraph if the layout ever stops
+		    being that simple. */}
+		{/* ── items-START, and the whole column is one card (Hiro, 08-05) ──
+		    Every piece of text on the page now lives in this card, beside the
+		    photo, and the card's top edge lines up with the photo's. Three
+		    changes that are really one: the sections came back INTO the column,
+		    the column became a card, and the row went back to top-aligned.
+
+		    They had to move together. Bottom-alignment (08-04, one day) was only
+		    ever meaningful while the column held two blocks — greeting and prose
+		    — whose last line could sit on the caption's. With interests and the
+		    toolbox back in here the column runs far taller than the figure, so
+		    there is no shared bottom left to align to and items-end would simply
+		    have pushed the photo down to meet a card that ends 600px below it.
+		    Top-aligned is the only edge the two still share.
+
+		    This also spends the 08-04 argument that took the sections OUT of the
+		    column for a full-width rule. The rules are now card-width and bleed
+		    to its edges instead — see the sections. The page is no longer ruled
+		    into bands; the CARD is, which is the same device at a smaller scale
+		    and is what "contained in the card" means.
+
+		    Nothing here is a measured offset, which is the one thing worth
+		    keeping from the version this replaces: the row has been a measured
+		    margin, then a bottom alignment, and is now a top alignment, and only
+		    the first of those needed a number that could go stale. */}
+		<div class="flex flex-col gap-12 lg:flex-row lg:items-start lg:gap-10">
+			{/* ── The card is ONE reveal, and the page's first (Hiro, 08-05) ──
+			    .reveal sits here rather than on the pieces inside it, so the whole
+			    card — greeting, prose, both sections — fades and slides in as a
+			    single object. Every child that used to carry its own .reveal (the
+			    h1, the two paragraphs, both sections at --base 700ms and --i 0–3)
+			    had it REMOVED, and that removal is required, not tidying: a
+			    .reveal inside a .reveal animates opacity against a parent already
+			    animating opacity, so the children arrive twice and the card's own
+			    fade multiplies against theirs.
+
+			    The cascade this replaces staggered five elements over 1150ms and
+			    read as the page assembling itself. One object arriving reads as
+			    the page BEING there — which is the right note for a card that is
+			    now the entire content of the page.
+
+			    --i: 0 with no --base, so it lands on the bar's --hold exactly. The
+			    figure takes --base 450ms; see the note there for why they overlap
+			    rather than queue. */}
+			{/* rounded-[1.5px] + --line + bg-clip-padding is the site's card
+			    material, the same one the photo beside it and the project cards
+			    wear, so the two halves of the row read as one set of parts. The
+			    clip is load-bearing rather than decorative: --line is translucent,
+			    so without it --surface paints THROUGH the border and the card's
+			    edge lands a different colour than the photo's identical one.
+
+			    ASYMMETRIC PADDING, and the asymmetry is the point (Hiro, 08-05):
+			    px-5 (23.75px) and py-10 (47.5px). The two axes are answering
+			    different asks and pull opposite ways — he wanted more room top and
+			    bottom, and the fix for the orphan below is more room left and
+			    right, which only the horizontal axis can give.
+
+			    px-5 was set by ONE SENTENCE and is no longer tight. "I'm a Design
+			    Engineer based in the San Francisco Bay Area." measures 489px at
+			    16.625px. Against the old 542px column, p-8 (38px) left 464 and
+			    broke it after "Bay", p-6 (28.5px) left 483 and still broke it by
+			    six pixels, and px-5 left 492.5 — fitting with 3.5px to spare, which
+			    was the whole margin.
+
+			    The card went to 561px on 08-05 and that margin is now 22.5px: the
+			    text is 511.5px against the sentence's 489. Comfortable rather than
+			    lucky, and the fragility flagged the day before is gone. px-5 stays
+			    anyway — it is a sensible inset in its own right, and re-widening it
+			    would spend the room that was just bought.
+
+			    text-pretty on the prose is still there and still the safety net —
+			    see the note. It has more slack to protect now, not less reason to
+			    exist.
+
+			    THE VERTICAL PADDING IS NOT SYMMETRIC EITHER, and the asymmetry is
+			    what makes it LOOK symmetric: pt-10 (47.5px) against pb-[56px]. It
+			    was py-10 until 08-05, a clean 47.5 both ends that measured 60.1px
+			    of air above the greeting's cap and 51.7 below the last list item —
+			    an 8.4px lean the eye reads as a top-heavy card.
+
+			    The cause is half-leading, and it is the same one the greeting's
+			    mb note records. The h1's line box carries +12.6px above its cap;
+			    the last li's carries +4.2px below its baseline. Equal padding
+			    therefore paints unequal. 56 - 47.5 = 8.5 ≈ the 8.4 difference,
+			    which is why the bottom number looks arbitrary and isn't.
+
+			    Both edges now read ~60px. Adding to the BOTTOM rather than cutting
+			    the top was deliberate: Hiro asked for more vertical room on 08-05
+			    and taking it off the top would have quietly walked that back.
+
+			    It reads as roughly 2:1 against the horizontal, which looks wrong
+			    written down and correct on the page — the eye measures a text
+			    block's top and bottom air against its LINE HEIGHT (27px), not
+			    against its side margins. */}
+			<div class="reveal max-w-[28rem] rounded-[1.5px] border border-[var(--line)] bg-[var(--surface)] bg-clip-padding px-5 pb-[56px] pt-10 lg:min-w-0 lg:max-w-none lg:flex-1" style="--i: 0">
+				{/* text-3xl, two steps ABOVE the section headings (Hiro, 08-05, in two
+				    asks the same day — text-xl → 2xl → 3xl). It
+				    sat at their exact size from 08-02, on the argument that a
+				    greeting isn't a page title and the column should read as two
+				    equal blocks under one photo. That argument is now half-spent:
+				    the second block moved out of this column on 08-04, so there is
+				    no pair left to keep equal, and the greeting is the only heading
+				    the row contains. 35.625px — back at the 3xl it was cut from on
+				    08-02, though for a different reason: that cut was about the
+				    column reading as two equal blocks, and there is only one block
+				    in the column now. The masthead still carries the name at full
+				    size on every page, so this stays a greeting and 4xl is still
+				    the line not to cross.
+
+				    mb-8 (38px). It went mb-4 → 8 → 10 → and back to 8 on 08-05, and
+				    the last move is the one with a reason worth keeping.
+
+				    SET OPTICALLY, NOT GEOMETRICALLY. At mb-10 the greeting sat 60.3px
+				    of ink-to-ink from its prose while the card's top padding put it
+				    60.1px from the card's edge — dead centre between the two, which
+				    reads as a heading belonging to neither. A heading has to be
+				    nearer what it heads than what is above it. mb-8 gives 50.8px
+				    against the edge's 60.1 and the affinity lands.
+
+				    The geometric number is NOT the gap. This h1's line box carries
+				    +12.6px of half-leading above its cap and only +3.6px below its
+				    baseline, so the 38px here paints as 50.8 downward and the 47.5
+				    above it paints as 60.1. Measure ink, not boxes, before retuning
+				    anything in this card — the same asymmetry is why the section
+				    rules needed 40px below and 47.5 above to look centred.
+
+				    The wave scales with all of this for free — .greeting-wave is
+				    sized in em, so it tracks the h1 without a second number. It is
+				    decorative and aria-hidden, or it reads out as "waving hand" in
+				    the middle of a Japanese greeting. */}
+				<h1 class="mb-8 text-3xl font-medium tracking-tight text-[var(--ink-heading)]">
+					はじめまして。<span aria-hidden="true" class="greeting-wave"><Icon name="wave" /></span>
 				</h1>
 				{/* text-sm (16.625px), down from base (19px) on 08-03 — Hiro's ask,
 				    applied to the body copy only. The two h2s and the greeting stay
@@ -99,13 +245,22 @@ const albums = [
 				    deliberately equal to the section headings' mt-4 (see above), and
 				    that symmetry is worth more than closing the gap from the other
 				    side. */}
-				<div class="space-y-5 text-sm leading-relaxed">
-					<p class="reveal" style="--base: 700ms; --i: 0">I'm a Design Engineer based in the San Francisco Bay Area.</p>
-					<p class="reveal" style="--base: 700ms; --i: 1">
+				{/* text-pretty (2026-08-05): the browser avoids leaving a single short
+				    word alone on a paragraph's last line, rebalancing the lines above
+				    it instead. It is doing NOTHING today — px-5 fits the first
+				    sentence on one line with 3.5px to spare — and that is exactly why
+				    it's here. That 3.5px is one copy edit or one type-scale nudge from
+				    gone, and the failure it prevents is the one Hiro flagged: "Area."
+				    alone on line two. Without this, losing the margin means an orphan;
+				    with it, losing the margin means two balanced lines. */}
+				<div class="space-y-5 text-pretty text-sm leading-relaxed">
+					<p>I'm a Design Engineer based in the San Francisco Bay Area.</p>
+					<p>
 						I build with AI, but I make the decisions that matter myself. Taste, and knowing how a
 						person moves through a product, is still human work.
 					</p>
 				</div>
+
 				{/* Started as the bio's closing line — "Outside of work, I play heavy
 				    metal drums and hike," a sentence doing a list's job at the end
 				    of a paragraph run — and was promoted to a section on 08-02,
@@ -114,56 +269,167 @@ const albums = [
 				    (see the project page). It takes the reveal slot the removed line
 				    held, so the cascade is unchanged.
 
-				    The emojis are decoration on top of words that already say the
+				    The marks are decoration on top of words that already say the
 				    same thing, so they're aria-hidden: a screen reader would
 				    otherwise hear "Playing drums drum".
 
-				    Leading the row (Hiro, 08-02), so each one gets a fixed 1.25em
-				    slot rather than riding on its own advance width — that's what
-				    puts the LABELS on one left edge, which is the only reason to
-				    hang icons off the front of a list. It's a width, not a clip, so a wider glyph
-				    later spills into the gap instead of losing a pixel.
+				    Leading the row (Hiro, 08-02), so each one gets a fixed slot
+				    rather than riding on its own advance width — that's what puts
+				    the LABELS on one left edge, which is the only reason to hang
+				    icons off the front of a list. The slot used to be an explicit
+				    1.25em because emoji advance widths differ per platform; drawn
+				    icons share one 24-unit box, so the slot is now intrinsic and
+				    .interest-mark just states the size it was always going to be.
 
-				    Ruled off the prose above it on 08-03, with mt-10/pt-10 splitting
-				    47.5px either side of the line. Balanced on purpose: an unbalanced
-				    rule reads as belonging to whichever block it sits nearer, and this
-				    one belongs to neither. Total 95px against the old 57px, which is
-				    the "more space between sections" half of the same ask.
+				    SVG since 2026-08-04, on Hiro's ask, replacing 🥁👾🎬🥾 — see the
+				    block in Icon.astro for what the emoji couldn't do, why each one
+				    redraws its OWN emoji rather than a neighbouring idea, and why
+				    none of them carry --len. A hue each, from --mark-*; the values,
+				    their ratios, and how this squares with the page declining the
+				    accent on its headings are all at .interest-mark in global.css.
 
-				    --line-soft, not --line: --line is what the photo and the album
-				    tiles draw their edges in, and a divider that matched them would
-				    read as another frame rather than as punctuation between blocks.
+				    Ruled off the block above it on 08-03. Balanced on purpose: an
+				    unbalanced rule reads as belonging to whichever block it sits
+				    nearer, and this one belongs to neither.
+
+				    mt-10 (47.5px) above, pt-[40px] below — UNEQUAL NUMBERS FOR AN
+				    EQUAL LOOK, and don't "fix" them back to a matching pair. It was
+				    47.5/47.5 until 08-05, which is balanced in the box model and
+				    visibly off in ink: 51.7px above the rule against 59.3 below, so
+				    every rule sat ~8px nearer the block above it and did exactly what
+				    this note says it must not. The h2 under each rule carries +10.8px
+				    of half-leading above its cap, where the paragraph or list item
+				    above ends only +4.2px after its last ink. 40 + 10.8 = 50.8
+				    against 47.5 + 4.2 = 51.7, and the rule finally sits centred.
+
+				    Total is now ~87.5px against the old 57px, which is still the
+				    "more space between sections" half of the 08-03 ask.
+
+				    --line-soft, not --line: --line is what the photo draws its edge in
+				    (and, until 08-05, the album tiles), and a divider that matched it
+				    would read as another frame rather than as punctuation between
+				    blocks.
 				    border-t on the section rather than an <hr>, because the h2s
 				    already mark the divisions structurally — this is presentation on
 				    top of semantics that exist, not a substitute for them.
 
-				    NOTE this rule spans the PROSE COLUMN (~542px at lg), while the
-				    albums divider below spans the full 912.5px, because that section
-				    sits outside the row. Deliberate, but it is the one place the two
-				    dividers don't line up. */}
-				<section class="reveal mt-10 border-t border-[var(--line-soft)] pt-10" style="--base: 700ms; --i: 2">
+				    THE RULE'S WIDTH HAS BEEN THREE THINGS IN THREE DAYS, so read the
+				    whole arc before moving it a fourth time. ~542px to 08-04, when it
+				    sat inside the prose column. Then the full 912.5px, when Hiro
+				    asked for a divider that spanned the page and the section moved
+				    out to become a direct child of main. Now card-width — the section
+				    is back in the column (08-05) and the column is a card.
+
+				    -mx-5/px-5 is what "contained in the card" means here: the negative
+				    margin cancels the card's padding so the BORDER reaches both inner
+				    edges, and the matching padding puts the content back where it was.
+				    THE TWO MUST MATCH THE CARD'S HORIZONTAL PADDING — they have moved
+				    with it twice in one day (8 → 6 → 5), and a mismatch doesn't fail
+				    loudly: too large a negative margin runs the rule out past the
+				    card's border, too small leaves it inset by the difference. Match
+				    px-*, NOT py-*; the card's padding is asymmetric and only the
+				    horizontal half is what these cancel.
+				    A rule inset by 38px either side would read as an underline under
+				    the heading above it rather than as a division of the card.
+
+				    What survives all three: the rule spans its CONTAINER, whatever the
+				    container currently is. The page was ruled into bands; the card is
+				    now ruled into bands. Same device, smaller scale.
+
+				    Still NOT full-bleed to the window, and that constraint is
+				    untouched by any of this. The nav's hairline is the site's only
+				    edge-to-edge rule (e69bfec), which is what makes it read as the
+				    bar's own edge rather than as content. */}
+				<section class="-mx-5 mt-10 border-t border-[var(--line-soft)] px-5 pt-[40px]">
 					<h2 class="text-xl font-medium tracking-tight text-[var(--ink-heading)]">Personal Interests</h2>
+					{/* items-start, not items-baseline: an SVG's baseline is its bottom
+					    margin edge, so items-baseline would hang all four marks off the
+					    text baseline rather than sitting them on the line. .interest-mark
+					    carries the offset that centres them instead. */}
 					<ul class="mt-4 space-y-2 text-sm leading-relaxed">
-						<li class="flex items-baseline gap-2">
-							<span aria-hidden="true" class="w-[1.25em] shrink-0">🥁</span>
+						<li class="flex items-start gap-2">
+							<span aria-hidden="true" class="interest-mark interest-mark--drums">
+								<Icon name="drums" />
+							</span>
 							<span>Playing drums</span>
 						</li>
-						<li class="flex items-baseline gap-2">
-							<span aria-hidden="true" class="w-[1.25em] shrink-0">👾</span>
+						<li class="flex items-start gap-2">
+							<span aria-hidden="true" class="interest-mark interest-mark--invader">
+								<Icon name="invader" />
+							</span>
 							<span>Video game design &amp; pixel art</span>
 						</li>
-						<li class="flex items-baseline gap-2">
-							<span aria-hidden="true" class="w-[1.25em] shrink-0">🎬</span>
+						<li class="flex items-start gap-2">
+							<span aria-hidden="true" class="interest-mark interest-mark--clapper">
+								<Icon name="clapper" />
+							</span>
 							<span>Tokusatsu (Godzilla, Ultraman, etc.)</span>
 						</li>
-						<li class="flex items-baseline gap-2">
-							<span aria-hidden="true" class="w-[1.25em] shrink-0">🥾</span>
+						<li class="flex items-start gap-2">
+							<span aria-hidden="true" class="interest-mark interest-mark--boot">
+								<Icon name="boot" />
+							</span>
 							<span>Enjoying nature and hiking</span>
 						</li>
 					</ul>
 				</section>
+
+				{/* ── Toolbox (2026-08-05) ── Took the slot the albums grid vacated the
+				    same day, and inherits its rule: mt-10/pt-10 either side of a
+				    --line-soft border, the full 912.5px, --i: 3 so the reveal cascade
+				    is unchanged. Three ruled bands on the page, one device.
+
+				    It IS an icon-and-label list, same as interests directly above it,
+				    and as of 08-05 also the same SHAPE — one vertical column, Hiro's
+				    call. Both devices that used to hold the two apart are now spent:
+				    the grid went with this change, and the monochrome went when the
+				    tools took hues earlier the same day.
+
+				    What still separates them, in the order it does the work: the 95px
+				    and the full-width rule between the sections; two h2s that name
+				    different things; and the LINE RHYTHM, which is the quiet one —
+				    interests are phrases ("Video game design & pixel art") and tools
+				    are single product names, so the two blocks have visibly different
+				    ragged edges even set identically. That last one is why this reads
+				    as two lists rather than one run of eleven.
+
+				    Worth knowing this argument has now been had three times: the
+				    albums section (08-02) was covers rather than titles for it, this
+				    section was a dl and then a grid for it, and it is now a plain
+				    list. If the two blocks ever do start reading as one, the fix is
+				    the rule and the gap between them, not the list itself.
+
+				    Not tags/chips, which is the obvious answer and a trap: they were
+				    on the project pages and came OFF on 07-29 (see the .btn note in
+				    global.css). --surface's comment still says "cards, tags, nav
+				    buttons" and that middle term is now stale. Reintroducing the
+				    device here would quietly undo a removal, on a page that isn't
+				    where the argument happened. */}
+				<section class="-mx-5 mt-10 border-t border-[var(--line-soft)] px-5 pt-[40px]">
+					<h2 class="text-xl font-medium tracking-tight text-[var(--ink-heading)]">Toolbox</h2>
+					{/* One column at every width (Hiro, 08-05). It was 3 × 3 column-major
+					    and then 4 × 2 row-major inside a day; both are gone, and with
+					    them the grid's job of holding this block apart from the
+					    interests list — see the section note for what carries that now.
+
+					    space-y-2 and the same li as interests, deliberately identical
+					    rather than nearly so: two lists set to the same rhythm read as
+					    two deliberate lists, where two set ALMOST the same read as one
+					    list with a glitch in it. If these diverge again, diverge on
+					    purpose and by more than a step. */}
+					<ul class="mt-4 space-y-2 text-sm leading-relaxed">
+						{tools.map((tool) => (
+							<li class="flex items-start gap-2">
+								<span aria-hidden="true" class={`tool-mark tool-mark--${tool.key}`}>
+									<Icon name={tool.icon} />
+								</span>
+								<span>{tool.name}</span>
+							</li>
+						))}
+					</ul>
+				</section>
 			</div>
-			{/* Fixed 17rem at lg so the flex-1 column above resolves to a known
+			{/* Fixed 16rem at lg so the flex-1 column above resolves to a known
 			    width (see the note there); it is the last thing in the row, so
 			    shrink-0 keeps the prose taking the slack rather than the photo.
 			    Below lg the row is gone and the old stacked caps stand.
@@ -177,11 +443,30 @@ const albums = [
 			    terms and started competing with the body copy that just got
 			    smaller itself.
 
-			    The 2rem the photo gave up went to the prose column, which is why
-			    the note above says 542px rather than the 504px it said yesterday.
-			    The column stays under --measure, so nothing about the row's
-			    reasoning changed — only the split. */}
-			<figure class="reveal w-full max-w-[16rem] sm:max-w-[20rem] lg:w-[17rem] lg:max-w-none lg:shrink-0" style="--base: 180ms; --i: 0">
+			    17rem → 16rem on 08-05, for a wider card rather than a smaller
+			    photo — the row is a fixed sum and the column had nowhere else to
+			    take it from. The caption did NOT move this time, deliberately:
+			    08-03 cut the photo 10.5% and the caption went with it, where this
+			    is 5.9% and 13.3px is already the smallest type on the page. Two
+			    consecutive 6% cuts would be the thing to watch, not this one.
+
+			    At 16rem the photo is 304 × 380px, and the LG WIDTH IS NOW THE
+			    SMALLEST of the three: 16rem here against the stacked caps of 16rem
+			    below sm and 20rem between. That's a first — the lg photo has
+			    always been the largest — and it is the signal that this lever is
+			    spent. Take the next widening from the gap.
+
+			    --base 450ms so it lands AFTER the card (Hiro, 08-05: the card
+			    first, then the image). It was 180ms, which put the photo in flight
+			    before the old cascade's later pieces had started.
+
+			    450 rather than 800: the reveal runs 0.8s, so at 450 the card is
+			    ~56% arrived and the two overlap by a third of a second. Waiting the
+			    card out entirely would read as a stall — the same taste the load
+			    intro's --hold records, where the content enters over the bar's
+			    tail rather than after it. Long enough to be a sequence, short
+			    enough not to be a queue. */}
+			<figure class="reveal w-full max-w-[16rem] sm:max-w-[20rem] lg:w-[16rem] lg:max-w-none lg:shrink-0" style="--base: 450ms; --i: 0">
 				<img
 					src="/images/me.webp"
 					alt="Hiro Eernisse"
@@ -207,69 +492,25 @@ const albums = [
 				</figcaption>
 			</figure>
 		</div>
-			{/* PROTOTYPE (08-02) — covers, not titles. A list of album NAMES
-			    under the interests list would have been a second bulleted list
-			    reading as more of the first; sleeves are the version that earns the
-			    space, because cover art carries taste without a sentence and this
-			    becomes the only other image on the page.
-
-			    OUT OF THE PROSE COLUMN AND ACROSS THE PAGE (08-03). It sat inside the
-			    504px column, which made the lg row badly bottom-heavy on one side: the
-			    text column ran 690px against the figure's 482px, so the whole
-			    bottom-right quadrant — everything below the caption, beside this grid
-			    — was empty. Lifting this section out takes ~224px off the column, which
-			    lands it at ~466px against the photo's 482px: the two columns now end
-			    within about 16px of each other and the hole is gone. The row above is
-			    still the same two-column arithmetic; this is simply no longer part of it.
-
-			    Four across the full 912.5px: (912.5 − 3 × 14.25) / 4 = 217px a tile,
-			    nearly double the 115px it got inside the column and comfortably clear
-			    of the ~115px floor where a sleeve stops being recognisable and starts
-			    being a swatch. Two-up below sm. Squares on purpose — every sleeve is
-			    square, so aspect-square means no art is ever cropped and the row has
-			    one flat baseline.
-
-			    mt-10/pt-10 with a rule between (08-03), matching the interests
-			    section exactly — 47.5px either side of the line, 95px all in. The
-			    gap is still measured from the ROW's bottom rather than from the
-			    interests list, so on the lg row this rule clears whichever column
-			    runs longer. --i: 3 is unchanged deliberately: this is still the
-			    fourth thing to reveal, and the cascade should not notice that it
-			    changed parents.
-
-			    This rule is the full 912.5px where the interests one is column-width;
-			    see the note there for why they differ.
-
-			    Same 1.5px radius and --line border as the photo, so the two image
-			    elements read as one material. bg-clip-padding on the fallback tiles:
-			    --line is translucent, so without it the tile's own --surface-sunken
-			    paints THROUGH the border and the edge lands a different colour than
-			    the photo's identical one. */}
-			<section class="reveal mt-10 border-t border-[var(--line-soft)] pt-10" style="--base: 700ms; --i: 3">
-				<h2 class="text-xl font-medium tracking-tight text-[var(--ink-heading)]">Favorite albums</h2>
-				<ul class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-					{albums.map((album) => (
-						<li>
-							{album.cover ? (
-								<img
-									src={album.cover}
-									alt={`${album.artist} — ${album.title}`}
-									class="aspect-square w-full rounded-[1.5px] border border-[var(--line)] object-cover"
-								/>
-							) : (
-								<div
-									class="flex aspect-square items-end rounded-[1.5px] border border-[var(--line)] bg-[var(--surface-sunken)] bg-clip-padding p-2"
-									role="img"
-									aria-label={`${album.artist} — ${album.title}`}
-								>
-									<span aria-hidden="true" class="text-[0.7rem] leading-tight text-[var(--ink-soft)]">
-										{album.artist} — {album.title}
-									</span>
-								</div>
-							)}
-						</li>
-					))}
-				</ul>
-			</section>
 	</main>
+
+	{/* Lifted verbatim from the home page (2026-08-05) — same element, same
+	    max-w-[960px]/px-5 so the copyright sits on the SAME left edge as the
+	    prose and both section rules above it, same py-10, same text-xs on
+	    --ink-soft. A copyright line is the lowest-priority text on the site
+	    and the home page already settled what that looks like; a second
+	    treatment here would be a second answer to a solved question.
+
+	    Deliberately NOT the project pages' footer, which is a back link
+	    rather than a copyright. That one exists because a project page ends
+	    several thousand pixels below where you started and needs a way home.
+	    This page ends one screen down with the nav still in reach, so it
+	    takes the home page's version instead.
+
+	    OUTSIDE <main>, matching both. It isn't page content and the reveal
+	    cascade doesn't touch it — no .reveal, no --i, so it is simply there
+	    when the page is. */}
+	<footer class="mx-auto max-w-[960px] px-5 py-10 text-xs text-[var(--ink-soft)]">
+		<span>© 2026 Hiro Eernisse</span>
+	</footer>
 </Layout>
