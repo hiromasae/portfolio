@@ -2,6 +2,9 @@
 *:Zone.Identifier
 .claude/
 .codex
+
+# licensed trial fonts, kept locally for reference only
+.vscode/input-sans-font-family/
 # build output
 dist/
 # generated types
