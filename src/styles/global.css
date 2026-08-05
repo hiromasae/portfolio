@@ -4,6 +4,35 @@
 	/* One face for the whole site — headings included. */
 	--font-sans: "Recursive", "Segoe UI", system-ui, -apple-system, sans-serif;
 
+	/* ── Weight tokens ── The scale itself — which tier wears what — is
+	   documented on body's font-weight rule. LIGHT RUNS ONE NOTCH HEAVIER
+	   (2026-08-05, Hiro: bump the weight a notch for all ink text in light
+	   mode): dark ink on a light ground draws thinner than the same weight
+	   inverted — the body comment records that asymmetry from the dark side —
+	   so the light theme buys its stroke back here, through the tokens, rather
+	   than every call site branching on theme. INK TEXT ONLY: .btn's label
+	   (--btn-text on the enamel) and the wordmark (--dye-name) are not ink on
+	   paper and keep their pinned numbers. */
+	--weight-body: 400;
+	--weight-ui: 500;
+	--weight-emph: 600;
+
+	/* ── The corner radius ──
+	   One value for every rounded corner on the site (2026-08-05, Hiro). Two
+	   families had drifted — 1.5px on the sheets (cards, images, the about
+	   card) and 0.11rem (2.09px at the 19px root) on the controls (.btn,
+	   .btn-icon, the hover label, the quiet button's focus rounding) — a 0.6px
+	   split nobody can see, running BACKWARDS from any nesting logic (the
+	   controls sit on the sheets yet were the rounder of the two), in units
+	   that scale differently with the root. At these near-square sizes the
+	   concentric inner-radius rule has nothing to operate on, so: one token,
+	   no exceptions. The scrollbar thumb's 999px capsule is a shape idiom,
+	   not a radius on this scale, and stays off the token.
+	   2px (Hiro's pick, seeing 3px in the browser — 1.5 "may be too little",
+	   3 a step too soft). This is the only dial; retune it here, nowhere
+	   else. */
+	--radius: 2px;
+
 	/* ── Light theme: Tokyo Night Light ──
 	   No longer the default — dark is (see Layout.astro). These values live on
 	   :root because that's the cascade's base, not because light is the site's
@@ -118,10 +147,18 @@
 	   17.47:1 and drop the only piece of Tokyo Night the body text carries. */
 	--ink-hero: #232839;
 	/* Tinted with the ink rather than pure black: on a lavender-grey ground a
-	   neutral black hairline reads as a foreign material. Alphas unchanged. */
+	   neutral black hairline reads as a foreign material. */
 	--line: rgba(52, 59, 88, 0.22); /* card/tag borders */
 	--line-strong: rgba(52, 59, 88, 0.4); /* hover borders */
-	--line-soft: rgba(52, 59, 88, 0.12); /* quiet borders (theme toggle) */
+	/* The page rules' shared peak — nav edge, projects rule, about card rules
+	   are its only consumers (the toggle left it; this label used to say
+	   "quiet borders"). 0.12 until 08-05 (Hiro: the about card's dividers read
+	   too faint on light) — raised HERE rather than on .card-rule because the
+	   four rules are one device and must strengthen together, and held under
+	   --line's 0.22 so a rule stays quieter than a card border. Dark keeps
+	   0.11: translucent light ink already pops on the night ground, which is
+	   why light needs the stronger peak in the first place. */
+	--line-soft: rgba(52, 59, 88, 0.18);
 	/* The raised sheet is Tokyo Night Day's ground — a real palette value that
 	   happens to sit one step above this one, so a card is a lighter sheet of
 	   the same stock rather than a different material. The sunken bed is stepped
@@ -226,7 +263,9 @@
 	   class is ranked by hue. What still ranks is the mark: --dye-name leads
 	   --ink-title by 1.16× here, so the wordmark stays the most forward piece of
 	   type on the page (the same depth rule the dye block below explains, now
-	   answering to a second competitor).
+	   answering to a second competitor). ⚠ 08-05: NO LONGER TRUE IN THIS THEME —
+	   the palette-purity pass put the mark back on verbatim green, which trails
+	   the title; the dye block records the accepted break. Dark still holds.
 
 	   ── 2026-08-04: THE HUE MOVED, blue → cyan ──
 	   Hiro: the nav logo and the project headings should be something
@@ -302,26 +341,27 @@
 	   A drum is red, an invader is purple, a boot is leather. The colour is
 	   describing the object, which is the one job it can do honestly here.
 
-	   All verbatim Tokyo Night Light except the yellow, and every one clears
-	   AA on its own against --paper — measured, not assumed. They are also
-	   aria-hidden decoration sitting beside a label that says the same thing,
-	   so AA is the floor being cleared for the sighted reader's sake, not a
-	   WCAG obligation these would otherwise fail.
+	   All five verbatim Tokyo Night Light, and every one clears AA on its own
+	   against --paper — measured, not assumed. They are also aria-hidden
+	   decoration sitting beside a label that says the same thing, so AA is the
+	   floor being cleared for the sighted reader's sake, not a WCAG obligation
+	   these would otherwise fail.
 
-	   THE YELLOW IS DEEPENED, and for the reason the --ink-title block already
-	   records: Tokyo Night Light's #8f5e15 lands at 4.62:1, dead level with
-	   --ink-soft's 4.63. Verbatim would put the greeting's wave at the muted
-	   text's depth while sitting INSIDE an --ink-heading line at 11.42 — the
-	   faintest thing in the boldest line. Solved in the hue's own family,
-	   lightness only, the way --dye-name was. 6.72:1 lands it among the other
-	   four (5.03–6.95) instead of under all of them.
+	   THE YELLOW RAN DEEPENED for a day (#704711, 6.72:1, 08-04 → 08-05),
+	   because verbatim #8f5e15 lands at 4.62:1 — level with what was then the
+	   muted text, the faintest thing inside an --ink-heading line at 11.42.
+	   Reverted to verbatim in the 08-05 palette-purity pass (Hiro: only Tokyo
+	   Night colours outside --paper, the inks and the button), which ranks
+	   palette fidelity above that complaint. 4.62 still clears AA's 4.5 with
+	   little to spare, and the wave is the faintest mark in the row again —
+	   that is now the accepted reading, not a bug to re-fix.
 
 	   Dark's mirror block carries the verbatim night values; see there. */
 	--mark-drums: #8c4351; /* red, verbatim — 5.75:1 */
 	--mark-invader: #5a3e8e; /* magenta, verbatim — 6.95:1 */
 	--mark-clapper: #2959aa; /* blue, verbatim — 5.63:1 */
 	--mark-boot: #965027; /* orange, verbatim — 5.03:1; was --ink-num's value until the 08-05 AAA pass deepened the numeral */
-	--mark-wave: #704711; /* yellow, DEEPENED from #8f5e15's 4.62 — 6.72:1 */
+	--mark-wave: #8f5e15; /* yellow, verbatim — 4.62:1, see above */
 
 	/* ── The toolbox marks ──
 	   One hue per tool (Hiro, 08-05), and unlike the interests row these have
@@ -346,11 +386,12 @@
 	   either share a hue or take green off the mark, and the second is not on
 	   offer. See the --dye-name block.
 
-	   All verbatim Tokyo Night Light except the yellow, which is the same
-	   deepened value --mark-wave carries and for the same reason recorded
-	   there. Every one clears AA against --paper. */
+	   All seven verbatim Tokyo Night Light — the yellow rode --mark-wave's
+	   deepened value for a day until the 08-05 palette-purity pass reverted
+	   both; the history and the 4.62:1 it costs live on that block. Every one
+	   clears AA against --paper. */
 	--tool-astro: #5a3e8e; /* magenta, verbatim — 6.95:1 */
-	--tool-js: #704711; /* yellow, DEEPENED — 6.72:1, --mark-wave's value */
+	--tool-js: #8f5e15; /* yellow, verbatim — 4.62:1, --mark-wave's value */
 	--tool-tailwind: #0f4b6e; /* cyan, verbatim — 7.76:1, --ink-title's value */
 	--tool-react: #33635c; /* teal, verbatim — 5.67:1 */
 	--tool-figma: #2959aa; /* blue, verbatim — 5.63:1 */
@@ -401,22 +442,21 @@
 	   not legibility. Move L and re-measure; don't read "more saturated" as a
 	   single dial. Ratios are measured against each theme's --paper.
 
-	   NOT verbatim, unlike the dark side and unlike every accent this token has
-	   worn before it. Tokyo Night Light's green is #385f0d, which carries only
-	   6.21:1 here — under the cyan title's 7.76, so the verbatim value would put
-	   a card title in front of the wordmark and invert the whole rule above.
-	   Solved in that green's own hue, lightness only, to 1.15× the title: 86% of
-	   the hue's chroma survives the move (it deepens toward the gamut's edge, so
-	   the clamp bites a little — the same caveat the --ink-heading block records
-	   from the light end). It reads as a dark forest rather than the leaf green
-	   the dark theme wears, which is the light theme doing what it always does
-	   here: the papers are inverted, so the mark is too.
-
-	   The deepening is a straight WIN and not a compromise. The magenta it
-	   replaces sat at 6.95:1; this sits at 9.03:1, so the wordmark is the most
-	   forward it has ever been on paper. Clears AA-large unaided in both themes,
-	   so nothing on the site leans on WCAG 1.4.3's logo/brand-name exemption. */
-	--dye-name: #264500; /* 9.03:1 — 1.27× the muted text (AAA pass), 1.16× the title */
+	   VERBATIM since the 08-05 palette-purity pass (Hiro: only Tokyo Night
+	   colours outside --paper, the inks and the button) — and on this ground,
+	   verbatim BREAKS the depth rule above. #385f0d carries 6.21:1: under the
+	   cyan title's 7.76 AND under the muted text's 7.10, so on paper the
+	   largest piece of type in the bar now reads BEHIND both — exactly the
+	   inversion this block spent seven retunes preventing. KNOWN AND ACCEPTED:
+	   the pass ranks palette fidelity above the depth rule, and dark — the
+	   default theme, where a first-time visitor lands — still holds the rule
+	   as shipped. The deepened forest green this replaces (#264500, 9.03:1 —
+	   1.27× the muted text, 1.16× the title, the most forward the mark ever
+	   sat on paper) is the value to restore if the rule ever outranks the
+	   palette again; it was that green's own hue, lightness only. Still clears
+	   AA-large unaided in both themes, so nothing on the site leans on WCAG
+	   1.4.3's logo/brand-name exemption. */
+	--dye-name: #385f0d; /* green, verbatim — 6.21:1; the depth rule breaks here, see above */
 
 	/* ── The page's hairlines ──
 	   One gradient, shared by the nav's bottom edge and the rule over the
@@ -563,11 +603,6 @@
 		color-mix(in srgb, var(--ground-tint) var(--ground-lift), var(--paper)) 0%,
 		var(--paper) 100%
 	);
-
-	/* Theme glyph fill rest: the ink half sits right of center in light
-	   (translateX(0)), left in dark (-9px) — see .theme-fill-rect. A var so
-	   the load intro's sweep keyframes can target rest in either theme. */
-	--theme-fill-x: 0px;
 
 	/* The site's default easing. It was cut for the nav's collapse/expand
 	   ensemble — a motion assembled from independent transitions that all had
@@ -723,6 +758,11 @@
    lighter sheet of the same paper rather than a different material. */
 :root[data-theme="dark"] {
 	color-scheme: dark;
+	/* The base weight scale — light runs one notch heavier; the why lives on
+	   the :root copy of these tokens, the tier map on body's font-weight. */
+	--weight-body: 300;
+	--weight-ui: 400;
+	--weight-emph: 500;
 	/* 08-02: one step darker at Hiro's ask. Like the light block, the ground it
 	   replaced didn't leave the palette — #1a1b26 is now --surface, so night's
 	   own background became the raised sheet.
@@ -890,9 +930,10 @@
 	/* ── The about page's marks ──
 	   The light block carries the reasoning. All five verbatim Tokyo Night
 	   here — including the yellow, which needs no help on this ground: 9.65:1
-	   against the night paper, where its light counterpart had to be deepened
-	   out of a 4.62 tie with the muted text. That asymmetry is the papers
-	   being inverted, the same thing --dye-name does.
+	   against the night paper, where its light counterpart carries 4.62 and
+	   ran deepened for a day before the 08-05 palette-purity pass put it back
+	   on verbatim. That asymmetry is the papers being inverted, the same thing
+	   --dye-name's pair shows.
 
 	   Every one of these clears its light counterpart by 1.3–1.9×, which is
 	   this theme's usual margin and not a per-mark decision. */
@@ -921,10 +962,11 @@
 	--tool-git: #f7768e; /* red, verbatim — 7.29:1 */
 
 	/* The same green on the night ground (see the light block for the method,
-	   the depth rule, and the 2026-08-04 repick). Tokyo Night's green verbatim,
-	   not a lightness-solved counterpart — unlike its light-theme counterpart,
-	   which had to be deepened to stay ahead of the title. This ground ranks the
-	   green above the cyan unaided, so the rule holds as shipped.
+	   the depth rule, and the 2026-08-04 repick). Tokyo Night's green verbatim.
+	   This ground ranks the green above the cyan unaided, so the rule holds as
+	   shipped — and since the 08-05 palette-purity pass this is the ONLY theme
+	   where it does: light went back to verbatim green, which trails its title
+	   (the light block records the accepted break).
 
 	   The mark runs LIGHTER here than on paper, not darker: on a dark ground a
 	   leaf green is the high-contrast direction, so this is the same "sit
@@ -940,7 +982,6 @@
 	   which costs contrast — and check the title still trails it. */
 	--dye-name: #9ece6a; /* 10.56:1 — 1.50× the muted text (AAA pass), 1.15× the title */
 
-	--theme-fill-x: -9px;
 	--grain: none;
 }
 
@@ -1059,8 +1100,18 @@ body {
 	   and weight cannot fix. They are listed in the audit note in
 	   projects/[slug].astro; the worst is the project lead in the dark theme.
 	   The rule this settles on: 300 everywhere, and a local font-normal ONLY
-	   where the floor demands it. Don't raise this line to fix a single block. */
-	font-weight: 300;
+	   where the floor demands it. Don't raise this line to fix a single block.
+
+	   2026-08-05: the scale moved into per-theme tokens (--weight-body/-ui/
+	   -emph, defined with the palette blocks) because LIGHT NOW RUNS ONE NOTCH
+	   HEAVIER — 400/500/600 against dark's 300/400/500. The optical note above
+	   ("light ink on a dark ground reads thinner") stopped being a caveat and
+	   became the dial: dark keeps the numbers this comment describes, light
+	   adds 100 to each. The tiers and their members are unchanged, except that
+	   .btn and the wordmark sit OFF the tokens at their pinned numbers — their
+	   labels aren't ink on paper, and the light-on-dark chip already reads a
+	   step heavier than its weight. */
+	font-weight: var(--weight-body);
 	-webkit-font-smoothing: antialiased;
 	text-rendering: optimizeLegibility;
 }
@@ -1089,6 +1140,24 @@ body {
 #site-nav {
 	background-image: var(--grain), var(--ground-grad);
 	background-attachment: scroll, fixed;
+}
+
+/* The unpinned bar — the settings menu's "Sticky bar" switched off.
+   data-nav-static is stamped on <html> pre-paint by Layout.astro (same
+   contract as the theme attribute) and flipped live in Nav.astro. RELATIVE,
+   NOT STATIC, and this is load-bearing: the bar's bottom hairline
+   (#site-nav::after) and the settings dropdown are absolutely positioned
+   against the bar, and `sticky` was the positioned ancestor they resolved
+   to. `static` shipped here first and sent the hairline to the middle of
+   the page — bottom: 0 of the next positioned ancestor up. Relative keeps
+   the bar an ordinary in-flow block that scrolls away, while staying the
+   containing block for everything hung off it. The two landing calculations
+   in Nav.astro subtract the bar's height only while it is sticky — keep the
+   three in step. The bar's paint is indifferent: its --ground-grad layer is
+   `fixed` (viewport-anchored), so it keeps agreeing with the page's wherever
+   the bar happens to sit. */
+:root[data-nav-static] #site-nav {
+	position: relative;
 }
 
 /* ── The two hairlines ──
@@ -1190,6 +1259,16 @@ body {
 .theme-switching *::before,
 .theme-switching *::after {
 	transition: none !important;
+}
+/* The one carve-out (08-05): the settings menu's theme switch. Its thumb is
+   the control the visitor just pressed — the one element whose motion IS the
+   feedback — and freezing it makes the click feel dead while the page swaps.
+   Higher specificity than the blanket rule above, so this !important wins.
+   (The old toggle solved the same problem by playing its sweep as KEYFRAMES,
+   which the freeze can't touch; a transition plus a carve-out is the simpler
+   tool now that the control is a thumb with one resting rule per state.) */
+.theme-switching .settings-row .switch-thumb {
+	transition: transform var(--dur-gesture) var(--nav-ease) !important;
 }
 
 /* ── Nav geometry ──
@@ -1624,7 +1703,7 @@ body {
 	width: 0;
 	height: 0;
 	z-index: 0;
-	border-radius: 1.5px;
+	border-radius: var(--radius);
 	background: var(--surface);
 	opacity: 0;
 	/* TOP, to match the card's own `origin-top` (ProjectCard.astro). The panel
@@ -1839,7 +1918,7 @@ body {
 	justify-content: center;
 	gap: 0.5rem;
 	padding: 0.55rem 1.1rem;
-	border-radius: 0.11rem;
+	border-radius: var(--radius);
 	font-size: 0.875rem;
 	/* The site's emphasis weight — see the scale in the body rule. 700 until
 	   2026-08-04; this is the button, so it takes the same step down as the
@@ -1901,7 +1980,7 @@ body {
 	   the hard constraint it was). The two simply do not need to agree.
 
 	   Three deliberate departures from the explored variant, all Hiro's call:
-	     · the RADIUS stays the site's 0.11rem, not the 0.2rem the specimen
+	     · the RADIUS stays the site's --radius, not the 0.2rem the specimen
 	       used. Enamel grammar usually wants a curve to catch light on, so
 	       this is the harder version of the material — the bloom has to do the
 	       work the corners were helping with. It keeps the button in the same
@@ -2041,8 +2120,9 @@ body {
 	   fixed value. At 0.5rem the hovered state opened a visible hole. */
 	gap: 0.4rem;
 	font-size: 0.875rem;
-	/* Secondary UI weight — was 500, stepped down with the rest 2026-08-04. */
-	font-weight: 400;
+	/* Secondary UI weight — was 500, stepped down with the rest 2026-08-04;
+	   tokenised 08-05 (light runs the tier a notch heavier, see :root). */
+	font-weight: var(--weight-ui);
 	line-height: 1;
 	color: var(--ink-soft);
 	text-decoration: none;
@@ -2056,7 +2136,7 @@ body {
 .btn-quiet:focus-visible {
 	outline: 2px solid var(--focus-ring);
 	outline-offset: 2px;
-	border-radius: 0.11rem;
+	border-radius: var(--radius);
 }
 
 /* ── Quiet link: label underline + arrow ──
@@ -2133,7 +2213,7 @@ body {
 	align-items: center;
 	justify-content: center;
 	padding: 0.5rem;
-	border-radius: 0.11rem;
+	border-radius: var(--radius);
 	color: var(--ink-soft);
 	text-decoration: none;
 	transition: color var(--dur-tap) ease;
@@ -2350,23 +2430,182 @@ body {
 	height: 100%;
 }
 
-/* Theme toggle: the classic contrast glyph — a circle half ink, half paper,
-   drawn with the icons' 2px square-cap stroke at their exact size, so the
-   button needs no box or track to hold its own in the row. The filled side
-   marks the current theme: right in light, left in dark. The fill is a PAIR
-   of ink rects one pattern-period (18 units) apart sliding inside a static
-   circular clipPath (see Nav.astro) — sliding them sweeps the ink across the
-   circle, a slide rather than a spin, in step with the site's other motion
-   (nav underline, contact pill wipe). Two rects rather than one so the sweep
-   can always travel RIGHTWARD (see the theme-swap block): the pattern is
-   periodic, so any two transforms 18 apart paint the same pixels.
-   Resting position is pure state — no transition here: the sweep on click is
-   played by keyframes, and everything else (initial paint, reduced motion)
-   should just snap. At translateX(0) the lead rect spans the circle's right
-   half (x 12–21 of its 3–21 diameter) with the twin off-circle at -6–3;
-   -9px lands the twin on the left half exactly (lead rect off-circle). */
-.theme-fill-rect {
-	transform: translateX(var(--theme-fill-x, 0px));
+/* ── The settings menu ──
+   2026-08-05 (Hiro): the theme toggle became a settings button and the
+   controls moved down into this dropdown — the light/dark switch plus the
+   sticky-bar switch that arrived with it. (The contrast-glyph toggle it
+   replaced — a pair of ink rects sliding one pattern-period apart inside a
+   circular clip, sweep always rightward — lives in git history with its
+   theme-swap keyframes; start from that if a bare toggle ever returns.)
+
+   Card material (--surface, --line, bg-clip-padding, --radius), wearing the
+   project cards' hover shadow AT REST: a floating layer is the one place
+   where lift is a state rather than feedback. Entrance replays on every
+   un-hide (the [hidden] attribute is the closed state, so display flips
+   restart the animation). The exit SPLITS by gesture (08-05, Hiro): closing
+   from the gear plays the pill's own shrink (.is-closing below, riding
+   pill-pop-out verbatim — same keyframes, same tokens — so the menu leaves
+   exactly the way the hover labels leave), while the outside click and
+   Escape keep the site's hard cut: a deliberate dismissal gets the
+   acknowledgement, an incidental one just goes. z-index 60 for the reason
+   the pill carries it: #site-nav::after — the bar's hairline — paints after
+   every child and would otherwise rule across the menu's head.
+
+   THE SWITCH is the squared idiom at control size: a 2px currentColor track
+   riding the row's rest/hover ink (quiet until the row is live, like the
+   icons), a filled square thumb inside it — left off, right on, keyed off
+   the row's aria-checked. The thumb TRAVELS, but on --dur-gesture/--nav-ease
+   rather than the slide pair: across 14px the slide's 3% overshoot is under
+   half a pixel — mass with nothing to show it. */
+.settings-menu {
+	position: absolute;
+	top: calc(100% + 0.5rem);
+	/* THE SWITCH COLUMN CENTRES ON THE GEAR (08-05, Hiro), not the menu's
+	   edge on the wrap's. Two measured offsets, set equal by this calc:
+	     glyph centre ← wrap right edge:  2.9rem × --nav-icon-scale / 2
+	       (the button contracts about the container's right edge — see the
+	       close-ranks block — so its drawn centre sits half a SCALED box in)
+	     switch centre ← menu right edge: 1px border + 0.15rem menu padding
+	       + 0.5rem row padding + 14px (half the 28px track) = 0.65rem + 15px
+	   Every term is MIRRORED from the rules around this one or close-ranks,
+	   not linked — the 08-05 padding tighten (0.3rem → 0.2rem) drifted the
+	   centring 1.9px until this calc was updated to match, so treat any
+	   padding/track/scale retune as a two-place edit: the rule and this sum
+	   (and the transform-origin below, which is the same point). Net ≈ −13px:
+	   the card pokes past the column edge into the page margin, which px-5
+	   (23.75px at the 19px root) still covers. */
+	right: calc(1.45rem * var(--nav-icon-scale) - (0.65rem + 15px));
+	z-index: 60;
+	/* Width is the text–switch gap dial: the rows are space-between, so all
+	   slack between a label and its switch comes from here (08-05, Hiro:
+	   tighter — was 12.5rem / 0.3rem). The row's 0.6rem side padding is NOT
+	   a free dial; the gear-centring calc above owns it. */
+	min-width: 8rem;
+	padding: 0.15rem;
+	background: var(--surface);
+	background-clip: padding-box;
+	border: 1px solid var(--line);
+	border-radius: var(--radius);
+	box-shadow:
+		0 1px 1px rgba(0, 0, 0, 0.03),
+		0 10px 30px -16px rgba(0, 0, 0, 0.15);
+	/* The pop's anchor rides the same point the calc above aligns: the
+	   switch column / gear centre, not the card's corner — so the entrance
+	   grows and the shrink leaves from under the button it belongs to. */
+	transform-origin: calc(100% - 0.65rem - 15px) 0;
+	animation: settings-pop var(--dur-pop-in) var(--ease-pop);
+}
+@keyframes settings-pop {
+	from {
+		opacity: 0;
+		transform: scale(0.97);
+	}
+}
+/* The gear-click close: the pill's exit, borrowed whole — pill-pop-out is
+   the hover labels' leaving gesture and the menu is their neighbour, so the
+   two shrink identically (scale 0.9 + fade, --dur-pop-out on --nav-ease).
+   The transform-origin above keeps the shrink anchored to the button rather
+   than the menu's centre. Nav.astro adds the class, hides on animationend,
+   and never adds it under reduced motion — closed is [hidden] either way. */
+.settings-menu.is-closing {
+	animation: pill-pop-out var(--dur-pop-out) var(--nav-ease) both;
+	pointer-events: none;
+}
+
+/* ── The gear's click spin ──
+   A FLYWHEEL, not a notch (08-05, second pass — one 60° tooth-step on the
+   slide pair read as a click; Hiro: it should spin faster and further, then
+   slow to a stop). Five tooth pitches (300°) on a hard deceleration: the
+   0.16/1 launch leaves at ~6× linear speed — a genuine whirr — and the
+   curve spends its whole back half easing the last few degrees home, which
+   is where the momentum reads. NO overshoot, deliberately: a flywheel
+   decays, it doesn't spring back, so this is not --ease-slide (whose 3%
+   rebound is for things that ARRIVE somewhere). The bezier is the long-
+   settle curve from the 08-03 travel exploration — rejected there for the
+   label slider, right here, because a spin has no destination to be late
+   to. One-off ceremonial timing, so the pair stays local per the motion
+   scale's own rule.
+   The rotation lives on the inner .gear-g — the svg's own transform belongs
+   to the press scale, and every toggle is also a press, so the two gestures
+   MUST own separate channels (the same split the old toggle kept between
+   its press and its fill sweep). The end frame equals rest because 300° is
+   a multiple of the cog's six-fold symmetry (and the hub is a circle), so
+   when the animation ends and the transform falls away, nothing moves.
+   transform-box: view-box centres the rotation on the 24-box's 12,12
+   regardless of the painted extents. */
+.settings-toggle .gear-g {
+	transform-box: view-box;
+	transform-origin: center;
+}
+.settings-toggle.gear-spin .gear-g {
+	animation: gear-spin 640ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes gear-spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(300deg);
+	}
+}
+.settings-row {
+	display: flex;
+	width: 100%;
+	align-items: center;
+	justify-content: space-between;
+	/* The floor under the text–switch gap when the card is at natural width;
+	   the card's min-width sets the real distance (see above). */
+	gap: 0.8rem;
+	padding: 0.4rem 0.5rem;
+	border-radius: var(--radius);
+	/* One step ABOVE the hover pill's 0.7rem, deliberately (08-05, settled
+	   after trying the pill's size for a beat): the pill is a transient
+	   whisper naming a button, these rows are CONTROLS — read, aimed at,
+	   clicked — and setting a control at the whisper's size makes it read as
+	   incidental. 0.75 also keeps the row a ~30px target. The site's small
+	   type now steps 0.7 whisper / 0.75 control / 0.8 body-adjacent. */
+	font-size: 0.75rem;
+	font-weight: var(--weight-ui);
+	line-height: 1;
+	color: var(--ink-soft);
+	cursor: pointer;
+	transition: color var(--dur-tap) ease;
+}
+.settings-row:hover,
+.settings-row:focus-visible {
+	color: var(--ink);
+}
+.settings-row:focus-visible {
+	outline: 2px solid var(--focus-ring);
+	outline-offset: -2px;
+}
+.switch {
+	position: relative;
+	flex: none;
+	width: 28px;
+	height: 14px;
+	border: 2px solid currentColor;
+	border-radius: var(--radius);
+}
+.switch-thumb {
+	position: absolute;
+	top: 1px;
+	left: 1px;
+	width: 8px;
+	height: 8px;
+	background: currentColor;
+	transition: transform var(--dur-gesture) var(--nav-ease);
+}
+.settings-row[aria-checked='true'] .switch-thumb {
+	transform: translateX(14px);
+}
+@media (prefers-reduced-motion: reduce) {
+	.settings-menu {
+		animation: none;
+	}
+	.switch-thumb {
+		transition: none;
+	}
 }
 
 /* ── Shared sliding label ──
@@ -2481,7 +2720,7 @@ body {
 	   Padding and radius come back with the fill; the script's measurer is a
 	   clone of this element, so the widths it writes follow them automatically. */
 	padding: 0.25rem 0.5rem;
-	border-radius: 0.11rem;
+	border-radius: var(--radius);
 	background: var(--surface-sunken);
 	color: var(--ink);
 	font-size: 0.7rem;
@@ -2489,9 +2728,10 @@ body {
 	   The most exposed of the four: at 0.7rem this is the smallest type on the
 	   site, and weight buys more legibility per step down here than anywhere
 	   else. Kept on the scale for consistency, but it is the first thing to put
-	   back to 500 if the label reads thin. The script's width measurer clones
-	   this element, so the widths it writes track the change on their own. */
-	font-weight: 400;
+	   back to 500 if the label reads thin — in dark, that is; the 08-05 token
+	   pass already runs light at 500. The script's width measurer clones this
+	   element, so the widths it writes track the change on their own. */
+	font-weight: var(--weight-ui);
 	line-height: 1;
 	white-space: nowrap;
 	/* Hidden until the first entrance plays. Both animations are `both`-filled,
@@ -2642,8 +2882,8 @@ body {
    pseudo-element, comes after every child in paint order and won.
    Raising the group is the fix rather than raising the pill again: the whole
    cluster is what has to clear the rule, and it is the outermost box that
-   actually competes with it. The theme toggle's twin pill never had this
-   problem — #theme-toggle-wrap is position: relative with no transform, so it
+   actually competes with it. The settings button's twin pill never had this
+   problem — #settings-wrap is position: relative with no transform, so it
    is not a stacking context and its pill's own 60 has always applied. */
 #contact-group {
 	gap: var(--nav-icon-gap);
@@ -2674,7 +2914,7 @@ body {
 		)
 		scale(var(--nav-icon-scale)); /* glyph: ~1.33rem */
 }
-#site-nav #theme-toggle-wrap .btn-icon {
+#site-nav #settings-wrap .btn-icon {
 	transform: translateX(calc(2.9rem / 2 * (1 - var(--nav-icon-scale))))
 		scale(var(--nav-icon-scale));
 }
@@ -2688,9 +2928,11 @@ body {
    then the icons stroke-draw their outlines (each shape's measured length
    rides in --len, so one dash animation draws every one of them edge-to-edge
    over the same duration; see the dash-hold comment below for why true units,
-   not pathLength), and finally the theme toggle draws its circle and sweeps
-   its ink into the resting half — the same rightward sweep a click plays, one
-   pattern-period (18 units) of travel ending exactly on --theme-fill-x.
+   not pathLength), and finally the settings button draws its gear — the cog
+   outline and its hub stroking in together, the intro's last glyph. (Until 08-05
+   this finale was the theme toggle's circle plus an ink sweep running to
+   1200ms; the sweep retired with the glyph, so the intro now ends with the
+   gear's draw at ~1020ms.)
 
    This is the flourish the EXPANDED masthead used to get; the compact bar had
    a shorter variant where the buttons wiped in like the type rather than
@@ -2736,54 +2978,40 @@ html.nav-intro-draw #site-nav .nav-logo {
    silently collapses the keyframes' from-offset to 0 and kills the whole
    draw. px lengths ARE user units for SVG, so the numbers are identical. */
 html.nav-intro-draw:not(.nav-intro-go) #contact-group .btn-icon svg :is(path, rect),
-html.nav-intro-draw:not(.nav-intro-go) .theme-toggle svg > circle {
+html.nav-intro-draw:not(.nav-intro-go) .settings-toggle svg :is(path, circle) {
 	stroke-dasharray: calc(var(--len) * 1px) calc(var(--len) * 2px);
 	stroke-dashoffset: calc((var(--len) + 1) * 1px);
 }
-/* Closed shapes (the rects, Twitter's silhouette, the toggle circle) draw
-   with BUTT caps for the intro's duration: while dashed, the seam start
-   wears a cap, and a square cap overhangs the path end by a full unit —
-   most visibly as an extended beak on Twitter that "clips off" when the
-   drawn seam wraps shut. Butt keeps the seam flush all along, so the weld
-   changes nothing. Open shapes keep their square caps (their dashed and
-   undashed ends are capped alike, so they never had the problem) — and once
-   a closed path is undashed it has no caps at all, so this rule holding
-   until cleanup is inert. */
+/* Closed shapes (the rects, Twitter's silhouette) draw with BUTT caps for
+   the intro's duration: while dashed, the seam start wears a cap, and a
+   square cap overhangs the path end by a full unit — most visibly as an
+   extended beak on Twitter that "clips off" when the drawn seam wraps shut.
+   Butt keeps the seam flush all along, so the weld changes nothing. Open
+   shapes keep their square caps (their dashed and undashed ends are capped
+   alike, so they never had the problem) — and once a closed path is undashed
+   it has no caps at all, so this rule holding until cleanup is inert. The
+   settings gear needs no entry here: its circles carry butt caps inline in
+   the markup and its teeth are butt-capped by the same attribute. */
 html.nav-intro-draw .icon-email rect,
 html.nav-intro-draw .icon-linkedin rect,
-html.nav-intro-draw .icon-twitter path,
-html.nav-intro-draw .theme-toggle svg > circle {
+html.nav-intro-draw .icon-twitter path {
 	stroke-linecap: butt;
-}
-html.nav-intro-draw .theme-fill-rect {
-	/* A pattern-period-and-change left of rest: both rects sit fully off-circle
-	   behind the clip, so the fill is simply absent until the sweep carries it
-	   in. 20, not the period's exact 18: at -18 (light theme) the lead rect's
-	   right edge lands exactly ON the clip's left tangent (x = 3), and Chrome's
-	   clip rasterization leaks the edge's antialiasing as a faint full-height
-	   bar at the clip bounds — the extra 2 units keep the edge clear of it.
-	   (Rest's tangent-touching twin never shows the leak: the circle's own
-	   stroke paints over that column.) */
-	transform: translateX(calc(var(--theme-fill-x) - 20px));
 }
 
 html.nav-intro-draw.nav-intro-go #site-nav .nav-logo {
 	animation: nav-load-wipe var(--dur-nav) var(--nav-ease) both;
 }
 /* The contacts stroke-draw in markup order, left→right off each button's
-   --nav-icon-i (0…3, set in Nav.astro); the toggle circle draws last, then
-   the ink pours in. `backwards`, NOT `both`: the delay still holds the first
-   (hidden) frame, but the dash must die with the animation so each icon snaps
-   to clean undashed rendering at its own finish (see the hold above). */
+   --nav-icon-i (0…3, set in Nav.astro); the settings gear draws last, its
+   two closed shapes together. `backwards`, NOT `both`: the delay still holds the
+   first (hidden) frame, but the dash must die with the animation so each icon
+   snaps to clean undashed rendering at its own finish (see the hold above). */
 html.nav-intro-draw.nav-intro-go #contact-group .btn-icon svg :is(path, rect) {
 	animation: nav-load-stroke var(--dur-draw) var(--nav-ease)
 		calc(240ms + var(--nav-icon-i, 0) * 90ms) backwards;
 }
-html.nav-intro-draw.nav-intro-go .theme-toggle svg > circle {
+html.nav-intro-draw.nav-intro-go .settings-toggle svg :is(path, circle) {
 	animation: nav-load-stroke var(--dur-draw) var(--nav-ease) 600ms backwards;
-}
-html.nav-intro-draw.nav-intro-go .theme-fill-rect {
-	animation: nav-load-sweep var(--dur-gesture) var(--nav-ease) 1000ms both;
 }
 
 @keyframes nav-load-wipe {
@@ -2808,18 +3036,6 @@ html.nav-intro-draw.nav-intro-go .theme-fill-rect {
 		stroke-dashoffset: 0px;
 	}
 }
-@keyframes nav-load-sweep {
-	/* from == the pre-go hold above (-20px, see the leak note there), so the
-	   'go' handoff stays invisible; 'to' is rest, so the cleanup handoff is
-	   too. The two extra units of travel are imperceptible at this duration. */
-	from {
-		transform: translateX(calc(var(--theme-fill-x) - 20px));
-	}
-	to {
-		transform: translateX(var(--theme-fill-x));
-	}
-}
-
 /* ── Content reveal: the page's entrance under the bar ──
    Left-to-right entrance in the site's horizontal motion language: each
    .reveal element fades and slides in from the left in --i order (× 150ms),
@@ -2834,13 +3050,12 @@ html.nav-intro-draw.nav-intro-go .theme-fill-rect {
 
    reveal-hold-draw   the load intro is coming, and it OVERLAPS rather than
                       finishing first: the draw's choreography runs long
-                      (icon draws to ~1020ms, ink sweep to 1200ms), so the
-                      content enters when the toggle, the intro's LAST icon,
-                      starts drawing its circle (its 600ms delay above) —
-                      the type is long landed, the contact draws are
-                      mid-flight, and the final draw + ink sweep finish over
-                      the arriving cards. Waiting the intro out instead
-                      reads as a stall.
+                      (icon draws to ~1020ms), so the content enters when
+                      the settings button, the intro's LAST glyph, starts
+                      drawing its gear (its 600ms delay above) — the type
+                      is long landed, the contact draws are mid-flight, and
+                      the final draw finishes over the arriving cards.
+                      Waiting the intro out instead reads as a stall.
 
    reveal-hold-land   the Projects nav link — a landing on the TOP of the
                       list. No entrance to wait out (an internal navigation
@@ -2959,12 +3174,10 @@ html.reveal-skip .reveal {
 		transform: translateY(-1px) scale(0.9);
 	}
 
-	/* The theme toggle presses too — same scale-in as the contacts, minus the
-	   lift it never had. The scale rides the svg's `transform`, a separate
-	   channel from the fill's sweep (keyframes on the inner rect), so pressing
-	   mid-swap can't disturb the slide. Snap-in speed and the release come from
-	   the shared #site-nav .btn-icon > svg transition rules. */
-	.theme-toggle:active > svg {
+	/* The settings button presses too — same scale-in as the contacts, minus
+	   the lift it never had. Snap-in speed and the release come from the
+	   shared #site-nav .btn-icon > svg transition rules. */
+	.settings-toggle:active > svg {
 		transform: scale(0.9);
 	}
 
@@ -2977,43 +3190,10 @@ html.reveal-skip .reveal {
 		transition-duration: var(--dur-press);
 	}
 
-	/* ── Theme swap ──
-	   The fill's resting position is pure state (the data-theme rule on
-	   .theme-fill-rect above); the sweep on click is played by keyframes, not
-	   a transition, so it survives the blanket `transition: none` the flip
-	   applies for its one frame (see .theme-switching). `.theme-anim` is
-	   toggled per-click in Nav.astro; the pair below picks the sweep for the
-	   theme just applied. BOTH sweeps travel rightward — the ink never
-	   reverses: to-light slides the left-half fill right through the middle,
-	   and to-dark wraps — the right-half ink exits through the circle's right
-	   edge while the twin rect pours in from the left. to-dark therefore ends
-	   at +9px, not the -9px resting value: the two-rect pattern repeats every
-	   18 units, so the frames are pixel-identical and the handoff to the
-	   resting rule doesn't snap. Under reduced motion Nav.astro never adds
-	   the class and the fill just snaps across. */
-	:root[data-theme="dark"] .theme-toggle.theme-anim .theme-fill-rect {
-		animation: theme-fill-to-dark var(--dur-gesture) var(--nav-ease);
-	}
-	:root:not([data-theme="dark"]) .theme-toggle.theme-anim .theme-fill-rect {
-		animation: theme-fill-to-light var(--dur-gesture) var(--nav-ease);
-	}
-}
-
-@keyframes theme-fill-to-dark {
-	from {
-		transform: translateX(0);
-	}
-	to {
-		/* +9, not -9: rightward wrap; pattern-identical to the -9px rest. */
-		transform: translateX(9px);
-	}
-}
-
-@keyframes theme-fill-to-light {
-	from {
-		transform: translateX(-9px);
-	}
-	to {
-		transform: translateX(0);
-	}
+	/* The theme-swap ink sweep lived here until 08-05 — a keyframe pair
+	   (theme-fill-to-dark / -to-light) sliding the toggle's fill rects one
+	   pattern-period rightward on every flip, keyframes rather than a
+	   transition precisely so it survived .theme-switching's freeze. It
+	   retired with the glyph when the toggle became the settings menu; the
+	   switch thumb's carve-out beside .theme-switching is that idea's heir. */
 }

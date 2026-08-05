@@ -139,7 +139,7 @@ const tools = [
 			    --i: 0 with no --base, so it lands on the bar's --hold exactly. The
 			    figure takes --base 450ms; see the note there for why they overlap
 			    rather than queue. */}
-			{/* rounded-[1.5px] + --line + bg-clip-padding is the site's card
+			{/* rounded-[var(--radius)] + --line + bg-clip-padding is the site's card
 			    material, the same one the photo beside it and the project cards
 			    wear, so the two halves of the row read as one set of parts. The
 			    clip is load-bearing rather than decorative: --line is translucent,
@@ -189,7 +189,7 @@ const tools = [
 			    written down and correct on the page — the eye measures a text
 			    block's top and bottom air against its LINE HEIGHT (27px), not
 			    against its side margins. */}
-			<div class="reveal max-w-[28rem] rounded-[1.5px] border border-[var(--line)] bg-[var(--surface)] bg-clip-padding px-5 pb-[56px] pt-10 lg:min-w-0 lg:max-w-none lg:flex-1" style="--i: 0">
+			<div class="reveal max-w-[28rem] rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface)] bg-clip-padding px-5 pb-[56px] pt-10 lg:min-w-0 lg:max-w-none lg:flex-1" style="--i: 0">
 				{/* text-3xl, two steps ABOVE the section headings (Hiro, 08-05, in two
 				    asks the same day — text-xl → 2xl → 3xl). It
 				    sat at their exact size from 08-02, on the argument that a
@@ -225,7 +225,7 @@ const tools = [
 				    sized in em, so it tracks the h1 without a second number. It is
 				    decorative and aria-hidden, or it reads out as "waving hand" in
 				    the middle of a Japanese greeting. */}
-				<h1 class="mb-8 text-3xl font-medium tracking-tight text-[var(--ink-heading)]">
+				<h1 class="mb-8 text-3xl [font-weight:var(--weight-emph)] tracking-tight text-[var(--ink-heading)]">
 					はじめまして。<span aria-hidden="true" class="greeting-wave"><Icon name="wave" /></span>
 				</h1>
 				{/* text-sm (16.625px), down from base (19px) on 08-03 — Hiro's ask,
@@ -356,31 +356,31 @@ const tools = [
 				    edge-to-edge rule (e69bfec), which is what makes it read as the
 				    bar's own edge rather than as content. */}
 				<section class="card-rule mt-10 pt-[40px]">
-					<h2 class="text-xl font-medium tracking-tight text-[var(--ink-heading)]">Personal Interests</h2>
+					<h2 class="text-xl [font-weight:var(--weight-emph)] tracking-tight text-[var(--ink-heading)]">Personal Interests</h2>
 					{/* items-start, not items-baseline: an SVG's baseline is its bottom
 					    margin edge, so items-baseline would hang all four marks off the
 					    text baseline rather than sitting them on the line. .interest-mark
 					    carries the offset that centres them instead. */}
 					<ul class="mt-4 space-y-2 text-sm leading-relaxed">
-						<li class="flex items-start gap-2">
+						<li class="flex items-start gap-3">
 							<span aria-hidden="true" class="interest-mark interest-mark--drums">
 								<Icon name="drums" />
 							</span>
 							<span>Playing drums</span>
 						</li>
-						<li class="flex items-start gap-2">
+						<li class="flex items-start gap-3">
 							<span aria-hidden="true" class="interest-mark interest-mark--invader">
 								<Icon name="invader" />
 							</span>
 							<span>Video game design &amp; pixel art</span>
 						</li>
-						<li class="flex items-start gap-2">
+						<li class="flex items-start gap-3">
 							<span aria-hidden="true" class="interest-mark interest-mark--clapper">
 								<Icon name="clapper" />
 							</span>
 							<span>Tokusatsu (Godzilla, Ultraman, etc.)</span>
 						</li>
-						<li class="flex items-start gap-2">
+						<li class="flex items-start gap-3">
 							<span aria-hidden="true" class="interest-mark interest-mark--boot">
 								<Icon name="boot" />
 							</span>
@@ -421,7 +421,7 @@ const tools = [
 				    device here would quietly undo a removal, on a page that isn't
 				    where the argument happened. */}
 				<section class="card-rule mt-10 pt-[40px]">
-					<h2 class="text-xl font-medium tracking-tight text-[var(--ink-heading)]">Toolbox</h2>
+					<h2 class="text-xl [font-weight:var(--weight-emph)] tracking-tight text-[var(--ink-heading)]">Toolbox</h2>
 					{/* One column at every width (Hiro, 08-05). It was 3 × 3 column-major
 					    and then 4 × 2 row-major inside a day; both are gone, and with
 					    them the grid's job of holding this block apart from the
@@ -434,7 +434,7 @@ const tools = [
 					    purpose and by more than a step. */}
 					<ul class="mt-4 space-y-2 text-sm leading-relaxed">
 						{tools.map((tool) => (
-							<li class="flex items-start gap-2">
+							<li class="flex items-start gap-3">
 								<span aria-hidden="true" class={`tool-mark tool-mark--${tool.key}`}>
 									<Icon name={tool.icon} />
 								</span>
@@ -487,7 +487,7 @@ const tools = [
 					alt="Hiro Eernisse"
 					width="832"
 					height="1040"
-					class="aspect-[4/5] w-full rounded-[1.5px] border border-[var(--line)] object-cover"
+					class="aspect-[4/5] w-full rounded-[var(--radius)] border border-[var(--line)] object-cover"
 				/>
 				<figcaption class="mt-2 flex items-center gap-1.5 text-[0.7rem] text-[var(--ink-soft)]">
 					<svg

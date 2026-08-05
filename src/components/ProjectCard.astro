@@ -10,7 +10,7 @@ const { project } = Astro.props;
 	id={`project-${project.slug}`}
 	href={`/projects/${project.slug}`}
 	class:list={[
-		'project-card group flex flex-col gap-4 scroll-mt-24 rounded-[1.5px]',
+		'project-card group flex flex-col gap-4 scroll-mt-24 rounded-[var(--radius)]',
 		/* Interior padding for the hover panel, cancelled by a matching negative
 		   margin so the CONTENT stays exactly where it was on the grid — the
 		   leftmost card's year and title still line up with the nav and footer.
@@ -97,7 +97,7 @@ const { project } = Astro.props;
 		{/* Stepped down again 2026-08-03 (Hiro: slightly smaller). base/1.1rem →
 		    0.95rem/1rem, matching the year's step down in the same pass so the
 		    block shrinks as a unit and the title/date ratio holds. */}
-		<h3 class="text-[0.95rem] font-normal tracking-tight text-[var(--ink-title)] md:text-[1rem] md:leading-tight">
+		<h3 class="text-[0.95rem] [font-weight:var(--weight-ui)] tracking-tight text-[var(--ink-title)] md:text-[1rem] md:leading-tight">
 			<span class="project-card__title">{project.title}</span>
 		</h3>
 	</div>
@@ -121,7 +121,7 @@ const { project } = Astro.props;
 	<div
 		class:list={[
 			'project-card__frame',
-			'relative aspect-[16/9] w-full overflow-hidden rounded-[1.5px] border border-[var(--line)] bg-[var(--surface-sunken)] bg-clip-padding',
+			'relative aspect-[16/9] w-full overflow-hidden rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface-sunken)] bg-clip-padding',
 		]}
 	>
 		<img

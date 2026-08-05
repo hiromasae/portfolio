@@ -160,33 +160,36 @@ const onHome = path === '/';
 			</span>
 		</div>
 
-		{/* Light/dark toggle: the classic contrast glyph — a circle half ink,
-		    half paper, drawn at the contact icons' size and stroke. The filled
-		    side marks the current theme (right = light, left = dark); on toggle
-		    the ink SWEEPS across to the other side — a slide, not a spin, to
-		    match the site's motion language, and always travelling RIGHTWARD:
-		    the fill is a pair of rects one pattern-period (18 units) apart
-		    sliding inside a static circular clip (animating rects, not the
-		    clipPath, keeps the motion working in Safari), so light→dark can
-		    wrap — ink exits through the circle's right edge while the twin
-		    rect pours in from the left. See the theme-swap block in
-		    global.css. `ml-auto` holds it at the bar's right edge — with the
+		{/* Settings: the gear — one closed cog silhouette (six square teeth,
+		    r6 root, r9.5 tip) plus its hub, in the icons' 2px stroke. Picked
+		    from a ten-variant exploration (2026-08-05, Hiro — the artifact
+		    URL is in the session memory): six WIDE teeth because they stay
+		    countable at the bar's 17px where eight tighten and ten fuzz to
+		    texture. The teeth are true rectangles — parallel flanks, flat
+		    chord tips — generated, not eyeballed; radial flanks with arc tips
+		    were tried first and read as a saw blade once stroked. A sliders
+		    glyph and a seated-teeth gear each spent part of the day here
+		    before this one. The button replaced the light/dark contrast
+		    glyph when the theme control moved into the menu below and gained
+		    a sticky-bar companion; the circle-and-fill-sweep toggle this
+		    displaced — ink rects sliding one pattern-period apart inside a
+		    circular clip, always travelling rightward — lives in git history
+		    with its theme-swap block in global.css. If a bare toggle ever
+		    comes back, start from that, not from scratch.
+		    `ml-auto` holds the cluster at the bar's right edge — with the
 		    contacts centred out of flow it's the only thing left in the row
-		    after the wordmark. Its close-ranks translate in global.css assumes
+		    after the wordmark. The close-ranks translate in global.css assumes
 		    the same 2.9rem box as the contacts, which the default .btn-icon
-		    padding + 1.9rem glyph give it already. The button is named for the
-		    theme a click switches TO (play/pause-style); the script keeps
-		    aria-label and the hover pill on the same text. */}
-		<div id="theme-toggle-wrap" class="relative ml-auto flex self-center">
-			{/* The pre-JS name. Dark is the site's default (stamped on <html> in
-			    Layout.astro), so the button starts out offering the way OUT of
-			    it; the script's syncThemeState corrects this on load for a
-			    visitor whose saved choice is light. */}
+		    padding + 1.9rem glyph give it already. */}
+		<div id="settings-wrap" class="relative ml-auto flex self-center">
 			<button
-				id="theme-toggle"
+				id="settings-toggle"
 				type="button"
-				class="btn-icon theme-toggle"
-				aria-label="Light mode"
+				class="btn-icon settings-toggle"
+				aria-label="Settings"
+				aria-haspopup="true"
+				aria-expanded="false"
+				aria-controls="settings-menu"
 			>
 				<svg
 					viewBox="0 0 24 24"
@@ -196,35 +199,60 @@ const onHome = path === '/';
 					stroke-linecap="square"
 					aria-hidden="true"
 				>
-					<defs>
-						<clipPath id="theme-fill-clip">
-							<circle cx="12" cy="12" r="9" />
-						</clipPath>
-					</defs>
-					{/* --len: measured circumference for the load intro's circle draw —
-					    same true-unit dash scheme as the contact icons (Icon.astro). */}
-					<circle cx="12" cy="12" r="9" style="--len: 56.25" />
-					<g clip-path="url(#theme-fill-clip)">
-						<rect class="theme-fill-rect" x="12" y="2" width="9" height="20" fill="currentColor" stroke="none" />
-						{/* The twin, exactly one period (18) left: off-circle at rest
-						    in light (its right edge only touches the clip's tangent
-						    point), it becomes the left-half fill as the sweep carries
-						    it in. Both rects share the class so the resting transforms
-						    and sweep keyframes drive them in lockstep. */}
-						<rect class="theme-fill-rect" x="-6" y="2" width="9" height="20" fill="currentColor" stroke="none" />
+					{/* --len: measured lengths for the load intro's stroke-draw —
+					    same true-unit dash scheme as the contact icons
+					    (Icon.astro): the cog outline computes to 80.47 (rounded
+					    up), the hub is 2πr. Both shapes are CLOSED and carry butt
+					    caps inline: a closed shape wears a cap only while the
+					    intro draws it dashed, where a square cap overhangs the
+					    seam (the Twitter-beak gotcha recorded at the intro's cap
+					    rule in global.css) — undashed, a closed path has no caps
+					    and the attribute is inert. The path is generated (6 teeth,
+					    frac 0.52, one tooth centred straight up), so retune it by
+					    regenerating, not by nudging coordinates. */}
+					{/* The rotatable group: the click spin (see .gear-g in
+					    global.css) turns this, not the svg — the svg's transform
+					    belongs to the press scale, and the two gestures overlap
+					    on every toggle. The spin is any multiple of 60°: the cog
+					    is six-fold symmetric, so the animation's end frame is
+					    pixel-identical to rest and the class can just fall off
+					    (currently 300°, a flywheel — see the keyframes). */}
+					<g class="gear-g">
+						<path
+							stroke-linecap="butt"
+							d="M10.366 6.227L10.366 2.642L13.634 2.642L13.634 6.227A6 6 0 0 1 16.183 7.699L19.288 5.906L20.922 8.736L17.817 10.528A6 6 0 0 1 17.817 13.472L20.922 15.264L19.288 18.094L16.183 16.301A6 6 0 0 1 13.634 17.773L13.634 21.358L10.366 21.358L10.366 17.773A6 6 0 0 1 7.817 16.301L4.712 18.094L3.078 15.264L6.183 13.472A6 6 0 0 1 6.183 10.528L3.078 8.736L4.712 5.906L7.817 7.699A6 6 0 0 1 10.366 6.227Z"
+							style="--len: 81"
+						/>
+						<circle cx="12" cy="12" r="2.5" stroke-linecap="butt" style="--len: 16" />
 					</g>
 				</svg>
 			</button>
+			{/* The dropdown. [hidden] at rest — the exit is a hard cut like every
+			    exit on the site; the entrance pop lives in CSS and replays on
+			    every un-hide. Two switch rows, role="switch" + aria-checked, both
+			    stamped correct pre-JS for the DEFAULTS (dark, sticky) and synced
+			    on load for saved choices — same contract as the theme attribute
+			    itself. */}
+			<div id="settings-menu" class="settings-menu" hidden>
+				<button type="button" class="settings-row" id="setting-theme" role="switch" aria-checked="true">
+					<span>Dark mode</span>
+					<span class="switch" aria-hidden="true"><span class="switch-thumb"></span></span>
+				</button>
+				<button type="button" class="settings-row" id="setting-sticky" role="switch" aria-checked="true">
+					<span>Sticky bar</span>
+					<span class="switch" aria-hidden="true"><span class="switch-thumb"></span></span>
+				</button>
+			</div>
 			{/* Twin of the contact pill (same class, so same look and wipes) —
 			    deliberately its OWN element rather than the shared slider: the
 			    shared pill gliding across the ml-8 gap would visually annex the
-			    toggle into the contacts cluster. See the toggle-label block in
-			    the script below.
-			    It carries the press box too (2026-08-04): the toggle is a button
+			    settings button into the contacts cluster. See the settings-label
+			    block in the script below.
+			    It carries the press box too (2026-08-04): the button presses
 			    like the other four and its label dips with it. No stamp box —
-			    nothing here copies, and the label's own click gesture is the
-			    horizontal roll, which lives on the text span and so passes
-			    through the press untouched. */}
+			    nothing here copies. The label is a static "Settings" since
+			    08-05; the horizontal roll it played when it named the next theme
+			    went with the bare toggle (the menu's rows show state now). */}
 			<span class="contact-slider" aria-hidden="true">
 				<span class="contact-slider-press">
 					<span class="contact-slider-in">
@@ -383,7 +411,11 @@ const onHome = path === '/';
 					(projectsIntent !== '1' && document.getElementById('project-' + projectsIntent)) ||
 					document.getElementById('project-list');
 				if (el) {
-					var y = el.getBoundingClientRect().top + window.scrollY - nav.offsetHeight - 12;
+					// An unpinned bar (data-nav-static, stamped pre-paint in
+					// Layout.astro) scrolls away with the page — nothing to duck
+					// under, so only the 12px breathing room remains.
+					var barH = root.dataset.navStatic !== undefined ? 0 : nav.offsetHeight;
+					var y = el.getBoundingClientRect().top + window.scrollY - barH - 12;
 					window.scrollTo({ top: Math.max(y, 0), behavior: 'instant' });
 				}
 			}
@@ -463,48 +495,128 @@ const onHome = path === '/';
 </script>
 
 <script>
-	// ── Theme toggle ──
-	// Flip <html data-theme> and remember the manual choice. The initial theme
-	// is resolved pre-paint in Layout.astro; this only handles user clicks.
-	const themeToggle = document.getElementById('theme-toggle');
-	const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-	// The button is named for the theme a click switches TO (play/pause-style):
-	// "Dark mode" while light is active, "Light mode" while dark is. The hover
-	// pill below shows the same text, so the visible label and the accessible
-	// name always agree. The glyph's resting position comes from CSS state
-	// alone; only the name needs syncing.
-	// "mode", not "theme" (07-31, Hiro): the pill is read as an instruction by
-	// a visitor who has just moved the cursor onto a half-filled circle, and
-	// "light mode" is what that control is called everywhere else.
-	const themeLabel = () =>
-		document.documentElement.dataset.theme === 'dark' ? 'Light mode' : 'Dark mode';
-	const syncThemeState = () => {
-		themeToggle?.setAttribute('aria-label', themeLabel());
+	// ── Settings menu ──
+	// The button discloses the dropdown; the two rows inside are the actual
+	// controls (role="switch", aria-checked = the state). Open/close is the
+	// site's usual asymmetry: entrance pop in CSS, exit a hard cut ([hidden]).
+	// The states themselves are resolved pre-paint in Layout.astro; this block
+	// only handles clicks.
+	const settingsToggle = document.getElementById('settings-toggle');
+	const settingsMenu = document.getElementById('settings-menu');
+	const settingsWrap = document.getElementById('settings-wrap');
+	const themeRow = document.getElementById('setting-theme');
+	const stickyRow = document.getElementById('setting-sticky');
+
+	const syncSettingsState = () => {
+		const root = document.documentElement;
+		themeRow?.setAttribute('aria-checked', String(root.dataset.theme === 'dark'));
+		stickyRow?.setAttribute('aria-checked', String(!('navStatic' in root.dataset)));
 	};
-	syncThemeState();
-	themeToggle?.addEventListener('click', () => {
+	syncSettingsState();
+
+	const reduceSettings = window.matchMedia('(prefers-reduced-motion: reduce)');
+	const menuOpen = () => settingsToggle?.getAttribute('aria-expanded') === 'true';
+	// The named handler (rather than a {once} listener) is load-bearing: a
+	// reopen mid-shrink cancels the exit animation, and a {once} listener
+	// armed for that animationend would survive to catch the NEXT one — the
+	// entrance's — and hide the menu the moment it finished arriving. The
+	// is-closing check makes a stale firing a no-op instead.
+	const onCloseEnd = (e: AnimationEvent) => {
+		if (!settingsMenu) return;
+		if (e.target === settingsMenu && settingsMenu.classList.contains('is-closing')) {
+			settingsMenu.hidden = true;
+			settingsMenu.classList.remove('is-closing');
+		}
+		settingsMenu.removeEventListener('animationend', onCloseEnd);
+	};
+	// `pop` closes with the pill's shrink (the gear-click path); the outside
+	// click and Escape keep the site's hard-cut exit.
+	const setMenu = (open: boolean, pop = false) => {
+		if (!settingsToggle || !settingsMenu) return;
+		settingsToggle.setAttribute('aria-expanded', String(open));
+		if (open) {
+			settingsMenu.classList.remove('is-closing');
+			settingsMenu.hidden = false;
+		} else if (pop && !reduceSettings.matches && !settingsMenu.hidden) {
+			settingsMenu.classList.add('is-closing');
+			settingsMenu.addEventListener('animationend', onCloseEnd);
+		} else {
+			settingsMenu.classList.remove('is-closing');
+			settingsMenu.hidden = true;
+		}
+	};
+	const toggleMenu = () => {
+		setMenu(!menuOpen(), true);
+		// The spin, replayed from zero on every toggle (remove + reflow +
+		// re-add, the retrigger idiom the old toggle's sweep used). On the
+		// inner .gear-g, so the press scale on the svg above never fights it;
+		// the flywheel numbers live on the keyframes in global.css.
+		if (settingsToggle && !reduceSettings.matches) {
+			settingsToggle.classList.remove('gear-spin');
+			void settingsToggle.offsetWidth;
+			settingsToggle.classList.add('gear-spin');
+		}
+	};
+	// ON RELEASE, like every button on the site. (08-05: a pointerdown
+	// toggle lived here for an hour — the native-menu convention — and was
+	// reverted the same day, Hiro: release feels like a toggle, and the
+	// shrink is actually SEEN instead of half-gone under a pressed button.
+	// The down-stroke already belongs to the press dip, so the gesture reads
+	// press → release → actuate; and a click listener serves keyboard
+	// activation for free, which the pointerdown version needed a
+	// detail === 0 side door for.)
+	settingsToggle?.addEventListener('click', () => toggleMenu());
+	// Outside click closes. pointerdown, not click: a click that lands on
+	// something interactive should find the menu already gone, the way every
+	// native menu dismisses.
+	document.addEventListener('pointerdown', (e) => {
+		if (menuOpen() && settingsWrap && !settingsWrap.contains(e.target as Node)) setMenu(false);
+	});
+	document.addEventListener('keydown', (e) => {
+		if (e.key !== 'Escape' || !menuOpen()) return;
+		const focusInside = settingsWrap?.contains(document.activeElement);
+		setMenu(false);
+		// Only reclaim focus that the menu owned — stealing it from elsewhere
+		// on Escape would yank a keyboard user across the page.
+		if (focusInside) settingsToggle?.focus();
+	});
+
+	// ── The theme switch ──
+	// Flip <html data-theme> and remember the manual choice.
+	themeRow?.addEventListener('click', () => {
 		const root = document.documentElement;
 		const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
 		// Suppress every transition for the frame the theme flips so the whole
 		// page changes at once — no element animates on its own clock, and grey
 		// text never dips through a low-contrast mid-tone. Force a style flush
 		// with transitions off, then re-enable them on the next frame.
+		// EXCEPT the switch's own thumb: .theme-switching carves it out in
+		// global.css, or the control the visitor just pressed would snap while
+		// everything it governs changes — the one element whose motion IS the
+		// feedback.
 		root.classList.add('theme-switching');
 		root.dataset.theme = next;
 		try {
 			localStorage.setItem('theme', next);
 		} catch (e) {}
-		syncThemeState();
-		// Play the thumb slide. It's a keyframe animation (unaffected by the
-		// transition suppression above), retriggered by removing the class and
-		// forcing a reflow before re-adding so rapid clicks restart it cleanly.
-		if (themeToggle && !prefersReducedMotion.matches) {
-			themeToggle.classList.remove('theme-anim');
-			void themeToggle.offsetWidth;
-			themeToggle.classList.add('theme-anim');
-		}
+		syncSettingsState();
 		void root.offsetHeight;
 		requestAnimationFrame(() => root.classList.remove('theme-switching'));
+	});
+
+	// ── The sticky switch ──
+	// data-nav-static on <html> unpins the bar (the CSS lives with #site-nav
+	// in global.css). Saved as its own key, same only-explicit-choice contract
+	// as 'theme'; Layout.astro replays it pre-paint.
+	stickyRow?.addEventListener('click', () => {
+		const root = document.documentElement;
+		const nowStatic = !('navStatic' in root.dataset);
+		if (nowStatic) root.dataset.navStatic = '';
+		else delete root.dataset.navStatic;
+		try {
+			localStorage.setItem('nav-sticky', nowStatic ? 'off' : 'on');
+		} catch (e) {}
+		syncSettingsState();
 	});
 
 	const nav = document.getElementById('site-nav');
@@ -520,9 +632,13 @@ const onHome = path === '/';
 		const PROJECTS_FLAG = 'nav-projects';
 
 		// The y that rests `el` ~12px under the bar (mirrored by the inline
-		// script's `landOnProjects` — keep the two in step).
+		// script's `landOnProjects` — keep the two in step). When the bar is
+		// unpinned (data-nav-static) it scrolls away with the page, so there
+		// is no bar to duck under and only the breathing room remains.
 		const compactTargetY = (el) => {
-			const top = el.getBoundingClientRect().top + window.scrollY - nav.offsetHeight;
+			const barH =
+				'navStatic' in document.documentElement.dataset ? 0 : nav.offsetHeight;
+			const top = el.getBoundingClientRect().top + window.scrollY - barH;
 			return Math.max(top - 12, 0);
 		};
 
@@ -892,20 +1008,21 @@ const onHome = path === '/';
 		});
 	}
 
-	// ── Theme toggle label ──
+	// ── Settings label ──
 	// A twin of the contact pill: same class (so same look, entrance wipe and
 	// exit wipe) under its own button. A lone button needs none of the shared
-	// slider's slide-between machinery — the pill just wipes in showing the
-	// theme a click would switch TO, and a click rolls the text to the next
-	// label (the same roll as the email icon's "Copied!", doubling as
-	// confirmation). Kept separate from the shared slider on purpose: one pill
-	// gliding across the ml-8 gap would read as the toggle joining the
-	// contacts cluster.
-	const toggleWrap = document.getElementById('theme-toggle-wrap');
-	const togglePill = toggleWrap?.querySelector<HTMLElement>('.contact-slider');
+	// slider's slide-between machinery — the pill just wipes in naming the
+	// button, a static "Settings" since 08-05 (it named the next theme and
+	// rolled on click while the button WAS the theme toggle; the menu's rows
+	// show state now, so the roll went with them). Kept separate from the
+	// shared slider on purpose: one pill gliding across the ml-8 gap would
+	// read as the settings button joining the contacts cluster. It also
+	// yields to the menu — the dropdown opens into the exact strip the pill
+	// wipes across, and a label for a control already open is noise.
+	const togglePill = settingsWrap?.querySelector<HTMLElement>('.contact-slider');
 	const togglePillText = togglePill?.querySelector<HTMLElement>('.contact-slider-text');
 	const togglePillPress = togglePill?.querySelector<HTMLElement>('.contact-slider-press');
-	if (toggleWrap && themeToggle && togglePill && togglePillText && togglePillPress) {
+	if (settingsWrap && settingsToggle && togglePill && togglePillText && togglePillPress) {
 		const reduceToggle = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 		// Hidden clone for width measurement (mirrors the contact slider's, inner
@@ -916,7 +1033,7 @@ const onHome = path === '/';
 			'position:absolute;visibility:hidden;top:-9999px;left:0;transform:none;transition:none;width:auto;';
 		measurer.querySelector<HTMLElement>('.contact-slider-in')!.style.cssText =
 			'width:auto;opacity:1;animation:none;';
-		toggleWrap.appendChild(measurer);
+		settingsWrap.appendChild(measurer);
 		const measurerText = measurer.querySelector<HTMLElement>('.contact-slider-text')!;
 		const widthFor = (text: string) => {
 			measurerText.textContent = text;
@@ -924,7 +1041,6 @@ const onHome = path === '/';
 		};
 
 		let shown = false;
-		let rollSeq = 0;
 
 		// Rect-based centering rather than pure CSS: the button's visual box
 		// rides the close-ranks transform, and rects see transforms — so the
@@ -934,8 +1050,8 @@ const onHome = path === '/';
 		// that a centered pill would cross clientWidth — and scrollbar-gutter:
 		// stable ends painting there, silently shearing the pill's right side.
 		const placePill = (text: string) => {
-			const wRect = toggleWrap.getBoundingClientRect();
-			const bRect = themeToggle.getBoundingClientRect();
+			const wRect = settingsWrap.getBoundingClientRect();
+			const bRect = settingsToggle.getBoundingClientRect();
 			const width = widthFor(text);
 			const maxCenter =
 				document.documentElement.clientWidth - 8 - width / 2 - wRect.left;
@@ -943,7 +1059,6 @@ const onHome = path === '/';
 				bRect.left - wRect.left + bRect.width / 2,
 				maxCenter
 			);
-			rollSeq++;
 			togglePillText.style.transition = 'none';
 			togglePillText.style.transform = 'none';
 			togglePillText.style.opacity = '1';
@@ -953,11 +1068,11 @@ const onHome = path === '/';
 		};
 
 		const showPill = () => {
-			if (shown) return;
+			if (shown || menuOpen()) return;
 			// Same pop as the contact pill — the two must appear the same way or
-			// the toggle reads as a different kind of control.
+			// the button reads as a different kind of control.
 			togglePill.style.transition = 'none';
-			placePill(themeLabel());
+			placePill('Settings');
 			void togglePill.offsetWidth;
 			togglePill.style.transition = '';
 			togglePill.classList.remove('is-out', 'is-in');
@@ -982,10 +1097,16 @@ const onHome = path === '/';
 		// plainly wrong now that its region is exactly the drawn button (see the
 		// hit-box block in global.css). The pill is pointer-events: none, so it
 		// can't take the hover away from the button it hangs under.
-		themeToggle.addEventListener('mouseenter', showPill);
-		themeToggle.addEventListener('mouseleave', hidePill);
-		themeToggle.addEventListener('focus', showPill);
-		themeToggle.addEventListener('blur', hidePill);
+		settingsToggle.addEventListener('mouseenter', showPill);
+		settingsToggle.addEventListener('mouseleave', hidePill);
+		settingsToggle.addEventListener('focus', showPill);
+		settingsToggle.addEventListener('blur', hidePill);
+		// The menu takes the pill's strip the moment it opens. Registered
+		// after the disclosure's own click listener, so menuOpen() answers
+		// for the state the toggle just produced.
+		settingsToggle.addEventListener('click', () => {
+			if (menuOpen()) hidePill();
+		});
 
 		// ── The press ──
 		// 2026-08-04, the same gesture the contact pills got, on the same tokens:
@@ -1003,7 +1124,7 @@ const onHome = path === '/';
 		// can scale underneath it without either gesture touching the other's
 		// transform. That separation is why the label can change identity and be
 		// pressed at the same instant, which is exactly what a click does here.
-		themeToggle.addEventListener('pointerdown', () => {
+		settingsToggle.addEventListener('pointerdown', () => {
 			if (reduceToggle) return;
 			togglePillPress.style.transition = `transform var(--dur-press) var(--ease-pop)`;
 			togglePillPress.style.transform = 'scale(var(--pill-press))';
@@ -1017,37 +1138,8 @@ const onHome = path === '/';
 			window.addEventListener('pointercancel', release);
 		});
 
-		// Roll to the new label after a click flips the theme. This listener
-		// registers after the flip handler above, so themeLabel() already
-		// answers for the NEW state. Deferred one frame: the flip suppresses
-		// every transition via .theme-switching for its frame (removed in the
-		// flip handler's own rAF, which was queued before this one), and the
-		// roll must not start until transitions are live again.
-		themeToggle.addEventListener('click', () => {
-			if (!shown) return;
-			requestAnimationFrame(() => {
-				const text = themeLabel();
-				togglePill.style.width = `${widthFor(text)}px`;
-				if (reduceToggle) {
-					togglePillText.textContent = text;
-					return;
-				}
-				const seq = ++rollSeq;
-				togglePillText.style.transition = 'transform 0.08s ease, opacity 0.08s ease';
-				togglePillText.style.transform = 'translateX(70%)';
-				togglePillText.style.opacity = '0';
-				window.setTimeout(() => {
-					if (seq !== rollSeq) return; // superseded by a reposition
-					togglePillText.textContent = text;
-					togglePillText.style.transition = 'none';
-					togglePillText.style.transform = 'translateX(-70%)';
-					void togglePillText.offsetHeight; // reflow so the entry animates
-					togglePillText.style.transition =
-						'transform 0.12s cubic-bezier(0.34, 1.35, 0.64, 1), opacity 0.1s ease';
-					togglePillText.style.transform = 'translateX(0)';
-					togglePillText.style.opacity = '1';
-				}, 80);
-			});
-		});
+		// The roll-to-next-label that used to live here (the "Copied!" gesture,
+		// naming the theme a click had just switched away from) retired with
+		// the bare toggle — the label no longer changes identity on click.
 	}
 </script>
