@@ -666,9 +666,23 @@
 	   travel inside 40ms either way) with the weight moved out of the overshoot
 	   and into a long tail, 99% at 297ms against this curve's 142ms. Hiro's
 	   pick from a thirteen-variant exploration of the travel, reverted on
-	   seeing it in the bar. The overshoot stands. */
+	   seeing it in the bar. The overshoot stood until:
+
+	   2026-08-05: THE OVERSHOOT CAME OUT — y1 1.3 → 1 (Hiro, off the migaki
+	   review: spring overshoot on UI chrome is aging out of the current edge).
+	   This is NOT the reverted long settle above coming back: that one moved
+	   the weight into a 480ms tail, where this keeps the 320ms envelope and
+	   the x1 = 0.34 held launch — which is where the mass read was living all
+	   along — and removes only the crossing of the target, so the pill now
+	   decelerates INTO the icon instead of through it. The 2.99%/61% figures
+	   above describe the old curve and stay as history. If the slide ever
+	   reads as redrawn-rather-than-travelling again, the launch is the dial to
+	   reach for, not the rebound. --ease-panel moved with this in the same
+	   pass — its 1.17 was solved off THIS token's absolute overshoot (see its
+	   note), so the two sliders still agree about overrun: it is now zero for
+	   both. */
 	--dur-slide: 320ms;
-	--ease-slide: cubic-bezier(0.34, 1.3, 0.5, 1);
+	--ease-slide: cubic-bezier(0.34, 1, 0.5, 1);
 
 	/* ── The pop ──
 	   The hover label's entrance and exit (see .contact-slider-in). Its own
@@ -1668,8 +1682,15 @@ body {
 	   fraction of a journey whose lengths differ by 3.5×.
 	   Only y1 moved (1.3 → 1.17). x1 = 0.34 is what holds the curve back at the
 	   start so the panel leaves slowly, and that is the part carrying the sense
-	   of mass — keep it. Duration is unchanged and still --dur-slide. */
-	--ease-panel: cubic-bezier(0.34, 1.17, 0.5, 1);
+	   of mass — keep it. Duration is unchanged and still --dur-slide.
+
+	   2026-08-05: y1 1.17 → 1, moving with --ease-slide when the pill's
+	   overshoot came out (see that token's note for the why). The shared-
+	   overrun invariant above still holds — it is just zero now. What still
+	   says this panel has momentum is the compress below, a read the pill
+	   never had, which is why the panel keeps a second device where the pill
+	   keeps only its launch. */
+	--ease-panel: cubic-bezier(0.34, 1, 0.5, 1);
 	/* ── The press clock ──
 	   2026-08-05, Hiro: the card should click down at the nav icons' speed. It
 	   was pressing on --dur-card (300ms) — the card's HOVER clock, which the
@@ -2455,8 +2476,10 @@ body {
    riding the row's rest/hover ink (quiet until the row is live, like the
    icons), a filled square thumb inside it — left off, right on, keyed off
    the row's aria-checked. The thumb TRAVELS, but on --dur-gesture/--nav-ease
-   rather than the slide pair: across 14px the slide's 3% overshoot is under
-   half a pixel — mass with nothing to show it. */
+   rather than the slide pair — cut when the slide still overshot (3% across
+   14px was under half a pixel: mass with nothing to show it), and standing
+   now that the pair is flat too (08-05), since a 14px hop is as little a
+   journey for the 0.34 held launch as it was for the rebound. */
 .settings-menu {
 	position: absolute;
 	top: calc(100% + 0.5rem);
@@ -2519,8 +2542,10 @@ body {
    0.16/1 launch leaves at ~6× linear speed — a genuine whirr — and the
    curve spends its whole back half easing the last few degrees home, which
    is where the momentum reads. NO overshoot, deliberately: a flywheel
-   decays, it doesn't spring back, so this is not --ease-slide (whose 3%
-   rebound is for things that ARRIVE somewhere). The bezier is the long-
+   decays, it doesn't spring back, so this is not --ease-slide — a
+   distinction drawn against that token's old 3% rebound (out 08-05); what
+   separates them now is the launch, 0.16's ~6×-linear whirr against 0.34's
+   held-back settle. The bezier is the long-
    settle curve from the 08-03 travel exploration — rejected there for the
    label slider, right here, because a spin has no destination to be late
    to. One-off ceremonial timing, so the pair stays local per the motion
