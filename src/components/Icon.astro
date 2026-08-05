@@ -1,6 +1,9 @@
 ---
 interface Props {
-	name: 'email' | 'linkedin' | 'github' | 'twitter';
+	name:
+		| 'email' | 'linkedin' | 'github' | 'twitter'
+		| 'drums' | 'invader' | 'clapper' | 'boot' | 'wave'
+		| 'astro' | 'javascript' | 'tailwind' | 'react' | 'figma' | 'claude' | 'git';
 }
 const { name } = Astro.props;
 ---
@@ -80,6 +83,260 @@ const { name } = Astro.props;
 			<g transform="translate(1.18 0.9) scale(0.93)" stroke-width="2.151">
 				<path style="--len: 84.1" d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-8 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" />
 			</g>
+		</svg>
+	)
+}
+
+{/* ── The about page's marks (2026-08-04) ──
+    These five replaced 👋🥁👾🎬🥾, which were the only emoji on the site and the
+    only marks on it that no token could reach: OS colour bitmaps take no
+    --ink-*, can't mirror per theme (🎬's black body sank into the night
+    ground), render as a different typeface per platform — so what you check in
+    `astro dev` isn't what a visitor gets — and, being saturated colour against
+    a 300/400/500 weight scale, out-weighted the very labels they were marking.
+
+    EACH ONE REDRAWS ITS OWN EMOJI and is not free to become a neighbouring
+    idea (Hiro, 08-04, after a first pass wandered): 👾 is an invader, not a
+    gamepad; 🎬 is a clapperboard, not a film strip; 🥾 is a boot, not a
+    mountain. The label beside each already names the interest, so an icon
+    that generalises it says strictly less than the emoji it replaced.
+
+    They carry a colour each — see the --mark-* tokens in global.css, where
+    the values and their ratios live.
+
+    NO --len on any shape, deliberately. The load intro's stroke-draw is scoped
+    to `#contact-group .btn-icon svg` and the theme toggle (see the load-intro
+    block in global.css), so nothing here is ever dashed and there is no length
+    to keep in sync. If one of these ever moves into the nav, measure
+    getTotalLength() first — the four above document why.
+
+    Same drawing system as the contact icons otherwise: 24-unit box, 2px
+    stroke, square caps, miter joins at limit 2. Butt caps appear only on
+    interior detail whose ends are meant to die into a surrounding shape —
+    the same exception the email flap takes, and here it is load-bearing
+    rather than cosmetic: a square cap on the snare's zigzag overhangs a full
+    unit along its own diagonal and lands inside the drum's left wall. */}
+{
+	name === 'drums' && (
+		<svg class="icon-drums" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="2">
+			<ellipse cx="12" cy="6.5" rx="9" ry="3" />
+			<path d="M3 6.5v10a9 3 0 0 0 18 0v-10" />
+			{/* Tension rods. Peaks held at y=12 rather than tucked up under the
+			    rim: the head's lower stroke reaches y=10.5 at centre, and a peak
+			    any higher welds the zigzag onto the ellipse at exactly the point
+			    where the two are meant to read as separate parts. */}
+			<path stroke-linecap="butt" d="M5.4 12 8.7 16.2 12 12l3.3 4.2L18.6 12" />
+		</svg>
+	)
+}
+{
+	name === 'invader' && (
+		<svg class="icon-invader" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="2">
+			{/* One closed silhouette on a 2-unit grid, every segment orthogonal.
+			    That's the whole reason this one works in the site's hand: square
+			    caps and miter joins ARE the pixel-art idiom, so a stepped outline
+			    reads as sprite rather than as an icon of a sprite. Nothing here
+			    may go diagonal — a single slope and it stops being pixels.
+
+			    Shoulders step OUT (x3/x21) past the head (x6/x18) and the three
+			    feet step down: those two moves are what separate an invader from
+			    a rounded blob, and they survive being drawn at 20px where the
+			    eyes almost don't. */}
+			<path d="M6 7h12v3h3v4h-3v3h-2v-2h-2v2h-4v-2h-2v2H6v-3H3v-4h3Z" />
+			<path stroke-linecap="butt" d="M9 7V4.5" />
+			<path stroke-linecap="butt" d="M15 7V4.5" />
+			{/* 2×2 eyes, the LinkedIn i-dot trick again: a butt-capped 2-unit
+			    vertical at stroke-width 2 paints the exact square. */}
+			<path stroke-linecap="butt" d="M10 10.5v2" />
+			<path stroke-linecap="butt" d="M14 10.5v2" />
+		</svg>
+	)
+}
+{
+	name === 'clapper' && (
+		<svg class="icon-clapper" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="2">
+			<rect x="2" y="10" width="20" height="10" rx="0.5" />
+			{/* The bar is hinged at the left and OPEN — its underside climbs from
+			    y9.9 to y7.3 while the slate's top edge stays at 10, and the
+			    wedge of ground that opens up between them is the only thing
+			    saying "clapperboard" rather than "box with a lid". Close the
+			    angle and it stops reading.
+
+			    NO diagonal stripes. The bar is 3.2 units thick, of which 2 are
+			    its own stroke, so a stripe has 1.2 units of clear interior to
+			    live in — at this size it fills the bar solid rather than
+			    striping it. Tried at 4.2 thick too; the bar then out-weighs the
+			    slate it sits on. The tilt carries the read on its own. */}
+			<path d="M2 9.9 21.6 7.3V4.1L2 6.7Z" />
+		</svg>
+	)
+}
+{
+	name === 'boot' && (
+		<svg class="icon-boot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="2">
+			{/* The TOE IS AN ARC and the shaft is wide — both were the fix. The
+			    first draft ran the toe out as a straight diagonal (`v7 l6 2`) off
+			    a narrow shaft, and at 20px it read as a bracket or a chair, not
+			    footwear: a boot's silhouette is a tall back and a round front,
+			    and a straight wedge gives it neither.
+
+			    The sole is a band the full width of the silhouette that
+			    overhangs at the HEEL (x4.5 against the upper's 6). Overhang is
+			    the hiking part — a sole flush with the upper draws a dress
+			    boot — and it goes at the back because the toe already has the
+			    arc to carry its own weight. */}
+			<path d="M6 4h7v7h3a5 5 0 0 1 5 5v2H4.5v-2H6Z" />
+			{/* Two lace bars, butt-capped so their ends die inside the shaft's
+			    walls rather than poking through them. */}
+			<path stroke-linecap="butt" d="M7.6 6.5h3.8" />
+			<path stroke-linecap="butt" d="M7.6 9h3.8" />
+		</svg>
+	)
+}
+{
+	name === 'wave' && (
+		<svg class="icon-wave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="2">
+			{/* The one icon on the site that is mostly ARCS, and it has to be:
+			    fingers are capsules, and stepping them the way the invader is
+			    stepped would draw a comb. It keeps the 2px weight and the miter
+			    limit, which is what holds it in the same hand.
+
+			    Every path is butt-capped, without exception. Three of the four
+			    are finger backs whose lower ends are meant to disappear into the
+			    palm; a square cap there adds a unit of stroke that surfaces
+			    through the palm's own outline as a stray notch. */}
+			{/* Tilted 18° (Hiro, 08-05). Upright, an open hand is the STOP gesture —
+			    the same drawing means halt at 0° and hello off-vertical, and no
+			    amount of redrawing the fingers fixes that. Rotated about (12,13)
+			    rather than the box centre: the pivot sits in the palm, so the
+			    wrist stays put and the fingers swing, which is where a real wave
+			    turns. Painted bounds still clear the box — the hand's widest
+			    reach is ~19.5 units and 18° of rotation costs it under 2. */}
+			<g transform="rotate(18 12 13)">
+				<path stroke-linecap="butt" d="M18 11V6a2 2 0 0 0-4 0" />
+				<path stroke-linecap="butt" d="M14 10V4a2 2 0 0 0-4 0v2" />
+				<path stroke-linecap="butt" d="M10 10.5V6a2 2 0 0 0-4 0v8" />
+				<path stroke-linecap="butt" d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" />
+			</g>
+		</svg>
+	)
+}
+
+{/* ── The toolbox marks (2026-08-05) ──
+    Seven tools, and unlike the interests marks these are BRAND marks.
+
+    Brand marks are drawn as FILLS by their owners and this site draws
+    strokes, so an outline trace of a solid logo comes back as a doubled
+    contour. Each of these is redrawn as a single-stroke skeleton instead —
+    the same trade the nav made when LinkedIn's solid slab became an "in"
+    box. They are recognisable, not accurate; anything needing accuracy
+    should ship the vendor's own SVG and sit outside this file.
+
+    One is deliberately GENERIC: Claude Code is a terminal, because
+    Anthropic's mark is a burst of TAPERED rays and taper is the one thing a
+    uniform 2px stroke cannot do — traced, it comes out an asterisk. A bad
+    trace of a famous mark reads as a mistake; an honest generic reads as a
+    category.
+
+    Colour lives in the --tool-* tokens in global.css, one hue per tool, with
+    the brand each is answering to and the note that green is unavailable.
+
+    TWO MARKS WERE HERE AND ARE GONE — `markup` (an HTML/CSS code caret) and
+    `aws` (a cloud), removed with their list entries the same day. Keeping
+    why, because both would be re-drawn the same way by anyone adding them
+    back: HTML and CSS ship the same shield in two colours, so in a row that
+    reads by hue they were one mark repeated; and AWS's smile-arrow
+    identifies nothing without the wordmark above it, which left a generic
+    cloud standing for a specific claim. Neither drawing was the problem.
+    The list entries were, and the note on `tools` in about.astro has that. */}
+{
+	name === 'astro' && (
+		<svg class="icon-astro" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="2">
+			{/* The mark's silhouette reduced to its A: two outer legs and the
+			    inner apex, open at the foot the way the original is. */}
+			<path d="M12 2.5 4.5 20h4l3.5-10.5L15.5 20h4Z" />
+		</svg>
+	)
+}
+{
+	name === 'javascript' && (
+		<svg class="icon-javascript" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="2">
+			{/* The tile with a J and an S set as single strokes. The only
+			    lettering anywhere in this file, and near its floor at 20px — if
+			    the toolbox ever renders smaller than the interests list, this is
+			    the first mark that stops working. */}
+			<rect x="2.5" y="2.5" width="19" height="19" rx="0.5" />
+			<path stroke-linecap="butt" d="M11 8.6v6.1a2.2 2.2 0 0 1-4.4 0" />
+			<path stroke-linecap="butt" d="M18.2 9.5a2.4 2.4 0 0 0-4 1.4c0 2.1 4 1.6 4 3.6a2.4 2.4 0 0 1-4 1.3" />
+		</svg>
+	)
+}
+{
+	name === 'tailwind' && (
+		<svg class="icon-tailwind" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="2">
+			{/* Two waves, offset right and down — the brand's own arrangement,
+			    drawn as centrelines rather than as the filled ribbon it really
+			    is. Stroking the ribbon's outline gives four wavy lines where the
+			    mark has two. */}
+			<path stroke-linecap="butt" d="M2 11c1.8-3.7 4.4-3.7 6.2 0s4.4 3.7 6.2 0" />
+			<path stroke-linecap="butt" d="M7.6 16.4c1.8-3.7 4.4-3.7 6.2 0s4.4 3.7 6.2 0" />
+		</svg>
+	)
+}
+{
+	name === 'react' && (
+		<svg class="icon-react" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="2">
+			{/* The one brand mark here that IS a line drawing already, so it needs
+			    no reinterpretation. rx 9.4 keeps the painted ellipse inside the
+			    box once the 2px stroke is added. */}
+			<circle cx="12" cy="12" r="2" />
+			<ellipse cx="12" cy="12" rx="9.4" ry="3.6" />
+			<ellipse cx="12" cy="12" rx="9.4" ry="3.6" transform="rotate(60 12 12)" />
+			<ellipse cx="12" cy="12" rx="9.4" ry="3.6" transform="rotate(120 12 12)" />
+		</svg>
+	)
+}
+{
+	name === 'figma' && (
+		<svg class="icon-figma" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="2">
+			{/* Five parts on a 2×3 grid, the arrangement being the whole mark —
+			    two capsules top, a capsule and a circle mid, a capsule bottom
+			    left. Rounded on each cell's outer edge and square where a cell
+			    meets its neighbour, which is what makes the stack read as one
+			    object rather than five. */}
+			<path d="M12 3.2H9a2.9 2.9 0 0 0 0 5.8h3Z" />
+			<path d="M12 3.2h3a2.9 2.9 0 0 1 0 5.8h-3Z" />
+			<path d="M12 9H9a2.9 2.9 0 0 0 0 5.8h3Z" />
+			<circle cx="15" cy="11.9" r="2.9" />
+			<path d="M12 14.8H9a2.9 2.9 0 1 0 3 2.9Z" />
+		</svg>
+	)
+}
+{
+	name === 'claude' && (
+		<svg class="icon-claude" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="2">
+			{/* GENERIC, and the honest choice: Anthropic's mark is a radial burst
+			    of TAPERED rays, and taper is exactly what a uniform 2px stroke
+			    cannot do — traced here it comes out an asterisk. This is a
+			    terminal, which is what Claude Code actually is. */}
+			<rect x="2" y="4" width="20" height="16" rx="0.5" />
+			<path stroke-linecap="butt" d="m7.2 10 3 2.6-3 2.6" />
+			<path stroke-linecap="butt" d="M12.6 15.2h4.4" />
+		</svg>
+	)
+}
+{
+	name === 'git' && (
+		<svg class="icon-git" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="2">
+			{/* The branch, not the lozenge. Git's own mark is a filled rotated
+			    square with three nodes and reads as a logo nobody recognises out
+			    of context; branch-and-merge is what people picture when they
+			    hear the word. */}
+			<circle cx="6.5" cy="5.5" r="2.6" />
+			<circle cx="6.5" cy="18.5" r="2.6" />
+			<circle cx="17.5" cy="5.5" r="2.6" />
+			<path stroke-linecap="butt" d="M6.5 8.1v7.8" />
+			<path stroke-linecap="butt" d="M17.5 8.1v1.4a4 4 0 0 1-4 4h-3a4 4 0 0 0-4 4v.5" />
 		</svg>
 	)
 }
