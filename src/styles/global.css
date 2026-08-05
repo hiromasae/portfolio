@@ -149,7 +149,40 @@
 	--btn-bg-hover: #343b58; /* --ink */
 	--btn-bg-active: #171a28;
 	--btn-text: #e9eaee; /* --paper */
-	--btn-border: var(--ink-hero);
+
+	/* ── The enamel's face and its three alphas ──
+	   2026-08-04. The chip's actual painted colour, split off from --btn-bg
+	   because the two themes can no longer share one. LIGHT is the easy case
+	   and the faces are just the --btn-bg ladder unchanged: the chip is
+	   near-black, so a white specular has ~200 levels of headroom above it and
+	   the bloom lands without help. See the dark block for the case that
+	   needed it. --btn-border tracks the face so the edge still belongs to the
+	   chip rather than being drawn around it. */
+	--btn-face: var(--btn-bg);
+	--btn-face-hover: var(--btn-bg-hover);
+	--btn-face-active: var(--btn-bg-active);
+	/* Tracks the face, so the edge is invisible and the shape is bounded by the
+	   inset rim light alone. Only DARK takes a visible rim — see its block for
+	   why the two themes differ here. */
+	--btn-border: var(--btn-face);
+	--btn-border-hover: var(--btn-face-hover);
+	/* The light gathering along the lit (bottom) edge, and the shadow falling
+	   across the head. On a near-black chip the LIGHT does nearly all the
+	   modelling — it has the whole range to climb — and the shadow barely
+	   registers, so it is set high just to be present at all. Dark is the
+	   mirror image; see its block. */
+	/* Back up to 0.5 once the wash was pulled below the baseline (see the
+	   30% stop in .btn). HISTORY, because it is the trap: while the light ran
+	   to 72% it spread into the glyph band and 0.55 put the label at 4.24:1,
+	   under AA's 4.5 for 14px — so the alpha had to be held at 0.32 to buy
+	   contrast the geometry should have been buying. Fixing the geometry is
+	   what made the brightness affordable again.
+	   Procedure if either number is retuned: sample a glyph-free column inside
+	   the left padding, walk down the chip, and check the row at the BASELINE,
+	   not the row at the bottom edge — the bottom edge always measures worst
+	   and never has text on it. */
+	--btn-lit: 0.5;
+	--btn-shade: 0.22;
 
 	/* Tokyo Night Light's cyan, verbatim. The ring is a UI boundary, so WCAG
 	   1.4.11's 3:1 is the bar it has to clear against every ground it can land
@@ -353,6 +386,100 @@
 	   — was also built and removed here 07-24; plain uniform grain is the
 	   call.) */
 	--grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.05'/%3E%3C/svg%3E");
+
+	/* ── The ground's shading ──
+	   2026-08-04 (Hiro): a very subtle gradient on the page ground. --paper sits
+	   at the HEAD of the viewport in both themes and only the FOOT moves — dark
+	   lifting toward --surface, light sinking toward --surface-sunken. See the
+	   --ground-tint block below for the full pair and for why the two amounts
+	   are deliberately unequal.
+
+	   NOT the full tint, in either theme. #1a1b26 against #0c0e14 is ~14 levels
+	   of red, and at full strength it reads as a distinct panel rather than as a
+	   shade (Hiro: it "contrasts pretty heavily against the original bg color"),
+	   so each theme takes a fraction of the way there. --ground-lift IS THE DIAL
+	   — the only number to touch if the effect wants more or less, and the
+	   gradient below should not need editing to retune it.
+
+	   Written as a mix of two THEME tokens rather than a hex, so one declaration
+	   serves both: each theme names its own --ground-tint and the same
+	   color-mix resolves against whichever --paper won. That works because :root
+	   and :root[data-theme="dark"] land on the same element, so the var()
+	   lookups here pick up whichever block won.
+
+	   ── The sticky bar, and why it is no longer a constraint ──
+	   HISTORY, because this used to dictate the direction: the bar repainted
+	   --paper FLAT, so a graded ground put a block across the top of the page
+	   that disagreed with everything behind it. Bottom-up was the way out —
+	   0deg puts --paper at the top of the viewport, exactly where the bar sits,
+	   so the two matched for free — and that coincidence was written down here
+	   as a reason the direction could not change.
+	   It can now. #site-nav paints --ground-grad itself, at the same `fixed`
+	   attachment, so it samples the same coordinates instead of matching by
+	   luck (see the note there). That is what allowed light to reverse on
+	   2026-08-05. Neither theme's direction is pinned by the bar any more.
+
+	   ── Banding ──
+	   ~4.5 levels spread over a viewport height, and the dark theme has no dither:
+	   --grain is deliberately `none` here, because on charcoal the grey speckle
+	   read as a haze lifting the black level (07-24). So the two levers if steps
+	   ever show are LOWERING --ground-lift or introducing a dark-specific tile
+	   far fainter than light's 0.05 — not simply switching --grain on, which is
+	   an effect that was already tried and rejected on this ground. */
+
+	/* ── The tint, and why light does NOT use --surface ──
+	   2026-08-04, Hiro: the gradient "looks good in dark mode, it's hardly
+	   noticeable in light". It was the same 45% in both, but the two themes do
+	   not have the same room to move in:
+	     dark   --paper #0c0e14 → --surface #1a1b26 is 14 levels, ΔL* 2.4
+	     light  --paper #e9eaee → --surface #f2f3f6 is  9 levels, ΔL* 1.4
+	   So light was landing at little over half of dark's perceived step while
+	   nominally sharing its number — and light also carries the grain, whose
+	   speckle masks a shallow ramp that dark shows plainly.
+
+	   Light therefore lifts toward WHITE rather than toward --surface. That is
+	   a deliberate break from the palette-verbatim rule everywhere else in this
+	   file, and the justification is that white is not a new colour here — it
+	   is the limit of the paper itself, the one direction with headroom left
+	   above #e9eaee. Mixed at 60% it lands around #f6f7f8, so the paper's blue
+	   tint thins slightly at the foot but never leaves. ΔL* 4.0, comfortably
+	   ahead of dark's 2.4, which is the point: a light ground hides a gradient
+	   that a dark one displays.
+	   Dark keeps --surface and 45% untouched — Hiro likes it there. */
+	/* ── The two themes MIRROR each other off a shared head ──
+	   2026-08-05, final arrangement. --paper sits at the HEAD in both, and each
+	   theme travels away from it at the foot in whichever direction has room:
+	     dark   --paper at the head, LIFTING toward --surface at the foot
+	     light  --paper at the head, SINKING toward --surface-sunken at the foot
+	   So the top of the screen is the page's own colour in either theme and only
+	   the foot moves. That is why this is one tint plus one amount again rather
+	   than the separate foot/head pair it briefly was, when light ran the other
+	   way up.
+
+	   Light takes --surface-sunken (#d5d6db, Tokyo Night Light's own ground),
+	   not --surface and not white. Two reasons, and the second is the one that
+	   settles it:
+	     · room — 20 levels below --paper, against the 9 that --surface offers
+	       above it.
+	     · --surface IS the card and raised-panel colour (#f2f3f6). A ground
+	       lifting toward white would climb PAST it, so the page would end up
+	       brighter than the surfaces that are supposed to sit on top of it, and
+	       the elevation model would invert at the bottom of the viewport.
+	       Sinking has no such ceiling to hit.
+
+	   The AMOUNTS are deliberately unequal, and this is not an oversight:
+	   light needs a bigger ΔL* than dark to read as equally present. It carries
+	   the grain, whose speckle masks a shallow ramp, and a light ground hides a
+	   gradient that a dark one displays. 60% here is ΔL* ~4.2 against dark's
+	   ~1.6 at 32%. Matching the NUMBERS would leave light looking flat again,
+	   which is the complaint that produced this line in the first place. */
+	--ground-tint: var(--surface-sunken);
+	--ground-lift: 60%;
+	--ground-grad: linear-gradient(
+		0deg,
+		color-mix(in srgb, var(--ground-tint) var(--ground-lift), var(--paper)) 0%,
+		var(--paper) 100%
+	);
 
 	/* Theme glyph fill rest: the ink half sits right of center in light
 	   (translateX(0)), left in dark (-9px) — see .theme-fill-rect. A var so
@@ -580,7 +707,71 @@
 	--btn-bg-hover: #f2f4fe;
 	--btn-bg-active: #c0caf5; /* --ink */
 	--btn-text: #0c0e14; /* --paper */
-	--btn-border: var(--ink-hero);
+
+	/* ── The enamel, rebuilt for dark (2026-08-04, Hiro: "fix the dark mode
+	   button") ──
+	   THE FACE IS NOT --btn-bg HERE, and this is the whole fix. --ink-hero is
+	   #e4e9fc, which leaves only ~27 levels of headroom to white. A white
+	   specular could therefore lift the chip 27 levels at most, while the
+	   bottom shade at 0.16 was pulling it down ~36 — so the darkening won, the
+	   bloom was invisible, and the chip read as a grey-bottomed slab rather
+	   than as enamel. Light never had the problem: its chip is near-black, so
+	   the same white bloom has the entire range to climb.
+
+	   The face therefore SITS BELOW --ink-hero, buying the specular somewhere
+	   to go. It is 7 levels down, which is imperceptible as a flat colour but
+	   is the difference between a bloom of 27 levels and one of 32 — and it is
+	   what lets the shade come down to 0.06, so the chip stays a bright
+	   lavender-white instead of going grey at the foot. Measured range across
+	   the finished chip: ~253 at the bloom to ~208 at the bottom edge.
+
+	   Consequence to keep in mind: the button is no longer painted in exactly
+	   --ink-hero, so it is no longer literally "the sentence's colour cut into
+	   a chip" the way the light block's note describes. At 7 levels nobody will
+	   see it, but if --ink-hero ever moves, this face has to move with it. */
+	--btn-face: #dde3fa;
+	--btn-face-hover: #eef1fe;
+	--btn-face-active: var(--btn-bg-active);
+	/* ── Dark gets a REAL rim (2026-08-04, Hiro: make the border slightly more
+	   noticeable in dark) ──
+	   Light keeps a border that tracks the face and is therefore invisible;
+	   dark's now sits 17 levels ABOVE it, so the chip carries a fine bright
+	   edge. Brighter rather than darker on purpose: the chip is already at
+	   enormous contrast against --paper, so a darker rim would only read as a
+	   gap between the button and the page, while a lighter one reads as the
+	   lit edge of the enamel and belongs to the same lighting model as the
+	   face. It also gives the inset rim light something to sit against — at
+	   0.22 white over a near-white face that highlight was doing almost
+	   nothing on its own.
+	   The hover value has to keep climbing, because --btn-face-hover IS this
+	   colour: if the rim didn't move, hovering would swallow it. */
+	--btn-border: #f9fbff;
+	--btn-border-hover: #ffffff;
+	/* The mirror of light's split, and for the same headroom reason. Here the
+	   chip is near-white, so the LIGHT has almost nowhere to climb (~34 levels)
+	   and the SHADOW does the modelling instead.
+
+	   SHADE IS THE DIAL, and it was set far too low at first — 0.07, which gave
+	   the whole chip a range of 29 levels and read flat (Hiro: "the skeuomorphic
+	   effect is too subtle in dark mode"). 0.2 takes the head down to ~177 while
+	   the lit foot still reaches ~245, so the face now spans ~68 levels instead
+	   of 29. That is the only direction with room: --btn-lit is already near its
+	   ceiling and saturates against white, so raising IT does almost nothing.
+	   The chip stays a bright object — its lit half is brighter than --ink-hero
+	   — it is just genuinely modelled now rather than evenly tinted. */
+	--btn-lit: 0.72;
+	--btn-shade: 0.2;
+
+	/* Dark keeps --paper at the HEAD and lifts toward --surface at the foot.
+	   See the light block for both directions written out and for why the two
+	   amounts are deliberately unequal.
+	   45% → 32% (2026-08-05, Hiro: slightly more subtle). That is ~4.5 levels
+	   across a viewport rather than ~6. Worth knowing before it goes lower:
+	   dark has no dither (--grain is `none` here), so the fewer levels this
+	   spans, the WIDER each 8-bit step gets — subtler is not automatically
+	   safer against banding, it just trades more bands for fatter ones. */
+	--ground-tint: var(--surface);
+	--ground-lift: 32%;
 
 	/* Tokyo Night's cyan, verbatim — 9.15:1 against --paper, 8.11:1 against
 	   --surface, both well clear of WCAG 1.4.11's 3:1 floor for non-text. Same
@@ -675,7 +866,28 @@ body {
 	   above it, each carrying the same tile (below): their tiles drift out
 	   of phase with the page's as you scroll, but random grain has no
 	   registration to break, so the joins are invisible. */
-	background-image: var(--grain);
+	/* Two layers now (2026-08-04): the grain on top, the ground's lift beneath
+	   it. In dark --grain is `none`, which is a perfectly good empty layer, so
+	   this one declaration serves both themes. Order matters — the gradient has
+	   to sit UNDER the tooth, or the texture would be tinted by it rather than
+	   sitting on it. */
+	background-image: var(--grain), var(--ground-grad);
+	/* PER LAYER, and the pairing is the point.
+	   The grain keeps `scroll` so it still travels with the document — the note
+	   above is the reason, and it survives unchanged.
+	   The gradient is `fixed`, so its positioning area is the VIEWPORT rather
+	   than the body box. Without that it would size to the document, and a long
+	   route and a short one would get visibly different grounds — the projects
+	   list and a single project page would not match. Fixed also means the lift
+	   reads as a property of the window, holding still while the page moves past
+	   it, which is what an ambient ground should do.
+	   KNOWN DEGRADATION: iOS Safari has long ignored fixed attachment here and
+	   treats it as scroll. That falls back to a document-sized gradient — still
+	   subtle, still correct at the top where the bar meets it, just anchored to
+	   the page instead of the window. If that ever needs fixing properly, the
+	   replacement is a position: fixed pseudo-element at z-index -1, which the
+	   compositor handles without the per-frame repaint `fixed` costs. */
+	background-attachment: scroll, fixed;
 	color: var(--ink);
 	font-family: var(--font-sans);
 	/* ── The weight scale ──
@@ -720,8 +932,28 @@ body {
 
 /* The nav bar's own paper (bg-[var(--paper)] in the markup) grains too, or
    the sticky bar would read as a flat band on a textured page. */
+/* THE BAR PAINTS THE GROUND'S GRADIENT, not a flat --paper (2026-08-05).
+   It is opaque and sticky, so scrolled content passes under it — that part is
+   unchanged. What changed is that its fill is no longer a flat colour that
+   happens to match: it carries the same --ground-grad at the same `fixed`
+   attachment, and because fixed positions a background against the VIEWPORT
+   rather than the element, the bar's copy lands on exactly the same coordinates
+   as the page's. The two are the same paint, so there is no seam to hide,
+   wherever the gradient happens to sit at the top of the screen.
+
+   This is what let LIGHT reverse direction. Until now the bar matched by luck:
+   --paper sat at the head of the ramp in both themes, so a flat --paper fill
+   agreed with the ground for free, and that coincidence was load-bearing enough
+   to be written down as a reason bottom-up had to stay. Light's head is now
+   --surface-sunken, which would have put a visibly lighter band across the top
+   of every page. Sampling instead of matching removes the constraint outright —
+   the ground can now be shaded in any direction, in either theme, without the
+   bar needing a blur, a veil, or translucency.
+   Keep the layer ORDER and the per-layer attachment in step with the body rule:
+   grain on top and scrolling, gradient beneath it and pinned. */
 #site-nav {
-	background-image: var(--grain);
+	background-image: var(--grain), var(--ground-grad);
+	background-attachment: scroll, fixed;
 }
 
 /* ── The two hairlines ──
@@ -1031,7 +1263,9 @@ body {
    right; the sweep is not coming back.
 
    ASYMMETRIC SINCE 2026-08-03 (Hiro: appear immediately, fade out on unhover).
-   Arriving is instant, leaving is a --dur-card opacity fade. The trick is that a
+   Arriving is instant, leaving is an opacity fade on the nav wordmark's out
+   clock (--dur-pop-out; see the ::after rule for why the easing matched too).
+   The trick is that a
    transition is read from the state being animated TO, not from the one being
    left: the fade lives on the RESTING rule, which is what the element returns to
    on unhover, and the hover rule sets transition: none so the arrival skips it.
@@ -1095,8 +1329,23 @@ body {
 	background: currentColor;
 	opacity: 0;
 	/* The LEAVING half — see the block comment. This is the resting rule, so this
-	   is the transition that runs on unhover. */
-	transition: opacity var(--dur-card) ease;
+	   is the transition that runs on unhover.
+
+	   MATCHED TO THE NAV WORDMARK 2026-08-04 (Hiro), duration and easing both:
+	   --dur-pop-out on --nav-ease, down from --dur-card on `ease`. The two are
+	   now the same gesture — instant in, 130ms out — which is what they always
+	   were in SHAPE, having arrived at the asymmetry independently a day apart
+	   (the mark on 08-03, this on 08-02). They just left at different speeds,
+	   this one at 300ms and the mark at 130ms.
+	   The easing came along because duration alone doesn't make two fades read
+	   alike: --nav-ease is a decelerating curve that spends most of its opacity
+	   early, so a 130ms `ease` out would still hang differently at the tail.
+	   NOTE what this de-couples. --dur-card is the CARD's clock — the frame's
+	   lift shadow still runs on it — so the underline no longer leaves in step
+	   with its own card, it leaves in step with the bar. That is the ask, but it
+	   means the two things a card does on unhover now have different lengths;
+	   if the underline ever looks like it's abandoning the shadow, this is why. */
+	transition: opacity var(--dur-pop-out) var(--nav-ease);
 }
 .project-card:hover .project-card__title::after,
 .project-card:focus-within .project-card__title::after {
@@ -1188,17 +1437,52 @@ body {
 	border-radius: 1.5px;
 	background: var(--surface);
 	opacity: 0;
+	/* TOP, to match the card's own `origin-top` (ProjectCard.astro). The panel
+	   is sized to the card exactly, so if the two shrank about different
+	   origins the panel would creep out from under one edge and recede from
+	   the other — at 0.99 on a ~330px card that is ~1.6px of daylight at each
+	   end, which is plenty to see against a card border.
+	   NOTE this also re-anchors the travelling compress below, which used to
+	   scale about the centre. For a mostly-horizontal hop the difference is
+	   negligible, and keeping one origin is worth more than the old default. */
+	transform-origin: top;
 	/* Never a hover target itself: it sits under the cursor constantly, and a
 	   panel that could take the pointer would fight the card it is under. */
 	pointer-events: none;
 	transition:
-		transform var(--dur-slide) var(--ease-panel),
+		/* `translate`, not `transform` — see place() in index.astro for why the
+		   position had to move off the transform property. */
+		translate var(--dur-slide) var(--ease-panel),
 		width var(--dur-slide) var(--ease-panel),
 		height var(--dur-slide) var(--ease-panel),
-		opacity var(--dur-gesture) var(--nav-ease);
+		opacity var(--dur-gesture) var(--nav-ease),
+		/* The press, and it takes the CARD's timing (--dur-card ease-out, see
+		   .project-card) rather than the panel's own --dur-slide. The panel is
+		   not travelling here, it is being pressed along with the card standing
+		   on it, so it has to answer on that gesture's clock or the ground
+		   arrives after the thing sitting on it. */
+		scale var(--dur-card) ease-out;
 }
 .card-panel.is-visible {
 	opacity: 1;
+}
+
+/* ── The panel presses with the card ──
+   2026-08-05, Hiro: the card's background should shrink on press too. The panel
+   is a SIBLING of the cards, not a child, so it cannot inherit the card's
+   active state — :has() on the list is what carries it across.
+
+   It uses the `scale` property, not a transform, for the same reason the
+   compress does: the script owns `transform` (that is where the panel's
+   position lives), and the two would overwrite each other. scale composes with
+   it instead.
+   One consequence of sharing the property with the compress: an animation beats
+   a normal declaration, so a press landing DURING a slide is ignored for that
+   slide's --dur-slide. The animation has no fill-mode, so the press applies
+   again the moment it finishes, and pressing a card that is still being slid
+   to is not a gesture anyone can really aim at. */
+#project-list:has(.project-card:active) .card-panel {
+	scale: 0.99;
 }
 
 /* ── The compress ──
@@ -1230,9 +1514,22 @@ body {
    tint; this reads as mass.
 
    `scale` as its own property, not folded into `transform`, because the script
-   owns the transform (it is where the panel's position lives) and the two would
-   overwrite each other. They compose: a translate followed by a scale about the
-   element's own centre is the same box either way round. */
+   owns the position and the two would overwrite each other if both used one
+   property.
+
+   CORRECTION, 2026-08-05 — the note this replaces claimed "a translate followed
+   by a scale about the element's own centre is the same box either way round".
+   That is false, and it was the cause of the press jiggle. The individual
+   transform properties compose in a FIXED order (translate, rotate, scale,
+   transform), so `scale` is applied OUTSIDE anything written to `transform` and
+   multiplies its translate. While the position lived on `transform`, this
+   compress was also dragging the panel toward the origin by up to 3.5% of its
+   own offset — ~16px on a 471px hop — which nobody noticed because it happened
+   during travel and read as momentum. The position now lives on the `translate`
+   property, which is applied BEFORE scale and is therefore left alone, so this
+   is finally the pure size change the profile below was designed as.
+   If the travel ever feels lighter than it used to, that is why: the compress
+   lost an unintended translation it was never supposed to have. */
 @keyframes panel-compress {
 	0% { scale: 0.9823; }
 	2% { scale: 0.9655; }
@@ -1265,6 +1562,13 @@ body {
 	   to — it would be a shape change with no move under it. */
 	.card-panel.is-sliding {
 		animation: none;
+	}
+	/* The card pins its own press to scale-100 under this setting
+	   (motion-reduce:active:scale-100 in ProjectCard.astro), so the panel has
+	   to be pinned with it — otherwise the ground would shrink under a card
+	   that no longer does. */
+	#project-list:has(.project-card:active) .card-panel {
+		scale: 1;
 	}
 }
 
@@ -1361,24 +1665,161 @@ body {
 	white-space: nowrap;
 	cursor: pointer;
 	color: var(--btn-text);
-	background: var(--btn-bg);
+	/* ── The enamel ── (2026-08-04, Hiro, off the 16-material exploration)
+	   A cloisonné badge: a deep fill inside a lit rim, with the light gathering
+	   along its bottom edge and the shadow curving across its head. It is the
+	   first thing on the site with a DIRECTION of light — everything else is
+	   lit flat — which is the whole reason it reads as an object rather than a
+	   painted rectangle.
+
+	   ── LIT FROM ABOVE, and every part of it agrees ──
+	   Four things carry the direction, and they only read as one source if all
+	   four move together — changing one alone is the bug to watch for:
+	     · the light gathers at the TOP edge, the shadow at the foot;
+	     · both layers run on the vertical, centred at 50%;
+	     · the cast shadow throws DOWNWARD (positive y);
+	     · the press well opens at the TOP (see :active).
+
+	   IT WAS LIT FROM BELOW FOR AN AFTERNOON, matched to --ground-grad, which
+	   rises toward the foot of the viewport. Hiro asked the right question
+	   afterwards — whether a ground that subtle should be driving the button at
+	   all — and the answer was no, for three reasons worth keeping so this
+	   isn't re-litigated:
+	     · the lift is bottom-up AND viewport-pinned, so it is at its weakest at
+	       the top of the screen, which is exactly where the hero sits. Around
+	       the button the ground is flat --paper to within a level or two. The
+	       button was taking a directional cue from a region with no gradient.
+	     · even at the foot it is ~6 levels, ΔL* 2.4. That reads as "the page
+	       isn't quite flat", not as a light source with a direction. The match
+	       was real in the CSS and invisible to the eye.
+	     · shape-from-shading leans hard on assuming OVERHEAD light. A bottom-lit
+	       convex object is perceptually ambiguous — it is the same prior that
+	       made the early bright-radial version read concave. The button is the
+	       one strongly-modelled object on the site, ~55 levels of shading on a
+	       34px surface, so it is the element that can least afford ambiguity,
+	       and the ground was the element least able to justify spending it.
+	   The GROUND kept its bottom-up direction regardless: that is load-bearing
+	   for a reason having nothing to do with the button (it puts the gradient's
+	   --paper end at the top of the viewport, which is where the sticky bar sits
+	   — though the bar samples the gradient directly now, so that is no longer
+	   the hard constraint it was). The two simply do not need to agree.
+
+	   Three deliberate departures from the explored variant, all Hiro's call:
+	     · the RADIUS stays the site's 0.11rem, not the 0.2rem the specimen
+	       used. Enamel grammar usually wants a curve to catch light on, so
+	       this is the harder version of the material — the bloom has to do the
+	       work the corners were helping with. It keeps the button in the same
+	       geometry as every other edge on the page, which is the point.
+	     · NO DARK RIM. The specimen drew a border a good deal darker than the
+	       chip to stand in for the metal cloison. The border stays
+	       --btn-border, which tracks --btn-face, so the edge is invisible and
+	       the shape is bounded by the inset rim light alone.
+	     · the press does NOT travel. No translateY, so the chip stays put and
+	       the state is carried entirely by the fill darkening and the well
+	       opening underneath it — see :active.
+
+	   Built from white/black ALPHA over the face rather than baked hex, so ONE
+	   rule serves both themes — but the ALPHAS THEMSELVES are per-theme tokens,
+	   which the first cut of this got wrong. A single set can't work: a white
+	   bloom over light's near-black chip has the whole range to climb, and over
+	   dark's near-white chip it has almost none. See the dark block's note on
+	   --btn-face for the failure that forced the split. */
+	background-color: var(--btn-face);
+	/* Longhand, and :hover/:active below match. The `background` SHORTHAND
+	   resets background-image to none, so setting it in any state would wipe
+	   the enamel for that state — which is exactly what this rule used to do
+	   before there was an image to lose. */
+	/* ── WHICH LAYER IS RADIAL DECIDES CONVEX vs CONCAVE ──
+	   2026-08-04, Hiro. This was the other way round for an hour: a radial
+	   BLOOM at the bottom over a linear fall. It read CONCAVE — a bright
+	   radial sitting in the middle of a face is what a dish does when it
+	   catches light, so the chip looked pressed in at rest, which fought the
+	   press state that was supposed to be the only recessed reading.
+	   The fix is to swap which quality is radial. On a CONVEX surface it is
+	   the SHADOW that curves: the face turns away from the source gradually,
+	   so the dark is what gathers and falls off, while the lit side stays a
+	   broad even wash. So the shadow is the radial and the light is the
+	   linear — not a change of amount, a change of which layer carries the
+	   curvature. Keep it that way; brightening the radial is what re-dishes it.
+	   ALWAYS ANCHOR THE SHADE ON THE LIGHT (here at 50% 0%), running from
+	   transparent at the lit edge to full at the far ones — never as a dark
+	   blob parked off the opposite side, which is what it was first. That
+	   version had two faults, both found by measuring rather than looking: a
+	   radial's falloff is elliptical, so at the chip's left edge the shade
+	   resolved to ~8.6% of a nominal 20% and most of the darkening never
+	   arrived; and it put the darkest point at the centre of the far edge with
+	   the corners LIGHTER, which is backwards — on a dome the corners are
+	   furthest from the source and should be the darkest thing on the face.
+	   Anchoring at the source fixes both at once: distance from the light IS
+	   the shading model, so every part of the face darkens by exactly how far
+	   it sits from the lit edge. */
+	/* The lit strip runs out at 30%, ABOVE THE CAP HEIGHT. The type sits
+	   between roughly 29% and 71% of the chip's height, so the whole wash lands
+	   clear of the glyphs and the label sits on the shaded part of the face.
+	   That geometry is what pays for --btn-lit being bright: the light can be
+	   as strong as it likes while none of it reaches a glyph. It ran to 72%
+	   once, spread into the text, and put the light-theme label at 4.24:1 —
+	   under AA's 4.5 for 14px — which was then "fixed" by dimming the alpha,
+	   i.e. paying with brightness for a problem the geometry had caused. Move
+	   this number back up and the contrast floor comes back with it. */
+	background-image:
+		radial-gradient(120% 120% at 50% 0%, rgba(0, 0, 0, 0) 25%, rgba(0, 0, 0, var(--btn-shade)) 100%),
+		linear-gradient(180deg, rgba(255, 255, 255, var(--btn-lit)), rgba(255, 255, 255, 0) 30%);
 	border: 1px solid var(--btn-border);
+	/* Three shadows, and the REST state declares all three — the middle one at
+	   zero alpha — so the list matches :active's and only the colours
+	   interpolate. Same technique, and the same reason, as
+	   .project-card__frame's rest shadow: a `none`-to-list transition has no
+	   defined pairing, so the well would pop in rather than open.
+	   Unlike the card's, this shadow is worn AT REST. The card's couldn't be:
+	   its border is translucent --line, so a resting shadow tinted the paper
+	   through it. --btn-border is opaque, so there is nothing to tint. */
+	box-shadow:
+		inset 0 0 0 1px rgba(255, 255, 255, 0.22),
+		inset 0 2px 4px rgba(0, 0, 0, 0),
+		0 2px 5px -1px rgba(0, 0, 0, 0.5);
 	transition:
-		background var(--dur-tap) ease,
-		border-color var(--dur-tap) ease;
+		background-color var(--dur-tap) ease,
+		border-color var(--dur-tap) ease,
+		box-shadow var(--dur-tap) ease;
 }
 
 .btn:hover {
-	background: var(--btn-bg-hover);
+	background-color: var(--btn-face-hover);
 	/* Tracks the ground rather than jumping to --line-strong, which is what this
 	   said while the button was a tinted surface: on a solid chip that hairline
 	   appeared out of nowhere on hover and read as a stroke drawn around the
-	   shape. The edge belongs to the chip, so it moves with it. */
-	border-color: var(--btn-bg-hover);
+	   shape. The edge belongs to the chip, so it moves with it — which in dark
+	   now means climbing ahead of the face rather than matching it, since the
+	   rim there is a visible object of its own. */
+	border-color: var(--btn-border-hover);
+	/* The chip lifts a little further off the page. Geometry unchanged from
+	   rest — only the drop's blur, spread and alpha move, so the hover reads as
+	   the light source pulling back rather than as the button resizing. */
+	box-shadow:
+		inset 0 0 0 1px rgba(255, 255, 255, 0.28),
+		inset 0 2px 4px rgba(0, 0, 0, 0),
+		0 3px 8px -2px rgba(0, 0, 0, 0.55);
 }
 
+/* NO TRANSFORM HERE — Hiro, 2026-08-04, explicitly. The chip does not move on
+   press. Everything the state needs is carried by the fill dropping to
+   --btn-face-active, the rim light dimming, and the middle inset opening from
+   zero into a well along the TOP edge — the shadowed wall of a recess is the
+   one facing away from the source, and the source is above. This is the part
+   most likely to be missed if the lighting is ever flipped again: the well
+   has to move with the other three or the press reads as lit from the
+   opposite side to the rest state. Because the shading is a
+   background-image it can't animate (background-image is not an interpolable
+   property), which is the other reason the press is built out of colour and
+   shadow: those three do transition, so the button presses on --dur-tap
+   instead of snapping. */
 .btn:active {
-	background: var(--btn-bg-active);
+	background-color: var(--btn-face-active);
+	box-shadow:
+		inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+		inset 0 2px 4px rgba(0, 0, 0, 0.3),
+		0 1px 2px -1px rgba(0, 0, 0, 0.5);
 }
 
 .btn:focus-visible {

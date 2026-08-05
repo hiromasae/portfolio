@@ -32,11 +32,14 @@ import { projects } from '../data/projects';
 		    sentence's left edge to say so, and the hero reads as one deliberate
 		    centred block instead. */}
 		{/* Padding stepped up one full stop 2026-08-03 (Hiro: let the hero breathe
-		    more) — 64/80 → 96/112, and 80/96 → 112/128 from sm up. The 1rem
-		    top/bottom ASYMMETRY is deliberate and survives the increase: the space
-		    below has to separate the hero from the projects grid, while the space
-		    above only has to clear the nav bar, which is already a ruled edge. */}
-		<section class="pt-24 pb-28 text-center sm:pt-28 sm:pb-32">
+		    more) — 64/80 → 96/112, and 80/96 → 112/128 from sm up. Stepped again
+		    2026-08-05, same ask and the same way: 112/128, and 128/144 from sm up.
+		    The 1rem top/bottom ASYMMETRY is deliberate and survives both
+		    increases: the space below has to separate the hero from the projects
+		    grid, while the space above only has to clear the nav bar, which is
+		    already a ruled edge. Keep stepping BOTH values together if it goes
+		    up again — the gap is the point, not the individual numbers. */}
+		<section class="pt-28 pb-32 text-center sm:pt-32 sm:pb-36">
 			{/* Still capped at --measure so a wide viewport can't run the line out
 			    past a readable length; mx-auto centres the box the cap creates. */}
 			{/* --ink-hero, a step PAST the body ink away from the paper (2026-08-03,
@@ -204,14 +207,36 @@ import { projects } from '../data/projects';
 			return { x, y };
 		};
 
+		// Position goes on the `translate` PROPERTY, never on `transform`.
+		// The individual transform properties compose in a fixed order —
+		// translate, then rotate, then scale, then `transform` — so anything
+		// written to `transform` sits INSIDE the scale and gets multiplied by
+		// it. With the position there, the panel's press (scale: 0.99) was
+		// scaling its own offset: card 1 sits at x=0 and never moved, card 2
+		// sits at x≈471 and lurched ~4.7px sideways on every press. That was
+		// the jiggle. On `translate` the position is applied before the scale
+		// and is left alone, so the panel only ever changes size in place.
 		const place = (card: HTMLElement) => {
 			const { x, y } = offsetIn(card, list);
 			panel.style.width = `${card.offsetWidth}px`;
 			panel.style.height = `${card.offsetHeight}px`;
-			panel.style.transform = `translate(${x}px, ${y}px)`;
+			panel.style.translate = `${x}px ${y}px`;
 		};
 
 		const show = (card: HTMLElement) => {
+			// Already on this card: do nothing. Without this guard, ANY second
+			// call for the same target re-runs the compress below, and the panel
+			// wobbles 3.5% in place with nothing travelling.
+			//
+			// It is not a hypothetical — pressing a card fires it every time.
+			// Mousedown focuses the card's <a>, focusin calls show() with the
+			// card already showing, and the compress restarts underneath the
+			// press. That is most of the jiggle: the press animates scale 1 →
+			// 0.99 while the compress independently drives it to 0.9655 and
+			// back, so the panel dips well past the pressed size and returns.
+			// Measured mid-press before the guard: 0.9805 at +80ms, 0.9986 at
+			// +200ms, 0.99 at +500ms — not even monotonic.
+			if (visible && card === current) return;
 			current = card;
 			if (visible) {
 				// Slide + resize to the new card, and restart the compress that rides
