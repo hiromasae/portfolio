@@ -160,15 +160,21 @@ const onHome = path === '/';
 			</span>
 		</div>
 
-		{/* Settings: the gear — one closed cog silhouette (six square teeth,
-		    r6 root, r9.5 tip) plus its hub, in the icons' 2px stroke. Picked
-		    from a ten-variant exploration (2026-08-05, Hiro — the artifact
-		    URL is in the session memory): six WIDE teeth because they stay
-		    countable at the bar's 17px where eight tighten and ten fuzz to
-		    texture. The teeth are true rectangles — parallel flanks, flat
-		    chord tips — generated, not eyeballed; radial flanks with arc tips
-		    were tried first and read as a saw blade once stroked. A sliders
-		    glyph and a seated-teeth gear each spent part of the day here
+		{/* Settings: the gear — one closed LOBED cog silhouette (six teeth,
+		    r6 root, r9.5 tip) plus its hub, in the icons' 2px stroke. Six
+		    WIDE teeth because they stay countable at the bar's 17px where
+		    eight tighten and ten fuzz to texture (the ten-variant exploration,
+		    2026-08-05). Redrawn lobed the same day: the first shipped cut had
+		    true-rectangle teeth — parallel flanks, flat chord tips, zero
+		    curvature anywhere in the silhouette — and next to the arc-dominant
+		    contact icons it read as the invader's pixel idiom, not the row's
+		    hand. This outline keeps the radii and instead runs radial flanks
+		    (±15° rays) into the tip and root circles through tangent 1.4-unit
+		    fillets, so the silhouette is mostly arcs — the feather-gear
+		    geometry, in this site's stroke. (Radial flanks with SHARP corners
+		    were the earlier saw-blade failure; the fillets are what fixed it,
+		    not the flank direction.) A sliders glyph and a seated-teeth gear
+		    each spent part of the day here
 		    before this one. The button replaced the light/dark contrast
 		    glyph when the theme control moved into the menu below and gained
 		    a sticky-bar companion; the circle-and-fill-sweep toggle this
@@ -201,15 +207,17 @@ const onHome = path === '/';
 				>
 					{/* --len: measured lengths for the load intro's stroke-draw —
 					    same true-unit dash scheme as the contact icons
-					    (Icon.astro): the cog outline computes to 80.47 (rounded
+					    (Icon.astro): the cog outline computes to 76.23 (rounded
 					    up), the hub is 2πr. Both shapes are CLOSED and carry butt
 					    caps inline: a closed shape wears a cap only while the
 					    intro draws it dashed, where a square cap overhangs the
 					    seam (the Twitter-beak gotcha recorded at the intro's cap
 					    rule in global.css) — undashed, a closed path has no caps
 					    and the attribute is inert. The path is generated (6 teeth,
-					    frac 0.52, one tooth centred straight up), so retune it by
-					    regenerating, not by nudging coordinates. */}
+					    radial flanks ±15° off each tooth centre, fillet r1.4 — the
+					    tip fillets sweep 1, convex corners; the root fillets sweep
+					    0, concave — one tooth centred straight up), so retune it
+					    by regenerating, not by nudging coordinates. */}
 					{/* The rotatable group: the click spin (see .gear-g in
 					    global.css) turns this, not the svg — the svg's transform
 					    belongs to the press scale, and the two gestures overlap
@@ -220,8 +228,8 @@ const onHome = path === '/';
 					<g class="gear-g">
 						<path
 							stroke-linecap="butt"
-							d="M10.366 6.227L10.366 2.642L13.634 2.642L13.634 6.227A6 6 0 0 1 16.183 7.699L19.288 5.906L20.922 8.736L17.817 10.528A6 6 0 0 1 17.817 13.472L20.922 15.264L19.288 18.094L16.183 16.301A6 6 0 0 1 13.634 17.773L13.634 21.358L10.366 21.358L10.366 17.773A6 6 0 0 1 7.817 16.301L4.712 18.094L3.078 15.264L6.183 13.472A6 6 0 0 1 6.183 10.528L3.078 8.736L4.712 5.906L7.817 7.699A6 6 0 0 1 10.366 6.227Z"
-							style="--len: 81"
+							d="M11.164 2.537A9.5 9.5 0 0 1 12.836 2.537A1.4 1.4 0 0 1 14.065 4.294L13.881 4.981A1.4 1.4 0 0 0 14.621 6.603A6 6 0 0 1 15.363 7.031A1.4 1.4 0 0 0 17.138 6.862L17.641 6.359A1.4 1.4 0 0 1 19.777 6.545A9.5 9.5 0 0 1 20.613 7.992A1.4 1.4 0 0 1 19.706 9.935L19.019 10.119A1.4 1.4 0 0 0 17.985 11.572A6 6 0 0 1 17.985 12.428A1.4 1.4 0 0 0 19.019 13.881L19.706 14.065A1.4 1.4 0 0 1 20.613 16.008A9.5 9.5 0 0 1 19.777 17.455A1.4 1.4 0 0 1 17.641 17.641L17.138 17.138A1.4 1.4 0 0 0 15.363 16.969A6 6 0 0 1 14.621 17.397A1.4 1.4 0 0 0 13.881 19.019L14.065 19.706A1.4 1.4 0 0 1 12.836 21.463A9.5 9.5 0 0 1 11.164 21.463A1.4 1.4 0 0 1 9.935 19.706L10.119 19.019A1.4 1.4 0 0 0 9.379 17.397A6 6 0 0 1 8.637 16.969A1.4 1.4 0 0 0 6.862 17.138L6.359 17.641A1.4 1.4 0 0 1 4.223 17.455A9.5 9.5 0 0 1 3.387 16.008A1.4 1.4 0 0 1 4.294 14.065L4.981 13.881A1.4 1.4 0 0 0 6.015 12.428A6 6 0 0 1 6.015 11.572A1.4 1.4 0 0 0 4.981 10.119L4.294 9.935A1.4 1.4 0 0 1 3.387 7.992A9.5 9.5 0 0 1 4.223 6.545A1.4 1.4 0 0 1 6.359 6.359L6.862 6.862A1.4 1.4 0 0 0 8.637 7.031A6 6 0 0 1 9.379 6.603A1.4 1.4 0 0 0 10.119 4.981L9.935 4.294A1.4 1.4 0 0 1 11.164 2.537Z"
+							style="--len: 76.5"
 						/>
 						<circle cx="12" cy="12" r="2.5" stroke-linecap="butt" style="--len: 16" />
 					</g>
