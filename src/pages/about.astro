@@ -313,8 +313,11 @@ const tools = [
 				    everywhere else on the site, so the ends fade out the way the nav's
 				    edge and the projects rule do. Only the paint changed; every number
 				    in this note survived it, which is the reason .card-rule stayed a
-				    border instead of becoming a pseudo-element. Read its comment in
-				    global.css before switching it to one.
+				    border instead of becoming a pseudo-element. (It briefly became
+				    one on 08-06 to join the page dividers' load finale, and was
+				    reverted the same day — these rules live on a card that enters as
+				    one object, so they enter with it. The .card-rule comment in
+				    global.css has both arguments; read it before restructuring.)
 				    A border on the section rather than an <hr>, because the h2s
 				    already mark the divisions structurally — this is presentation on
 				    top of semantics that exist, not a substitute for them.

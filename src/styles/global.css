@@ -1205,7 +1205,11 @@ body {
 
    They also stopped adding their 1px to layout when they stopped being borders,
    so the bar is 70px rather than 71 and the projects section starts a pixel
-   higher. Nothing is measured off either number. */
+   higher. Nothing is measured off either number.
+
+   Both ENTER by growing centre-out at the tail of the page's load choreography
+   — see the hairlines' entrance block after the content reveal rules before
+   adding any transform here; scaleX is spoken for during the intro. */
 #projects {
 	position: relative;
 }
@@ -1246,6 +1250,17 @@ body {
    border's pixel would take the gap below each rule to 39 and tip a figure the
    section note spends a paragraph getting right. The pseudo-element is the
    better tool where nothing is measured off the line; here something is.
+
+   For a few hours on 2026-08-06 this WAS a transparent border plus a pseudo,
+   so the two rules could grow in with the page dividers' load finale — and
+   Hiro pulled them back out of it the same day: these rules are ON A CARD,
+   and the card enters as one object, so its internal dividers arriving on
+   their own clock read as the card assembling itself after it had already
+   arrived. The finale belongs to PAGE-level structure (the bar's edge, the
+   projects rule); anything inside a .reveal enters with its reveal. If these
+   ever need motion again, the transparent-border-for-layout + pseudo-for-
+   paint split is in git history and its geometry was verified — but bring
+   the argument above with you.
 
    slice 1 with left/right widths at 0: the corner regions are zero-wide, so the
    top edge gets the full-width strip and --rule's percentage stops land on the
@@ -2956,14 +2971,21 @@ body {
    not pathLength), and finally the settings button draws its gear — the cog
    outline and its hub stroking in together, the intro's last glyph. (Until 08-05
    this finale was the theme toggle's circle plus an ink sweep running to
-   1200ms; the sweep retired with the glyph, so the intro now ends with the
-   gear's draw at ~1020ms.)
+   1200ms; the sweep retired with the glyph.) A beat after the content
+   cascade settles (1600ms) the bar's bottom hairline grows in from its
+   centre — the hairlines' entrance block below the reveal rules — taking
+   the intro's choreography to ~2800ms; Nav.astro's cleanup timer sits just
+   past that.
 
    This is the flourish the EXPANDED masthead used to get; the compact bar had
    a shorter variant where the buttons wiped in like the type rather than
    drawing (nav-intro-wipe, ~780ms against this one's ~1350ms). With the
-   masthead gone the bar plays the draw at every arrival — Hiro's call
-   (2026-08-02) when the two variants collapsed into one.
+   masthead gone the bar played the draw at every arrival — Hiro's call
+   (2026-08-02) when the two variants collapsed into one — until 2026-08-06,
+   when the ceremony (grown to ~2.8s with the hairline finale) was gated: an
+   explicit RELOAD always replays it, a stale same-tab return takes the
+   internal-navigation form, once per tab-session otherwise. The gate and its
+   reasoning live at the loadIntro decision in Nav.astro.
 
    The class is added PRE-PAINT by Nav.astro's inline script: the rules
    without .nav-intro-go are static hidden holds equal to each animation's
@@ -3134,6 +3156,82 @@ html.reveal-skip .reveal {
 		opacity: 1;
 		animation: none;
 	}
+}
+
+/* ── The hairlines' entrance: the page's last strokes (2026-08-05, Hiro) ──
+   The index's two dividers draw themselves LAST, each growing from its centre
+   outward — the page assembles content-first and the rules arrive to index
+   what has landed: the bar's line first, the projects rule a beat behind.
+   Both run the reveal's curve at half-again its clock (1.2s against 0.8s) —
+   same family as the cascade, but unhurried where the content is eager: the
+   close of the choreography, not two more entries in it.
+
+   The bar's line is part of the BAR's entrance, so it rides the load intro's
+   classes and an internal navigation — where the bar is already seated —
+   never replays it. Held at scaleX(0) pre-go, then growing at 1600ms — a
+   BEAT AFTER the cascade's entries have visually landed (the last card
+   starts ~1050ms and its curve front-loads, so ~1500ms is where the page
+   reads as assembled), not overlapping their tails. That pause is the point
+   (Hiro, 2026-08-06: "slower and a little after everything loads in" — the
+   first cut started the lines at the gear-draw handoff, 1020ms, mid-tail,
+   and read as part of the pile-in rather than a close). Keep this delay and
+   Nav.astro's cleanup timer in step.
+
+   The projects rule is CONTENT — it plays on internal navigations exactly as
+   the cascade does — so its delay rides --hold like every .reveal element:
+   --hold + 1240ms lands it 240ms after the bar's line on a hard load (the
+   intro's own first-icon beat) and a beat after the shorter no-intro cascade
+   settles. It pauses under reveal-wait with the rest of the choreography and
+   sits at rest on reveal-skip landings, same as .reveal.
+
+   THE FINALE IS PAGE-LEVEL ONLY. The about card's .card-rule dividers joined
+   it for a few hours on 2026-08-06 and were pulled back out the same day
+   (Hiro): they sit ON A CARD that enters as one object, and internal
+   dividers arriving on their own clock read as the card assembling itself
+   after it had already arrived. Anything inside a .reveal enters with its
+   reveal; only structure that indexes the PAGE — the bar's edge, the
+   projects rule — earns a line in the finale. The .card-rule block has the
+   full note.
+
+   scaleX rather than a clip-path inset: the gradient compresses while it
+   grows, so the line lengthens with its end-fades intact — a short rule
+   becoming a long one, not a long rule being uncovered. transform-origin's
+   default centre IS the centre-out. `backwards` fill, not `both`: the 'to'
+   frame equals rest, so each pseudo returns to plain static rendering the
+   frame its animation ends (and the intro classes can be removed later
+   without a pop). */
+html.nav-intro-draw:not(.nav-intro-go) #site-nav::after {
+	transform: scaleX(0);
+}
+html.nav-intro-draw.nav-intro-go #site-nav::after {
+	animation: rule-grow 1.2s cubic-bezier(0.22, 0.68, 0, 1) 1600ms backwards;
+}
+#projects::before {
+	animation: rule-grow 1.2s cubic-bezier(0.22, 0.68, 0, 1)
+		calc(var(--hold, 0ms) + 1240ms) backwards;
+}
+html.reveal-wait #projects::before {
+	animation-play-state: paused;
+}
+html.reveal-skip #projects::before {
+	animation: none;
+}
+
+@keyframes rule-grow {
+	from {
+		transform: scaleX(0);
+	}
+	to {
+		transform: none;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	#projects::before {
+		animation: none;
+	}
+	/* The bar's line needs no entry: reduced motion never adds the intro
+	   classes, so its hold and animation simply never apply. */
 }
 
 /* SVG size is fixed now; only the hover/press gesture transitions. Scoped to

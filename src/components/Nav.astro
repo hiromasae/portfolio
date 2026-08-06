@@ -365,13 +365,46 @@ const onHome = path === '/';
 		// pre-paint so first paint holds the bar hidden at the animation's first
 		// frame (the holds in global.css); runLoadIntro releases it at
 		// 'interactive'.
+		//
+		// ONCE PER TAB-SESSION — EXCEPT AN EXPLICIT RELOAD (2026-08-06, Hiro,
+		// both calls the same day: the gate landed first, then "I should be
+		// able to see it on reload"). The full ceremony runs ~2.8s since the
+		// hairline finale joined it, and it earns that on a first meeting; but
+		// a reload is a deliberate act — "show me again" — and it is also how
+		// this site's own author checks the entrance, so it always replays.
+		// What the session stamp actually shortens is the one remaining hard
+		// arrival: a same-tab return from an external site after the nav-from
+		// stamp has gone stale (>10s), where re-greeting someone who left a
+		// minute ago would read as the site forgetting them. Those take the
+		// internal-navigation form: bar at rest, cascade at once, the projects
+		// rule still closing it (its --hold+1240ms delay needs no class). The
+		// stamp is written only when the ceremony actually PLAYS — a visitor
+		// whose first arrival is a projects landing (which skips the intro)
+		// still gets the full entrance on their first plain load.
+		// sessionStorage, like nav-from/nav-return: per tab, dies with it.
+		// ("Every arrival" was the 2026-08-02 call; it was made when the whole
+		// intro ran ~1.35s.)
 		var navType = '';
 		try {
 			var navEntry = performance.getEntriesByType('navigation')[0];
 			if (navEntry) navType = navEntry.type;
 		} catch (e) {}
-		var loadIntro = !reduce && !projectsIntent && (!internal || navType === 'reload');
-		if (loadIntro) root.classList.add('nav-intro-draw');
+		var introSeen = false;
+		try {
+			introSeen = !!sessionStorage.getItem('nav-introed');
+		} catch (e) {}
+		var hardArrival = !projectsIntent && (!internal || navType === 'reload');
+		var loadIntro = !reduce && hardArrival && (!introSeen || navType === 'reload');
+		// The short form: a repeat hard arrival — no bar entrance, but still a
+		// hard load, with everything that implies for the webfonts (see the
+		// reveal-wait note below).
+		var shortForm = !reduce && !loadIntro && hardArrival;
+		if (loadIntro) {
+			root.classList.add('nav-intro-draw');
+			try {
+				sessionStorage.setItem('nav-introed', '1');
+			} catch (e) {}
+		}
 
 		// ── Content reveal coordination ──
 		// The pages' .reveal cascades (global.css) start after whatever entrance
@@ -399,9 +432,19 @@ const onHome = path === '/';
 			// pausing shifts the whole sequence intact, where rewriting
 			// animation-delay mid-flight would restart it.
 			root.classList.add('reveal-wait');
+		} else if (shortForm) {
+			// The short form is still a HARD load — and a hard reload bypasses
+			// the font cache — so the type problem the ceremony waits out (the
+			// whenTypeSettled note below) hits the cascade here too: content
+			// slid in wearing the fallback face and snapped to Recursive when
+			// it landed (Hiro, 2026-08-06, the day after the session gate made
+			// this path reachable by reload). Same cure, same insurance: pause
+			// until type settles; a warm cache resolves fonts.ready in the
+			// same tick and costs the common repeat nothing.
+			root.classList.add('reveal-wait');
 		}
 
-		if (!projectsIntent && !loadIntro) return;
+		if (!projectsIntent && !loadIntro && !shortForm) return;
 
 		// Land on the projects view: the exact remembered position when we have
 		// one, otherwise the intended card (or the top of the list) ~12px under
@@ -446,19 +489,38 @@ const onHome = path === '/';
 		// 'go' either way, so this just lands the entrance a beat later on type
 		// that then holds still. The race is the insurance: a slow, blocked or
 		// offline CDN must not swallow the entrance, so at 1200ms it plays over
-		// the fallback exactly as it does today. Fonts already pending by here
-		// (they start at first layout, before 'interactive'), so fonts.ready
-		// can't resolve early on an empty set.
+		// the fallback exactly as it does today.
+		//
+		// fonts.load(), NOT fonts.ready alone (2026-08-06). ready resolves
+		// when nothing is *currently* loading — and at 'interactive' the woff2
+		// request usually hasn't STARTED, because a face only begins loading at
+		// first layout of text that uses it. So on a cold cache ready resolved
+		// on an empty set, the choreography played on the fallback face, and
+		// Recursive snapped every box when it landed mid- or post-flight
+		// (Hiro's report; the 07-29 note here previously claimed fonts were
+		// "already pending by here", which a warm dev cache made true enough to
+		// ship). load() forces the request NOW and resolves when the face is
+		// usable; the ready chase behind it catches any other face. The
+		// descriptor names the body's own face and floor weight — keep it in
+		// step with --font-sans and the weight scale in global.css.
 		var whenTypeSettled = function (run) {
-			if (!document.fonts || !document.fonts.ready) return run();
 			var fired = false;
 			var once = function () {
 				if (fired) return;
 				fired = true;
 				run();
 			};
-			document.fonts.ready.then(once, once);
 			window.setTimeout(once, 1200);
+			try {
+				document.fonts
+					.load('300 1rem "Recursive"')
+					.then(function () {
+						return document.fonts.ready;
+					})
+					.then(once, once);
+			} catch (e) {
+				once();
+			}
 		};
 
 		// Release the intro's animations (the class was added pre-paint above;
@@ -475,7 +537,7 @@ const onHome = path === '/';
 				root.classList.remove('reveal-wait');
 				window.setTimeout(function () {
 					root.classList.remove('nav-intro-draw', 'nav-intro-go');
-				}, 1350);
+				}, 2900);
 			});
 		};
 
@@ -490,6 +552,10 @@ const onHome = path === '/';
 				}
 			}
 			if (loadIntro) runLoadIntro();
+			else if (shortForm)
+				whenTypeSettled(function () {
+					root.classList.remove('reveal-wait');
+				});
 		};
 		if (document.readyState !== 'loading') {
 			arrive();
