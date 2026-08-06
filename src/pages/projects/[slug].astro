@@ -25,10 +25,43 @@ const { project } = Astro.props;
 
 		{/* Dateline is the year alone — the company already reads off the prose
 		    below, and tags/Visit were dropped from this page (both still live in
-		    projects.ts). */}
+		    projects.ts).
+
+		    THE SYNTAX ACCENTS ARE GONE FROM THIS HEADER (2026-08-06, Hiro: match
+		    the about page's colours). The year wore --ink-num's orange and the
+		    title wore --ink-title's cyan; the about page runs one ink family and
+		    no accents — --ink-heading for headings, plain --ink for prose,
+		    --ink-soft for the quiet line — and this header now does the same.
+
+		    What it costs, so nobody rediscovers it: the title's cyan was an echo
+		    of the card you arrived from, whose h3 still carries --ink-title (see
+		    ProjectCard.astro). That thread is cut. The card's YEAR, note, already
+		    went plain ink on 08-02 for the same reason in miniature — two accents
+		    in one small block and the orange won the entrance — so the two headers
+		    disagreed on the year long before they disagreed on the title.
+		    --ink-num now has no consumer left on the site. */}
 		<header class="reveal" style="--i: 0">
-			<p class="text-sm tabular-nums text-[var(--ink-num)]">{project.year}</p>
-			<h1 class="mt-2 text-3xl [font-weight:var(--weight-emph)] tracking-tight text-[var(--ink-title)] sm:text-4xl">{project.title}</h1>
+			<p class="text-xs tabular-nums text-[var(--ink-soft)]">{project.year}</p>
+			{/* 1.7rem (32.3px), hand-set. Two cuts in one day, and the second is
+			    the one that needs explaining.
+
+			    First the sm:text-4xl bump went: it crossed the line the about
+			    page's h1 draws in its own note — 4xl is "still the line not to
+			    cross" — and this page was the one crossing it. That left text-3xl
+			    (35.6px), equal to about's h1.
+
+			    Then Hiro called it slightly too big anyway, so this is now a
+			    hand-set value BETWEEN the rungs rather than a scale step. Off
+			    3xl by 9%, which is the "slightly" — text-2xl was the alternative
+			    and drops 20%, landing nearer about's h2 (23.8px) than its h1.
+
+			    So the two pages' titles no longer match exactly, and that is
+			    deliberate: about's h1 is a GREETING sized by the argument in its
+			    own note (a greeting is not a page title), while this one is an
+			    actual page title carrying a real project name — the longest
+			    strings on the site, which is what made 35.6px feel large here and
+			    not there. Same tier, not the same number. */}
+			<h1 class="mt-2 text-[1.7rem] [font-weight:var(--weight-emph)] tracking-tight text-[var(--ink-heading)]">{project.title}</h1>
 		</header>
 
 		{/* Reading matter is capped at --measure (see global.css) — ~11 words a
@@ -39,27 +72,71 @@ const { project } = Astro.props;
 		    a reader nothing to skip to, and the labels were the same small-bold
 		    kicker shape the home page dropped. The register change they marked
 		    — context, then what I did — now rides the type instead. The problem
-		    paragraph is set as a lead (a step up in size, --ink-soft), so the
-		    work paragraph reads as the body it steps down into. */}
+		    paragraph is set as a lead — a step up in SIZE, and as of 08-06 that
+		    is the whole of it; it used to have --ink-soft and a heavier weight
+		    doing the same job. See the note in the section below. */}
 		<section class="reveal mt-8 max-w-[var(--measure)]" style="--i: 1">
-			{/* Both paragraphs carry the UI weight tier (w400 dark / w500 light
-			    since the 08-05 token pass; was font-normal) rather than inheriting
-			    the body's tier — the only weight bumps the 2026-08-04 legibility
-			    audit actually required. This is the site's longest-form reading, and at
-			    w300 both fell under the APCA floor: the lead needs ≥32px at w300
-			    for its Lc 64.8 and is 23.75px; the work paragraph needs ≥24px for
-			    its Lc 75.1 and is 21.375px. w400 clears both.
+			{/* SIZED AND COLOURED OFF THE ABOUT PAGE (2026-08-06, Hiro: smaller,
+			    and match about's colours). The work paragraph is now that page's
+			    prose spec exactly — text-sm, plain --ink — and the lead sits one
+			    step above it at text-base. They were text-xl / text-lg.
 
-			    ⚠ The dark lead is the site's one RESIDUAL APCA shortfall. The
-			    08-05 AAA pass lifted --ink-soft to 7.06:1 (Lc 42.1 → 48.6), so
-			    the lead is WCAG-AAA clean in both themes now — but APCA still
-			    wants 35px at w400 from that Lc and the lead is 23.75px; no
-			    weight reaches the floor from there. What remains is a COLOUR
-			    gap, not a weight one: closing it fully means setting this
-			    paragraph in --ink. Left standing deliberately — the muted lead
-			    is the design, and it clears every WCAG bar it answers to. */}
-			<p class="text-xl [font-weight:var(--weight-ui)] leading-relaxed text-[var(--ink-soft)]">{project.problem}</p>
-			<p class="mt-6 text-lg [font-weight:var(--weight-ui)] leading-relaxed">{project.work}</p>
+			    The lead lost --ink-soft in the same move, and that is the happy
+			    half of it: this paragraph was the site's one RESIDUAL APCA
+			    SHORTFALL. The 08-05 AAA pass had lifted --ink-soft to 7.06:1
+			    (Lc 42.1 → 48.6), leaving it WCAG-AAA clean in both themes but
+			    still short of APCA, which wanted 35px at w400 from that Lc
+			    against the 23.75px it was set at — a gap no weight could close,
+			    because it was a COLOUR gap. The old note said so and said the fix
+			    was to set this paragraph in --ink. Matching about did that.
+
+			    THE WEIGHTS CAME OFF LATER THE SAME DAY (Hiro: body text needs to
+			    be lighter). Both paragraphs had carried the UI tier explicitly —
+			    w500 light / w400 dark — which was the one weight bump the
+			    2026-08-04 legibility audit required back when they were set at
+			    23.75/21.375px. They now inherit the body tier (w400 light / w300
+			    dark) like every other paragraph on the site.
+
+			    An earlier draft of this note argued the bump was load-bearing and
+			    told the next person not to remove it. That argument was about the
+			    OLD sizes and it does not survive the move to about's scale, so
+			    here is the honest version:
+
+			    The work paragraph is now the about page's prose spec EXACTLY —
+			    text-sm, body weight, plain --ink, same leading. Not "close to" it
+			    and not a step off it; the same four values. Whatever legibility
+			    bar that pairing clears everywhere else on the site, it clears
+			    here, because it is the same text set the same way. The lead is
+			    that pairing one size LARGER, so it is strictly ahead of it.
+
+			    What genuinely changed is the MARGIN, and that is the thing to
+			    know before touching this again: the work paragraph used to sit a
+			    weight tier above the site's baseline prose and now sits level
+			    with it. It has no headroom left. Anything that lowers this
+			    pairing further — a lighter tier, a smaller size, a softer ink —
+			    takes the page below a bar the rest of the site holds, and would
+			    be the first change here that needs its own APCA number rather
+			    than an equivalence to about. Going lighter than the site's
+			    lightest is not a taste call any more.
+
+			    ── The lead got half a tier back (Hiro, same day, third pass) ──
+			    Size alone turned out to be too little separation once the weights
+			    came off, so the lead now wears --weight-lead: 450 light / 350
+			    dark, a HALF step above the body rather than the full step it had
+			    that morning. The full step was --weight-ui, i.e. precisely where
+			    it had started, so taking it would have made the lighten a no-op
+			    here and left the ask unanswered.
+
+			    The distinction is back to two channels — size and weight — but
+			    the weight channel is now half as loud as it was, and colour (the
+			    third, --ink-soft) is not coming back: that one was the APCA
+			    shortfall above.
+
+			    The token is a fraction of a tier and can only exist because the
+			    face is a continuous variable range; global.css's :root block
+			    carries the full argument and the one way it breaks. */}
+			<p class="text-base [font-weight:var(--weight-lead)] leading-relaxed">{project.problem}</p>
+			<p class="mt-6 text-sm leading-relaxed">{project.work}</p>
 		</section>
 
 		<section class="reveal mt-10 space-y-5" style="--i: 2">

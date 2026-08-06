@@ -67,9 +67,18 @@ const { project } = Astro.props;
 		    muted line without promoting the whole line; on a card whose title had
 		    just taken the blue, that put two accent colours in a four-line block and
 		    the orange won the entrance. Plain ink keeps the year quiet and lets the
-		    title lead. --ink-num is still live on the project pages' datelines, so
-		    the token is not orphaned — but the two headers no longer match here, and
-		    that was the argument for the year taking its own line at all. */}
+		    title lead. This note used to add that --ink-num was still live on the
+		    project pages' datelines, so the token was not orphaned; that stopped
+		    being true on 08-06, when those datelines went --ink-soft to match the
+		    about page and the token lost its last consumer. It is still DEFINED in
+		    both themes (global.css) — orphaned, not deleted.
+
+		    The two headers agreed on the year again for one day and then diverged
+		    the other way: this one is plain --ink, the project page's is
+		    --ink-soft. Whoever reconciles them should know the card lost its
+		    accent to a crowding argument and the page lost its accent to a
+		    match-the-about-page one — different reasons, so agreement here is not
+		    automatic. */}
 		<p class="text-[0.8rem] leading-snug tabular-nums text-[var(--ink)]">{project.year}</p>
 		{/* The <span> stops the underline at the words rather than letting it run
 		    the full width of the h3's line box. It originally also kept the line

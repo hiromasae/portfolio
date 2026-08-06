@@ -17,6 +17,48 @@
 	--weight-ui: 500;
 	--weight-emph: 600;
 
+	/* HALF A TIER, and the only token on this scale that is not a round step
+	   (2026-08-06, Hiro: increase the lead paragraph's weight slightly). The
+	   project page's lead had just been lightened to --weight-body with its
+	   body paragraph and needed to come back up — but one tier up is
+	   --weight-ui, which is exactly where it started that morning, so the ask
+	   would have round-tripped to a no-op.
+
+	   This is only spellable because Recursive is loaded as a CONTINUOUS
+	   300–700 range rather than pinned stops (see Layout.astro, which says so
+	   in as many words: "there is no reason to quantise it"). 450 and 350 are
+	   real interpolations the file can draw, not synthesised or snapped — the
+	   failure the .btn note downstream was written to record. If the face is
+	   ever swapped for one shipping discrete instances, THIS TOKEN IS THE
+	   FIRST THING THAT BREAKS, and it will break quietly: the browser rounds
+	   to the nearest available stop and the lead silently rejoins the body.
+
+	   Keeps the light-runs-heavier offset of the tiers around it. One
+	   consumer today — the project page's lead. If a second appears, that is
+	   the moment to ask whether the scale should be halved throughout rather
+	   than growing one-off half-steps.
+
+	   ⚠ A HALF-STEP IS NOT WORTH THE SAME IN BOTH THEMES, and this is worth
+	   knowing before trusting either one to carry emphasis. Measured as ink
+	   laid down (summed alpha over a rendered string, 19px):
+	     dark   300 → 350   +34.9%      light  400 → 450   +6.9%
+	     dark   300 → 400   +68.0%      light  400 → 500   +13.5%
+	   Each half-step is honestly half its own tier, so the token is
+	   internally consistent — but the SAME nominal 50 units buys five times
+	   the emphasis at the light end of the axis as at the heavy end. The
+	   lead therefore separates from the body noticeably harder in dark than
+	   in light.
+
+	   That asymmetry is INHERITED, not introduced: the full tiers already
+	   have it (+68% vs +13.5% above), so every --weight-ui element on the
+	   site already stands off its --weight-body neighbours more in dark than
+	   in light. It only became visible here because this lead leans on weight
+	   for a distinction it used to get from colour and size as well. If the
+	   two themes ever need to MATCH in perceived emphasis rather than in
+	   nominal step, that is a change to the whole scale, not to this token —
+	   and it would mean giving up the round numbers. */
+	--weight-lead: 450;
+
 	/* ── The corner radius ──
 	   One value for every rounded corner on the site (2026-08-05, Hiro). Two
 	   families had drifted — 1.5px on the sheets (cards, images, the about
@@ -777,6 +819,9 @@
 	--weight-body: 300;
 	--weight-ui: 400;
 	--weight-emph: 500;
+	/* Half-step, same as its :root copy — 50 above the body tier, not a step
+	   on the scale. See the :root block for why it can be a fraction at all. */
+	--weight-lead: 350;
 	/* 08-02: one step darker at Hiro's ask. Like the light block, the ground it
 	   replaced didn't leave the palette — #1a1b26 is now --surface, so night's
 	   own background became the raised sheet.
