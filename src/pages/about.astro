@@ -137,8 +137,9 @@ const tools = [
 			    now the entire content of the page.
 
 			    --i: 0 with no --base, so it lands on the bar's --hold exactly. The
-			    figure takes --base 450ms; see the note there for why they overlap
-			    rather than queue. */}
+			    figure follows at --i: 1 — the standard 150ms stagger, matched to
+			    the home page's hero→grid beat; see the note there for how a
+			    bespoke 450ms gap fell out of step with the hairline finale. */}
 			{/* rounded-[var(--radius)] + --line + bg-clip-padding is the site's card
 			    material, the same one the photo beside it and the project cards
 			    wear, so the two halves of the row read as one set of parts. The
@@ -474,17 +475,21 @@ const tools = [
 			    always been the largest — and it is the signal that this lever is
 			    spent. Take the next widening from the gap.
 
-			    --base 450ms so it lands AFTER the card (Hiro, 08-05: the card
-			    first, then the image). It was 180ms, which put the photo in flight
-			    before the old cascade's later pieces had started.
-
-			    450 rather than 800: the reveal runs 0.8s, so at 450 the card is
-			    ~56% arrived and the two overlap by a third of a second. Waiting the
-			    card out entirely would read as a stall — the same taste the load
-			    intro's --hold records, where the content enters over the bar's
-			    tail rather than after it. Long enough to be a sequence, short
-			    enough not to be a queue. */}
-			<figure class="reveal w-full max-w-[16rem] sm:max-w-[20rem] lg:w-[16rem] lg:max-w-none lg:shrink-0" style="--base: 450ms; --i: 0">
+			    --i: 1 so it lands AFTER the card (Hiro, 08-05: the card first,
+			    then the image) at the standard 150ms stagger — the SAME beat the
+			    home page's grid follows its hero by (Hiro, 08-06: the photo
+			    should follow the card at the rate the project cards follow the
+			    hero). It was a hand-set --base before: 180ms (in flight before
+			    the old five-element cascade's later pieces had started), then
+			    450ms against the card-as-one-object — which read right on its
+			    own, but priced the page out of the hairline finale: the bar's
+			    line fires at 1150ms, the frame BOTH index blocks have landed,
+			    and a 450ms base pushed the figure's landing to ~1450ms, so the
+			    close started mid-arrival here. On the shared stagger the two
+			    pages' cascades land together and one finale delay is right for
+			    both — keep this on the standard beat; a bespoke gap needs a
+			    bespoke finale delay to go with it. */}
+			<figure class="reveal w-full max-w-[16rem] sm:max-w-[20rem] lg:w-[16rem] lg:max-w-none lg:shrink-0" style="--i: 1">
 				<img
 					src="/images/me.webp"
 					alt="Hiro Eernisse"

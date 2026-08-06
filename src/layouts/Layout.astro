@@ -30,15 +30,6 @@ const {
 					if (localStorage.getItem('theme') === 'light') {
 						document.documentElement.dataset.theme = 'light';
 					}
-					/* The bar preference rides the same pre-paint stamp: sticky is
-					   the default, and only the explicit saved choice moves off it —
-					   resolved here so the bar never paints sticky and then unpins
-					   (or vice versa) after first paint. Flipped from the settings
-					   menu in Nav.astro; the CSS side is the data-nav-static rule
-					   over #site-nav in global.css. */
-					if (localStorage.getItem('nav-sticky') === 'off') {
-						document.documentElement.dataset.navStatic = '';
-					}
 				} catch (e) {}
 			})();
 		</script>

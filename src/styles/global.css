@@ -604,6 +604,11 @@
 		var(--paper) 100%
 	);
 
+	/* Theme glyph fill rest: the ink half sits right of center in light
+	   (translateX(0)), left in dark (-9px) — see .theme-fill-rect. A var so
+	   the load intro's sweep keyframes can target rest in either theme. */
+	--theme-fill-x: 0px;
+
 	/* The site's default easing. It was cut for the nav's collapse/expand
 	   ensemble — a motion assembled from independent transitions that all had
 	   to ride one curve, or their per-frame disagreement would bend the glide
@@ -996,6 +1001,7 @@
 	   which costs contrast — and check the title still trails it. */
 	--dye-name: #9ece6a; /* 10.56:1 — 1.50× the muted text (AAA pass), 1.15× the title */
 
+	--theme-fill-x: -9px;
 	--grain: none;
 }
 
@@ -1156,23 +1162,16 @@ body {
 	background-attachment: scroll, fixed;
 }
 
-/* The unpinned bar — the settings menu's "Sticky bar" switched off.
-   data-nav-static is stamped on <html> pre-paint by Layout.astro (same
-   contract as the theme attribute) and flipped live in Nav.astro. RELATIVE,
-   NOT STATIC, and this is load-bearing: the bar's bottom hairline
-   (#site-nav::after) and the settings dropdown are absolutely positioned
-   against the bar, and `sticky` was the positioned ancestor they resolved
-   to. `static` shipped here first and sent the hairline to the middle of
-   the page — bottom: 0 of the next positioned ancestor up. Relative keeps
-   the bar an ordinary in-flow block that scrolls away, while staying the
-   containing block for everything hung off it. The two landing calculations
-   in Nav.astro subtract the bar's height only while it is sticky — keep the
-   three in step. The bar's paint is indifferent: its --ground-grad layer is
-   `fixed` (viewport-anchored), so it keeps agreeing with the page's wherever
-   the bar happens to sit. */
-:root[data-nav-static] #site-nav {
-	position: relative;
-}
+/* The bar is sticky, full stop (2026-08-06). A "Sticky bar" switch in the
+   settings menu could unpin it — :root[data-nav-static] made #site-nav
+   `relative` and two landing calculations in Nav.astro dropped the bar's
+   height from their offsets — and it went out with the menu. It was a
+   design decision shipped as a question: sticky is the call, so the site
+   makes it. If it ever comes back, note the one trap the old rule carried a
+   paragraph about — RELATIVE, not static: the bar's bottom hairline is
+   absolutely positioned against #site-nav, and `sticky` was the positioned
+   ancestor it resolved to, so `static` sent the rule to the middle of the
+   page. */
 
 /* ── The two hairlines ──
    Drawn as pseudo-elements rather than borders because a border can only be one
@@ -1289,16 +1288,13 @@ body {
 .theme-switching *::after {
 	transition: none !important;
 }
-/* The one carve-out (08-05): the settings menu's theme switch. Its thumb is
-   the control the visitor just pressed — the one element whose motion IS the
-   feedback — and freezing it makes the click feel dead while the page swaps.
-   Higher specificity than the blanket rule above, so this !important wins.
-   (The old toggle solved the same problem by playing its sweep as KEYFRAMES,
-   which the freeze can't touch; a transition plus a carve-out is the simpler
-   tool now that the control is a thumb with one resting rule per state.) */
-.theme-switching .settings-row .switch-thumb {
-	transition: transform var(--dur-gesture) var(--nav-ease) !important;
-}
+/* The toggle's own sweep needs no carve-out here, and that is by design: it
+   is played as KEYFRAMES (see the theme-swap block), which this blanket
+   `transition: none` cannot touch. The control the visitor just pressed is
+   the one element whose motion IS the feedback, so it has to survive the
+   freeze — the settings menu's switch thumb, which briefly stood here
+   (08-05), needed an explicit !important carve-out for exactly this reason
+   because it moved on a transition. Keyframes are the cheaper answer. */
 
 /* ── Nav geometry ──
    The bar has ONE state. Both its type and its buttons are authored at full
@@ -2466,186 +2462,34 @@ body {
 	height: 100%;
 }
 
-/* ── The settings menu ──
-   2026-08-05 (Hiro): the theme toggle became a settings button and the
-   controls moved down into this dropdown — the light/dark switch plus the
-   sticky-bar switch that arrived with it. (The contrast-glyph toggle it
-   replaced — a pair of ink rects sliding one pattern-period apart inside a
-   circular clip, sweep always rightward — lives in git history with its
-   theme-swap keyframes; start from that if a bare toggle ever returns.)
+/* Theme toggle: the classic contrast glyph — a circle half ink, half paper,
+   drawn with the icons' 2px square-cap stroke at their exact size, so the
+   button needs no box or track to hold its own in the row. The filled side
+   marks the current theme: right in light, left in dark. The fill is a PAIR
+   of ink rects one pattern-period (18 units) apart sliding inside a static
+   circular clipPath (see Nav.astro) — sliding them sweeps the ink across the
+   circle, a slide rather than a spin, in step with the site's other motion
+   (contact pill wipe, travelling panel). Two rects rather than one so the
+   sweep can always travel RIGHTWARD (see the theme-swap block): the pattern
+   is periodic, so any two transforms 18 apart paint the same pixels.
+   Resting position is pure state — no transition here: the sweep on click is
+   played by keyframes, and everything else (initial paint, reduced motion)
+   should just snap. At translateX(0) the lead rect spans the circle's right
+   half (x 12–21 of its 3–21 diameter) with the twin off-circle at -6–3;
+   -9px lands the twin on the left half exactly (lead rect off-circle).
 
-   Card material (--surface, --line, bg-clip-padding, --radius), wearing the
-   project cards' hover shadow AT REST: a floating layer is the one place
-   where lift is a state rather than feedback. Entrance replays on every
-   un-hide (the [hidden] attribute is the closed state, so display flips
-   restart the animation). The exit SPLITS by gesture (08-05, Hiro): closing
-   from the gear plays the pill's own shrink (.is-closing below, riding
-   pill-pop-out verbatim — same keyframes, same tokens — so the menu leaves
-   exactly the way the hover labels leave), while the outside click and
-   Escape keep the site's hard cut: a deliberate dismissal gets the
-   acknowledgement, an incidental one just goes. z-index 60 for the reason
-   the pill carries it: #site-nav::after — the bar's hairline — paints after
-   every child and would otherwise rule across the menu's head.
-
-   THE SWITCH is the squared idiom at control size: a 2px currentColor track
-   riding the row's rest/hover ink (quiet until the row is live, like the
-   icons), a filled square thumb inside it — left off, right on, keyed off
-   the row's aria-checked. The thumb TRAVELS, but on --dur-gesture/--nav-ease
-   rather than the slide pair — cut when the slide still overshot (3% across
-   14px was under half a pixel: mass with nothing to show it), and standing
-   now that the pair is flat too (08-05), since a 14px hop is as little a
-   journey for the 0.34 held launch as it was for the rebound. */
-.settings-menu {
-	position: absolute;
-	top: calc(100% + 0.5rem);
-	/* THE SWITCH COLUMN CENTRES ON THE GEAR (08-05, Hiro), not the menu's
-	   edge on the wrap's. Two measured offsets, set equal by this calc:
-	     glyph centre ← wrap right edge:  2.9rem × --nav-icon-scale / 2
-	       (the button contracts about the container's right edge — see the
-	       close-ranks block — so its drawn centre sits half a SCALED box in)
-	     switch centre ← menu right edge: 1px border + 0.15rem menu padding
-	       + 0.5rem row padding + 14px (half the 28px track) = 0.65rem + 15px
-	   Every term is MIRRORED from the rules around this one or close-ranks,
-	   not linked — the 08-05 padding tighten (0.3rem → 0.2rem) drifted the
-	   centring 1.9px until this calc was updated to match, so treat any
-	   padding/track/scale retune as a two-place edit: the rule and this sum
-	   (and the transform-origin below, which is the same point). Net ≈ −13px:
-	   the card pokes past the column edge into the page margin, which px-5
-	   (23.75px at the 19px root) still covers. */
-	right: calc(1.45rem * var(--nav-icon-scale) - (0.65rem + 15px));
-	z-index: 60;
-	/* Width is the text–switch gap dial: the rows are space-between, so all
-	   slack between a label and its switch comes from here (08-05, Hiro:
-	   tighter — was 12.5rem / 0.3rem). The row's 0.6rem side padding is NOT
-	   a free dial; the gear-centring calc above owns it. */
-	min-width: 8rem;
-	padding: 0.15rem;
-	background: var(--surface);
-	background-clip: padding-box;
-	border: 1px solid var(--line);
-	border-radius: var(--radius);
-	box-shadow:
-		0 1px 1px rgba(0, 0, 0, 0.03),
-		0 10px 30px -16px rgba(0, 0, 0, 0.15);
-	/* The pop's anchor rides the same point the calc above aligns: the
-	   switch column / gear centre, not the card's corner — so the entrance
-	   grows and the shrink leaves from under the button it belongs to. */
-	transform-origin: calc(100% - 0.65rem - 15px) 0;
-	animation: settings-pop var(--dur-pop-in) var(--ease-pop);
-}
-@keyframes settings-pop {
-	from {
-		opacity: 0;
-		transform: scale(0.97);
-	}
-}
-/* The gear-click close: the pill's exit, borrowed whole — pill-pop-out is
-   the hover labels' leaving gesture and the menu is their neighbour, so the
-   two shrink identically (scale 0.9 + fade, --dur-pop-out on --nav-ease).
-   The transform-origin above keeps the shrink anchored to the button rather
-   than the menu's centre. Nav.astro adds the class, hides on animationend,
-   and never adds it under reduced motion — closed is [hidden] either way. */
-.settings-menu.is-closing {
-	animation: pill-pop-out var(--dur-pop-out) var(--nav-ease) both;
-	pointer-events: none;
-}
-
-/* ── The gear's click spin ──
-   A FLYWHEEL, not a notch (08-05, second pass — one 60° tooth-step on the
-   slide pair read as a click; Hiro: it should spin faster and further, then
-   slow to a stop). Five tooth pitches (300°) on a hard deceleration: the
-   0.16/1 launch leaves at ~6× linear speed — a genuine whirr — and the
-   curve spends its whole back half easing the last few degrees home, which
-   is where the momentum reads. NO overshoot, deliberately: a flywheel
-   decays, it doesn't spring back, so this is not --ease-slide — a
-   distinction drawn against that token's old 3% rebound (out 08-05); what
-   separates them now is the launch, 0.16's ~6×-linear whirr against 0.34's
-   held-back settle. The bezier is the long-
-   settle curve from the 08-03 travel exploration — rejected there for the
-   label slider, right here, because a spin has no destination to be late
-   to. One-off ceremonial timing, so the pair stays local per the motion
-   scale's own rule.
-   The rotation lives on the inner .gear-g — the svg's own transform belongs
-   to the press scale, and every toggle is also a press, so the two gestures
-   MUST own separate channels (the same split the old toggle kept between
-   its press and its fill sweep). The end frame equals rest because 300° is
-   a multiple of the cog's six-fold symmetry (and the hub is a circle), so
-   when the animation ends and the transform falls away, nothing moves.
-   transform-box: view-box centres the rotation on the 24-box's 12,12
-   regardless of the painted extents. */
-.settings-toggle .gear-g {
-	transform-box: view-box;
-	transform-origin: center;
-}
-.settings-toggle.gear-spin .gear-g {
-	animation: gear-spin 640ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-@keyframes gear-spin {
-	from {
-		transform: rotate(0deg);
-	}
-	to {
-		transform: rotate(300deg);
-	}
-}
-.settings-row {
-	display: flex;
-	width: 100%;
-	align-items: center;
-	justify-content: space-between;
-	/* The floor under the text–switch gap when the card is at natural width;
-	   the card's min-width sets the real distance (see above). */
-	gap: 0.8rem;
-	padding: 0.4rem 0.5rem;
-	border-radius: var(--radius);
-	/* One step ABOVE the hover pill's 0.7rem, deliberately (08-05, settled
-	   after trying the pill's size for a beat): the pill is a transient
-	   whisper naming a button, these rows are CONTROLS — read, aimed at,
-	   clicked — and setting a control at the whisper's size makes it read as
-	   incidental. 0.75 also keeps the row a ~30px target. The site's small
-	   type now steps 0.7 whisper / 0.75 control / 0.8 body-adjacent. */
-	font-size: 0.75rem;
-	font-weight: var(--weight-ui);
-	line-height: 1;
-	color: var(--ink-soft);
-	cursor: pointer;
-	transition: color var(--dur-tap) ease;
-}
-.settings-row:hover,
-.settings-row:focus-visible {
-	color: var(--ink);
-}
-.settings-row:focus-visible {
-	outline: 2px solid var(--focus-ring);
-	outline-offset: -2px;
-}
-.switch {
-	position: relative;
-	flex: none;
-	width: 28px;
-	height: 14px;
-	border: 2px solid currentColor;
-	border-radius: var(--radius);
-}
-.switch-thumb {
-	position: absolute;
-	top: 1px;
-	left: 1px;
-	width: 8px;
-	height: 8px;
-	background: currentColor;
-	transition: transform var(--dur-gesture) var(--nav-ease);
-}
-.settings-row[aria-checked='true'] .switch-thumb {
-	transform: translateX(14px);
-}
-@media (prefers-reduced-motion: reduce) {
-	.settings-menu {
-		animation: none;
-	}
-	.switch-thumb {
-		transition: none;
-	}
+   RESTORED 2026-08-06, one day out. It spent 05→06 as a gear opening a
+   dropdown of two switches (dark mode + a sticky-bar preference), and what
+   sank that was the theme: this glyph ANNOUNCES the affordance, a gear
+   announces nothing, and Layout.astro deliberately ignores
+   prefers-color-scheme — so every light-mode visitor lands on dark and has
+   to find the way out. Two clicks behind a generic icon is not a way out.
+   The menu's own furniture (card, switch rows, 300° flywheel spin, the
+   gear-click close riding pill-pop-out) is in git history at faf42e8 if a
+   settings surface is ever wanted again — but it wants a third setting
+   first, not two. */
+.theme-fill-rect {
+	transform: translateX(var(--theme-fill-x, 0px));
 }
 
 /* ── Shared sliding label ──
@@ -2922,9 +2766,9 @@ body {
    pseudo-element, comes after every child in paint order and won.
    Raising the group is the fix rather than raising the pill again: the whole
    cluster is what has to clear the rule, and it is the outermost box that
-   actually competes with it. The settings button's twin pill never had this
-   problem — #settings-wrap is position: relative with no transform, so it
-   is not a stacking context and its pill's own 60 has always applied. */
+   actually competes with it. The toggle's twin pill never had this problem —
+   #theme-toggle-wrap is position: relative with no transform, so it is not a
+   stacking context and its pill's own 60 has always applied. */
 #contact-group {
 	gap: var(--nav-icon-gap);
 	z-index: 60;
@@ -2954,7 +2798,7 @@ body {
 		)
 		scale(var(--nav-icon-scale)); /* glyph: ~1.33rem */
 }
-#site-nav #settings-wrap .btn-icon {
+#site-nav #theme-toggle-wrap .btn-icon {
 	transform: translateX(calc(2.9rem / 2 * (1 - var(--nav-icon-scale))))
 		scale(var(--nav-icon-scale));
 }
@@ -2968,14 +2812,21 @@ body {
    then the icons stroke-draw their outlines (each shape's measured length
    rides in --len, so one dash animation draws every one of them edge-to-edge
    over the same duration; see the dash-hold comment below for why true units,
-   not pathLength), and finally the settings button draws its gear — the cog
-   outline and its hub stroking in together, the intro's last glyph. (Until 08-05
-   this finale was the theme toggle's circle plus an ink sweep running to
-   1200ms; the sweep retired with the glyph.) A beat after the content
-   cascade settles (1600ms) the bar's bottom hairline grows in from its
-   centre — the hairlines' entrance block below the reveal rules — taking
-   the intro's choreography to ~2800ms; Nav.astro's cleanup timer sits just
-   past that.
+   not pathLength), and finally the theme toggle draws its circle and sweeps
+   its ink into the resting half — the same rightward sweep a click plays, one
+   pattern-period (18 units) of travel ending exactly on --theme-fill-x. (For
+   a day, 08-05 → 08-06, this finale was a settings gear stroking in without
+   a sweep; the sweep came back with the glyph.) As the content cascade lands
+   (1150ms) the bar's bottom hairline grows in from its centre — the
+   hairlines' entrance block below the reveal rules — taking the intro's
+   choreography to ~2350ms; Nav.astro's cleanup timer sits just past that.
+
+   The sweep's tail (1000→1200ms) now OVERLAPS the hairline's start by 50ms,
+   where the gear's silent finale ended clear of it at ~1020. That is the
+   intro's own rule, not a miss — tails overlap here rather than queue — and
+   the hairline still finishes last, which is what makes it the close. The
+   1150 was derived from where the grid lands, so it is the sweep that yields
+   if these ever fight: move its 1000ms delay, not the bar's.
 
    This is the flourish the EXPANDED masthead used to get; the compact bar had
    a shorter variant where the buttons wiped in like the type rather than
@@ -3025,40 +2876,54 @@ html.nav-intro-draw #site-nav .nav-logo {
    silently collapses the keyframes' from-offset to 0 and kills the whole
    draw. px lengths ARE user units for SVG, so the numbers are identical. */
 html.nav-intro-draw:not(.nav-intro-go) #contact-group .btn-icon svg :is(path, rect),
-html.nav-intro-draw:not(.nav-intro-go) .settings-toggle svg :is(path, circle) {
+html.nav-intro-draw:not(.nav-intro-go) .theme-toggle svg > circle {
 	stroke-dasharray: calc(var(--len) * 1px) calc(var(--len) * 2px);
 	stroke-dashoffset: calc((var(--len) + 1) * 1px);
 }
-/* Closed shapes (the rects, Twitter's silhouette) draw with BUTT caps for
-   the intro's duration: while dashed, the seam start wears a cap, and a
-   square cap overhangs the path end by a full unit — most visibly as an
-   extended beak on Twitter that "clips off" when the drawn seam wraps shut.
-   Butt keeps the seam flush all along, so the weld changes nothing. Open
-   shapes keep their square caps (their dashed and undashed ends are capped
-   alike, so they never had the problem) — and once a closed path is undashed
-   it has no caps at all, so this rule holding until cleanup is inert. The
-   settings gear needs no entry here: its circles carry butt caps inline in
-   the markup and its teeth are butt-capped by the same attribute. */
+/* Closed shapes (the rects, Twitter's silhouette, the toggle circle) draw
+   with BUTT caps for the intro's duration: while dashed, the seam start
+   wears a cap, and a square cap overhangs the path end by a full unit —
+   most visibly as an extended beak on Twitter that "clips off" when the
+   drawn seam wraps shut. Butt keeps the seam flush all along, so the weld
+   changes nothing. Open shapes keep their square caps (their dashed and
+   undashed ends are capped alike, so they never had the problem) — and once
+   a closed path is undashed it has no caps at all, so this rule holding
+   until cleanup is inert. */
 html.nav-intro-draw .icon-email rect,
 html.nav-intro-draw .icon-linkedin rect,
-html.nav-intro-draw .icon-twitter path {
+html.nav-intro-draw .icon-twitter path,
+html.nav-intro-draw .theme-toggle svg > circle {
 	stroke-linecap: butt;
+}
+html.nav-intro-draw .theme-fill-rect {
+	/* A pattern-period-and-change left of rest: both rects sit fully off-circle
+	   behind the clip, so the fill is simply absent until the sweep carries it
+	   in. 20, not the period's exact 18: at -18 (light theme) the lead rect's
+	   right edge lands exactly ON the clip's left tangent (x = 3), and Chrome's
+	   clip rasterization leaks the edge's antialiasing as a faint full-height
+	   bar at the clip bounds — the extra 2 units keep the edge clear of it.
+	   (Rest's tangent-touching twin never shows the leak: the circle's own
+	   stroke paints over that column.) */
+	transform: translateX(calc(var(--theme-fill-x) - 20px));
 }
 
 html.nav-intro-draw.nav-intro-go #site-nav .nav-logo {
 	animation: nav-load-wipe var(--dur-nav) var(--nav-ease) both;
 }
 /* The contacts stroke-draw in markup order, left→right off each button's
-   --nav-icon-i (0…3, set in Nav.astro); the settings gear draws last, its
-   two closed shapes together. `backwards`, NOT `both`: the delay still holds the
-   first (hidden) frame, but the dash must die with the animation so each icon
-   snaps to clean undashed rendering at its own finish (see the hold above). */
+   --nav-icon-i (0…3, set in Nav.astro); the toggle circle draws last, then
+   the ink pours in. `backwards`, NOT `both`: the delay still holds the first
+   (hidden) frame, but the dash must die with the animation so each icon snaps
+   to clean undashed rendering at its own finish (see the hold above). */
 html.nav-intro-draw.nav-intro-go #contact-group .btn-icon svg :is(path, rect) {
 	animation: nav-load-stroke var(--dur-draw) var(--nav-ease)
 		calc(240ms + var(--nav-icon-i, 0) * 90ms) backwards;
 }
-html.nav-intro-draw.nav-intro-go .settings-toggle svg :is(path, circle) {
+html.nav-intro-draw.nav-intro-go .theme-toggle svg > circle {
 	animation: nav-load-stroke var(--dur-draw) var(--nav-ease) 600ms backwards;
+}
+html.nav-intro-draw.nav-intro-go .theme-fill-rect {
+	animation: nav-load-sweep var(--dur-gesture) var(--nav-ease) 1000ms both;
 }
 
 @keyframes nav-load-wipe {
@@ -3083,6 +2948,18 @@ html.nav-intro-draw.nav-intro-go .settings-toggle svg :is(path, circle) {
 		stroke-dashoffset: 0px;
 	}
 }
+@keyframes nav-load-sweep {
+	/* from == the pre-go hold above (-20px, see the leak note there), so the
+	   'go' handoff stays invisible; 'to' is rest, so the cleanup handoff is
+	   too. The two extra units of travel are imperceptible at this duration. */
+	from {
+		transform: translateX(calc(var(--theme-fill-x) - 20px));
+	}
+	to {
+		transform: translateX(var(--theme-fill-x));
+	}
+}
+
 /* ── Content reveal: the page's entrance under the bar ──
    Left-to-right entrance in the site's horizontal motion language: each
    .reveal element fades and slides in from the left in --i order (× 150ms),
@@ -3091,6 +2968,16 @@ html.nav-intro-draw.nav-intro-go .settings-toggle svg :is(path, circle) {
    frame blank (and survives Vite's dev HMR style swap, which briefly drops
    the rules here and would flash the resting state).
 
+   The index cascade is TWO entries (2026-08-06, Hiro): the hero as one block
+   (--i 0) and the projects grid as one block (--i 1). It was per-element —
+   hero sentence, hero button, then every card at --i index + 2 — until the
+   card stagger was flagged against migaki's fade-up carve-out ("one entrance
+   on the hero, everything else static") and collapsed. Elements inside a
+   block enter WITH it, the same rule the hairline finale states for the
+   about card's dividers. The stagger machinery (--i, --base) stays: the
+   about and project pages still count a few blocks, and two entries is
+   still a cascade.
+
    The cascade starts only after whatever entrance the bar itself is playing,
    via --hold and the persistent reveal-* classes Nav.astro's inline script
    sets pre-paint:
@@ -3098,8 +2985,8 @@ html.nav-intro-draw.nav-intro-go .settings-toggle svg :is(path, circle) {
    reveal-hold-draw   the load intro is coming, and it OVERLAPS rather than
                       finishing first: the draw's choreography runs long
                       (icon draws to ~1020ms), so the content enters when
-                      the settings button, the intro's LAST glyph, starts
-                      drawing its gear (its 600ms delay above) — the type
+                      the theme toggle, the intro's LAST glyph, starts
+                      drawing its circle (its 600ms delay above) — the type
                       is long landed, the contact draws are mid-flight, and
                       the final draw finishes over the arriving cards.
                       Waiting the intro out instead reads as a stall.
@@ -3168,21 +3055,29 @@ html.reveal-skip .reveal {
 
    The bar's line is part of the BAR's entrance, so it rides the load intro's
    classes and an internal navigation — where the bar is already seated —
-   never replays it. Held at scaleX(0) pre-go, then growing at 1600ms — a
-   BEAT AFTER the cascade's entries have visually landed (the last card
-   starts ~1050ms and its curve front-loads, so ~1500ms is where the page
-   reads as assembled), not overlapping their tails. That pause is the point
-   (Hiro, 2026-08-06: "slower and a little after everything loads in" — the
-   first cut started the lines at the gear-draw handoff, 1020ms, mid-tail,
-   and read as part of the pile-in rather than a close). Keep this delay and
-   Nav.astro's cleanup timer in step.
+   never replays it. Held at scaleX(0) pre-go, then growing at 1150ms — the
+   frame the grid (--i 1, starts 750ms on a hard load, curve front-loads)
+   finishes landing. NO dead beat: the delay walked down through three cuts
+   on 2026-08-06 (1600 — the ~100ms beat it was tuned for against the old
+   per-card cascade turned into a ~450ms stall when the cascade collapsed
+   to two blocks; 1300 — the original beat restored, still "a tad long",
+   Hiro; 1150 — lands-with-the-landing). What survives of "slower and a
+   little after everything loads in" is only the FLOOR: never start the
+   lines before the toggle's circle draw ends (~1020ms) — the first cut at that
+   handoff read as part of the pile-in rather than a close. Derivation if
+   the cascade's shape changes again: start AT the last landing, floor at
+   the intro's last glyph. Keep this delay and Nav.astro's cleanup timer
+   in step.
 
    The projects rule is CONTENT — it plays on internal navigations exactly as
    the cascade does — so its delay rides --hold like every .reveal element:
-   --hold + 1240ms lands it 240ms after the bar's line on a hard load (the
-   intro's own first-icon beat) and a beat after the shorter no-intro cascade
-   settles. It pauses under reveal-wait with the rest of the choreography and
-   sits at rest on reveal-skip landings, same as .reveal.
+   --hold + 790ms lands it 240ms after the bar's line on a hard load (the
+   intro's own first-icon beat) and ~240ms after the two-block no-intro
+   cascade settles (~550ms) on an internal navigation — the same beat by
+   coincidence, a nice one. It moved 1240 → 940 → 790 with the bar; the
+   pair keep their 240ms stagger wherever they go. It pauses under
+   reveal-wait with the rest of the choreography and sits at rest on
+   reveal-skip landings, same as .reveal.
 
    THE FINALE IS PAGE-LEVEL ONLY. The about card's .card-rule dividers joined
    it for a few hours on 2026-08-06 and were pulled back out the same day
@@ -3204,11 +3099,11 @@ html.nav-intro-draw:not(.nav-intro-go) #site-nav::after {
 	transform: scaleX(0);
 }
 html.nav-intro-draw.nav-intro-go #site-nav::after {
-	animation: rule-grow 1.2s cubic-bezier(0.22, 0.68, 0, 1) 1600ms backwards;
+	animation: rule-grow 1.2s cubic-bezier(0.22, 0.68, 0, 1) 1150ms backwards;
 }
 #projects::before {
 	animation: rule-grow 1.2s cubic-bezier(0.22, 0.68, 0, 1)
-		calc(var(--hold, 0ms) + 1240ms) backwards;
+		calc(var(--hold, 0ms) + 790ms) backwards;
 }
 html.reveal-wait #projects::before {
 	animation-play-state: paused;
@@ -3297,10 +3192,12 @@ html.reveal-skip #projects::before {
 		transform: translateY(-1px) scale(0.9);
 	}
 
-	/* The settings button presses too — same scale-in as the contacts, minus
-	   the lift it never had. Snap-in speed and the release come from the
-	   shared #site-nav .btn-icon > svg transition rules. */
-	.settings-toggle:active > svg {
+	/* The theme toggle presses too — same scale-in as the contacts, minus the
+	   lift it never had. The scale rides the svg's `transform`, a separate
+	   channel from the fill's sweep (keyframes on the inner rect), so pressing
+	   mid-swap can't disturb the slide. Snap-in speed and the release come from
+	   the shared #site-nav .btn-icon > svg transition rules. */
+	.theme-toggle:active > svg {
 		transform: scale(0.9);
 	}
 
@@ -3313,10 +3210,96 @@ html.reveal-skip #projects::before {
 		transition-duration: var(--dur-press);
 	}
 
-	/* The theme-swap ink sweep lived here until 08-05 — a keyframe pair
-	   (theme-fill-to-dark / -to-light) sliding the toggle's fill rects one
-	   pattern-period rightward on every flip, keyframes rather than a
-	   transition precisely so it survived .theme-switching's freeze. It
-	   retired with the glyph when the toggle became the settings menu; the
-	   switch thumb's carve-out beside .theme-switching is that idea's heir. */
+	/* ── Theme swap ──
+	   The fill's resting position is pure state (the data-theme rule on
+	   .theme-fill-rect above); the sweep on click is played by keyframes, not
+	   a transition, so it survives the blanket `transition: none` the flip
+	   applies for its one frame (see .theme-switching). `.theme-anim` is
+	   toggled per-click in Nav.astro; the pair below picks the sweep for the
+	   theme just applied. BOTH sweeps travel rightward — the ink never
+	   reverses: to-light slides the left-half fill right through the middle,
+	   and to-dark wraps — the right-half ink exits through the circle's right
+	   edge while the twin rect pours in from the left. to-dark therefore ends
+	   at +9px, not the -9px resting value: the two-rect pattern repeats every
+	   18 units, so the frames are pixel-identical and the handoff to the
+	   resting rule doesn't snap. Under reduced motion Nav.astro never adds
+	   the class and the fill just snaps across. */
+	:root[data-theme='dark'] .theme-toggle.theme-anim .theme-fill-rect {
+		animation: theme-fill-to-dark var(--dur-gesture) var(--nav-ease);
+	}
+	:root:not([data-theme='dark']) .theme-toggle.theme-anim .theme-fill-rect {
+		animation: theme-fill-to-light var(--dur-gesture) var(--nav-ease);
+	}
+}
+
+@keyframes theme-fill-to-dark {
+	from {
+		transform: translateX(0);
+	}
+	to {
+		/* +9, not -9: rightward wrap; pattern-identical to the -9px rest. */
+		transform: translateX(9px);
+	}
+}
+@keyframes theme-fill-to-light {
+	from {
+		transform: translateX(-9px);
+	}
+	to {
+		transform: translateX(0);
+	}
+}
+
+/* ── The label's roll, on the ink's clock ──
+   2026-08-06, Hiro: "there is some phasing between the two". The glyph's ink
+   crossing its circle and the word naming the theme it crossed TO are one
+   event, and they were running on two. Measured on the old build: the ink
+   changed identity at ~40ms and finished at 216; the label swapped at 100ms
+   and settled at 250, with a ~33ms hole in between where the pill was empty.
+
+   None of that was tuning — it was structure. The ink is a keyframe
+   animation; the label was an rAF-deferred JS transition, an 80ms timer, a
+   reflow and a second transition, each costing a frame, ending on a 1.35
+   back-out spring the ink never had. So the label is keyframes now too:
+   one --dur-gesture on --nav-ease, started in the same frame as the sweep
+   (keyframes ride through .theme-switching's freeze, which is the whole
+   reason the sweep was written this way — see the theme-swap block above).
+
+   THE TWO PERCENTAGES ARE CUT AGAINST THE INK, not chosen for the word.
+   --nav-ease is cubic-bezier(0, 0, 0.2, 1), which reaches half its travel at
+   t = 0.2 — so the ink crosses the circle's centre 40ms in, and that is the
+   instant the label has to be mid-swap. 15%/30% puts a 30ms window of
+   opacity 0 (30→60ms) around it: the word is absent for exactly the frames
+   the ink is committing, and the swap timer in Nav.astro fires into the
+   middle of that window with a frame of slack either side. Retiming
+   --dur-gesture keeps all of this true; changing --nav-ease does NOT — the
+   0.2 crossing is a property of that curve, so re-derive both numbers if it
+   ever moves.
+
+   The transform slides +60% → -60% between those two stops, i.e. while
+   invisible, so the word never reads as travelling through the middle — it
+   leaves right and returns from the left, the site's horizontal grammar,
+   with the U-turn hidden. */
+@keyframes theme-label-roll {
+	0% {
+		transform: translateX(0);
+		opacity: 1;
+	}
+	15% {
+		transform: translateX(60%);
+		opacity: 0;
+	}
+	30% {
+		transform: translateX(-60%);
+		opacity: 0;
+	}
+	100% {
+		transform: translateX(0);
+		opacity: 1;
+	}
+}
+/* Scoped to the toggle's own pill: .contact-slider is shared with the
+   contacts' slider, which has no click gesture of its own. */
+#theme-toggle-wrap .contact-slider.is-rolling .contact-slider-text {
+	animation: theme-label-roll var(--dur-gesture) var(--nav-ease);
 }

@@ -39,7 +39,14 @@ import { projects } from '../data/projects';
 		    grid, while the space above only has to clear the nav bar, which is
 		    already a ruled edge. Keep stepping BOTH values together if it goes
 		    up again — the gap is the point, not the individual numbers. */}
-		<section class="pt-28 pb-32 text-center sm:pt-32 sm:pb-36">
+		{/* The hero reveals as ONE block (2026-08-06, Hiro) — the sentence and its
+		    button enter together, --i 0 of a two-beat cascade (the projects grid is
+		    --i 1). They were two entries (--i 0 and 1, with the cards at +2) until
+		    the per-element stagger was flagged against the migaki carve-out —
+		    "one entrance on the hero, everything else static" — and collapsed:
+		    elements inside a block enter WITH it, same rule the hairline finale
+		    already enforces for the card dividers. */}
+		<section class="reveal pt-28 pb-32 text-center sm:pt-32 sm:pb-36" style="--i: 0">
 			{/* Still capped at --measure so a wide viewport can't run the line out
 			    past a readable length; mx-auto centres the box the cap creates. */}
 			{/* --ink-hero, a step PAST the body ink away from the paper (2026-08-03,
@@ -66,7 +73,7 @@ import { projects } from '../data/projects';
 			    would pass at 300 and keep the lighter drawing. Dark was never the
 			    problem (Lc 93.5, wants 20px at w300); this is a light-theme-only
 			    margin, and it moves with --ink-hero. */}
-			<p class="reveal mx-auto max-w-[var(--measure)] text-lg leading-relaxed text-[var(--ink-hero)]" style="--i: 0">
+			<p class="mx-auto max-w-[var(--measure)] text-lg leading-relaxed text-[var(--ink-hero)]">
 				Design engineering, with good sense and taste.
 			</p>
 			{/* The page's only route to /about, so it's the site's one real button.
@@ -81,7 +88,7 @@ import { projects } from '../data/projects';
 			    performs an action, and that's information you want before you
 			    hover, not after. .btn's flex + gap owns the spacing, so the glyph
 			    needs no margin of its own. */}
-			<p class="reveal mt-6" style="--i: 1">
+			<p class="mt-6">
 				<a href="/about" class="btn">
 					About Hiro Eernisse
 					<svg
@@ -124,19 +131,28 @@ import { projects } from '../data/projects';
 			    gap only has to separate two cards side by side, while the row gap
 			    also has to out-space the gap INSIDE a card (title → image), or a
 			    card's image reads as belonging to the title below it. */}
-			<div id="project-list" class="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2">
+			{/* The grid reveals as ONE block, --i 1 behind the hero (2026-08-06,
+			    Hiro) — the per-card stagger (each card in its own .reveal wrapper,
+			    --i index + 2) came out with the hero's collapse to a single entry.
+			    The reveal sits on #project-list rather than #projects so the
+			    section's rule (#projects::before) stays OUTSIDE the reveal: it is
+			    page-level structure and enters in the hairline finale, not with
+			    the content — see the finale block in global.css.
+
+			    The cards are direct grid children now. Their p-3/-m-3 pair behaves
+			    identically as a grid item (the negative margin grows the card past
+			    its track by the same 0.75rem the wrapper let it overflow), and the
+			    panel script's offset walk simply has one less hop — it accumulates
+			    the offsetParent chain, so it never cared how many wrappers sat in
+			    between (see the note on offsetIn below). */}
+			<div id="project-list" class="reveal grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2" style="--i: 1">
 				{/* The hover panel — one for the whole grid, sliding to whichever card
 				    is hovered or focused. MUST STAY FIRST: it's kept under the cards by
 				    DOM order as well as z-index (see .card-panel in global.css).
 				    Absolutely positioned, so it claims no grid track. */}
 				<div class="card-panel" aria-hidden="true"></div>
-				{/* +2: the hero's two lines hold --i 0 and 1, so the whole page reveals
-				    as one top-down cascade instead of the first cards arriving
-				    alongside the hero. */}
-				{projects.map((project, index) => (
-					<div class="reveal" style={`--i: ${index + 2}`}>
-						<ProjectCard project={project} />
-					</div>
+				{projects.map((project) => (
+					<ProjectCard project={project} />
 				))}
 			</div>
 		</section>
@@ -167,15 +183,15 @@ import { projects } from '../data/projects';
     that measures its target's transform will always be one gesture behind.
 
     But they must be ACCUMULATED up the offsetParent chain, not read once — see
-    offsetIn below. A card's offsetParent is not #project-list: it's the .reveal
-    wrapper in between, because .reveal runs a transform animation with
-    fill-mode `both`, and an element with a filling transform animation is a
-    containing block for as long as the fill lasts, which is forever. Read
-    directly, every card reports the same offsetLeft/Top (-14, -14 — its own
-    negative margin inside its wrapper) and the panel never leaves the first
-    card. Accumulating also survives the opposite case: under html.reveal-skip
-    the animation is off, .reveal stops being a containing block, and the walk
-    simply has one less hop. */}
+    offsetIn below. Since the grid became the reveal element (2026-08-06) the
+    chain is a single hop — a card's offsetParent is #project-list itself — so
+    the walk is momentarily equivalent to reading offsetLeft/Top directly. Keep
+    the walk anyway: it's what made the per-card .reveal wrappers harmless
+    (each ran a filling transform animation, and an element with a filling
+    transform animation is a containing block FOREVER, so every card reported
+    its own -12,-12 negative margin instead of a grid position — the panel
+    never left the first card until the chain was accumulated), and it keeps
+    any future wrapper from silently reintroducing that bug. */}
 <script>
 	const list = document.getElementById('project-list');
 	const panel = list?.querySelector<HTMLElement>('.card-panel');
