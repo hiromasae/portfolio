@@ -25,10 +25,33 @@ const { project } = Astro.props;
 
 		{/* Dateline is the year alone — the company already reads off the prose
 		    below, and tags/Visit were dropped from this page (both still live in
-		    projects.ts). */}
+		    projects.ts).
+
+		    ── 2026-08-10: THIS PAGE TAKES THE ABOUT PAGE'S SCALE AND PALETTE ──
+		    Hiro's ask, and it applies to the whole page, so read this note before
+		    changing any size or colour below. The project page had been running
+		    its own type scale (title 35.625/42.75px, lead 23.75, body 21.375) and
+		    its own two accents (--ink-title on the h1, --ink-num on the year).
+		    The about page runs THREE values and no accents: headings at
+		    --ink-heading, prose at 16.625px in plain --ink, ancillary text at
+		    --ink-soft. That set is now this page's set too.
+
+		    --ink-soft on the year, not --ink-num. The about page has no numerals,
+		    so there was no counterpart to match — what it does have is small
+		    ancillary text (the photo caption, the footer) and that runs
+		    --ink-soft. The year rode ON the muted line already and the orange was
+		    there to lift it out of it, which is the thing that goes.
+		    ⚠ This was --ink-num's LAST use on the site; the card datelines dropped
+		    it on 08-02 (see ProjectCard.astro). The token is still defined in
+		    global.css and nothing consumes it. Left there rather than deleted —
+		    that is a palette decision, not a page one.
+
+		    NO sm:text-4xl. The h1 sat one step larger from sm up; the about page's
+		    greeting is text-3xl at every width and this now matches it, so the
+		    title is 35.625px on a phone and on a desktop alike. */}
 		<header class="reveal" style="--i: 0">
-			<p class="text-sm tabular-nums text-[var(--ink-num)]">{project.year}</p>
-			<h1 class="mt-2 text-3xl [font-weight:var(--weight-emph)] tracking-tight text-[var(--ink-title)] sm:text-4xl">{project.title}</h1>
+			<p class="text-sm tabular-nums text-[var(--ink-soft)]">{project.year}</p>
+			<h1 class="mt-2 text-3xl [font-weight:var(--weight-emph)] tracking-tight text-[var(--ink-heading)]">{project.title}</h1>
 		</header>
 
 		{/* Reading matter is capped at --measure (see global.css) — ~11 words a
@@ -37,29 +60,56 @@ const { project } = Astro.props;
 
 		    No "Background" / "Work" headings: two paragraphs in one screen give
 		    a reader nothing to skip to, and the labels were the same small-bold
-		    kicker shape the home page dropped. The register change they marked
-		    — context, then what I did — now rides the type instead. The problem
-		    paragraph is set as a lead (a step up in size, --ink-soft), so the
-		    work paragraph reads as the body it steps down into. */}
-		<section class="reveal mt-8 max-w-[var(--measure)]" style="--i: 1">
-			{/* Both paragraphs carry the UI weight tier (w400 dark / w500 light
-			    since the 08-05 token pass; was font-normal) rather than inheriting
-			    the body's tier — the only weight bumps the 2026-08-04 legibility
-			    audit actually required. This is the site's longest-form reading, and at
-			    w300 both fell under the APCA floor: the lead needs ≥32px at w300
-			    for its Lc 64.8 and is 23.75px; the work paragraph needs ≥24px for
-			    its Lc 75.1 and is 21.375px. w400 clears both.
+		    kicker shape the home page dropped.
 
-			    ⚠ The dark lead is the site's one RESIDUAL APCA shortfall. The
-			    08-05 AAA pass lifted --ink-soft to 7.06:1 (Lc 42.1 → 48.6), so
-			    the lead is WCAG-AAA clean in both themes now — but APCA still
-			    wants 35px at w400 from that Lc and the lead is 23.75px; no
-			    weight reaches the floor from there. What remains is a COLOUR
-			    gap, not a weight one: closing it fully means setting this
-			    paragraph in --ink. Left standing deliberately — the muted lead
-			    is the design, and it clears every WCAG bar it answers to. */}
-			<p class="text-xl [font-weight:var(--weight-ui)] leading-relaxed text-[var(--ink-soft)]">{project.problem}</p>
-			<p class="mt-6 text-lg [font-weight:var(--weight-ui)] leading-relaxed">{project.work}</p>
+		    ⚠ THE LEAD IS GONE (2026-08-10, with the about-page scale — see the
+		    header note). The register change the dropped headings used to mark
+		    — context, then what I did — rode the TYPE from 08-01 on: the problem
+		    paragraph was a step up in size (23.75px) and set in --ink-soft, so
+		    the work paragraph read as the body it stepped down into. The about
+		    page sets every paragraph identically, so matching it spends that
+		    device: both are now 16.625px in plain --ink and nothing but the
+		    paragraph break separates them. That is a real loss and it was the
+		    price of the ask, not an oversight — if the two paragraphs ever need
+		    telling apart again, the headings are the honest fix, because the
+		    type has no step left to make.
+
+		    Nothing here is capped by these numbers, but the MEASURE now is: the
+		    section is still max-w-[var(--measure)] (35rem / 665px), which held
+		    ~11 words a line at 21.375px and holds ~80 characters at 16.625 —
+		    past the usual 45–75. The about page's own column is 511.5px and ~62
+		    characters. Narrowing this is the obvious follow-up and was left
+		    alone deliberately: it is a layout change, and the ask was sizes and
+		    colours. The page itself still spans the nav's full 960px, which the
+		    images below fill. */}
+		<section class="reveal mt-8 max-w-[var(--measure)]" style="--i: 1">
+			{/* Both paragraphs keep the UI weight tier (w400 dark / w500 light)
+			    rather than inheriting the body's w300 — the only weight bumps the
+			    2026-08-04 legibility audit actually required, and the ONE thing
+			    the 08-10 about-page pass did not touch. Weight is neither a size
+			    nor a colour, and this is the site's longest-form reading; dropping
+			    to w300 would quietly undo an audit finding on prose that just got
+			    5px smaller, which is the wrong direction. So these paragraphs
+			    render at the about page's size and colour a notch heavier than its
+			    own prose does. If an exact match is wanted, deleting both
+			    [font-weight:…] is the whole change.
+
+			    The audit's numbers are STALE and deliberately not restated: they
+			    were measured at 23.75px/--ink-soft and 21.375px/--ink, and both
+			    paragraphs are now 16.625px/--ink. Smaller type needs MORE weight
+			    for the same APCA floor, so w400 no longer clears what it cleared
+			    then — but the about page's prose is 16.625px at w300 in the same
+			    ink and the audit already lists it as a standing contrast item
+			    that weight cannot fix. This page now sits in that same accepted
+			    posture rather than in one of its own. Re-measure before quoting
+			    any figure here.
+
+			    What this DID close: the lead was the site's one residual APCA
+			    shortfall, at 23.75px in --ink-soft where the Lc wanted 35px and no
+			    weight reached the floor. Moving it to --ink retires that entry —
+			    it was a colour gap, and the colour is what changed. */}
+			<p class="text-sm [font-weight:var(--weight-ui)] leading-relaxed">{project.problem}</p>
+			<p class="mt-6 text-sm [font-weight:var(--weight-ui)] leading-relaxed">{project.work}</p>
 		</section>
 
 		<section class="reveal mt-10 space-y-5" style="--i: 2">

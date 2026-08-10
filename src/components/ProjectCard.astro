@@ -69,7 +69,16 @@ const { project } = Astro.props;
 		    the orange won the entrance. Plain ink keeps the year quiet and lets the
 		    title lead. --ink-num is still live on the project pages' datelines, so
 		    the token is not orphaned — but the two headers no longer match here, and
-		    that was the argument for the year taking its own line at all. */}
+		    that was the argument for the year taking its own line at all.
+
+		    ⚠ 2026-08-10: BOTH halves of that last sentence are now false. The
+		    project page took the about page's palette, so its dateline went to
+		    --ink-soft and the token IS orphaned (the --ink-num block in global.css
+		    has the details and the two ways out). And the headers match again by
+		    accident rather than by agreement — this year is --ink, that one is
+		    --ink-soft, which is the closest the two have been since 08-01. The
+		    line-of-its-own decision stands on the paragraph above it regardless;
+		    it never depended on the mismatch. */}
 		<p class="text-[0.8rem] leading-snug tabular-nums text-[var(--ink)]">{project.year}</p>
 		{/* The <span> stops the underline at the words rather than letting it run
 		    the full width of the h3's line box. It originally also kept the line

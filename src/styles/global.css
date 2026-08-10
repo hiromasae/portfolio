@@ -313,6 +313,18 @@
 	   orange (see --mark-boot), so the tie the marks' comments used to record
 	   is broken, not moved.
 
+	   ⚠ 2026-08-10: --ink-num HAS NO CONSUMER. The card datelines dropped it on
+	   08-02 (see ProjectCard.astro) and the project pages' datelines went to
+	   --ink-soft when that page took the about page's palette — the year sits
+	   back down in the muted line it used to be lifted out of. Every word above
+	   is the argument FOR the token and still stands on its own terms; none of
+	   it is currently on screen. Kept defined rather than deleted because
+	   retiring a hue is a palette decision and that pass was a page-level one.
+	   Two ways out, and they are not equivalent: put a numeral back on it, or
+	   delete it and the dark copy together. Read the paragraph above first if
+	   it ever comes back — the value is tuned to clear --ink-soft's 7.10 by one
+	   step, and a numeral that doesn't ride that line wants a different number.
+
 	   The title is verbatim Tokyo Night Light. Titles run 24-38px and card
 	   titles 21px bold, so all of them clear WCAG's large-text bar with room;
 	   the numerals are small text and clear the full 7:1.
@@ -329,7 +341,23 @@
 	   now wear --ink-heading, which pushes them one step FURTHER from the paper
 	   than the body instead of matching it. The reasoning above is untouched —
 	   the about page still declines the hue, and separates by contrast, which is
-	   the one channel a heading at the body's own size still has left. */
+	   the one channel a heading at the body's own size still has left.
+
+	   ⚠ 2026-08-10: THE EXCEPTION SWALLOWED THE PROJECT H1 (Hiro — that page
+	   should use the about page's sizes and colours). So the list two paragraphs
+	   up is now card titles and the home page; project h1s wear --ink-heading,
+	   and the about page's arrangement — --ink-heading headings, --ink prose,
+	   --ink-soft ancillary — is what two of the site's three routes run.
+
+	   NOTE the rule this breaks, because the exception no longer explains
+	   itself. The about page dropped the hue because its headings had come down
+	   to the BODY'S OWN SIZE-CLASS and colour at that size reads as
+	   highlighting. That is not the project h1's situation: it is 35.625px over
+	   16.625px prose, so it outsizes its body more than it did before the pass,
+	   not less, and by the stated rule it should have kept the accent. It came
+	   off because the ask was the about page's palette, full stop. If the accent
+	   is ever restored on this one heading, the rule above is intact and needs
+	   no amending — it never stopped applying. */
 	--ink-title: #0f4b6e; /* cyan, verbatim — 7.76:1, 1.09× the muted text since the AAA pass */
 	--ink-num: #7b3809; /* 7.24:1 — deepened off verbatim for AAA, see above */
 
