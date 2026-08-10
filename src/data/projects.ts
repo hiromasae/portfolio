@@ -83,21 +83,6 @@ export const projects: Project[] = [
 		],
 		link: 'https://shipyardhq.tech/',
 	},
-	{
-		slug: 'indio',
-		title: 'Agent Dashboard & Broker Profile',
-		company: 'Indio Technologies',
-		year: '2019',
-		tags: ['UI Redesign', 'Dashboard', 'InsurTech'],
-		role: 'Redesigned two dense internal insurance tools around clarity and everyday use.',
-		blurb: 'A redesign of dense internal insurance tools, focused on clarity, structure, and easier day-to-day use.',
-		problem:
-			'These internal insurance tools had gotten pretty cluttered over time. The screens were dense, hard to scan, and not very intuitive, so the redesign focused on making everyday tasks feel less confusing and easier to get through.',
-		work:
-			'I audited the existing components first, which turned up a lot of near-duplicates doing the same job in slightly different ways. That gave me the base to rebuild the Agent Dashboard on a simpler layout and to cut the Broker Profile back to what an agent actually needs in front of them. Consolidating those patterns did the real work: the two screens stopped reading as separate products, and the everyday paths through them got shorter.',
-		cover: '/images/indio1.webp',
-		images: ['/images/indio1.webp', '/images/indio2.webp', '/images/indio3.webp', '/images/indio4.webp'],
-	},
 ];
 
 export const contacts = [
