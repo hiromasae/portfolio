@@ -302,6 +302,15 @@ const onHome = path === '/';
 		// project the position was recorded for (a detail page reached some other
 		// way falls back to the card alignment), and consumed on use so a stale
 		// entry can't hijack a later landing.
+		//
+		// ⚠ 2026-08-10: DORMANT. "Back to projects" was removed, and it was the
+		// only thing that ever set an intent — so the guard below is never true
+		// and returnY never leaves null. The recorder still writes 'nav-return'
+		// on every card click, which means the entry now accumulates and is
+		// consumed by nobody. Harmless (one short sessionStorage key, overwritten
+		// each click, dies with the tab) and left in place so the feature is one
+		// anchor away from working. Full context at the data-projects-link
+		// handler in the module script below.
 		var returnY = null;
 		if (projectsIntent && projectsIntent !== '1') {
 			try {
@@ -638,6 +647,25 @@ const onHome = path === '/';
 		// return spot when one exists — and cleans the hash).
 		// The list intent stays a clean "/" — its target sits so near the top that
 		// the browser's own #projects jump gets clamped and fights the collapse.
+		//
+		// ⚠ 2026-08-10: THIS SELECTOR MATCHES NOTHING. The comment above says
+		// "every projects link (nav 'Projects', 'Back to projects')" and both are
+		// now gone — the nav's went on 08-01, and Hiro removed the project pages'
+		// back button today. This handler is the ONLY writer of PROJECTS_FLAG, so
+		// with no element to bind to, `projectsIntent` in the inline script is
+		// permanently null and everything it gates is unreachable: the
+		// .projects-landing hold, landOnProjects(), reveal-hold-land,
+		// reveal-skip, the returnY restore, and goToProjects() itself (this is
+		// its only caller). The card-click recorder below still writes
+		// 'nav-return' faithfully; nothing reads it any more.
+		//
+		// Deliberately NOT deleted. The machinery is correct and was expensive to
+		// get right — it is one `data-projects-link` on one anchor away from
+		// working again, and that is a far better state to leave it in than
+		// half-unpicked. If it is being retired for good, the removal is this
+		// block, goToProjects, compactTargetY, PROJECTS_FLAG, the card recorder,
+		// and the whole projectsIntent branch of the inline script — as one
+		// change, not piecemeal. See the footer note in pages/projects/[slug].astro.
 		document.querySelectorAll('a[data-projects-link]').forEach((link) => {
 			link.addEventListener('click', (e) => {
 				if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;

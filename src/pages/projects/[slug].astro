@@ -126,34 +126,37 @@ const { project } = Astro.props;
 		</section>
 	</main>
 
-	{/* The one back link on the page, and not a duplicate of the nav's
-	    Projects: the slug sends you to the CARD you came from at the scroll
-	    position you left it (Nav.astro's nav-return / returnY), where the nav
-	    link lands on the top of the list. Worth its place down here, several
-	    thousand pixels of screenshots below where you started. */}
-	<footer class="mx-auto max-w-[960px] px-5 py-10">
-		<a
-			href={`/#project-${project.slug}`}
-			data-projects-link
-			data-project-slug={project.slug}
-			class="btn-quiet"
-		>
-			{/* The card's arrow, mirrored — same viewBox and stroke, pointing the
-			    other way. Decorative: the label carries the accessible name. */}
-			<svg
-				class="btn-quiet__arrow h-[0.9rem] w-[0.9rem]"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				aria-hidden="true"
-			>
-				<line x1="20" y1="12" x2="5" y2="12"></line>
-				<polyline points="12 5 5 12 12 19"></polyline>
-			</svg>
-			<span class="btn-quiet__label">Back to projects</span>
-		</a>
-	</footer>
+	{/* ── NO FOOTER (2026-08-10, Hiro: remove the back-to-projects button) ──
+	    This page had one and it held exactly one thing: a "Back to projects"
+	    link whose slug sent you to the CARD you came from, at the scroll
+	    position you left it. It was the last navigation on the page, several
+	    thousand pixels of screenshots below where you started; the way back is
+	    now the browser's own Back button and the wordmark.
+
+	    ⚠ IT WAS ALSO THE ENTRY POINT TO THE WHOLE PROJECTS-LANDING PIPELINE,
+	    which is the part that isn't obvious from the markup that just left.
+	    That anchor carried `data-projects-link`, and it was the ONLY element on
+	    the site that did — the nav's own Projects link went on 08-01. So
+	    Nav.astro's handler for `a[data-projects-link]` now matches nothing, and
+	    everything downstream of it is unreachable rather than merely unused:
+	      · `sessionStorage['nav-projects']` has no writer, so `projectsIntent`
+	        is always null on arrival;
+	      · therefore `.projects-landing`, `landOnProjects()`, `reveal-hold-land`
+	        and `reveal-skip` never fire;
+	      · `goToProjects()` has no caller;
+	      · `nav-return` is still WRITTEN on every card click, but `returnY` is
+	        only read inside an `if (projectsIntent)`, so it is now write-only.
+	    None of that was deleted — the ask was the button, and unpicking a
+	    cross-page scroll-restore system is its own change with its own risks.
+	    Read the notes in Nav.astro before either reviving or removing it; the
+	    machinery is intact and correct, it simply has nothing to start it.
+
+	    `.btn-quiet` in global.css is likewise orphaned — this was its only
+	    consumer. Same reasoning: left standing, flagged there.
+
+	    The page now ends on the last screenshot with only main's py-12 (57px)
+	    under it, where the footer added another 47.5. It is also the only route
+	    with no footer — home and about both carry the copyright line. If the
+	    ending reads too abrupt, that line is the drop-in, and about.astro's
+	    footer note explains why this page never took it. */}
 </Layout>

@@ -2186,7 +2186,15 @@ body {
    icons and links are the only other buttons a visitor sees there, so this
    matches them instead. Weight 500 for the same reason: it's the nav links'
    weight, and Satoshi has a real 500 (see the .btn note above on which cuts
-   actually exist — 600 is not one of them). */
+   actually exist — 600 is not one of them).
+
+   ⚠ 2026-08-10: ORPHANED. Hiro removed the back-to-projects button, and it was
+   this rule's only consumer — the whole .btn-quiet family below (__label,
+   __arrow, the hover nudge, the reduced-motion block) now styles nothing. Left
+   standing on the same terms as --ink-num above: the argument is intact and
+   the next borderless text link on the site wants exactly this, but nothing is
+   wearing it today. The [slug].astro footer note records what else went dead
+   with that button — it is more than the CSS. */
 .btn-quiet {
 	display: inline-flex;
 	align-items: center;
