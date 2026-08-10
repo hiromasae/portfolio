@@ -32,16 +32,16 @@ export interface Project {
 export const projects: Project[] = [
 	{
 		slug: 'migaki',
-		title: 'migaki: Design Taste for Coding Agents',
+		title: 'migaki: Design Sense for Coding Agents',
 		company: 'Open source',
 		year: '2026',
 		tags: ['Open Source', 'AI', 'Design Systems'],
 		role: 'Wrote the skill, its three-file structure, and the weekly refresh loop.',
-		blurb: 'An open source design skill that gives any AI coding agent a working sense of visual taste.',
+		blurb: 'An open source design skill that gives any AI coding agent a working visual sense.',
 		problem:
-			'A coding agent will build almost anything you describe, but left to its own defaults it keeps landing on the same look. Hand it taste as a static document and the document starts aging the day you write it. migaki (磨き, "to polish") is a design skill that tries to solve both halves of that at once: a sense of visual taste an agent can actually apply, that does not decay into a period piece.',
+			'A coding agent will build almost anything you describe, but left to its own defaults it keeps landing on the same look. Write the fix down once and the document starts aging the day you save it. migaki (磨き, "to polish") is a design skill that tries to solve both halves of that at once: a visual sense an agent can actually apply, that does not decay into a period piece.',
 		work:
-			"The skill is three markdown files. The first holds the timeless perceptual principles, the part of visual judgement that doesn't move. The second catalogues the patterns that read as AI-generated or dated, and the third what reads as excellent right now. Those last two rewrite themselves weekly, so the taste layer tracks the present instead of settling into a style guide from last year. Anything that can read a skill file gets the whole thing.",
+			"The skill is three markdown files. The first holds the timeless perceptual principles, the part of visual judgement that doesn't move. The second catalogues the patterns that read as AI-generated or dated, and the third what reads as excellent right now. Those last two rewrite themselves weekly, so the sense it works from tracks the present instead of settling into a style guide from last year. Anything that can read a skill file gets the whole thing.",
 		cover: '',
 		images: [],
 		placeholders: 3,
