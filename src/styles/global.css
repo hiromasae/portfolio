@@ -685,8 +685,23 @@
 	   reach for, not the rebound. --ease-panel moved with this in the same
 	   pass — its 1.17 was solved off THIS token's absolute overshoot (see its
 	   note), so the two sliders still agree about overrun: it is now zero for
-	   both. */
-	--dur-slide: 320ms;
+	   both.
+
+	   2026-08-09: 320ms → 260ms, TRIAL. Curve untouched — this trims the tail,
+	   not the character. Against the current curve the envelope was never what
+	   the eye read anyway: it is 50% of the travel by 19% of the duration, 95%
+	   by 57%, 99% by 73%, so the last quarter of a 320ms slide moved under 1%
+	   of the distance. On the pill's 134px full sweep that invisible remainder
+	   still had 6-7px of visible creep ahead of it at the 95% mark, and the
+	   label swaps to its final text at frame zero (Nav.astro) — right word,
+	   plate still arriving. 260ms puts 95% at ~147ms and leaves the held x1 =
+	   0.34 launch, which is where the mass read lives, exactly as it was.
+	   The real exposure this answers is the fast sweep across all four icons:
+	   each new hover restarts the transition from wherever the pill currently
+	   is, so a long envelope trails the pointer and only catches up once it
+	   stops. That one is duration-bound; no curve fixes it. Revert to 320ms if
+	   the slide starts reading as redrawn-rather-than-travelling. */
+	--dur-slide: 260ms;
 	--ease-slide: cubic-bezier(0.34, 1, 0.5, 1);
 
 	/* ── The pop ──
