@@ -63,6 +63,16 @@ const { project } = Astro.props;
 		</section>
 
 		<section class="reveal mt-10 space-y-5" style="--i: 2">
+			{/* Placeholder frames for a project whose screenshots don't exist yet.
+			    Same border, radius and bed as the real images below, but at the
+			    cards' 16/9 — a real screenshot sets its own height from the file,
+			    and an empty div has none to take, so the ratio has to be stated.
+			    They hold the page's shape (and the reveal's third beat) so
+			    dropping the images in later is a data change, nothing more. */}
+			{project.images.length === 0 &&
+				Array.from({ length: project.placeholders ?? 0 }).map(() => (
+					<div class="aspect-[16/9] w-full rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface-sunken)] bg-clip-padding" />
+				))}
 			{
 				project.images.map((src, i) => (
 					<img
