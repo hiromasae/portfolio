@@ -1372,26 +1372,39 @@ body {
 	   GLYPHS 22.6px apart — the same 22.5px, so the cluster now sits on one unit
 	   in both axes.
 	   Smaller steps, if this overshoots: 0.5rem lands the glyphs at 18.8px,
-	   which is --nav-inset (19px) almost exactly; 0.7rem lands them at 21.3px.
-	   What it costs is that --nav-inset is now the bar's TIGHTEST horizontal gap
-	   at 19px, which inverts the argument in that token's own note — the ends
-	   would want ~1.2rem to lead again. Left alone deliberately: the inset holds
-	   the wordmark and the toggle, and widening it moves them, which is not what
-	   was asked for here. */
+	   0.7rem at 21.3px.
+	   This used to be measured against --nav-inset too — the two sat within a
+	   pixel of each other and the ENDS being the tighter of the pair was read as
+	   a fault here. That comparison is gone: the inset is 0 since 2026-08-10 and
+	   the bar's ends are set by the content column, not by the bar's own
+	   horizontal rhythm. Nothing is cut against it any more. */
 	--nav-icon-gap: 0.8rem;
 	/* How far the bar's outermost DRAWN elements sit inside the column edges —
 	   the wordmark on the left, the toggle's glyph on the right. See the
 	   .nav-inner rule below, which spends it asymmetrically to land them equal.
 
-	   1rem = 19px, up from 0.5rem the same day it was introduced. Measured
-	   against the bar's other gaps: the icon glyphs sit 18.3px apart and there
-	   is 22.5px above and below them, so at 9.5px the ENDS were the tightest
-	   spacing in the bar — the outer margin of a box should be its largest gap,
-	   not its smallest, and the hairline made the box legible enough to read
-	   that as a mistake. 19px puts the ends within a pixel of the icons' own
-	   rhythm, so the bar runs on one horizontal unit, and squares the box up
-	   against the 22.5px verticals. */
-	--nav-inset: 1rem;
+	   ZERO since 2026-08-10 (Hiro: match the nav's content width to the page's).
+	   The bar's contents now sit on the CONTENT COLUMN — the same left and right
+	   edges as the projects rule, the leftmost card's year and the footer's
+	   copyright — so the page has one left spine from the wordmark down.
+
+	   Kept as a token rather than deleted, because it is the one value that
+	   brings the inset back and because the history is what stops it being
+	   re-added by eye. It ran at 0.5rem and then 1rem (19px) through 08-03, when
+	   the bar's hairline was COLUMN-WIDTH: the bar read as a bounded box, and a
+	   box's contents want inner padding. The hairline went full-bleed later the
+	   same day and the box became a band — no visible end left to be inset from
+	   — but the inset outlived its reason, leaving the wordmark 19px off the
+	   page's spine: near enough to read as a miss rather than a decision.
+	   The tuning argument had expired as well. 19px was measured against glyphs
+	   that sat 18.3px apart, so the ends led the bar's rhythm by a hair;
+	   --nav-icon-gap then went to 0.8rem and the glyphs are 22.6px apart, which
+	   made the ends the TIGHTEST horizontal gap in the bar instead. It was
+	   satisfying neither goal.
+	   So if the bar is ever wanted as its own inset unit again, move this PAST
+	   the icons' 22.6px (~1.2rem and up), not back to 19px — that is the
+	   stranded middle this came from. */
+	--nav-inset: 0rem;
 }
 
 /* Ended at 0.4rem the same day it moved twice: 0.25 → 0.15 (Hiro: tighter
@@ -1406,33 +1419,51 @@ body {
 }
 
 /* ── The bar's interior inset ──
-   2026-08-03, Hiro: bring the wordmark and the theme toggle inward off the
-   column edges. It goes on the ROW rather than on .nav-pad or the 960px shell,
-   so it insets the bar's CONTENTS and nothing else — which is what let the
-   hairline change its length later the same day without touching this. It was
-   written when the rule was column-width and the contents sat inside it, the
-   way a card's contents sit inside its border; the rule now spans the window,
-   so the contents are inset from the column and the column is inset from the
-   rule. Same nesting, one more step.
+   --nav-inset rides the ROW rather than .nav-pad or the 960px shell, so it
+   insets the bar's CONTENTS and nothing else — which is what let the hairline
+   change its length independently (it hangs off #site-nav and spans the
+   window, out past this column). At the token's current 0 this rule draws
+   nothing; it stays because the inset is one value away from returning, and
+   because the correction below has to be expressed against it either way.
 
    THE TWO SIDES ARE NOT EQUAL, and that is what makes them look equal. The
    wordmark draws from its box's left edge, so its ink lands exactly at whatever
-   padding it is given. The toggle does not: its glyph sits one button padding
-   (0.5rem) inside its drawn box, scaled by --nav-icon-scale, so an equal
-   padding-right would push the visible circle ~6.7px further in than the
-   wordmark and the bar would read as leaning left. Subtracting that distance
-   puts both DRAWN edges on the same inset — which is the only inset anyone can
-   see. It is written as an expression rather than a number so it follows
-   --nav-icon-scale; retune it there, never by eye.
+   inset it is given. The toggle does not: its glyph sits one button padding
+   (0.5rem) inside its drawn box, scaled by --nav-icon-scale, so an equal inset
+   on the right would push the visible circle ~6.3px further in than the
+   wordmark and the bar would read as leaning left. Taking that distance back
+   off the toggle's side puts both DRAWN edges on the same inset — which is the
+   only inset anyone can see. It is written as an expression rather than a
+   number so it follows --nav-icon-scale; retune it there, never by eye.
 
-   What this costs: the wordmark no longer lines up with the leftmost card's
-   year and the footer's copyright, which all sit on the column edge. The bar is
-   its own inset unit. If that alignment is ever wanted back, this is the rule
-   that broke it — and it is worth knowing that the hairline can no longer stand
-   in for the column, so nothing else in the bar marks it. */
+   THE CORRECTION MOVED OUT to #theme-toggle-wrap on 2026-08-10, when the inset
+   went to 0. Both other places it could live are wrong, and neither failure is
+   visible until the token is 0:
+     · padding-right here — the expression resolves NEGATIVE at inset 0, and a
+       negative padding is invalid and clamps to 0. The wordmark would land on
+       the column and the circle would sit 6.3px inside it: the exact lean this
+       correction exists to prevent, reappearing at the one value where nothing
+       looks obviously broken.
+     · a negative margin here — #contact-group is absolutely centred on
+       .nav-inner, and an abspos box resolves against its containing block's
+       PADDING box, so a margin that shrinks this row drags all four contact
+       icons half its width (~3px) off the bar's centre. Padding never could,
+       which is why the icons survived every earlier value of this token.
+   On the toggle's own wrapper it does neither: the wrapper reaches past the
+   row's content edge and .nav-inner's box is untouched. */
 #site-nav .nav-inner {
-	padding-left: var(--nav-inset);
-	padding-right: calc(var(--nav-inset) - 0.5rem * var(--nav-icon-scale));
+	padding-inline: var(--nav-inset);
+}
+
+/* The toggle's half of the asymmetry above. Negative, so the wrapper's right
+   edge — and with it the drawn button's, which the close-ranks translate pins
+   to that edge — sits one scaled button-padding past the row's content edge,
+   landing the GLYPH's right edge on --nav-inset exactly as the wordmark's ink
+   lands on it at the left. At inset 0 that is 6.3px of overhang into the
+   shell's px-5 gutter; nothing on the nav clips (the overflow-x: clip is on
+   `main`), so it simply draws there. */
+#site-nav #theme-toggle-wrap {
+	margin-right: calc(-0.5rem * var(--nav-icon-scale));
 }
 
 /* The wordmark is authored at 2.5rem and scaled down, anchored at its left
