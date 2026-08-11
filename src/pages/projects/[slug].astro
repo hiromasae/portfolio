@@ -20,12 +20,23 @@ const { project } = Astro.props;
    rendered anywhere since 07-29, and any similarity metric over three items is
    theatre.
 
-   Two cards today, which is exactly one row of the sm:grid-cols-2 layout — a
-   pleasant accident, not a constraint the code enforces. At four projects this
-   becomes three cards and the last one sits alone on row two; that is fine and
-   is what the grid does on the home page too. At ONE project it would render a
-   single half-width card under a "More projects" heading, which reads oddly —
-   see the strip below for the guard. */
+   Three cards today, and the strip asks ProjectGrid for three columns so they
+   land in one row (2026-08-11, Hiro). That coupling is HAND-MAINTAINED, not
+   derived: `columns` is a literal 3 down in the strip, not others.length, and
+   the two numbers agreeing is the thing to re-check when a project is added or
+   removed. Deriving it was the obvious move and is the wrong one — the grid
+   stops at three columns because a fourth shrinks the cards past their titles
+   (ProjectGrid.astro has the measurements), so a fifth project wants a
+   different answer here, not a bigger number.
+
+   What that answer should be, when it comes up: leave this at 3 and let the
+   fourth card sit alone on row two, which is what the grid did before today and
+   still does on the home page. The alternative — capping the strip at three
+   cards — trades a ragged row for hiding work, and this strip is the page's
+   only way onward.
+
+   At ONE project it would render a single third-width card under a "More
+   projects" heading, which reads oddly — see the strip below for the guard. */
 const others = projects.filter((other) => other.slug !== project.slug);
 ---
 
@@ -224,9 +235,26 @@ const others = projects.filter((other) => other.slug !== project.slug);
 		    The guard is for a one-project site, not for today: with a single
 		    project left, `others` is empty and the whole strip goes rather than
 		    rendering a heading over nothing. It reads `> 1` rather than `> 0`
-		    deliberately — one lone card sitting at half the grid's width under a
-		    plural heading is worse than no strip at all. Three projects today,
-		    so this renders two and fills exactly one row. */}
+		    deliberately — one lone card sitting at a third of the grid's width
+		    under a plural heading is worse than no strip at all. Four projects
+		    today, so this renders three and fills exactly one row.
+
+		    ── columns={3} (2026-08-11, Hiro: make these smaller so they all fit
+		    in one row and fit the width of the page) ── The default is 2, which
+		    is the home page's grid; at three cards that left one alone on row
+		    two. The cards get NARROWER rather than the strip getting a type
+		    scale of its own: ProjectCard is untouched, so the year, the title
+		    and the 16/9 frame are the same components the home page draws, in a
+		    290.67px track instead of a 448px one. That is the whole of
+		    "smaller", and ProjectGrid.astro records where dividing further stops
+		    working.
+
+		    The grid still spans the page's full 920px — the width never changed,
+		    only how many ways it is cut. Note the strip is the ONLY thing on this
+		    page at that width: the prose above is capped at --measure (665px) and
+		    the screenshots fill 920px. So the strip and the images share an edge
+		    and the cards' outer edges line up with them, which is what keeps a
+		    three-up row from reading as a different page element. */}
 		{others.length > 1 && (
 			<section class="reveal mt-32" style="--i: 3">
 				<h2 class="text-xl [font-weight:var(--weight-emph)] tracking-tight text-[var(--ink-heading)]">
@@ -238,7 +266,7 @@ const others = projects.filter((other) => other.slug !== project.slug);
 				    cards enter together as one object, which is the rule the about
 				    card and the home page's hero both follow. --i 3, one beat behind
 				    the screenshots at 2. */}
-				<ProjectGrid projects={others} class="mt-8" />
+				<ProjectGrid projects={others} columns={3} class="mt-8" />
 			</section>
 		)}
 	</main>

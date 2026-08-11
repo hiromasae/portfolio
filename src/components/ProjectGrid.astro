@@ -36,15 +36,48 @@ interface Props {
 	   there carries the reveal instead. */
 	class?: string;
 	style?: string;
+	/* How many columns from sm up. Two unless a caller says otherwise — that is
+	   the home page's grid and the shape every measurement in this file was
+	   taken against. The project page's strip passes 3 so its cards land in one
+	   row (2026-08-11, Hiro); see the note over the class list for what a wider
+	   grid costs and where it stops paying. */
+	columns?: 2 | 3;
 }
 
-const { projects: items, class: className, style } = Astro.props;
+const { projects: items, class: className, style, columns = 2 } = Astro.props;
+
+/* Written out rather than interpolated — `sm:grid-cols-${columns}` is invisible
+   to Tailwind's scanner, which reads source text and never runs this file, so
+   the class would simply not be generated. Two entries because two is what the
+   grid supports; a fourth column is not a lookup-table edit, it is the
+   card-shrinks-past-legibility problem in the note below. */
+const columnClass = columns === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2';
 ---
 
-{/* Two columns from sm up. The gaps are uneven on purpose: the column gap only
-    has to separate two cards side by side, while the row gap also has to
-    out-space the gap INSIDE a card (title → image), or a card's image reads as
-    belonging to the title below it. */}
+{/* Two columns from sm up, three when the caller asks (see the `columns` prop).
+    The gaps are uneven on purpose: the column gap only has to separate two
+    cards side by side, while the row gap also has to out-space the gap INSIDE a
+    card (title → image), or a card's image reads as belonging to the title
+    below it.
+
+    ⚠ THE COLUMN GAP IS LOAD-BEARING AT ANY COLUMN COUNT and does not change
+    with it: each card's p-3/-m-3 pair reaches 0.75rem past its track on both
+    sides, and gap-x-6 (1.5rem) is exactly two of those, so neighbouring hover
+    panels meet and never overlap. Three columns adds a second such meeting
+    point rather than tightening the existing one, so the arithmetic carries
+    over untouched — but it is the reason narrowing the gutter to buy card width
+    is not available as a fix (ProjectCard.astro says the same from its end).
+
+    What three columns DOES cost is card width: inside the 960px page (920px of
+    content) a 2-up track is 448px and a 3-up track is 290.67px, a 35% cut. The
+    card takes that cut in the TITLE, which is the only part of it that reflows
+    — the frame is aspect-[16/9] so it just gets shorter in proportion, and the
+    year is four characters wide at any track. So the column count is really a
+    question about the longest title on the site, which is currently migaki's at
+    38 characters, and a fourth column is where that stops being arguable: 212px
+    tracks against a title that already needs more than one line at 290px, with
+    the text block growing every time the image it labels shrinks. Three is the
+    ceiling until ProjectCard gets a smaller title of its own. */}
 {/* The grid reveals as ONE block on the home page, --i 1 behind the hero
     (2026-08-06, Hiro) — the per-card stagger (each card in its own .reveal
     wrapper, --i index + 2) came out with the hero's collapse to a single
@@ -61,7 +94,7 @@ const { projects: items, class: className, style } = Astro.props;
     below). */}
 <div
 	id="project-list"
-	class:list={['grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2', className]}
+	class:list={['grid grid-cols-1 gap-x-6 gap-y-10', columnClass, className]}
 	style={style}
 >
 	{/* The hover panel — one for the whole grid, sliding to whichever card is
