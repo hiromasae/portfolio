@@ -15,6 +15,12 @@ export interface Project {
 	work: string;
 	cover: string;
 	images: string[];
+	/** Number of empty frames to stand in for screenshots that don't exist yet.
+	    Only read when `images` is empty, and only by the detail page; an empty
+	    `cover` leaves the card's own frame blank the same way. Delete the field
+	    from a project the moment it has real images — a placeholder that
+	    outlives its shoot is worse than no frame at all. */
+	placeholders?: number;
 	/** `tags`, `company`, `link` and now `role` are no longer rendered anywhere
 	    (tags/company/link dropped from the detail page 2026-07-29, role from the
 	    cards 2026-08-02; the cards now use only year, title and cover). Kept
@@ -24,6 +30,22 @@ export interface Project {
 }
 
 export const projects: Project[] = [
+	{
+		slug: 'migaki',
+		title: 'migaki: Design Sense for Coding Agents',
+		company: 'Open source',
+		year: '2026',
+		tags: ['Open Source', 'AI', 'Design Systems'],
+		role: 'Wrote the skill, its three-file structure, and the weekly refresh loop.',
+		blurb: 'An open source design skill that gives any AI coding agent a working visual sense.',
+		problem:
+			'A coding agent will build almost anything you describe, but left to its own defaults it keeps landing on the same look. Write the fix down once and the document starts aging the day you save it. migaki (磨き, "to polish") is a design skill that tries to solve both halves of that at once: a visual sense an agent can actually apply, that does not decay into a period piece.',
+		work:
+			"The skill is three markdown files. The first holds the timeless perceptual principles, the part of visual judgement that doesn't move. The second catalogues the patterns that read as AI-generated or dated, and the third what reads as excellent right now. Those last two rewrite themselves weekly, so the sense it works from tracks the present instead of settling into a style guide from last year. Anything that can read a skill file gets the whole thing.",
+		cover: '',
+		images: [],
+		placeholders: 3,
+	},
 	{
 		slug: 'stacksmith',
 		title: 'Stacksmith: AI Tool Stack Discovery',

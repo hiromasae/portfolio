@@ -124,12 +124,21 @@ const { project } = Astro.props;
 			'relative aspect-[16/9] w-full overflow-hidden rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface-sunken)] bg-clip-padding',
 		]}
 	>
-		<img
-			src={project.cover}
-			alt={project.title}
-			loading="lazy"
-			decoding="async"
-			class="absolute inset-0 h-full w-full object-cover object-top"
-		/>
+		{/* A project with no cover yet keeps the frame and drops the <img>: the
+		    border, radius and sunken bed are all on the div above, so the empty
+		    state is the frame itself rather than anything drawn to stand in for
+		    one. No "coming soon" plate — an unfilled frame in the grid reads as
+		    a project without a shot, which is what it is. */}
+		{
+			project.cover && (
+				<img
+					src={project.cover}
+					alt={project.title}
+					loading="lazy"
+					decoding="async"
+					class="absolute inset-0 h-full w-full object-cover object-top"
+				/>
+			)
+		}
 	</div>
 </a>
