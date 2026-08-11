@@ -666,6 +666,11 @@ const onHome = path === '/';
 		// block, goToProjects, compactTargetY, PROJECTS_FLAG, the card recorder,
 		// and the whole projectsIntent branch of the inline script — as one
 		// change, not piecemeal. See the footer note in pages/projects/[slug].astro.
+		//
+		// The "More projects" strip added to the project pages later the same day
+		// did NOT revive this: its cards are ProjectCards linking straight to
+		// /projects/<slug>, so none of them carries the attribute. It did give the
+		// recorder below a second page to fire on — see its note.
 		document.querySelectorAll('a[data-projects-link]').forEach((link) => {
 			link.addEventListener('click', (e) => {
 				if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
@@ -703,6 +708,17 @@ const onHome = path === '/';
 		// the very spot the visitor left — not just the card aligned under the nav
 		// (see the inline script's `returnY`). Keyed by slug: a detail page reached
 		// any other way ignores another card's entry.
+		//
+		// ⚠ 2026-08-10: NOT JUST THE HOME PAGE ANY MORE. The project pages grew a
+		// "More projects" strip built on the same grid, so `#project-list` — and
+		// therefore this selector — now matches on two routes. Nothing breaks:
+		// `returnY` is only read when `projectsIntent` is set, and nothing has set
+		// that since the back button went, so this is write-only either way. But
+		// it is a behaviour change waiting to surface if the pipeline is ever
+		// revived, because a strip click records THIS page's scrollY under the
+		// TARGET project's slug — a Y measured on a page you'd never be restoring
+		// to. Scope this to the home page (or key the entry by origin as well as
+		// slug) before switching any of it back on.
 		document.querySelectorAll('#project-list a[id^="project-"]').forEach((card) => {
 			card.addEventListener('click', () => {
 				try {

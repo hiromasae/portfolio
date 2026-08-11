@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import Nav from '../../components/Nav.astro';
+import ProjectGrid from '../../components/ProjectGrid.astro';
 import { projects } from '../../data/projects';
 
 export function getStaticPaths() {
@@ -11,6 +12,21 @@ export function getStaticPaths() {
 }
 
 const { project } = Astro.props;
+
+/* Everything except the one you're reading, in projects.ts order — the same
+   order the home grid uses, so the strip reads as that grid with one card
+   pulled out rather than as a second, differently-sorted list. NOT sorted by
+   year or "relatedness": there are three projects, the tags field hasn't been
+   rendered anywhere since 07-29, and any similarity metric over three items is
+   theatre.
+
+   Two cards today, which is exactly one row of the sm:grid-cols-2 layout — a
+   pleasant accident, not a constraint the code enforces. At four projects this
+   becomes three cards and the last one sits alone on row two; that is fine and
+   is what the grid does on the home page too. At ONE project it would render a
+   single half-width card under a "More projects" heading, which reads oddly —
+   see the strip below for the guard. */
+const others = projects.filter((other) => other.slug !== project.slug);
 ---
 
 <Layout title={`${project.title} — Hiro Eernisse`} description={project.blurb}>
@@ -124,14 +140,109 @@ const { project } = Astro.props;
 				))
 			}
 		</section>
+
+		{/* ── More projects (2026-08-10, Hiro) ──
+		    A strip of the other work at the foot of the case study. It is the
+		    same ProjectGrid the home page uses, with the same travelling hover
+		    panel — see that component for why it became one rather than being
+		    copied. A visitor who reaches the bottom of a project page has
+		    finished the only thing this page had to say; the strip is what it
+		    hands off to, and it is also the page's way back into the work now
+		    that the back-to-projects button is gone (removed earlier today —
+		    see the footer note below for what that removal took with it).
+
+		    THE HEADING IS A REAL h2, at the about page's exact treatment
+		    (text-xl / --weight-emph / tracking-tight / --ink-heading). This page
+		    took that page's scale and palette this morning, so there is nothing
+		    to decide here — the value already exists. Not the small-bold
+		    uppercase kicker: this codebase has dropped that shape twice (the
+		    Background/Work labels on this very page, and the about page's
+		    interests heading), and it is not coming back through a side door.
+
+		    ── The rule is a .card-rule, deliberately NOT #projects::before ──
+		    Same paint either way, since both are drawn off the shared --rule
+		    gradient, so this reads as one family with the nav's edge and the
+		    home page's projects line. What differs is what comes attached:
+		    #projects::before is keyed to that id and carries the load finale's
+		    `rule-grow` animation (global.css), tuned to the INDEX's two-block
+		    cascade. Borrowing the id would have pulled that animation onto a
+		    rule sitting several thousand pixels below the fold, where it would
+		    play unseen and out of step with this page's four-block cascade — and
+		    it would have put a second #projects on the site. .card-rule is the
+		    static version of the same line and needed nothing.
+
+		    This is .card-rule's third context (about's two section dividers were
+		    the first two). Its comment in global.css still says "the about
+		    card's section rules"; the mechanism was always general — a border-top
+		    with the gradient sliced into it — and the border, rather than a
+		    pseudo-element, is the reason the 1px still occupies layout here.
+
+		    ── The spacing is LOPSIDED on purpose ──
+		    mt-20 (95px) above the rule, pt-12 (57px) below, which is the home
+		    page's arrangement at #projects (128 above, 57 below) and the same
+		    argument: the rule introduces the section under it, so it belongs to
+		    that section rather than floating between two equal gaps. Don't
+		    balance these. The optical correction the about card's rules need
+		    doesn't apply here either — the thing ABOVE this rule is an <img>,
+		    which has no half-leading, so its bottom edge is its ink and the
+		    margin paints exactly what it says.
+
+		    mt-8 (38px) from the h2 down to the grid, not the about page's mt-4.
+		    That gap is smaller than it looks: a card's p-3/-m-3 pair overflows
+		    its grid track by 14.25px on every side, so the HOVER PANEL's top
+		    edge sits 14.25px above the grid element's own top edge. At mt-4 a
+		    hovered first-row card would light up a tint within ~5px of the
+		    heading's descenders. 38 leaves 23.75px of clearance, which is the
+		    same figure as the panel's own overhang.
+
+		    The guard is for a one-project site, not for today: with a single
+		    project left, `others` is empty and the whole strip goes rather than
+		    rendering a heading over nothing. It reads `> 1` rather than `> 0`
+		    deliberately — one lone card sitting at half the grid's width under a
+		    plural heading is worse than no strip at all. Three projects today,
+		    so this renders two and fills exactly one row. */}
+		{others.length > 1 && (
+			<section class="card-rule reveal mt-20 pt-12" style="--i: 3">
+				<h2 class="text-xl [font-weight:var(--weight-emph)] tracking-tight text-[var(--ink-heading)]">
+					More projects
+				</h2>
+				{/* No .reveal on the grid — this section is the reveal, and a .reveal
+				    inside a .reveal animates opacity against a parent already doing
+				    the same, so the block would arrive twice. The heading and the
+				    cards enter together as one object, which is the rule the about
+				    card and the home page's hero both follow. --i 3, one beat behind
+				    the screenshots at 2. */}
+				<ProjectGrid projects={others} class="mt-8" />
+			</section>
+		)}
 	</main>
 
-	{/* ── NO FOOTER (2026-08-10, Hiro: remove the back-to-projects button) ──
-	    This page had one and it held exactly one thing: a "Back to projects"
-	    link whose slug sent you to the CARD you came from, at the scroll
-	    position you left it. It was the last navigation on the page, several
-	    thousand pixels of screenshots below where you started; the way back is
-	    now the browser's own Back button and the wordmark.
+	{/* ── The copyright footer (2026-08-10, Hiro: add a footer) ──
+	    Lifted verbatim from the home page, exactly as the about page's was
+	    (08-05) and for the same reason: same element, same max-w-[960px]/px-5
+	    so the line sits on the SAME left edge as the prose, the h2 above it and
+	    the leftmost strip card's year, same py-10, same text-xs on --ink-soft.
+	    A copyright line is the lowest-priority text on the site and the home
+	    page settled what that looks like; a third treatment would be a third
+	    answer to a solved question. All three routes now end the same way.
+
+	    OUTSIDE <main>, matching both. It isn't page content and the reveal
+	    cascade doesn't touch it — no .reveal, no --i, so it is simply there
+	    when the page is.
+
+	    NOTE this replaces a footer that was a BACK LINK rather than a
+	    copyright, and about.astro's footer note used to cite that difference as
+	    the reason it took the home page's version instead. That distinction is
+	    gone: there is one footer on the site now, in three places. The note
+	    over there has been corrected.
+
+	    ── What the old footer was, and what removing it took with it ──
+	    It held exactly one thing: a "Back to projects" link whose slug sent you
+	    to the CARD you came from, at the scroll position you left it. It was the
+	    last navigation on the page, several thousand pixels of screenshots below
+	    where you started. That job is now the strip above — different in kind,
+	    since the strip sends you ONWARD to another project rather than back to
+	    the grid — plus the browser's Back button and the wordmark.
 
 	    ⚠ IT WAS ALSO THE ENTRY POINT TO THE WHOLE PROJECTS-LANDING PIPELINE,
 	    which is the part that isn't obvious from the markup that just left.
@@ -146,17 +257,24 @@ const { project } = Astro.props;
 	      · `goToProjects()` has no caller;
 	      · `nav-return` is still WRITTEN on every card click, but `returnY` is
 	        only read inside an `if (projectsIntent)`, so it is now write-only.
+	        As of the strip above it is written on THIS page too — the recorder
+	        selects `#project-list a[id^="project-"]` and there is now a
+	        #project-list here. Still harmless, still read by nobody; it means a
+	        strip click records this page's scroll position under the target's
+	        slug. If the pipeline is ever revived, that is a case it never had to
+	        handle before: "back to projects" from a project reached FROM a
+	        project would restore a Y measured on the wrong page. The fix would
+	        be to scope the recorder to the home page, not to drop it.
 	    None of that was deleted — the ask was the button, and unpicking a
 	    cross-page scroll-restore system is its own change with its own risks.
 	    Read the notes in Nav.astro before either reviving or removing it; the
 	    machinery is intact and correct, it simply has nothing to start it.
 
-	    `.btn-quiet` in global.css is likewise orphaned — this was its only
-	    consumer. Same reasoning: left standing, flagged there.
-
-	    The page now ends on the last screenshot with only main's py-12 (57px)
-	    under it, where the footer added another 47.5. It is also the only route
-	    with no footer — home and about both carry the copyright line. If the
-	    ending reads too abrupt, that line is the drop-in, and about.astro's
-	    footer note explains why this page never took it. */}
+	    `.btn-quiet` in global.css is likewise orphaned — the removed link was
+	    its only consumer, and the strip did NOT take it back up (the cards are
+	    ProjectCards, which have their own hover). Same reasoning: left standing,
+	    flagged there. */}
+	<footer class="mx-auto max-w-[960px] px-5 py-10 text-xs text-[var(--ink-soft)]">
+		<span>© 2026 Hiro Eernisse</span>
+	</footer>
 </Layout>

@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Nav from '../components/Nav.astro';
-import ProjectCard from '../components/ProjectCard.astro';
+import ProjectGrid from '../components/ProjectGrid.astro';
 import { projects } from '../data/projects';
 ---
 
@@ -127,34 +127,21 @@ import { projects } from '../data/projects';
 		    belongs to the section it introduces rather than floating between two
 		    equal gaps. */}
 		<section id="projects" class="scroll-mt-20 pt-12 pb-16 sm:pt-14">
-			{/* Two columns from sm up. The gaps are uneven on purpose: the column
-			    gap only has to separate two cards side by side, while the row gap
-			    also has to out-space the gap INSIDE a card (title → image), or a
-			    card's image reads as belonging to the title below it. */}
-			{/* The grid reveals as ONE block, --i 1 behind the hero (2026-08-06,
-			    Hiro) — the per-card stagger (each card in its own .reveal wrapper,
-			    --i index + 2) came out with the hero's collapse to a single entry.
-			    The reveal sits on #project-list rather than #projects so the
-			    section's rule (#projects::before) stays OUTSIDE the reveal: it is
-			    page-level structure and enters in the hairline finale, not with
-			    the content — see the finale block in global.css.
+			{/* The grid, the travelling hover panel and the script that drives it
+			    all moved into ProjectGrid.astro on 2026-08-10, when the project
+			    pages grew a "More projects" strip and needed the same three things.
+			    Nothing changed in the move — the rendered markup here is identical
+			    — so every comment that used to live at this spot now lives in that
+			    component, next to the code it describes.
 
-			    The cards are direct grid children now. Their p-3/-m-3 pair behaves
-			    identically as a grid item (the negative margin grows the card past
-			    its track by the same 0.75rem the wrapper let it overflow), and the
-			    panel script's offset walk simply has one less hop — it accumulates
-			    the offsetParent chain, so it never cared how many wrappers sat in
-			    between (see the note on offsetIn below). */}
-			<div id="project-list" class="reveal grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2" style="--i: 1">
-				{/* The hover panel — one for the whole grid, sliding to whichever card
-				    is hovered or focused. MUST STAY FIRST: it's kept under the cards by
-				    DOM order as well as z-index (see .card-panel in global.css).
-				    Absolutely positioned, so it claims no grid track. */}
-				<div class="card-panel" aria-hidden="true"></div>
-				{projects.map((project) => (
-					<ProjectCard project={project} />
-				))}
-			</div>
+			    What stays a decision of THIS page: .reveal and --i 1. The grid is
+			    the second of the home page's two blocks (the hero is --i 0), and
+			    the reveal sits on #project-list rather than on #projects so the
+			    section's rule (#projects::before) stays OUTSIDE it — page-level
+			    structure enters in the hairline finale, not with the content. See
+			    the finale block in global.css, and the Props note in the component
+			    for why the caller owns this rather than the grid. */}
+			<ProjectGrid projects={projects} class="reveal" style="--i: 1" />
 		</section>
 	</main>
 
@@ -166,172 +153,3 @@ import { projects } from '../data/projects';
 	</footer>
 
 </Layout>
-
-{/* ── The travelling hover panel ──
-    Drives .card-panel to whichever card is hovered or focused. Built on the
-    same shape as the nav's contact pill (Nav.astro): a shared element that
-    SLIDES between targets when one is already showing, and snaps into place
-    with transitions suppressed when it first appears — otherwise the entrance
-    animates from wherever the last card left it, or from 0,0 on the first
-    hover, which reads as the panel flying in from the corner.
-
-    All geometry comes from offsetLeft/Top/Width/Height, never
-    getBoundingClientRect: offset values are the UNTRANSFORMED layout box. This
-    mattered more when the card lifted 3px on hover — a rect read mid-transition
-    had the panel chasing a moving target — and the card is still scaled while
-    pressed, so the reason hasn't fully gone away. Keep it regardless: a panel
-    that measures its target's transform will always be one gesture behind.
-
-    But they must be ACCUMULATED up the offsetParent chain, not read once — see
-    offsetIn below. Since the grid became the reveal element (2026-08-06) the
-    chain is a single hop — a card's offsetParent is #project-list itself — so
-    the walk is momentarily equivalent to reading offsetLeft/Top directly. Keep
-    the walk anyway: it's what made the per-card .reveal wrappers harmless
-    (each ran a filling transform animation, and an element with a filling
-    transform animation is a containing block FOREVER, so every card reported
-    its own -12,-12 negative margin instead of a grid position — the panel
-    never left the first card until the chain was accumulated), and it keeps
-    any future wrapper from silently reintroducing that bug. */}
-<script>
-	const list = document.getElementById('project-list');
-	const panel = list?.querySelector<HTMLElement>('.card-panel');
-
-	if (list && panel) {
-		const cards = Array.from(list.querySelectorAll<HTMLElement>('.project-card'));
-		// The card no longer lifts on hover (2026-08-02), so the panel simply lands
-		// on the card's own box. This used to read a --card-lift property off the
-		// list and subtract it here, with a reduced-motion branch because the lift
-		// was pinned to 0 under that setting and the two had to agree. All of it
-		// came out with the lift; see the note in global.css if one comes back.
-		let visible = false;
-		let current: HTMLElement | null = null;
-
-		// Sum offsetLeft/Top from `el` up to (not including) `root`, following the
-		// offsetParent chain rather than the DOM parent chain. Terminates on the
-		// root because #project-list is position: relative, so it is the first
-		// positioned ancestor any chain from inside the grid can reach; the null
-		// check is a guard against that ever changing silently.
-		const offsetIn = (el: HTMLElement, root: HTMLElement) => {
-			let x = 0;
-			let y = 0;
-			let node: HTMLElement | null = el;
-			while (node && node !== root) {
-				x += node.offsetLeft;
-				y += node.offsetTop;
-				node = node.offsetParent as HTMLElement | null;
-			}
-			return { x, y };
-		};
-
-		// Position goes on the `translate` PROPERTY, never on `transform`.
-		// The individual transform properties compose in a fixed order —
-		// translate, then rotate, then scale, then `transform` — so anything
-		// written to `transform` sits INSIDE the scale and gets multiplied by
-		// it. With the position there, the panel's press (scale: 0.99) was
-		// scaling its own offset: card 1 sits at x=0 and never moved, card 2
-		// sits at x≈471 and lurched ~4.7px sideways on every press. That was
-		// the jiggle. On `translate` the position is applied before the scale
-		// and is left alone, so the panel only ever changes size in place.
-		const place = (card: HTMLElement) => {
-			const { x, y } = offsetIn(card, list);
-			panel.style.width = `${card.offsetWidth}px`;
-			panel.style.height = `${card.offsetHeight}px`;
-			panel.style.translate = `${x}px ${y}px`;
-		};
-
-		const show = (card: HTMLElement) => {
-			// Already on this card: do nothing. Without this guard, ANY second
-			// call for the same target re-runs the compress below, and the panel
-			// wobbles 3.5% in place with nothing travelling.
-			//
-			// It is not a hypothetical — pressing a card fires it every time.
-			// Mousedown focuses the card's <a>, focusin calls show() with the
-			// card already showing, and the compress restarts underneath the
-			// press. That is most of the jiggle: the press animates scale 1 →
-			// 0.99 while the compress independently drives it to 0.9655 and
-			// back, so the panel dips well past the pressed size and returns.
-			// Measured mid-press before the guard: 0.9805 at +80ms, 0.9986 at
-			// +200ms, 0.99 at +500ms — not even monotonic.
-			if (visible && card === current) return;
-			current = card;
-			if (visible) {
-				// Slide + resize to the new card, and restart the compress that rides
-				// along with it (see @keyframes panel-compress in global.css — the
-				// panel gives up 3.5% of its size while it's moving). A CSS animation
-				// only re-runs if it's removed and re-added with a reflow in between,
-				// and the reflow has to happen while the class is OFF or the browser
-				// coalesces the two states and the animation simply continues from
-				// where the last hop left it. Placing after the flush keeps the
-				// transform change and the animation start in the same frame.
-				panel.classList.remove('is-sliding');
-				void panel.offsetWidth;
-				place(card);
-				panel.classList.add('is-sliding');
-				return;
-			}
-			// First appearance: kill the transition, land on the card, force the
-			// reflow so the browser doesn't coalesce the two states, then let the
-			// class fade it up. Only opacity animates here — and no compress, since
-			// nothing has travelled: the panel is being placed, not moved.
-			panel.classList.remove('is-sliding');
-			panel.style.transition = 'none';
-			place(card);
-			void panel.offsetWidth;
-			panel.style.transition = '';
-			panel.classList.add('is-visible');
-			visible = true;
-		};
-
-		const hide = () => {
-			visible = false;
-			current = null;
-			panel.classList.remove('is-visible');
-			// Drop the compress too, or a hop cut short by leaving the grid leaves a
-			// part-compressed panel behind for the next appearance to snap in at.
-			panel.classList.remove('is-sliding');
-		};
-
-		// Crossing the gutter between two cards briefly leaves every card, which
-		// would hide the panel and re-show it at the new one — killing the slide
-		// that is the whole point. A short grace delay lets the next enter cancel
-		// the hide, so a sweep across the grid stays one continuous move; pausing
-		// in the gutter still clears it.
-		let gapHideTimer = 0;
-		cards.forEach((card) => {
-			card.addEventListener('mouseenter', () => {
-				window.clearTimeout(gapHideTimer);
-				show(card);
-			});
-			card.addEventListener('mouseleave', () => {
-				window.clearTimeout(gapHideTimer);
-				gapHideTimer = window.setTimeout(hide, 90);
-			});
-		});
-		list.addEventListener('mouseleave', () => {
-			window.clearTimeout(gapHideTimer);
-			hide();
-		});
-
-		// Keyboard: the panel follows focus too, so tabbing through the grid marks
-		// the same card the underline and the lift do.
-		list.addEventListener('focusin', (e) => {
-			const card = (e.target as HTMLElement).closest<HTMLElement>('.project-card');
-			if (card) show(card);
-		});
-		list.addEventListener('focusout', (e) => {
-			if (!list.contains(e.relatedTarget as Node)) hide();
-		});
-
-		// The grid reflows on resize (one column below sm), so every offset the
-		// panel is holding goes stale. Re-place rather than hide — the pointer may
-		// still be over the same card — and do it with transitions off, since the
-		// panel isn't travelling anywhere, it's being corrected.
-		window.addEventListener('resize', () => {
-			if (!visible || !current) return;
-			panel.style.transition = 'none';
-			place(current);
-			void panel.offsetWidth;
-			panel.style.transition = '';
-		});
-	}
-</script>
