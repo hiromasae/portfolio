@@ -1588,58 +1588,91 @@ body {
 
    This also forced the line off background-size and onto an ::after. Opacity is
    what fades, and the gradient was painted on the title itself, where fading it
-   would have taken the words with it. The pseudo-element carries the same 2px
-   band at the same position, so the measured descender clearance below is
-   unchanged — see padding-bottom. */
-.project-card__title {
-	/* inline-block, NOT inline: an inline element's padding doesn't grow the
-	   line box, so a line painted below the text can land outside the box (and
-	   outside any ancestor's overflow clip, where it disappears). */
-	display: inline-block;
-	/* The ::after is positioned against this box, so it has to be a containing
-	   block. Nothing else on the title relies on the offset. */
-	position: relative;
-	/* The line hugs the title, so this is the smallest padding that still clears
-	   a descender. The band paints at the BOTTOM of the padding box, so its top
-	   edge lands at (padding-bottom − 2px) from the content box; every extra px
-	   buys exactly 1px of clearance over the y in "Shipyard" and "Discovery".
+   would have taken the words with it.
 
-	   MEASURED, and it moves with the face — four faces, four answers: 1px
-	   cleared by 0.46px under Supreme 700/1.3rem; the same 1px OVERLAPPED by
-	   0.88px under Satoshi 700/1.1rem, which 3px fixed; Archivo 700/1.1rem has a
-	   shallower descender again, so 3px went slack at +3.25px and 1px measured
-	   +1.25px. Restored at 1px. Recursive 600/19px measured +1.00px, and after
-	   the weight scale dropped the title to 400 (2026-08-04) it measures
-	   +0.875px. Still clears, so 1px stands — but this is the thinnest margin
-	   any of the four faces has run at, and it is the value to check first if a
-	   descender ever touches the line.
-	   CORRECTION to the note this replaces, which said descender depth "barely
-	   moves with weight (the stroke thins, the outline doesn't climb)": the
-	   depth does barely move, but it moved the opposite way to what that implied
-	   — 600 → 400 made the descender DEEPER, 3.750px → 3.875px, not shallower.
-	   A lighter cut is not automatically a safer one here. Re-measure when the
-	   face, the size, OR the weight moves.
-	   Procedure: probe the baseline with a zero-height inline-block appended into
-	   the title, add canvas measureText('y').actualBoundingBoxDescent taken at 8×
-	   the rendered size (it quantises to whole px at these sizes), and compare
-	   against the element's bottom − 2px. */
-	padding-bottom: 1px;
-}
-.project-card__title::after {
-	content: "";
-	position: absolute;
-	/* Insets rather than a width: the band spans the span, which the markup
-	   already holds to the words. bottom: 0 puts it at the foot of the PADDING
-	   box — the same place background-position: left bottom painted it — so the
-	   1px measured above is still what clears the descender. */
-	left: 0;
-	right: 0;
-	bottom: 0;
-	height: 2px;
-	/* currentColor, not --ink: the title wears --ink-title, and the line under it
-	   has to travel with it or it reads as a rule the heading happens to sit on. */
-	background: currentColor;
-	opacity: 0;
+   ── 2026-08-11: AND OFF THE ::after, ONTO text-decoration (Hiro: the underline
+   underlines only the last line when the heading wraps) ──
+   The pseudo-element was one absolutely-positioned box pinned to bottom: 0 of a
+   span that covered every line of the title. On a title that fits one line that
+   is the same thing as underlining the words; on a wrapped one it can only ever
+   draw beneath the LAST line — and, worse, at the span's full width rather than
+   the last line's, because an inline-block that wraps takes the whole available
+   width instead of shrinking to its longest line. So the bug was two bugs: the
+   line was under one line of three, and it was too long.
+
+   Nothing about the ::after could fix that. One box cannot underline N lines,
+   and the geometry the browser would need — where each line fragment starts and
+   ends — is not exposed to CSS. text-decoration IS that geometry, per line, for
+   free. What it costs is the opacity fade, since fading the property that draws
+   the words would fade the words: the transition moves to
+   text-decoration-color, transparent → currentColor, which is the same fade of
+   the same 2px band and leaves the asymmetry above intact (it is still the
+   RESTING rule that carries it).
+
+   WHY IT SURFACED NOW: the project page's More projects strip went to three
+   columns today, and a 290.67px track is the first place on the site a title
+   has ever wrapped. The home page's tracks are 448px and every title there
+   still sets on one line, which is why this survived since 08-02 — and why the
+   fix is invisible there. See ProjectGrid.astro. */
+.project-card__title {
+	/* Plain inline now — no display, no position, no padding. All three existed
+	   only to serve the ::after: inline-block so padding would grow the line box,
+	   position: relative to be its containing block, padding-bottom to give the
+	   band somewhere inside the box to land. A text-decoration is drawn by the
+	   text itself, so it needs none of them, and inline is the safest of the
+	   three for the job — a decoration on an inline box paints over the text runs
+	   in every engine, whereas on a block container it is the LINE that is
+	   decorated, and how much trailing space that includes is not something to
+	   rely on across browsers.
+
+	   ⚠ The <span> still earns its place, for a different reason than before: it
+	   holds the decoration to the words rather than the h3's full line box. That
+	   was true of the ::after too (see ProjectCard.astro's note on the span). */
+	text-decoration-line: underline;
+	/* The same 2px band the ::after drew. */
+	text-decoration-thickness: 2px;
+	/* NOT skip-ink: auto, which is the browser default and the reason this is
+	   stated. Auto breaks the line wherever a descender crosses it — measured
+	   here it puts notches under the g of "migaki", "Design" and "Coding" in one
+	   title — and this line has been solid through four typefaces. It clears
+	   descenders by sitting below them instead, which is what the offset is for. */
+	text-decoration-skip-ink: none;
+	/* MEASURED, at 3× device scale against the built stylesheet, by rendering the
+	   title at the strip's 290.67px track and reading the rasterised rows: the
+	   deepest descender ends 55 device-rows below the top of the line's ink, and
+	   this offset puts the band's top edge 1.33px clear of it. The ::after it
+	   replaces measured 1.67px by the same method, so the line sits 0.33px
+	   higher than it did — under a third of a CSS pixel, and the closest whole-px
+	   offset to the old position. 5px measured 0.33px of clearance, which clears
+	   but is thin enough to read as touching; 7px would overshoot the old
+	   position by more than 6px undershoots it.
+
+	   ⚠ This number is NOT the old padding-bottom rescaled, and the two are not
+	   comparable: padding-bottom measured DOWN FROM THE CONTENT BOX (1px), while
+	   text-underline-offset measures down from the font's own underline
+	   position. Anyone reading the history should expect 1 → 6 to look like a
+	   six-fold change in the gap; the gap moved by 0.33px.
+
+	   It still moves with the face, the size and the weight, exactly as the
+	   padding did — the note this replaces recorded four faces and four answers
+	   (Supreme, Satoshi, Archivo, Recursive) and, as a correction worth keeping,
+	   that dropping the title's weight 600 → 400 made the descender DEEPER
+	   (3.750px → 3.875px), not shallower. A lighter cut is not automatically a
+	   safer one here. Re-measure when any of the three moves.
+
+	   Procedure, since it changed with the mechanism: the old one probed the
+	   baseline with a zero-height inline-block and compared against canvas
+	   measureText('y').actualBoundingBoxDescent. A text-decoration's position is
+	   not in the DOM at all, so it cannot be read that way — rasterise instead.
+	   Screenshot the title at 3× with the underline forced on, then find the rows
+	   that are near-continuous across the text's width (the band) versus the rows
+	   that are not (the glyphs), and subtract. */
+	text-underline-offset: 6px;
+	/* Transparent, not `none`: the underline is always present and only its
+	   colour changes, so there is something for the transition below to animate.
+	   text-decoration-line is not an animatable property — switching it on hover
+	   would snap in BOTH directions and lose the release. */
+	text-decoration-color: transparent;
 	/* The LEAVING half — see the block comment. This is the resting rule, so this
 	   is the transition that runs on unhover.
 
@@ -1656,12 +1689,19 @@ body {
 	   lift shadow still runs on it — so the underline no longer leaves in step
 	   with its own card, it leaves in step with the bar. That is the ask, but it
 	   means the two things a card does on unhover now have different lengths;
-	   if the underline ever looks like it's abandoning the shadow, this is why. */
-	transition: opacity var(--dur-pop-out) var(--nav-ease);
+	   if the underline ever looks like it's abandoning the shadow, this is why.
+
+	   The PROPERTY changed with the mechanism (opacity → text-decoration-color)
+	   but not the duration, the easing or which rule carries them. A colour fade
+	   to transparent and an opacity fade are the same fade here, because the band
+	   is the only thing the property paints. */
+	transition: text-decoration-color var(--dur-pop-out) var(--nav-ease);
 }
-.project-card:hover .project-card__title::after,
-.project-card:focus-within .project-card__title::after {
-	opacity: 1;
+.project-card:hover .project-card__title,
+.project-card:focus-within .project-card__title {
+	/* currentColor, not --ink: the title wears --ink-title, and the line under it
+	   has to travel with it or it reads as a rule the heading happens to sit on. */
+	text-decoration-color: currentColor;
 	/* The ARRIVING half: no transition, so the line is simply there. */
 	transition: none;
 }
