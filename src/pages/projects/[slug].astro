@@ -62,12 +62,27 @@ const others = projects.filter((other) => other.slug !== project.slug);
 		    global.css and nothing consumes it. Left there rather than deleted —
 		    that is a palette decision, not a page one.
 
-		    NO sm:text-4xl. The h1 sat one step larger from sm up; the about page's
-		    greeting is text-3xl at every width and this now matches it, so the
-		    title is 35.625px on a phone and on a desktop alike. */}
+		    NO sm:text-4xl. The h1 sat one step larger from sm up; it is one size
+		    at every width now, 28.5px on a phone and on a desktop alike.
+
+		    ── 2026-08-11: text-2xl, NOT the about page's text-3xl ──
+		    Hiro's ask, "make the heading smaller", one step down the scale
+		    (35.625 → 28.5px). This is the first place the two pages part company
+		    since yesterday's pass above, and the note stays because that pass is
+		    what a later reader will find first: the SCALE ANCHOR is no longer
+		    "whatever the about page's greeting is". Colour, weight and tracking
+		    are still that page's exactly; only this one number is ours.
+
+		    It still clears the strip's h2 (text-xl / 23.75px) by a step, which is
+		    what the page needs it to do — the h1 is the only text above the fold
+		    and the h2 is several thousand pixels below it, so the pair never
+		    shares a screen, but the two are the page's only headings and reading
+		    them as one scale rather than two is the point. text-xl here would
+		    have flattened that and is the step to avoid if "smaller" comes up
+		    again; the honest next move at that point is dropping the h2 too. */}
 		<header class="reveal" style="--i: 0">
 			<p class="text-sm tabular-nums text-[var(--ink-soft)]">{project.year}</p>
-			<h1 class="mt-2 text-3xl [font-weight:var(--weight-emph)] tracking-tight text-[var(--ink-heading)]">{project.title}</h1>
+			<h1 class="mt-2 text-2xl [font-weight:var(--weight-emph)] tracking-tight text-[var(--ink-heading)]">{project.title}</h1>
 		</header>
 
 		{/* Reading matter is capped at --measure (see global.css) — ~11 words a
@@ -99,33 +114,40 @@ const others = projects.filter((other) => other.slug !== project.slug);
 		    colours. The page itself still spans the nav's full 960px, which the
 		    images below fill. */}
 		<section class="reveal mt-8 max-w-[var(--measure)]" style="--i: 1">
-			{/* Both paragraphs keep the UI weight tier (w400 dark / w500 light)
-			    rather than inheriting the body's w300 — the only weight bumps the
-			    2026-08-04 legibility audit actually required, and the ONE thing
-			    the 08-10 about-page pass did not touch. Weight is neither a size
-			    nor a colour, and this is the site's longest-form reading; dropping
-			    to w300 would quietly undo an audit finding on prose that just got
-			    5px smaller, which is the wrong direction. So these paragraphs
-			    render at the about page's size and colour a notch heavier than its
-			    own prose does. If an exact match is wanted, deleting both
-			    [font-weight:…] is the whole change.
+			{/* ── 2026-08-11: no weight override, so these inherit --weight-body ──
+			    Hiro's ask, "make the body font weight lighter". Both paragraphs
+			    carried [font-weight:var(--weight-ui)] (w400 dark / w500 light);
+			    dropping it takes them to w300/w400. This is the change the
+			    previous note here named as the exact-match move — the paragraphs
+			    now render at the about page's size, colour AND weight, and this
+			    page has no type of its own left except the h1's size.
 
-			    The audit's numbers are STALE and deliberately not restated: they
-			    were measured at 23.75px/--ink-soft and 21.375px/--ink, and both
-			    paragraphs are now 16.625px/--ink. Smaller type needs MORE weight
-			    for the same APCA floor, so w400 no longer clears what it cleared
-			    then — but the about page's prose is 16.625px at w300 in the same
-			    ink and the audit already lists it as a standing contrast item
-			    that weight cannot fix. This page now sits in that same accepted
-			    posture rather than in one of its own. Re-measure before quoting
-			    any figure here.
+			    ⚠ WHAT THAT OVERRIDE WAS HOLDING, because it was not decoration:
+			    it was the 2026-08-04 legibility audit's finding, the only weight
+			    bump that audit required, and the one thing the 08-10 about-page
+			    pass deliberately left standing on the argument that weight is
+			    neither a size nor a colour and this is the site's longest-form
+			    reading. That argument has now been overruled by the ask, which is
+			    Hiro's call to make; it is recorded here so the bump is not
+			    re-applied as a "fix" by someone who finds the audit and not this.
 
-			    What this DID close: the lead was the site's one residual APCA
-			    shortfall, at 23.75px in --ink-soft where the Lc wanted 35px and no
-			    weight reached the floor. Moving it to --ink retires that entry —
-			    it was a colour gap, and the colour is what changed. */}
-			<p class="text-sm [font-weight:var(--weight-ui)] leading-relaxed">{project.problem}</p>
-			<p class="mt-6 text-sm [font-weight:var(--weight-ui)] leading-relaxed">{project.work}</p>
+			    The audit's own numbers are STALE and are not restated: they were
+			    measured at 23.75px/--ink-soft and 21.375px/--ink, and both
+			    paragraphs are 16.625px/--ink now. What survives the restatement is
+			    the direction — smaller type needs MORE weight for the same APCA
+			    floor, and this went the other way at 16.625px, so assume the
+			    margin is thinner than anything the audit recorded. Re-measure
+			    before quoting a figure.
+
+			    It is not an unprecedented posture: the about page's prose is
+			    16.625px at w300 in this same ink, and the audit already carries
+			    that as a standing contrast item weight cannot fix. This page has
+			    joined it rather than invented a worse one. If the floor ever has
+			    to be met for real, --ink-heading on the prose buys more than any
+			    weight tier does at this size, and colour is the lever the 08-10
+			    pass already used to retire the lead's shortfall. */}
+			<p class="text-sm leading-relaxed">{project.problem}</p>
+			<p class="mt-6 text-sm leading-relaxed">{project.work}</p>
 		</section>
 
 		<section class="reveal mt-10 space-y-5" style="--i: 2">
