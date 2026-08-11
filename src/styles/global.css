@@ -1610,8 +1610,8 @@ body {
    RESTING rule that carries it).
 
    WHY IT SURFACED NOW: the project page's More projects strip went to three
-   columns today, and a 290.67px track is the first place on the site a title
-   has ever wrapped. The home page's tracks are 448px and every title there
+   columns today, and a 285.17px track is the first place on the site a title
+   has ever wrapped. The home page's tracks are 442px and every title there
    still sets on one line, which is why this survived since 08-02 — and why the
    fix is invisible there. See ProjectGrid.astro. */
 .project-card__title {
@@ -1637,15 +1637,19 @@ body {
 	   title — and this line has been solid through four typefaces. It clears
 	   descenders by sitting below them instead, which is what the offset is for. */
 	text-decoration-skip-ink: none;
-	/* MEASURED, at 3× device scale against the built stylesheet, by rendering the
-	   title at the strip's 290.67px track and reading the rasterised rows: the
-	   deepest descender ends 55 device-rows below the top of the line's ink, and
-	   this offset puts the band's top edge 1.33px clear of it. The ::after it
-	   replaces measured 1.67px by the same method, so the line sits 0.33px
-	   higher than it did — under a third of a CSS pixel, and the closest whole-px
-	   offset to the old position. 5px measured 0.33px of clearance, which clears
-	   but is thin enough to read as touching; 7px would overshoot the old
-	   position by more than 6px undershoots it.
+	/* MEASURED, at 3× device scale against the built stylesheet, by rendering a
+	   card title and reading the rasterised rows: the deepest descender ends 55
+	   device-rows below the top of the line's ink, and this offset puts the
+	   band's top edge 1.33px clear of it. The ::after it replaces measured
+	   1.67px by the same method, so the line sits 0.33px higher than it did —
+	   under a third of a CSS pixel, and the closest whole-px offset to the old
+	   position. 5px measured 0.33px of clearance, which clears but is thin
+	   enough to read as touching; 7px would overshoot the old position by more
+	   than 6px undershoots it.
+
+	   The track width is NOT a variable here — this is a font metric, and it was
+	   confirmed identical at the strip's three-up track and the home page's
+	   two-up one. What it does move with is the face, the size and the weight.
 
 	   ⚠ This number is NOT the old padding-bottom rescaled, and the two are not
 	   comparable: padding-bottom measured DOWN FROM THE CONTENT BOX (1px), while

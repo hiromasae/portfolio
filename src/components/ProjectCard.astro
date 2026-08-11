@@ -127,9 +127,35 @@ const { project } = Astro.props;
 	    light, and ~13/255 lighter in dark. Clipping to the padding box lets
 	    it composite over paper, like the about <img> which has no background
 	    of its own — same token, same result. Keep the two in step. */}
+	{/* ── mt-auto: the frame hugs the BOTTOM of the card (2026-08-11, Hiro) ──
+	    Cards are grid items and stretch to their row's height, so a card whose
+	    title takes fewer lines than its tallest neighbour has slack — and until
+	    now that slack sat under the image, leaving the frame floating with a gap
+	    beneath it while the row's other images sat lower. The auto margin eats
+	    the free space ABOVE the frame instead, so every image in a row shares a
+	    bottom edge. They also share a top edge, since the frames are all the same
+	    width and all aspect-[16/9], so they are the same rectangle.
+
+	    Measured on the migaki page before the change: "Shipyard" is a one-line
+	    title where its two neighbours wrap, and its frame sat 23.75px high — one
+	    line of the title's leading, which is exactly the slack.
+
+	    What this spends is the title→image gap, which is no longer constant: it
+	    is gap-4 on the tallest card in a row and gap-4 + the slack on the others.
+	    That is the ask — a shared bottom edge is worth more than a shared gap,
+	    because the images are the row's strongest horizontal line and the gap is
+	    invisible unless you measure it. The gap-4 note above still holds as the
+	    MINIMUM; the flex gap applies on top of the auto margin, so nothing can
+	    close below it.
+
+	    Nothing happens where there is no slack: the home page's two-up row has
+	    only one-line titles, and below sm every card is its own grid row and so
+	    is exactly as tall as its content. This only bites in the project page's
+	    three-up strip, which is where the wrapping starts (see ProjectGrid). */}
 	<div
 		class:list={[
 			'project-card__frame',
+			'mt-auto',
 			'relative aspect-[16/9] w-full overflow-hidden rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface-sunken)] bg-clip-padding',
 		]}
 	>

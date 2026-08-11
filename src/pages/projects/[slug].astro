@@ -245,16 +245,26 @@ const others = projects.filter((other) => other.slug !== project.slug);
 		    two. The cards get NARROWER rather than the strip getting a type
 		    scale of its own: ProjectCard is untouched, so the year, the title
 		    and the 16/9 frame are the same components the home page draws, in a
-		    290.67px track instead of a 448px one. That is the whole of
+		    285.17px track instead of a 442px one. That is the whole of
 		    "smaller", and ProjectGrid.astro records where dividing further stops
-		    working.
+		    working — and note the ⚠ there about px figures being at a 19px root,
+		    because these two numbers are the ones most likely to be re-derived
+		    wrongly from the class names.
 
-		    The grid still spans the page's full 920px — the width never changed,
-		    only how many ways it is cut. Note the strip is the ONLY thing on this
-		    page at that width: the prose above is capped at --measure (665px) and
-		    the screenshots fill 920px. So the strip and the images share an edge
-		    and the cards' outer edges line up with them, which is what keeps a
-		    three-up row from reading as a different page element. */}
+		    The grid still spans the page's full 912.5px — the width never
+		    changed, only how many ways it is cut. Note the strip is the ONLY
+		    thing on this page at that width: the prose above is capped at
+		    --measure (665px) and the screenshots fill 912.5px. So the strip and
+		    the images share an edge and the cards' outer edges line up with
+		    them, which is what keeps a three-up row from reading as a different
+		    page element.
+
+		    ── The card images share a bottom edge (2026-08-11, Hiro: the image
+		    should hug the bottom of the card) ── That is ProjectCard's mt-auto,
+		    not anything this page sets, and this strip is the only place on the
+		    site where it changes a pixel — see the note there. It exists because
+		    the three-up row is the first row on the site to mix one-line and
+		    two-line titles. */}
 		{others.length > 1 && (
 			<section class="reveal mt-32" style="--i: 3">
 				<h2 class="text-xl [font-weight:var(--weight-emph)] tracking-tight text-[var(--ink-heading)]">
