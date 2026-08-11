@@ -159,33 +159,49 @@ const others = projects.filter((other) => other.slug !== project.slug);
 		    Background/Work labels on this very page, and the about page's
 		    interests heading), and it is not coming back through a side door.
 
-		    ── The rule is a .card-rule, deliberately NOT #projects::before ──
-		    Same paint either way, since both are drawn off the shared --rule
-		    gradient, so this reads as one family with the nav's edge and the
-		    home page's projects line. What differs is what comes attached:
-		    #projects::before is keyed to that id and carries the load finale's
-		    `rule-grow` animation (global.css), tuned to the INDEX's two-block
-		    cascade. Borrowing the id would have pulled that animation onto a
-		    rule sitting several thousand pixels below the fold, where it would
-		    play unseen and out of step with this page's four-block cascade — and
-		    it would have put a second #projects on the site. .card-rule is the
-		    static version of the same line and needed nothing.
+		    ── NO DIVIDER (2026-08-10, Hiro: remove the line between the images
+		    and this strip) ── The break is carried by WHITESPACE ALONE now, and
+		    it is the only section break on the site drawn that way: the nav's
+		    edge, the home page's projects line and the about card's two section
+		    rules are all still ruled. So if a later pass is "making the dividers
+		    consistent", this one is the deliberate exception, not the omission.
 
-		    This is .card-rule's third context (about's two section dividers were
-		    the first two). Its comment in global.css still says "the about
-		    card's section rules"; the mechanism was always general — a border-top
-		    with the gradient sliced into it — and the border, rather than a
-		    pseudo-element, is the reason the 1px still occupies layout here.
+		    THE GAP DID NOT CHANGE WITH IT. It was mt-20 (95px) + a 1px border +
+		    pt-12 (57px) = 153px, and it is now a single mt-32 (152px). Removing
+		    the line was the whole ask, so the space it sat in stays exactly
+		    where it was, to the pixel. That also keeps the removal cheap to
+		    reverse — .card-rule back on the section and the 32 split into 20/12
+		    restores it precisely.
 
-		    ── The spacing is LOPSIDED on purpose ──
-		    mt-20 (95px) above the rule, pt-12 (57px) below, which is the home
-		    page's arrangement at #projects (128 above, 57 below) and the same
-		    argument: the rule introduces the section under it, so it belongs to
-		    that section rather than floating between two equal gaps. Don't
-		    balance these. The optical correction the about card's rules need
-		    doesn't apply here either — the thing ABOVE this rule is an <img>,
-		    which has no half-leading, so its bottom edge is its ink and the
-		    margin paints exactly what it says.
+		    The lopsidedness went with the rule, and had to. 95-above/57-below
+		    copied the home page's arrangement at #projects, on the argument that
+		    a rule introduces the section under it and so belongs nearer to it.
+		    With no rule there is nothing for the asymmetry to describe — it was
+		    never about the two blocks, it was about where the LINE sat between
+		    them — so one margin is the honest shape.
+
+		    ⚠ 152px is now the largest bare gap on the site, and that is load
+		    bearing rather than generous: whitespace is doing a job three other
+		    places on the site give a line. Cutting this is what would make the
+		    strip read as more of the case study. If it has to come down, mt-24
+		    (114px) is the step, and the divider coming back is the cheaper fix.
+
+		    What the rule WAS, kept because the choice was not obvious and would
+		    otherwise be re-litigated: a .card-rule, deliberately not
+		    #projects::before. Same paint either way — both are drawn off the
+		    shared --rule gradient — but #projects::before is keyed to that id
+		    and carries the load finale's `rule-grow` animation (global.css),
+		    tuned to the INDEX's two-block cascade. Borrowing the id would have
+		    pulled that animation onto a rule several thousand pixels below the
+		    fold, where it would play unseen and out of step with this page's
+		    four-block cascade, and it would have put a second #projects on the
+		    site. .card-rule is back to its original two consumers (the about
+		    card's section dividers), so it is not orphaned by this.
+
+		    The optical correction those about-card rules need never applied
+		    here anyway, and applies even less now: the thing above this gap is
+		    an <img>, which has no half-leading, so its bottom edge is its ink
+		    and the margin paints exactly what it says.
 
 		    mt-8 (38px) from the h2 down to the grid, not the about page's mt-4.
 		    That gap is smaller than it looks: a card's p-3/-m-3 pair overflows
@@ -202,7 +218,7 @@ const others = projects.filter((other) => other.slug !== project.slug);
 		    plural heading is worse than no strip at all. Three projects today,
 		    so this renders two and fills exactly one row. */}
 		{others.length > 1 && (
-			<section class="card-rule reveal mt-20 pt-12" style="--i: 3">
+			<section class="reveal mt-32" style="--i: 3">
 				<h2 class="text-xl [font-weight:var(--weight-emph)] tracking-tight text-[var(--ink-heading)]">
 					More projects
 				</h2>
