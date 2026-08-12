@@ -38,7 +38,26 @@ import { projects } from '../data/projects';
 		    increases: the space below has to separate the hero from the projects
 		    grid, while the space above only has to clear the nav bar, which is
 		    already a ruled edge. Keep stepping BOTH values together if it goes
-		    up again — the gap is the point, not the individual numbers. */}
+		    up again — the gap is the point, not the individual numbers.
+
+		    ⚠ 2026-08-11 CUT ROUGHLY IN HALF — 112/128 → 56/64, 128/144 → 64/72.
+		    This is the three increases above being UNDONE, and the reason is that
+		    they were the wrong lever. Read as a sequence they are the tell: a
+		    hero that felt thin three separate times, answered three times with
+		    air. The section was 426px tall and 103px of it was ink — 76% air
+		    holding a sentence set at 1.125× body, which is reading size, not
+		    display size. Whitespace was compensating for type that wasn't doing
+		    display work. The fix went to SIZE (see the tagline below); the air
+		    came off in the same pass because at 43.7px the sentence holds the
+		    section on its own and the old padding read as a gap rather than as
+		    breathing room.
+		    The asymmetry survives, halved with everything else: 0.5rem now
+		    rather than 1rem, same direction, same reason.
+		    Measured, both themes, 1440×900: the section goes 426px → 326px and
+		    its ink 103px → 164px, so the air drops from 76% to 50%. The first
+		    project card moves from y=563 to y=462. Note the section did NOT
+		    halve — the padding did, and the type took half of it back. That is
+		    the trade this change is: the same vertical space, spent on ink. */}
 		{/* The hero reveals as ONE block (2026-08-06, Hiro) — the sentence and its
 		    button enter together, --i 0 of a two-beat cascade (the projects grid is
 		    --i 1). They were two entries (--i 0 and 1, with the cards at +2) until
@@ -46,7 +65,7 @@ import { projects } from '../data/projects';
 		    "one entrance on the hero, everything else static" — and collapsed:
 		    elements inside a block enter WITH it, same rule the hairline finale
 		    already enforces for the card dividers. */}
-		<section class="reveal pt-28 pb-32 text-center sm:pt-32 sm:pb-36" style="--i: 0">
+		<section class="reveal pt-14 pb-16 text-center sm:pt-16 sm:pb-[4.5rem]" style="--i: 0">
 			{/* Still capped at --measure so a wide viewport can't run the line out
 			    past a readable length; mx-auto centres the box the cap creates. */}
 			{/* --ink-hero, a step PAST the body ink away from the paper (2026-08-03,
@@ -62,19 +81,85 @@ import { projects } from '../data/projects';
 			    lead again, it is this token it has to answer to. See --ink-hero in
 			    global.css for why the two themes are proportional rather than
 			    inverse. */}
-			{/* Inherits the body's 300. It briefly carried font-normal: the
-			    2026-08-04 APCA audit put this line 0.125px under the floor in the
-			    LIGHT theme (Lc 88.5 wants ≥21.5px at w300; it is 21.375px), so 400
-			    was the minimum that cleared. Hiro asked for it lighter the same
-			    day, knowing that, so 300 stands and this is a deliberate miss, not
-			    an oversight — don't "fix" it back to 400 on sight.
-			    Worth knowing if it ever gets revisited: the shortfall is 0.125px,
-			    so SIZE clears it as easily as weight — text-[1.15rem] (21.85px)
-			    would pass at 300 and keep the lighter drawing. Dark was never the
-			    problem (Lc 93.5, wants 20px at w300); this is a light-theme-only
-			    margin, and it moves with --ink-hero. */}
-			<p class="mx-auto max-w-[var(--measure)] text-lg leading-relaxed text-[var(--ink-hero)]">
-				Design engineering, with good sense and taste.
+			{/* ⚠ 2026-08-11 THIS LINE BECAME DISPLAY TYPE — 21.375px → 43.7px, and
+			    the padding above came off in the same pass. The two are one
+			    change: the hero was 76% air because the sentence was set at
+			    1.125× body and couldn't hold the section, so every previous pass
+			    added padding instead. Size is the lever that was never pulled.
+			    Set as an arbitrary value rather than a scale step because there
+			    is no display tier on this site to step to — the scale runs
+			    16.625px prose to the 35.625px project h1, and this now sits ABOVE
+			    all of it. That is deliberate for the home page's opening
+			    statement, but it is a scale decision, not a hero-local one: if
+			    the project h1 ever needs to lead again, it answers to this, not
+			    to --ink-hero alone.
+
+			    FLUID, not a breakpoint step. It went out as text-[2rem] with an
+			    sm:text-[2.3rem] and that was wrong at both ends — 38px held all
+			    the way down to 320px, which put FOUR lines on a phone. A clamp
+			    scales through the middle instead of stepping once, so the line
+			    count changes where the words actually run out rather than where
+			    a breakpoint happens to sit. Measured, no horizontal overflow at
+			    any width:
+			      320px   31.35px (the floor)   4 lines
+			      390px   31.35px               3 lines
+			      641px   41.7px               2 lines  ← the br turns on here
+			      1440px  43.7px (the ceiling)  2 lines
+			    The 6.5vw middle term is what puts the ceiling at ~672px, so every
+			    desktop width gets the full 43.7px. The floor is the dial for the
+			    phone case; lowering it buys a third line back at 320px but costs
+			    presence at 390px, where most phones actually are.
+
+			    Leading 1.1, down from leading-relaxed's 1.625. A prose leading on
+			    a two-line display sentence opens a gap the eye reads as two
+			    separate statements; at 1.1 the two lines lock into one block.
+
+			    ── The APCA note this replaces, because it is now MOOT ──
+			    The 2026-08-04 audit put this line 0.125px under the floor in the
+			    LIGHT theme at w300 (Lc 88.5 wants ≥21.5px; it was 21.375px), and
+			    that miss was accepted deliberately — Hiro asked for it lighter
+			    knowing the cost. The old note recorded that SIZE clears the
+			    shortfall as easily as weight. It just did, by a factor of two:
+			    at 43.7px the line clears the floor at any weight the face
+			    offers, so the deliberate miss is retired rather than carried.
+
+			    Weight rides --weight-ui, NOT a pinned number, and that is the
+			    correction worth recording. The critique asked for 450–500 and
+			    this shipped as a literal font-[450] first — which quietly broke
+			    the rule at the top of global.css: light runs ONE NOTCH HEAVIER
+			    than dark for all INK text, through the tokens, so that dark ink
+			    on a light ground buys back the stroke it loses. Pinned numbers
+			    are reserved for things that aren't ink on paper (the button's
+			    label, the wordmark). This line is ink on paper, so a pinned 450
+			    would have given light and dark the same weight and undone that
+			    compensation on the theme that needs it most.
+			    --weight-ui is 400 dark / 500 light, which BRACKETS the 450–500
+			    ask rather than splitting it — the theme that draws thinner gets
+			    the lighter number, which is the whole point of the asymmetry.
+			    If it reads heavy, the next stop down is --weight-body (300/400),
+			    not a literal: large type needs less weight than small, and the
+			    size is already doing most of the work here. */}
+			<p class="mx-auto max-w-[var(--measure)] text-[clamp(1.65rem,6.5vw,2.3rem)] leading-[1.1] font-[var(--weight-ui)] text-[var(--ink-hero)]">
+				{/* The break is EXPLICIT and it has to be. Left to wrap, --measure's
+				    665px gives "Design engineering, with good / sense and taste.",
+				    which splits "good sense and taste" — the half of the sentence
+				    doing the actual work. No width cap can fix that: line 2
+				    ("with good sense and taste.", 591px) is WIDER than "Design
+				    engineering, with" (546px), so every cap that fits the second
+				    clause also has room to pull "with" up onto the first. Nor does
+				    text-wrap: balance — it targets even lines and lands on the
+				    546/492 split, which is the same problem one word over.
+				    So the break goes where the sentence's own break is: the comma.
+				    Line 1 short, line 2 long, which is the right way round for a
+				    centred pair — the eye lands on the shorter clause first.
+				    Hidden below sm, where the clause no longer fits on one line
+				    anyway and has to wrap on its own terms — forcing the break
+				    there would just add a line to a column already wrapping.
+				    sm (640px) is the tightest width where it IS active, so that
+				    is the one to check if the copy ever changes: at 641px the
+				    second clause measures 583px inside a 601px column. 18px of
+				    slack. A longer sentence overflows there first. */}
+				Design engineering,<br class="hidden sm:inline" /> with good sense and taste.
 			</p>
 			{/* The page's only route to /about, so it's the site's one real button.
 			    mt-6 rather than the old link's mt-4 — a control needs more air off
