@@ -216,22 +216,38 @@
 	   why the two themes differ here. */
 	--btn-border: var(--btn-face);
 	--btn-border-hover: var(--btn-face-hover);
-	/* The light gathering along the lit (bottom) edge, and the shadow falling
-	   across the head. On a near-black chip the LIGHT does nearly all the
-	   modelling — it has the whole range to climb — and the shadow barely
-	   registers, so it is set high just to be present at all. Dark is the
-	   mirror image; see its block. */
-	/* Back up to 0.5 once the wash was pulled below the baseline (see the
-	   30% stop in .btn). HISTORY, because it is the trap: while the light ran
-	   to 72% it spread into the glyph band and 0.55 put the label at 4.24:1,
-	   under AA's 4.5 for 14px — so the alpha had to be held at 0.32 to buy
-	   contrast the geometry should have been buying. Fixing the geometry is
-	   what made the brightness affordable again.
+	/* The light gathering along the lit (TOP) edge, and the shadow falling away
+	   toward the foot and the far corners. Both themes now spend the SAME
+	   gloss: ΔL* 6.91 at the lit edge, which is all dark's 0.72 buys once it
+	   saturates against a near-white face.
+	   2026-08-12, Hiro: "make light mode gloss strength the same as dark mode".
+	   The two were nowhere near each other — 0.5 over this near-black chip
+	   lifted the top edge 44.8 L* (16.4 → 61.2, rgb(145,148,156)) against
+	   dark's 6.9. The BIG alpha was the small effect and the small alpha the
+	   big one, because alpha buys a fraction of the headroom above the face and
+	   the two faces sit at opposite ends of the range. Matching the perceived
+	   lift rather than the number is what puts 0.07 here.
+	   THE CONSEQUENCE, so it is not later found as a bug: light's total face
+	   span drops to 11.2 L* / 24 levels, against dark's 23.3 / 63. --btn-shade
+	   cannot make that up — black over a near-black chip has only ~16 L* of
+	   room all the way to pure black, so on THIS face the gloss was carrying
+	   the modelling almost alone. Light is deliberately the flatter of the two
+	   chips now; note that 24 levels sits just under the 29 that read flat in
+	   dark on 08-04. Raising this number is the only way back, and it reopens
+	   exactly the gap this closed.
+	   HISTORY of the 0.5 it replaces, kept because the trap is still live for
+	   anyone who raises it: the wash used to run to 72% of the chip, spreading
+	   into the glyph band, where 0.55 put the label at 4.24:1 — under AA's 4.5
+	   for 14px — so the alpha was held down at 0.32 to buy contrast the
+	   geometry should have been buying. Pulling the stop back to 30% (see .btn)
+	   is what made brightness affordable, and 0.5 was the number that bought.
+	   At 0.07 there is no contrast question left: the label measures 9.84:1
+	   even on the lit edge itself, against 2.54:1 before.
 	   Procedure if either number is retuned: sample a glyph-free column inside
 	   the left padding, walk down the chip, and check the row at the BASELINE,
 	   not the row at the bottom edge — the bottom edge always measures worst
 	   and never has text on it. */
-	--btn-lit: 0.5;
+	--btn-lit: 0.07;
 	--btn-shade: 0.22;
 
 	/* Tokyo Night Light's cyan, verbatim. The ring is a UI boundary, so WCAG
