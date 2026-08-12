@@ -205,12 +205,42 @@ const others = projects.filter((other) => other.slug !== project.slug);
 		    rules are all still ruled. So if a later pass is "making the dividers
 		    consistent", this one is the deliberate exception, not the omission.
 
-		    THE GAP DID NOT CHANGE WITH IT. It was mt-20 (95px) + a 1px border +
-		    pt-12 (57px) = 153px, and it is now a single mt-32 (152px). Removing
-		    the line was the whole ask, so the space it sat in stays exactly
-		    where it was, to the pixel. That also keeps the removal cheap to
-		    reverse — .card-rule back on the section and the 32 split into 20/12
-		    restores it precisely.
+		    THE GAP DID NOT CHANGE WITH IT — and then, a day later, it had to.
+		    The rule's removal kept the distance to the pixel: mt-20 (95px) + a
+		    1px border + pt-12 (57px) = 153px became a single mt-32 (152px), so
+		    the space the line had sat in stayed exactly where it was, which also
+		    kept the removal cheap to reverse.
+
+		    ── mt-24, 114px (2026-08-11, Hiro: is there too much space above More
+		    projects) ── Yes, and preserving the number is what caused it. 152px
+		    was calibrated for a gap with a LINE IN THE MIDDLE OF IT: the eye
+		    never met 152px of continuous emptiness, it met 95px, a rule, then
+		    57px. Take the rule out and the same distance becomes one unbroken
+		    void, and unbroken whitespace reads far larger than the same distance
+		    interrupted. The gap did not grow; it emptied. Holding the number
+		    preserved the measurement and lost the effect.
+
+		    MEASURED on this page, which is what settled it: every other gap here
+		    is 47.5px (prose → screenshots) or 38px (this h2 → its cards), and
+		    the page ENDS on 123.5px (see the main's sm:pb-16). At mt-32 the
+		    break in the middle of the page was larger than the one that closes
+		    it — the longest pause landed before the strip rather than after it,
+		    which reads as the strip being detached from the case study instead
+		    of following it. Detached is precisely what the whitespace was meant
+		    to avoid when the rule went. 114px puts it back under the page's
+		    closing gap and still leaves it 2.4× the next-largest gap here, which
+		    is all the strip needs to read as its own movement.
+
+		    ⚠ THE REVERSAL IS NO LONGER FREE, and the note this replaces said it
+		    was: 20/12 + a .card-rule restored the old arrangement precisely only
+		    while this was mt-32. Putting the rule back now means restoring the
+		    gap as well, or accepting a rule in a 114px space it was never
+		    measured for.
+
+		    Still the largest bare gap on the site, and still load bearing:
+		    whitespace is doing a job three other places on the site give a line.
+		    The next step down is mt-20 (95px), which is where it would start
+		    competing with the 47.5px gaps above it rather than out-ranking them.
 
 		    The lopsidedness went with the rule, and had to. 95-above/57-below
 		    copied the home page's arrangement at #projects, on the argument that
@@ -218,12 +248,6 @@ const others = projects.filter((other) => other.slug !== project.slug);
 		    With no rule there is nothing for the asymmetry to describe — it was
 		    never about the two blocks, it was about where the LINE sat between
 		    them — so one margin is the honest shape.
-
-		    ⚠ 152px is now the largest bare gap on the site, and that is load
-		    bearing rather than generous: whitespace is doing a job three other
-		    places on the site give a line. Cutting this is what would make the
-		    strip read as more of the case study. If it has to come down, mt-24
-		    (114px) is the step, and the divider coming back is the cheaper fix.
 
 		    What the rule WAS, kept because the choice was not obvious and would
 		    otherwise be re-litigated: a .card-rule, deliberately not
@@ -284,7 +308,7 @@ const others = projects.filter((other) => other.slug !== project.slug);
 		    the three-up row is the first row on the site to mix one-line and
 		    two-line titles. */}
 		{others.length > 1 && (
-			<section class="reveal mt-32" style="--i: 3">
+			<section class="reveal mt-24" style="--i: 3">
 				<h2 class="text-xl [font-weight:var(--weight-emph)] tracking-tight text-[var(--ink-heading)]">
 					More projects
 				</h2>
