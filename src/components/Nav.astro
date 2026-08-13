@@ -56,6 +56,13 @@ const onHome = path === '/';
 				    regression, not a taste call, and the HUE is what makes both possible
 				    at once — see the dye block in global.css before recolouring.
 
+				    Note the mark's contrast is also set from OUTSIDE this file: it is a
+				    verbatim palette hex, so the only thing that moves it is --paper.
+				    That is how the light theme's inversion was resolved on 08-12 —
+				    the ground went near-white and the mark walked up past the muted
+				    text without being recoloured. Don't try to fix a depth complaint
+				    here; it is not reachable from this component.
+
 				    Initials since 2026-08-02 (was the full "Hiro Eernisse"). The
 				    accessible name has to say what the mark can't: "HE" alone reads as
 				    two letters to a screen reader, and this is the site's home link. */}

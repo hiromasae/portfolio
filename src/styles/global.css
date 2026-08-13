@@ -47,19 +47,47 @@
 	   wherever they clear the site's rules below, and solved in the theme's hue
 	   where they don't; each token says which it is.
 
-	   The papers are no longer near-white and near-black. This ground is a grey
-	   lavender and the ink is a deep navy, so the light theme lost ~11 points of
-	   ink contrast (19.19:1 → 7.57:1). That is the theme, not a slip — but it is
-	   what forces the muting proportion below. */
+	   The dark paper is no longer near-black, and for ten days (08-02 → 08-12)
+	   the light one was not near-white either: a grey-lavender ground under a
+	   deep navy ink cost the light theme ~11 points of ink contrast
+	   (19.19:1 → 7.57:1), which is what forced the muting proportion below onto
+	   the AAA floor and inverted the wordmark's depth. 08-12 took the ground
+	   back to near-white, which is what buys that headroom back. */
 	color-scheme: light;
-	/* 08-02: stepped one further from the dark ground at Hiro's ask ("light mode
-	   bg lighter"). #d5d6db, Tokyo Night Light's own editor background, moves
-	   DOWN to --surface-sunken rather than leaving the palette — so the theme's
-	   ground is still on the page, just as the recessed plane. The paper above
-	   it is derived: same hue, lifted in OKLCH.
-	   This is what bought back the muting depth — see --ink-soft. */
-	--paper: #e9eaee;
-	--ink: #343b58; /* Tokyo Night Light foreground, verbatim — 9.13:1 */
+	/* 2026-08-12, Hiro: "the current bg is too dark", then "even lighter" —
+	   the ground goes near-white in two steps the same day.
+	   #d5d6db → #e9eaee (08-02) → #f7f8fc → #f9fbff. Same construction each
+	   time: the paper's own hue and chroma held, lightness alone raised, here
+	   to L 0.988 at C 0.0057.
+
+	   THIS IS THE LAST CLEAN STOP and the reason is the sRGB boundary, not
+	   taste. The paper is a very light blue-grey, so its blue channel is the
+	   first to run out: at L 0.988 it sits at 255 exactly. Push lightness any
+	   further and blue cannot follow, so the construction stops being "lightness
+	   alone" — the hue collapses toward neutral and the paper silently stops
+	   being the same colour. (It has already drifted from H 275.0 to 264.5 in
+	   the quantisation, which at C 0.0057 is invisible; past here it would not
+	   be.) Anything lighter than this is white with extra steps, and white is
+	   already spoken for one plane up — see --surface.
+
+	   THE GROUND IS THE ONLY LEVER THAT MOVES CONTRAST WITHOUT MOVING A COLOUR,
+	   and that is the whole reason this was worth doing rather than retuning
+	   accents. Every fixed hex on the page gains the same 1.161× — the ink to
+	   10.60:1, the paper's own ceiling to 20.27:1 — so nothing about the RANKING
+	   of two verbatim colours changes: the mark still trails the title by
+	   exactly 0.801×, before and after, and no ground can alter that (see the
+	   dye block). What DOES change is anything pinned to a RATIO rather than to
+	   a hex. --ink-soft is nailed to the AAA floor, so as the ink gains contrast
+	   the muted line re-derives LIGHTER and the muting proportion falls
+	   77.8% → 66.2%, back under the 66% "barely muted" line the AAA pass had
+	   pushed it past. That is the depth 08-05 spent, returned without moving one
+	   palette value — and it is what puts the wordmark ahead of the muted text
+	   (1.029×, from 0.875× trailing).
+
+	   #e9eaee is not demoted this time, it simply leaves; --surface-sunken takes
+	   #e6e7ed instead. See that token — the swap is a fidelity GAIN. */
+	--paper: #f9fbff;
+	--ink: #343b58; /* Tokyo Night Light foreground, verbatim — 10.60:1 (9.13 until 08-12) */
 	/* Secondary text. THE RULE HERE IS A PROPORTION, NOT A HEX: both themes must
 	   mute by the same fraction of their own ink contrast, or the same-looking
 	   grey reads as two different degrees of quiet on two different grounds
@@ -81,19 +109,41 @@
 
 	   2026-08-05 THE FLOOR MOVED: AA → AAA (Hiro, "everything should be AAA in
 	   light mode and dark mode"), and 7:1 on a 9.13:1 ink is a 77.8% muting —
-	   past the 66% that read as "barely muted" in July, so the muted tier now
-	   separates mostly by hue and every accent's lead over it compressed
-	   (title 1.09×, mark 1.27×, from 1.68×/1.95×). That is what AAA costs on
-	   an ink that only carries 9.13:1; the one way to buy the depth back is
+	   past the 66% that read as "barely muted" in July, so the muted tier
+	   separated mostly by hue and every accent's lead over it compressed
+	   (title 1.09×, mark 1.27×, from 1.68×/1.95×). That is what AAA cost on
+	   an ink that only carried 9.13:1; the one way to buy the depth back is
 	   more ink contrast — moving --paper or --ink — not this token. The
 	   PROPORTION-EQUALITY rule died in the same pass: dark could not follow
 	   light to 77.8% without ranking its muted tier above its titles (see the
 	   dark block), so the shared rule is now "each theme sits on the AAA
 	   floor", and that is the invariant a future retune should preserve.
 
-	   Solved in the hue of Tokyo Night's comment #565f89 (which is itself 1.96:1
-	   here — unusable for body text); lightness only. 7.10:1. */
-	--ink-soft: #424a73;
+	   2026-08-12 THE PREDICTION ABOVE CAME TRUE, and it is the clearest proof
+	   this token is a proportion and not a value. Nothing here was retuned. The
+	   ground went near-white for a reason of its own ("the current bg is too
+	   dark"), the ink picked up 1.22 points for free — 9.13:1 → 10.60:1 — and
+	   because this token is nailed to the 7:1 floor rather than to a hex, the
+	   SAME floor now sits at 66.2% instead of 77.8%. The value re-derived
+	   LIGHTER (#424a73 → #4d5579, L 0.421 → 0.458) to stay on the floor, which
+	   is the muting getting deeper, not shallower. Every accent's lead over the
+	   muted line widened with it, and the wordmark crossed back in front of it
+	   for the first time since 08-05 — see the dye block. "Moving --paper" was
+	   named above as the one lever that could do this; it was.
+
+	   Solved in the hue of Tokyo Night's comment #565f89, lightness only —
+	   verbatim it lands at 5.97:1 here, well under the AAA floor this token has
+	   to sit on. 7.01:1, and the two decimals matter: the 7:1 floor is a hard
+	   edge and 8-bit hex does not land on it cleanly. #4d557a — ONE unit of
+	   blue lighter — measures 6.9996 and FAILS. This trap has now been walked
+	   into twice on two different grounds (#4b537c, 6.998, on the intermediate
+	   #f7f8fc), so it is not bad luck: near this floor a whole neighbourhood of
+	   hexes rounds to "7.00" and half of them are under it. If this is ever
+	   re-solved, check the third decimal.
+	   (A previous revision of this line put #565f89 at 1.96:1. That figure does
+	   not reproduce against any token in this file — measured 5.15:1 on the old
+	   ground — and has been corrected rather than rescaled.) */
+	--ink-soft: #4d5579;
 	/* ── Headings that step FORWARD of the body ──
 	   2026-08-03, Hiro: the about page's headings should be lighter, so they
 	   contrast with the body text. Taken the way the button chip was taken —
@@ -107,11 +157,20 @@
 	   PROPORTION of each theme's own ink contrast, never a shared hex, because
 	   the two grounds carry different amounts of contrast and a shared value
 	   would read as two different degrees of emphasis (see the long note above).
-	   --ink-soft steps back to the AAA floor (77.8% since 08-05, 50.4% before
-	   it); this steps forward to 125%. 11.42:1 here,
+	   --ink-soft steps back to the AAA floor (66.2% since 08-12, 77.8% before
+	   it); this steps forward to 125%. 13.25:1 here,
 	   14.26:1 dark. There is no AA question in this direction — the only ceiling
-	   is the paper's own maximum (17.47:1 here, 18.49:1 dark), and 125% leaves
+	   is the paper's own maximum (20.27:1 here, 18.49:1 dark), and 125% leaves
 	   both with room.
+
+	   THE HEX DID NOT MOVE when the ground went near-white on 08-12, and that is
+	   worth one line because it looks like an oversight and is not. Contrast
+	   against a ground scales every fixed hex by the same factor, so --ink and
+	   this token both gained 1.161× and the RATIO between them — the only thing
+	   this token is — came through untouched: 11.42/9.13 and 13.25/10.60 are
+	   both 125%. A proportion pinned to another token on the same ground is
+	   ground-invariant. --ink-soft is pinned to an absolute floor instead, which
+	   is exactly why that one had to be re-solved and this one did not.
 
 	   Solved in --ink's own hue, lightness only, so a heading is the body ink
 	   pushed further rather than a second colour. Light has chroma to spare
@@ -123,7 +182,7 @@
 	   what the about page's documented EXCEPTION to that now resolves to instead
 	   of plain --ink. Read the --ink-title block before pointing anything else
 	   at either one. */
-	--ink-heading: #252c47; /* 11.42:1 — 125% of the ink's contrast */
+	--ink-heading: #252c47; /* 13.25:1 — 125% of the ink's contrast */
 
 	/* ── The hero ink ──
 	   The SECOND forward step, and the two arrived on the same day from
@@ -139,15 +198,20 @@
 	   are not the same hex and are not each other's inverse; they are the same
 	   DISTANCE PAST THE INK, away from the paper.
 	   Like --ink-soft, the rule is a proportion rather than a value: 1.33× the
-	   theme's own ink contrast. 12.18:1 here against --ink's 9.13, and 15.29
-	   against 11.45 in dark — 1.334 and 1.335, which is as close as two hexes
-	   get. Retune it as a ratio or the hero reads brighter on one theme than the
-	   other, which is the exact failure --ink-soft exists to document.
+	   theme's own ink contrast. 14.14:1 here against --ink's 10.60, and 15.29
+	   against 11.45 in dark — 1.333 and 1.335, which is as close as two hexes
+	   get. (Both sides here scaled together when the ground went near-white on
+	   08-12 — 12.18/9.13 was the same 1.334 — so this hex did not move either;
+	   see the note on --ink-heading.) Retune it as a ratio or the hero reads
+	   brighter on one theme than the other, which is the exact failure
+	   --ink-soft exists to document.
 	   Still in the theme's navy, not neutral black: pushing to #000 would give
-	   17.47:1 and drop the only piece of Tokyo Night the body text carries. */
+	   20.27:1 and drop the only piece of Tokyo Night the body text carries. */
 	--ink-hero: #232839;
-	/* Tinted with the ink rather than pure black: on a lavender-grey ground a
-	   neutral black hairline reads as a foreign material. */
+	/* Tinted with the ink rather than pure black: even on a near-white ground a
+	   neutral black hairline reads as a foreign material beside navy type — and
+	   more so since 08-12, because the ground stopped supplying the lavender
+	   cast that used to do half this job. */
 	--line: rgba(52, 59, 88, 0.22); /* card/tag borders */
 	--line-strong: rgba(52, 59, 88, 0.4); /* hover borders */
 	/* The page rules' shared peak — nav edge, projects rule, about card rules
@@ -159,13 +223,50 @@
 	   0.11: translucent light ink already pops on the night ground, which is
 	   why light needs the stronger peak in the first place. */
 	--line-soft: rgba(52, 59, 88, 0.18);
-	/* The raised sheet is Tokyo Night Day's ground — a real palette value that
-	   happens to sit one step above this one, so a card is a lighter sheet of
-	   the same stock rather than a different material. The sunken bed is stepped
-	   DOWN from --paper in OKLCH with chroma raised slightly, the same
-	   construction the dark block uses in the other direction. */
-	--surface: #f2f3f6; /* cards, tags, nav buttons */
-	--surface-sunken: #d5d6db; /* card image bed — Tokyo Night Light's own ground */
+	/* ── The three planes, re-seated 2026-08-12 ──
+	   The near-white ground consumed the room the raised sheet used to sit in,
+	   so all three planes moved at once. They must be read as a set:
+
+	     sunken   #d5d6db → #e6e7ed   L 0.877 → 0.929
+	     paper    #e9eaee → #f9fbff   L 0.937 → 0.988
+	     surface  #f2f3f6 → #ffffff   L 0.964 → 1.000
+
+	   THE SUNKEN BED IS THE FIDELITY GAIN, not the loss it looks like. The old
+	   #d5d6db was labelled "Tokyo Night Light's own editor background" and is
+	   not: it is the ground of folke's LEGACY nvim light palette. This file's
+	   accents all come from enkia's VS Code Tokyo Night Light (the port named at
+	   the top of this block), and that theme's editor background is #e6e7ed —
+	   which is also, to within 0.009 L, exactly where the delta-preserving step
+	   below the new paper lands. So the bed keeps its job, keeps a verbatim
+	   palette ground on the page, and starts being the RIGHT one. Ten days of a
+	   mis-attributed anchor end here.
+
+	   THE RAISED SHEET GOES TO PURE WHITE because there is nowhere else above a
+	   0.988 ground, and white is the one value this file has already ruled
+	   admissible on exactly this argument — see the --ground-tint block, "white
+	   is not a new colour here, it is the limit of the paper itself".
+
+	   THE CARD PLANE IS THE PRICE OF THE WHOLE MOVE, and it is worth stating in
+	   one place rather than discovering later. The step narrows 0.027 → 0.020
+	   (first lift) → 0.0123 L. At 1.2% lightness the fill difference is at the
+	   edge of visible on most displays and gone on a bad one, and the white
+	   sheet no longer carries the faint blue-tint difference that used to do
+	   half the work. A CARD NOW READS BY ITS --line BORDER, essentially alone.
+	   That is a real change in what a card IS here, not a rounding error, and
+	   it is the thing to look at first if the about page starts reading flat.
+
+	   The paper cannot go lighter without taking this to zero, and --surface
+	   cannot go higher than white — so this plane is now the binding constraint
+	   on the ground, ahead of contrast, gamut, or anything in the palette. If
+	   more brightness is ever wanted, the honest move is to give the card a
+	   shadow it has never had, or to strengthen --line, and only then to lift
+	   the paper. Darkening the paper back is the one fix that undoes the ask.
+
+	   The old claim that --surface was "Tokyo Night Day's ground, a real palette
+	   value" was wrong too (day's ground is #e1e2e7); nothing verbatim is lost
+	   by taking this to white. */
+	--surface: #ffffff; /* cards, tags, nav buttons */
+	--surface-sunken: #e6e7ed; /* card image bed — enkia Tokyo Night Light's editor ground, verbatim */
 
 	/* ── The button is a SOLID INK CHIP, not a tinted surface ──
 	   2026-08-02, Hiro: the hero's About button should carry a light background
@@ -178,7 +279,7 @@
 	   described; light theme gets the same IDEA — maximum separation from the
 	   page — pointing the other way.
 	   Contrast comes free and is the best on the site: it's the --ink/--paper
-	   pair inverted, so 9.13:1 here and 11.45:1 in dark, identical to body text.
+	   pair inverted, so 10.60:1 here and 11.45:1 in dark, identical to body text.
 	   Hover moves the ground one step toward the paper (lighter here, lighter
 	   there too — a solid chip brightening reads as "live" in both), active one
 	   step past the rest value in the other direction so press is unmistakably
@@ -194,11 +295,11 @@
 	   The ladder still reads hover-brighter / press-darker in both themes. Here
 	   that puts hover ON the body ink: rest is past it toward black, so the step
 	   back toward the paper lands exactly on --ink. All three clear AA against
-	   the paper text by a wide margin (12.18 / 9.13 / 14.38). */
+	   the paper text by a wide margin (14.14 / 10.60 / 16.69). */
 	--btn-bg: var(--ink-hero);
 	--btn-bg-hover: #343b58; /* --ink */
 	--btn-bg-active: #171a28;
-	--btn-text: #e9eaee; /* --paper */
+	--btn-text: #f9fbff; /* --paper */
 
 	/* ── The enamel's face and its three alphas ──
 	   2026-08-04. The chip's actual painted colour, split off from --btn-bg
@@ -241,8 +342,12 @@
 	   for 14px — so the alpha was held down at 0.32 to buy contrast the
 	   geometry should have been buying. Pulling the stop back to 30% (see .btn)
 	   is what made brightness affordable, and 0.5 was the number that bought.
-	   At 0.07 there is no contrast question left: the label measures 9.84:1
-	   even on the lit edge itself, against 2.54:1 before.
+	   (Those two figures were measured against the old #e9eaee label and are
+	   left as measured — they record a configuration that no longer exists.)
+	   At 0.07 there is no contrast question left: the label measures 11.15:1
+	   even on the lit edge itself. It gained 1.161× on 08-12 for free, because
+	   --btn-text IS --paper and the paper went near-white while the enamel under
+	   it did not move.
 	   Procedure if either number is retuned: sample a glyph-free column inside
 	   the left padding, walk down the chip, and check the row at the BASELINE,
 	   not the row at the bottom edge — the bottom edge always measures worst
@@ -252,7 +357,7 @@
 
 	/* Tokyo Night Light's cyan, verbatim. The ring is a UI boundary, so WCAG
 	   1.4.11's 3:1 is the bar it has to clear against every ground it can land
-	   on — 7.76:1 against --paper and 8.40:1 against --surface, so it has room
+	   on — 9.00:1 against --paper and 9.33:1 against --surface, so it has room
 	   this time (the previous ring shipped under its own floor for a while).
 	   Deliberately the SAME hue as --ink-title below: a focused card shows a
 	   ring the colour of the title inside it, which reads as one object being
@@ -282,6 +387,13 @@
 	   answering to a second competitor). ⚠ 08-05: NO LONGER TRUE IN THIS THEME —
 	   the palette-purity pass put the mark back on verbatim green, which trails
 	   the title; the dye block records the accepted break. Dark still holds.
+	   ⚠ 08-12, and this is the one thing a future retune must not misread: the
+	   near-white ground did NOT fix this half. Both tokens are fixed hexes, so
+	   the ground scales them together and the mark sits at 0.801× the title
+	   before and after — that number is GROUND-INVARIANT and no paper will ever
+	   move it. What the ground did fix is the mark against the muted text, which
+	   is pinned to a ratio and therefore does move. Two different relations,
+	   only one of them reachable from here.
 
 	   ── 2026-08-04: THE HUE MOVED, blue → cyan ──
 	   Hiro: the nav logo and the project headings should be something
@@ -322,12 +434,20 @@
 	   promoting the whole line, which is what a numeric literal does in an
 	   editor. It rides ON --ink-soft's line, so it must clear the floor on its
 	   own — and since the 08-05 AAA pass that floor is 7:1, which the verbatim
-	   #965027 (5.03:1) could not reach. Deepened in the orange's own hue,
-	   lightness only, to 7.24:1 — held one step PAST the muted line's 7.10
-	   deliberately, because a year that trails the line it rides on stops
-	   lifting out of it. NO LONGER VERBATIM; the icon rows keep the verbatim
-	   orange (see --mark-boot), so the tie the marks' comments used to record
-	   is broken, not moved.
+	   #965027 (5.84:1 since 08-12, 5.03 before) still cannot reach. Deepened in
+	   the orange's own hue, lightness only, to 7.15:1 — held one step PAST the
+	   muted line's 7.01 deliberately, because a year that trails the line it
+	   rides on stops lifting out of it. NO LONGER VERBATIM; the icon rows keep
+	   the verbatim orange (see --mark-boot), so the tie the marks' comments used
+	   to record is broken, not moved.
+
+	   08-12 re-solved it, and the direction is worth noting: the near-white
+	   ground let this token move BACK TOWARD verbatim (#7b3809 → #884213,
+	   L 0.423 → 0.461) while still clearing the floor, because both this and the
+	   line it rides re-derive against a lighter paper. The deepening this token
+	   is apologising for is smaller than it was. It does not close — reaching
+	   7:1 on verbatim #965027 would need a paper brighter than white — but the
+	   gap narrowed, and a future ground lift narrows it further.
 
 	   ⚠ 2026-08-10: --ink-num HAS NO CONSUMER. The card datelines dropped it on
 	   08-02 (see ProjectCard.astro) and the project pages' datelines went to
@@ -338,7 +458,7 @@
 	   retiring a hue is a palette decision and that pass was a page-level one.
 	   Two ways out, and they are not equivalent: put a numeral back on it, or
 	   delete it and the dark copy together. Read the paragraph above first if
-	   it ever comes back — the value is tuned to clear --ink-soft's 7.10 by one
+	   it ever comes back — the value is tuned to clear --ink-soft's 7.01 by one
 	   step, and a numeral that doesn't ride that line wants a different number.
 
 	   The title is verbatim Tokyo Night Light. Titles run 24-38px and card
@@ -374,8 +494,8 @@
 	   off because the ask was the about page's palette, full stop. If the accent
 	   is ever restored on this one heading, the rule above is intact and needs
 	   no amending — it never stopped applying. */
-	--ink-title: #0f4b6e; /* cyan, verbatim — 7.76:1, 1.09× the muted text since the AAA pass */
-	--ink-num: #7b3809; /* 7.24:1 — deepened off verbatim for AAA, see above */
+	--ink-title: #0f4b6e; /* cyan, verbatim — 9.00:1, 1.28× the muted text since the ground lift */
+	--ink-num: #884213; /* 7.15:1 — deepened off verbatim for AAA, see above */
 
 	/* ── The about page's marks ──
 	   One hue per mark, each picked to match the emoji it redraws rather than
@@ -391,21 +511,24 @@
 	   floor being cleared for the sighted reader's sake, not a WCAG obligation
 	   these would otherwise fail.
 
-	   THE YELLOW RAN DEEPENED for a day (#704711, 6.72:1, 08-04 → 08-05),
-	   because verbatim #8f5e15 lands at 4.62:1 — level with what was then the
-	   muted text, the faintest thing inside an --ink-heading line at 11.42.
-	   Reverted to verbatim in the 08-05 palette-purity pass (Hiro: only Tokyo
-	   Night colours outside --paper, the inks and the button), which ranks
-	   palette fidelity above that complaint. 4.62 still clears AA's 4.5 with
-	   little to spare, and the wave is the faintest mark in the row again —
-	   that is now the accepted reading, not a bug to re-fix.
+	   THE YELLOW RAN DEEPENED for a day (#704711, 6.72:1 on the old ground,
+	   08-04 → 08-05), because verbatim #8f5e15 landed at 4.62:1 — level with
+	   what was then the muted text, the faintest thing inside an --ink-heading
+	   line. Reverted to verbatim in the 08-05 palette-purity pass (Hiro: only
+	   Tokyo Night colours outside --paper, the inks and the button), which ranks
+	   palette fidelity above that complaint. The wave is still the faintest mark
+	   in the row and that remains the accepted reading — but the margin it clears
+	   AA by stopped being thin on 08-12: the near-white ground took it 4.62 → 5.36
+	   without touching the hex. Nothing in this row is near a floor any more
+	   (5.36 to 8.06), which is the quiet dividend of moving the paper rather
+	   than the palette.
 
 	   Dark's mirror block carries the verbatim night values; see there. */
-	--mark-drums: #8c4351; /* red, verbatim — 5.75:1 */
-	--mark-invader: #5a3e8e; /* magenta, verbatim — 6.95:1 */
-	--mark-clapper: #2959aa; /* blue, verbatim — 5.63:1 */
-	--mark-boot: #965027; /* orange, verbatim — 5.03:1; was --ink-num's value until the 08-05 AAA pass deepened the numeral */
-	--mark-wave: #8f5e15; /* yellow, verbatim — 4.62:1, see above */
+	--mark-drums: #8c4351; /* red, verbatim — 6.68:1 */
+	--mark-invader: #5a3e8e; /* magenta, verbatim — 8.06:1 */
+	--mark-clapper: #2959aa; /* blue, verbatim — 6.53:1 */
+	--mark-boot: #965027; /* orange, verbatim — 5.84:1; was --ink-num's value until the 08-05 AAA pass deepened the numeral */
+	--mark-wave: #8f5e15; /* yellow, verbatim — 5.36:1, see above */
 
 	/* ── The toolbox marks ──
 	   One hue per tool (Hiro, 08-05), and unlike the interests row these have
@@ -432,15 +555,17 @@
 
 	   All seven verbatim Tokyo Night Light — the yellow rode --mark-wave's
 	   deepened value for a day until the 08-05 palette-purity pass reverted
-	   both; the history and the 4.62:1 it costs live on that block. Every one
-	   clears AA against --paper. */
-	--tool-astro: #5a3e8e; /* magenta, verbatim — 6.95:1 */
-	--tool-js: #8f5e15; /* yellow, verbatim — 4.62:1, --mark-wave's value */
-	--tool-tailwind: #0f4b6e; /* cyan, verbatim — 7.76:1, --ink-title's value */
-	--tool-react: #33635c; /* teal, verbatim — 5.67:1 */
-	--tool-figma: #2959aa; /* blue, verbatim — 5.63:1 */
-	--tool-claude: #965027; /* orange, verbatim — 5.03:1 */
-	--tool-git: #8c4351; /* red, verbatim — 5.75:1 */
+	   both; the history and the 4.62:1 it then cost live on that block. Every
+	   one clears AA against --paper, and since the 08-12 ground lift every one
+	   clears it by a real margin (5.36 to 9.00, from 4.62 to 7.76) with no hex
+	   touched. */
+	--tool-astro: #5a3e8e; /* magenta, verbatim — 8.06:1 */
+	--tool-js: #8f5e15; /* yellow, verbatim — 5.36:1, --mark-wave's value */
+	--tool-tailwind: #0f4b6e; /* cyan, verbatim — 9.00:1, --ink-title's value */
+	--tool-react: #33635c; /* teal, verbatim — 6.58:1 */
+	--tool-figma: #2959aa; /* blue, verbatim — 6.53:1 */
+	--tool-claude: #965027; /* orange, verbatim — 5.84:1 */
+	--tool-git: #8c4351; /* red, verbatim — 6.68:1 */
 
 	/* ── The dye ──
 	   The wordmark — and until 08-02 the ONLY colour on the site, which is no
@@ -474,11 +599,19 @@
 	   largest element in the bar reading as the faintest puts it visually BEHIND
 	   everything else — size and weight do not override that. The mark must
 	   out-contrast --ink-soft beside it, and since 08-02 it must also lead
-	   --ink-title. 9.03:1 leads the muted text 1.27× and the title 1.16×.
-	   (Until the 08-05 AAA pass lifted --ink-soft to 7.10, the lead over the
-	   muted text was 1.95× — the widest the mark ever held on paper; the
-	   crimson and the magenta both ran at 1.25×. The compression came from the
-	   floor under the muted text rising, not from this token moving.)
+	   --ink-title. (Measured on the old #e9eaee ground, #264500 led the muted
+	   text 1.27× and the title 1.16×; until the 08-05 AAA pass lifted --ink-soft
+	   to 7.10 the lead over the muted text was 1.95× — the widest the mark ever
+	   held on paper, against 1.25× for the crimson and the magenta. That
+	   compression came from the floor under the muted text rising, not from this
+	   token moving, and the 08-12 ground lift is what gave it back.)
+
+	   ONE CAVEAT ON THE RULE ITSELF, added 08-12 after it was pushed to its
+	   limit: it ranks by luminance contrast alone, and that is only half of
+	   atmospheric perspective. See the chroma note below — on the other half
+	   this token has never stopped leading. The rule is still the one to tune
+	   against, because it is the half that also governs legibility, but a future
+	   pass should not read a contrast deficit as proof the mark reads recessed.
 
 	   Also still true, and the trap in any retune: SATURATION IS PAID FOR IN
 	   CONTRAST. Pushing chroma at a fixed lightness makes a colour darker in
@@ -487,20 +620,56 @@
 	   single dial. Ratios are measured against each theme's --paper.
 
 	   VERBATIM since the 08-05 palette-purity pass (Hiro: only Tokyo Night
-	   colours outside --paper, the inks and the button) — and on this ground,
-	   verbatim BREAKS the depth rule above. #385f0d carries 6.21:1: under the
-	   cyan title's 7.76 AND under the muted text's 7.10, so on paper the
-	   largest piece of type in the bar now reads BEHIND both — exactly the
-	   inversion this block spent seven retunes preventing. KNOWN AND ACCEPTED:
-	   the pass ranks palette fidelity above the depth rule, and dark — the
-	   default theme, where a first-time visitor lands — still holds the rule
-	   as shipped. The deepened forest green this replaces (#264500, 9.03:1 —
-	   1.27× the muted text, 1.16× the title, the most forward the mark ever
-	   sat on paper) is the value to restore if the rule ever outranks the
-	   palette again; it was that green's own hue, lightness only. Still clears
+	   colours outside --paper, the inks and the button). From 08-05 to 08-12
+	   that broke the depth rule outright: on the old #e9eaee ground #385f0d
+	   carried 6.21:1, under the cyan title's 7.76 AND under the muted text's
+	   7.10, so the largest piece of type in the bar read BEHIND both — the
+	   inversion this block spent seven retunes preventing, accepted because the
+	   pass ranks palette fidelity above the depth rule.
+
+	   ── 2026-08-12: HALF OF IT CAME BACK, AND ONLY HALF CAN ──
+	   Hiro moved the ground to near-white for its own reason ("the current bg is
+	   too dark"), and that turns out to be the ONE lever that reaches this
+	   without recolouring anything. #385f0d is unchanged and now carries 7.21:1.
+
+	   Against the muted text: FIXED. The mark leads 1.029× where it trailed at
+	   0.875×. The mechanism is worth understanding before anyone tries to
+	   improve on it — --ink-soft is pinned to the AAA floor as a RATIO, so it
+	   stays at 7:1 no matter how bright the paper gets, while this token is a
+	   fixed hex whose contrast climbs with the ground. Lighten the paper and the
+	   mark walks up past a line that cannot move. Green crosses 7:1 at a paper
+	   luminance of Y≈0.934, which is why the ground landed high and not
+	   lower; there was no cheaper place to put it.
+
+	   Against the title: UNREACHABLE, permanently, and this is the part not to
+	   re-litigate. Both are fixed verbatim hexes, so any ground scales them by
+	   the same factor and the mark sits at 0.801× the title on every possible
+	   paper — 6.21/7.76 and 7.21/9.00 are the same number. No ground, no grain,
+	   no surface lift changes it. The only moves that would are recolouring one
+	   of the two (leaves the palette) or dropping the titles below 7:1 (leaves
+	   AAA, since card titles are small text). Both were weighed and neither is
+	   on offer. The honest reading of today's state: the mark leads the reading
+	   matter and trails the titles, and the second half is the standing cost of
+	   palette fidelity — a real cost, but one paid at 0.80× rather than at the
+	   0.875× AND 0.80× it was paying a day ago.
+
+	   Worth recording because it cuts against the obvious fix: the mark is also
+	   the MOST CHROMATIC element on the light page by a wide margin — OKLCH C
+	   0.116, against the title's 0.083 and the muted text's 0.069. Atmospheric
+	   perspective drains saturation as well as contrast, so on that channel the
+	   mark has led the whole time, including through the 08-05 inversion. And
+	   the deepened green below would spend it: #264500 drops to C 0.098, cutting
+	   the lead over the title from 1.40× to 1.18×. Anyone restoring it is
+	   trading a channel the mark wins for one it cannot.
+
+	   The deepened forest green this replaces (#264500, 9.03:1 on the old ground,
+	   10.48 on this one — 1.49× the muted text, 1.16× the title) is still the
+	   value to restore if fidelity ever loses to hierarchy; it was that green's
+	   own hue, lightness only. Note it does NOT fix the title relation either —
+	   1.16× came from it being a non-palette colour, not from any ground. Still clears
 	   AA-large unaided in both themes, so nothing on the site leans on WCAG
 	   1.4.3's logo/brand-name exemption. */
-	--dye-name: #385f0d; /* green, verbatim — 6.21:1; the depth rule breaks here, see above */
+	--dye-name: #385f0d; /* green, verbatim — 7.21:1; leads the muted text 1.029×, trails the title 0.801× (structural), see above */
 
 	/* ── The page's hairlines ──
 	   One gradient, shared by the nav's bottom edge and the rule over the
@@ -600,6 +769,8 @@
 	   not have the same room to move in:
 	     dark   --paper #0c0e14 → --surface #1a1b26 is 14 levels, ΔL* 2.4
 	     light  --paper #e9eaee → --surface #f2f3f6 is  9 levels, ΔL* 1.4
+	   (light's figures are the 08-04 stack; both of those hexes have since
+	   moved — see the three-planes block above)
 	   So light was landing at little over half of dark's perceived step while
 	   nominally sharing its number — and light also carries the grain, whose
 	   speckle masks a shallow ramp that dark shows plainly.
@@ -612,7 +783,12 @@
 	   tint thins slightly at the foot but never leaves. ΔL* 4.0, comfortably
 	   ahead of dark's 2.4, which is the point: a light ground hides a gradient
 	   that a dark one displays.
-	   Dark keeps --surface and 45% untouched — Hiro likes it there. */
+	   Dark keeps --surface and 45% untouched — Hiro likes it there.
+	   ⚠ SUPERSEDED the next day by the mirror arrangement below: light now SINKS
+	   and no longer travels toward white at all. Kept for the one argument that
+	   outlived it and got reused twice since — white counts as "the limit of the
+	   paper itself" rather than as a new colour, which is what let --surface go
+	   to #ffffff on 08-12. The 60% and the ΔL* 4.0 here are dead numbers. */
 	/* ── The two themes MIRROR each other off a shared head ──
 	   2026-08-05, final arrangement. --paper sits at the HEAD in both, and each
 	   theme travels away from it at the foot in whichever direction has room:
@@ -623,25 +799,42 @@
 	   than the separate foot/head pair it briefly was, when light ran the other
 	   way up.
 
-	   Light takes --surface-sunken (#d5d6db, Tokyo Night Light's own ground),
-	   not --surface and not white. Two reasons, and the second is the one that
-	   settles it:
-	     · room — 20 levels below --paper, against the 9 that --surface offers
-	       above it.
-	     · --surface IS the card and raised-panel colour (#f2f3f6). A ground
-	       lifting toward white would climb PAST it, so the page would end up
-	       brighter than the surfaces that are supposed to sit on top of it, and
-	       the elevation model would invert at the bottom of the viewport.
-	       Sinking has no such ceiling to hit.
+	   Light takes --surface-sunken (#e6e7ed, enkia Tokyo Night Light's editor
+	   ground), not --surface and not white. Two reasons, and the second is the
+	   one that settles it:
+	     · room — it sits below --paper, where --surface has almost none left
+	       above it now that the paper is near-white.
+	     · --surface IS the card and raised-panel colour, and since 08-12 it is
+	       pure white. A ground lifting toward white would land ON it, so the page
+	       would end up level with the surfaces that are supposed to sit on top of
+	       it and the elevation model would collapse at the bottom of the
+	       viewport. Sinking has no such ceiling to hit. This was already the
+	       argument at 08-05, when --surface was #f2f3f6 and the ground would have
+	       climbed PAST it; the near-white paper only sharpened it.
 
 	   The AMOUNTS are deliberately unequal, and this is not an oversight:
 	   light needs a bigger ΔL* than dark to read as equally present. It carries
 	   the grain, whose speckle masks a shallow ramp, and a light ground hides a
-	   gradient that a dark one displays. 60% here is ΔL* ~4.2 against dark's
-	   ~1.6 at 32%. Matching the NUMBERS would leave light looking flat again,
-	   which is the complaint that produced this line in the first place. */
+	   gradient that a dark one displays. Matching the NUMBERS would leave light
+	   looking flat again, which is the complaint that produced this line in the
+	   first place.
+
+	   2026-08-12 THE DIAL IS SOLVED, NOT CHOSEN, and it moved twice in one day
+	   before landing back where it started. THE RULE IS THE TRAVEL: light's
+	   ramp is ~0.036 in OKLCH L, and this percentage is whatever fraction of
+	   the room below --paper produces it. Do not carry the number forward on
+	   its own — re-solve it whenever either ground moves.
+
+	   Worked twice that day, which is the useful illustration. The first lift
+	   (#e9eaee → #f7f8fc) left the sunken bed where it was, so the room fell
+	   0.061 → 0.051 and holding the travel needed 60% → 71%. The second
+	   ("even lighter", → #f9fbff) raised --paper again while the bed stayed at
+	   #e6e7ed, so the room grew back to 0.059 and the same travel now needs
+	   61%. The dial ended up within a point of its original value, having been
+	   nowhere near it in between — proof the percentage was never the thing
+	   being tuned. Dark's 32% is untouched; nothing about its stack moved. */
 	--ground-tint: var(--surface-sunken);
-	--ground-lift: 60%;
+	--ground-lift: 61%;
 	--ground-grad: linear-gradient(
 		0deg,
 		color-mix(in srgb, var(--ground-tint) var(--ground-lift), var(--paper)) 0%,
@@ -1759,8 +1952,11 @@ body {
    this one box and never touches the grid.
 
    --surface is deliberately the FAINT choice: against --paper it is one plane
-   step, not a highlight (#0c0e14 → #1a1b26 dark, #e9eaee → #f2f3f6 light). The
-   panel should be felt rather than read.
+   step, not a highlight (#0c0e14 → #1a1b26 dark, #f9fbff → #ffffff light). The
+   panel should be felt rather than read. Light's step is the fainter of the two
+   and got fainter still on 08-12 (ΔL 0.027 → 0.0123, and the white sheet no
+   longer carries the paper's blue tint) — if this panel stops being felt on
+   light, that is where it went.
 
    z-index 0 AND first in the DOM. Either alone would do it — the cards paint
    later — but the reveal animation gives each grid item a filled animation, and
@@ -2536,10 +2732,12 @@ body {
    without competing with anything.
 
    The marks stay SUBORDINATE to their own labels, and that's the check worth
-   keeping: every --mark-* lands below --ink in its theme (5.03–6.95 against
-   9.13 light; 7.29–9.65 against 11.95 dark). A mark that out-contrasts the
+   keeping: every --mark-* lands below --ink in its theme (5.36–8.06 against
+   10.60 light; 7.29–9.65 against 11.95 dark). A mark that out-contrasts the
    words it introduces has become the content. Re-check this line, not just
-   AA, if any --mark-* is ever retuned. */
+   AA, if any --mark-* is ever retuned — and note the check survives a ground
+   move for free on light, because the marks and --ink are all fixed hexes that
+   scale together (08-12 lifted the whole row 1.161× and the ordering held). */
 .interest-mark {
 	display: block;
 	flex-shrink: 0;
@@ -2592,8 +2790,8 @@ body {
    What the monochrome bought, and what it cost: --ink-soft put every tool
    mark below every interests mark in contrast, which ranked the two lists for
    free and kept the section a visitor came for the louder one. That ranking
-   is gone. The two rows now interleave (5.03–7.76 light, 7.29–11.58 dark
-   against interests' 5.03–6.95 and 7.29–9.65), and the LAYOUT is what keeps
+   is gone. The two rows now interleave (5.36–9.00 light, 7.29–11.58 dark
+   against interests' 5.36–8.06 and 7.29–9.65), and the LAYOUT is what keeps
    them apart instead — one tall column against a short wide grid. If the two
    ever start reading as one run again, that grid is the thing to protect. */
 .tool-mark {
