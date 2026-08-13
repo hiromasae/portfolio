@@ -1846,10 +1846,16 @@ body {
 	   origins the panel would creep out from under one edge and recede from
 	   the other — at 0.99 on a ~330px card that is ~1.6px of daylight at each
 	   end, which is plenty to see against a card border.
-	   NOTE this also re-anchors the travelling compress below, which used to
-	   scale about the centre. For a mostly-horizontal hop the difference is
-	   negligible, and keeping one origin is worth more than the old default. */
-	transform-origin: top;
+	   NOTE this also re-anchors the travelling compress below — see the
+	   .is-sliding rule there, which overrides the X half of this for the length
+	   of a hop and hands it back on animationend. This declaration is the AT-REST
+	   origin: what the press scales about, and the only one the press ever sees.
+
+	   CORRECTION to what stood here (2026-08-13): the old note claimed that for a
+	   mostly-horizontal hop the choice of origin was negligible. It is the exact
+	   opposite — an X origin of 50% is why a horizontal hop had no visible
+	   squeeze. Measured below. */
+	transform-origin: 50% 0;
 	/* Never a hover target itself: it sits under the cursor constantly, and a
 	   panel that could take the pointer would fight the card it is under. */
 	pointer-events: none;
@@ -1953,6 +1959,56 @@ body {
    from nowhere would read as a pop rather than as travel. */
 .card-panel.is-sliding {
 	animation: panel-compress var(--dur-slide) linear;
+	/* ── The squeeze had to be one-sided to be seen (2026-08-13, Hiro: the
+	   horizontal hop doesn't squeeze like the vertical one) ──
+	   The compress above is UNIFORM and was already running identically in both
+	   directions — sampled frame by frame across a horizontal and a vertical hop,
+	   the `scale` timeline is the same numbers on the same clock. What differed
+	   was where the shrink came out of the box, and that is the origin's doing.
+
+	   At rest the origin is 50% 0. Vertically that pins the top edge, so the whole
+	   3.45% leaves the BOTTOM — on a downward hop that is the leading edge pulling
+	   back, one edge moving the full distance, which is the squash everyone can
+	   see. Horizontally 50% splits the same 3.45% across both edges, so each moves
+	   half as far and neither reads as braking. Measured at the compress's peak
+	   (scale 0.9655):
+
+	     home page, 471×346 card   bottom edge 11.94px │ each side 8.12px
+	     project page, 314×281     bottom edge  9.70px │ each side 5.41px
+
+	   5.4px of inset on a 313px hop is not a squeeze, it is a rounding error, and
+	   the project page's "More projects" strip is a single row of three — every
+	   hop there is horizontal, so that page had no squeeze at all. That is what
+	   was reported, and why it was reported against that page even though the
+	   grid is shared. The home page hid it: its vertical hops looked right, so the
+	   horizontal ones read as merely weaker rather than as broken.
+
+	   So: pin the TRAILING edge for the length of the hop and the full width
+	   shrink lands on the leading one — 16.25px on the home page, 10.83px on the
+	   project page, both now larger than their vertical counterpart, which is
+	   correct because the cards are wider than they are tall and the hops are
+	   longer. Both axes now spend the same 3.45% of the dimension they travel
+	   along, which is what "the same squeeze" has to mean on boxes of different
+	   proportions.
+
+	   --slide-origin-x is written by the script (ProjectGrid.astro) because only
+	   it knows which way the panel is going: 0% travelling right, 100% travelling
+	   left, and 50% when the hop is purely vertical, which leaves those hops
+	   byte-identical to what they have always done. The Y half stays 0
+	   unconditionally — an upward hop therefore still contracts from the bottom,
+	   i.e. from the trailing edge rather than the leading one. That is the one
+	   case left un-mirrored, deliberately: vertical is the half that was already
+	   right, and the fallback keeps a hop with no horizontal component from
+	   changing at all.
+
+	   ⚠ THIS RULE MUST NOT OUTLIVE THE ANIMATION. The press (scale: 0.99, above)
+	   shares the origin, and it has to keep 50% or the panel shrinks about one
+	   edge while the card standing on it shrinks about its centre — the same
+	   daylight-at-one-end problem the at-rest origin note describes. The script
+	   drops .is-sliding on animationend, so the override is scoped to travel; the
+	   reduced-motion block below covers the one case where that event never
+	   comes. */
+	transform-origin: var(--slide-origin-x, 50%) 0;
 }
 
 /* Reduced motion: the panel still appears and still marks the hovered card —
@@ -1969,6 +2025,13 @@ body {
 	   to — it would be a shape change with no move under it. */
 	.card-panel.is-sliding {
 		animation: none;
+		/* And the directional origin has to come back off with it. Not cosmetic:
+		   with no animation there is no animationend, so the class the script
+		   normally sheds at the end of a hop STAYS ON for as long as the panel is
+		   showing. Left to itself the .is-sliding rule above would then hand the
+		   press an edge origin permanently — the exact failure that rule's own
+		   warning is about, reached by the one route that skips its cleanup. */
+		transform-origin: 50% 0;
 	}
 	/* The card pins its own press to scale-100 under this setting
 	   (motion-reduce:active:scale-100 in ProjectCard.astro), so the panel has

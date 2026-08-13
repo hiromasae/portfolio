@@ -154,6 +154,12 @@ const columnClass = columns === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2';
 		// came out with the lift; see the note in global.css if one comes back.
 		let visible = false;
 		let current: HTMLElement | null = null;
+		// Where place() last put the panel's left edge, in list coordinates. Read
+		// only to work out which way the NEXT hop travels; the panel's own
+		// style.translate would do as a source but would have to be parsed back out
+		// of a string, and mid-transition it reports an interpolated value rather
+		// than the target the last hop was aimed at.
+		let placedX = 0;
 
 		// Sum offsetLeft/Top from `el` up to (not including) `root`, following the
 		// offsetParent chain rather than the DOM parent chain. Terminates on the
@@ -186,7 +192,41 @@ const columnClass = columns === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2';
 			panel.style.width = `${card.offsetWidth}px`;
 			panel.style.height = `${card.offsetHeight}px`;
 			panel.style.translate = `${x}px ${y}px`;
+			return x;
 		};
+
+		// Which edge the compress should hold still, as the X half of the panel's
+		// transform-origin while it travels (see .card-panel.is-sliding in
+		// global.css for why a uniform scale needs this to be visible at all).
+		// Pin the TRAILING edge, so the shrink comes out of the leading one: 0%
+		// going right, 100% going left.
+		//
+		// 50% for a purely vertical hop is not a fallback, it is the answer — it is
+		// the at-rest origin, so a hop between two cards in the same column keeps
+		// exactly the behaviour it had before any of this existed. Same-column is
+		// the ONLY case that lands here: two cards can share an X or not, and the
+		// grid gives every other pair a sign.
+		const originX = (fromX: number, toX: number) => {
+			if (toX === fromX) return '50%';
+			return toX > fromX ? '0%' : '100%';
+		};
+
+		// The origin override is scoped to the length of the hop, because the press
+		// scales about this same property and must keep the centre (again, see the
+		// warning on that CSS rule). Dropping the class here rather than leaving it
+		// until the next hop is what scopes it, and it costs nothing else: every
+		// other reader of .is-sliding — the remove/reflow/add retrigger, hide() —
+		// is idempotent with respect to the class already being off.
+		//
+		// Guarded on animationName so a future animation on this element can't shed
+		// the class on its own completion. Nothing guards against a cancelled hop's
+		// event landing on its replacement, because there is no such event: the
+		// retrigger removes the class, which CANCELS the running compress, and a
+		// cancel fires `animationcancel` rather than this. If a second animation is
+		// ever added here, check that assumption before trusting it.
+		panel.addEventListener('animationend', (e) => {
+			if (e.animationName === 'panel-compress') panel.classList.remove('is-sliding');
+		});
 
 		const show = (card: HTMLElement) => {
 			// Already on this card: do nothing. Without this guard, ANY second
@@ -214,7 +254,13 @@ const columnClass = columns === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2';
 				// transform change and the animation start in the same frame.
 				panel.classList.remove('is-sliding');
 				void panel.offsetWidth;
-				place(card);
+				const fromX = placedX;
+				placedX = place(card);
+				// Before the class goes back on, so the origin and the animation it
+				// applies to start in the same frame — the reflow above is already
+				// spent, and a property written after the class would take effect a
+				// frame into a 260ms compress that opens on its deepest keyframe.
+				panel.style.setProperty('--slide-origin-x', originX(fromX, placedX));
 				panel.classList.add('is-sliding');
 				return;
 			}
@@ -224,7 +270,7 @@ const columnClass = columns === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2';
 			// nothing has travelled: the panel is being placed, not moved.
 			panel.classList.remove('is-sliding');
 			panel.style.transition = 'none';
-			place(card);
+			placedX = place(card);
 			void panel.offsetWidth;
 			panel.style.transition = '';
 			panel.classList.add('is-visible');
@@ -278,7 +324,11 @@ const columnClass = columns === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2';
 		window.addEventListener('resize', () => {
 			if (!visible || !current) return;
 			panel.style.transition = 'none';
-			place(current);
+			// Kept in step or the next hop reads its direction against a column
+			// position that no longer exists — crossing the sm breakpoint moves
+			// every card to x=0, and a stale placedX would call that a leftward
+			// hop and pin the wrong edge.
+			placedX = place(current);
 			void panel.offsetWidth;
 			panel.style.transition = '';
 		});
