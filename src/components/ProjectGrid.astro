@@ -154,12 +154,12 @@ const columnClass = columns === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2';
 		// came out with the lift; see the note in global.css if one comes back.
 		let visible = false;
 		let current: HTMLElement | null = null;
-		// Where place() last put the panel's left edge, in list coordinates. Read
-		// only to work out which way the NEXT hop travels; the panel's own
+		// Where place() last put the panel's top-left corner, in list coordinates.
+		// Read only to work out which way the NEXT hop travels; the panel's own
 		// style.translate would do as a source but would have to be parsed back out
 		// of a string, and mid-transition it reports an interpolated value rather
 		// than the target the last hop was aimed at.
-		let placedX = 0;
+		let placed = { x: 0, y: 0 };
 
 		// Sum offsetLeft/Top from `el` up to (not including) `root`, following the
 		// offsetParent chain rather than the DOM parent chain. Terminates on the
@@ -192,23 +192,33 @@ const columnClass = columns === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2';
 			panel.style.width = `${card.offsetWidth}px`;
 			panel.style.height = `${card.offsetHeight}px`;
 			panel.style.translate = `${x}px ${y}px`;
-			return x;
+			return { x, y };
 		};
 
-		// Which edge the compress should hold still, as the X half of the panel's
-		// transform-origin while it travels (see .card-panel.is-sliding in
-		// global.css for why a uniform scale needs this to be visible at all).
-		// Pin the TRAILING edge, so the shrink comes out of the leading one: 0%
-		// going right, 100% going left.
+		// Where the compress should be anchored while the panel travels, one axis at
+		// a time. See .card-panel.is-sliding in global.css for why a uniform scale
+		// needs an origin chosen per hop to be visible at all.
 		//
-		// 50% for a purely vertical hop is not a fallback, it is the answer — it is
-		// the at-rest origin, so a hop between two cards in the same column keeps
-		// exactly the behaviour it had before any of this existed. Same-column is
-		// the ONLY case that lands here: two cards can share an X or not, and the
-		// grid gives every other pair a sign.
-		const originX = (fromX: number, toX: number) => {
-			if (toX === fromX) return '50%';
-			return toX > fromX ? '0%' : '100%';
+		// ONE RULE, APPLIED TWICE: an axis the panel is MOVING along pins its
+		// trailing edge, so the whole shrink on that axis comes out of the leading
+		// one and reads as braking. An axis it is NOT moving along centres, so the
+		// shrink splits and BOTH of that axis's edges pull in.
+		//
+		// The split matters more than it looks, and it is the half this got wrong
+		// first time (2026-08-13, Hiro: the effect is only happening on the bottom,
+		// the top just glides). Movement PARALLEL to the sweep is masked by the
+		// sweep — a 16px lag on a 470px hop is not something an eye picks out of a
+		// 260ms move. Movement PERPENDICULAR to it has nothing to hide behind. So on
+		// a horizontal hop the vertical axis is the only one that can carry a
+		// visible squeeze, and pinning it at the top spent all of it on the bottom
+		// edge, leaving the top with nothing but travel. Centred, the top drops as
+		// the bottom rises and the panel pinches around its own path.
+		//
+		// A diagonal hop gets a pin on both axes and no split, which is correct: it
+		// is moving along both, so both have a leading edge to brake with.
+		const originFor = (from: number, to: number, forward: string, back: string) => {
+			if (to === from) return '50%';
+			return to > from ? forward : back;
 		};
 
 		// The origin override is scoped to the length of the hop, because the press
@@ -254,13 +264,14 @@ const columnClass = columns === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2';
 				// transform change and the animation start in the same frame.
 				panel.classList.remove('is-sliding');
 				void panel.offsetWidth;
-				const fromX = placedX;
-				placedX = place(card);
+				const from = placed;
+				placed = place(card);
 				// Before the class goes back on, so the origin and the animation it
 				// applies to start in the same frame — the reflow above is already
 				// spent, and a property written after the class would take effect a
 				// frame into a 260ms compress that opens on its deepest keyframe.
-				panel.style.setProperty('--slide-origin-x', originX(fromX, placedX));
+				panel.style.setProperty('--slide-origin-x', originFor(from.x, placed.x, '0%', '100%'));
+				panel.style.setProperty('--slide-origin-y', originFor(from.y, placed.y, '0%', '100%'));
 				panel.classList.add('is-sliding');
 				return;
 			}
@@ -270,7 +281,7 @@ const columnClass = columns === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2';
 			// nothing has travelled: the panel is being placed, not moved.
 			panel.classList.remove('is-sliding');
 			panel.style.transition = 'none';
-			placedX = place(card);
+			placed = place(card);
 			void panel.offsetWidth;
 			panel.style.transition = '';
 			panel.classList.add('is-visible');
@@ -326,9 +337,9 @@ const columnClass = columns === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2';
 			panel.style.transition = 'none';
 			// Kept in step or the next hop reads its direction against a column
 			// position that no longer exists — crossing the sm breakpoint moves
-			// every card to x=0, and a stale placedX would call that a leftward
+			// every card to x=0, and a stale `placed` would call that a leftward
 			// hop and pin the wrong edge.
-			placedX = place(current);
+			placed = place(current);
 			void panel.offsetWidth;
 			panel.style.transition = '';
 		});

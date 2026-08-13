@@ -1991,15 +1991,35 @@ body {
 	   along, which is what "the same squeeze" has to mean on boxes of different
 	   proportions.
 
-	   --slide-origin-x is written by the script (ProjectGrid.astro) because only
-	   it knows which way the panel is going: 0% travelling right, 100% travelling
-	   left, and 50% when the hop is purely vertical, which leaves those hops
-	   byte-identical to what they have always done. The Y half stays 0
-	   unconditionally — an upward hop therefore still contracts from the bottom,
-	   i.e. from the trailing edge rather than the leading one. That is the one
-	   case left un-mirrored, deliberately: vertical is the half that was already
-	   right, and the fallback keeps a hop with no horizontal component from
-	   changing at all.
+	   ── AND THE CROSS AXIS HAS TO SPLIT (2026-08-13, second pass) ──
+	   Hiro, on the first version of this: the effect is only happening on the
+	   bottom of the card, the top just glides across. Correct, and the reason is
+	   that pinning the trailing edge is only half a rule.
+
+	   Movement PARALLEL to the sweep is masked by the sweep. A 16px lag on a 470px
+	   hop inside 260ms is not something an eye picks out. Movement PERPENDICULAR
+	   to it has nothing to hide behind, which is why the bottom edge was the only
+	   part anyone could see: on a horizontal hop the vertical axis is the only one
+	   that can carry a visible squeeze, and an origin pinned at the top spent all
+	   of that axis on the bottom edge, leaving the top with pure travel.
+
+	   So the rule is one rule applied per axis: an axis the panel MOVES along pins
+	   its trailing edge (the shrink leaves the leading one, and reads as braking);
+	   an axis it does NOT move along centres, so the shrink splits and both of
+	   that axis's edges pull in. A horizontal hop now drops the top by half the
+	   height shrink as it lifts the bottom by the same — 5.97px each on the home
+	   page, 4.85px on the project page — and the panel pinches around its own path
+	   instead of shedding one edge. A diagonal hop pins both axes and splits
+	   neither, which is right: it has a leading edge on both.
+
+	   Both halves are written by the script (ProjectGrid.astro), because only it
+	   knows which way the panel is going. X: 0% travelling right, 100% left. Y: 0%
+	   travelling down, 100% up. Either axis with no travel gets 50%. A purely
+	   vertical downward hop therefore resolves to 50% 0% — the at-rest origin, and
+	   byte-identical to what vertical hops have always done, which is the half
+	   that was already right. An upward hop now mirrors it rather than contracting
+	   from its trailing edge, which is a change, and the only one here that was
+	   not asked for: leaving it would have made up and down hops disagree.
 
 	   ⚠ THIS RULE MUST NOT OUTLIVE THE ANIMATION. The press (scale: 0.99, above)
 	   shares the origin, and it has to keep 50% or the panel shrinks about one
@@ -2008,7 +2028,7 @@ body {
 	   drops .is-sliding on animationend, so the override is scoped to travel; the
 	   reduced-motion block below covers the one case where that event never
 	   comes. */
-	transform-origin: var(--slide-origin-x, 50%) 0;
+	transform-origin: var(--slide-origin-x, 50%) var(--slide-origin-y, 0%);
 }
 
 /* Reduced motion: the panel still appears and still marks the hovered card —
