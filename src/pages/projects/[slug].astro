@@ -218,32 +218,66 @@ const others = projects.filter((other) => other.slug !== project.slug);
 				Array.from({ length: project.placeholders ?? 0 }).map(() => (
 					<div class="aspect-[16/9] w-full rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface-sunken)] bg-clip-padding" />
 				))}
-			{/* <figure> per shot, so the caption belongs to its picture in the
-			    accessibility tree rather than floating as a stray paragraph
-			    between two images. The wrapper also becomes the section's
-			    space-y-5 child, which is what gives the caption a gap of its
-			    own to be tighter than — the one inside the figure has to stay
-			    well under that 5.
+			{/* ── The screenshots open (2026-08-14, Hiro: hovering an image should
+			    give the zoom cursor, clicking should open it full screen) ──
+			    Each shot is wrapped in a real <button>, not a click handler on the
+			    <img>. The wrapper is what makes the gesture reachable by keyboard
+			    and announced as a control; an img with a listener is neither, and
+			    this page's screenshots are the only thing on it worth enlarging.
+			    The button is a bare block box (see .shot in global.css) — the
+			    border, radius and bed still belong to the <img>, so the rendered
+			    page is pixel-identical to what it was before the wrapper existed.
 
-			    CAPTION FIRST, above the image (2026-08-14, Hiro asked whether
-			    it should be; this is that). Spec-legal — figcaption may be the
-			    figure's first or last child — and it earns the position twice
-			    over. A reader cannot un-see a picture, so a label underneath
-			    arrives after the impression it was meant to frame, which for a
-			    before/after is exactly backwards. And with the shots ordered
-			    1,3,2,4 a caption below image 1 would sit directly above the
-			    terminal shot, where it can attach to either neighbour; above,
-			    it binds forward to one image only. */}
+			    The aria-label names the POSITION ("image 2 of 5") rather than
+			    repeating the alt text underneath it, which the button already
+			    exposes; a screen reader reaching this hears the alt, then what the
+			    control does with it.
+
+			    ⚠ THE BUTTON IS ONLY A BUTTON ON A POINTER DEVICE (2026-08-14,
+			    Hiro: mobile shouldn't have any zooming in or out, since you can
+			    zoom with your fingers on the page directly). The markup is static
+			    and identical everywhere, so the script downstairs is what decides:
+			    on a coarse pointer it takes the tab stop and the button role back
+			    off these and never opens anything. Read that block before treating
+			    this element as unconditionally interactive — it is markup for the
+			    case where a cursor exists.
+
+			    ── The <figure> wrapper and the caption (merged in from the caption
+			    branch, 2026-08-14) ──
+			    figure > figcaption + button > img, and that NESTING IS THE WHOLE
+			    RESOLUTION. The caption sits outside the button on purpose: inside,
+			    it would join the button's hit area — so clicking a label would open
+			    a lightbox — and it would be swallowed by the control's accessible
+			    name. Outside, it stays a caption of the figure and the button stays
+			    a control wrapping exactly one image. Don't collapse these two
+			    wrappers into one; they answer different questions.
+
+			    CAPTION FIRST, above the image. Spec-legal — figcaption may be the
+			    figure's first or last child — and it earns the position: a reader
+			    cannot un-see a picture, so a label underneath arrives after the
+			    impression it was meant to frame, which for a before/after is
+			    exactly backwards.
+
+			    The figure is now the section's space-y-5 child, which is what gives
+			    the caption a gap of its own to be tighter than — the one inside the
+			    figure has to stay well under that 5. */}
 			{
 				figures.map(({ src, caption }, i) => (
 					<figure>
 						{caption && <figcaption class={captionClass}>{caption}</figcaption>}
-						<img
-							src={src}
-							alt={caption ? `${project.title} — ${caption}` : `${project.title} — image ${i + 1}`}
-							loading={i === 0 ? 'eager' : 'lazy'}
-							class="w-full rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface)]"
-						/>
+						<button
+							type="button"
+							class="shot"
+							data-shot
+							aria-label={`Enlarge image ${i + 1} of ${figures.length}`}
+						>
+							<img
+								src={src}
+								alt={caption ? `${project.title} — ${caption}` : `${project.title} — image ${i + 1}`}
+								loading={i === 0 ? 'eager' : 'lazy'}
+								class="w-full rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface)]"
+							/>
+						</button>
 					</figure>
 				))
 			}
@@ -452,4 +486,136 @@ const others = projects.filter((other) => other.slug !== project.slug);
 	<footer class="mx-auto max-w-[960px] px-5 py-10 text-xs text-[var(--ink-soft)]">
 		<span>© 2026 Hiro Eernisse</span>
 	</footer>
+
+	{/* ── The lightbox (2026-08-14, Hiro) ──
+	    ONE dialog for the whole page, re-pointed at whichever shot was clicked,
+	    rather than one per image. There is only ever one open, the markup for a
+	    fourth screenshot would be identical to the first three, and a single
+	    element means a single place for the dismissal handler to live.
+
+	    ── IT CLOSES WHEREVER YOU CLICK, AND THERE IS NO CLOSE BUTTON
+	    (2026-08-14, Hiro, revising the same day's first version) ──
+	    The zoom cursor is the entire control surface: zoom-in over a shot on the
+	    page, zoom-out over every pixel of the open modal, image included. The
+	    gesture reverses itself, so the thing that opened it closes it.
+
+	    It shipped with an X chip fixed in the top-right corner for a few hours.
+	    What the chip was actually for was TOUCH — a cursor cannot be an
+	    affordance where there is no cursor — and the answer to that turned out
+	    to be that touch has no business here at all: a phone pinch-zooms the
+	    page itself, far better than any modal would. So the feature is now
+	    gated to pointer devices (see the script), and once mobile is out of
+	    scope the chip has nobody left to serve. The cost, accepted knowingly:
+	    clicking a screenshot to point at something in it closes it.
+
+	    A NATIVE <dialog> opened with showModal(), which is doing more work here
+	    than it looks. Four behaviours come free and are NOT reimplemented below,
+	    so read this before "adding" any of them:
+	      · Esc closes it (the platform's close request);
+	      · it renders in the TOP LAYER, above everything, so it needs no z-index
+	        and cannot be trapped by the nav's stacking context or the page's
+	        transformed .reveal blocks — either of which would defeat a plain
+	        fixed-position div;
+	      · the rest of the page goes inert, so a tab press can't land on a nav
+	        link behind the image, and focus returns to the shot you opened when
+	        it closes;
+	      · ::backdrop is a real element to paint, so the scrim isn't a div.
+
+	    closedby="any" asks the browser for LIGHT DISMISS — a click on the
+	    backdrop closes it with no script at all. With the whole modal now a
+	    dismiss target the script covers that case anyway, so this is belt and
+	    braces rather than the mechanism; it stays because it means the scrim
+	    keeps working if the module never loads. It is still why the dialog
+	    shrink-wraps the image (see .lightbox in global.css) instead of filling
+	    the viewport: "outside" has to be outside the dialog's own box for the
+	    browser to count it.
+
+	    THE DIALOG IS THE ONLY FOCUSABLE THING IN HERE now that the close button
+	    is gone — showModal() focuses the dialog element itself, the aria-label
+	    below is what a screen reader announces on arrival, and Esc is the way
+	    out without a pointer. */}
+	<dialog id="lightbox" class="lightbox" closedby="any" aria-label="Enlarged screenshot">
+		{/* src and alt are both set by the script — empty here so the page never
+		    fetches a second copy of a screenshot nobody has asked to enlarge. */}
+		<img class="lightbox__img" alt="" />
+	</dialog>
 </Layout>
+
+<script>
+	const dialog = document.getElementById('lightbox') as HTMLDialogElement | null;
+	const full = dialog?.querySelector<HTMLImageElement>('.lightbox__img');
+
+	if (dialog && full) {
+		// ── The whole feature is gated on there being a POINTER ──
+		// (2026-08-14, Hiro: mobile shouldn't have any zooming in or out, since
+		// you can zoom with your fingers on the page directly.) A phone already
+		// has a better version of this gesture than any modal could offer — it
+		// pinch-zooms the real page, in place, at whatever magnification the
+		// reader wants, with no state to get out of. Opening a fixed-size copy
+		// of the same picture on top of it is strictly worse.
+		//
+		// `(hover: hover) and (pointer: fine)` is the pair, not either alone:
+		// hover alone lets in a stylus, and pointer alone lets in a TV remote.
+		// Both together mean a mouse or a trackpad, which is exactly the device
+		// class where a cursor can carry the affordance.
+		//
+		// A LIVE QUERY, read inside each handler rather than branched on once at
+		// startup: an iPad that gets a trackpad attached mid-session flips this
+		// from false to true, and a laptop user who picks the screen up flips it
+		// back. Reading it per event means the feature simply follows the device
+		// rather than being decided by whatever was true when the page loaded.
+		const pointer = matchMedia('(hover: hover) and (pointer: fine)');
+
+		const shots = document.querySelectorAll<HTMLButtonElement>('[data-shot]');
+
+		// The markup ships a <button> unconditionally (it has to — the page is
+		// static), so on a coarse pointer the interactivity is taken back off
+		// here: no tab stop, and no "button" in the accessibility tree, because
+		// a control that announces itself and then does nothing is worse than a
+		// plain image. The <img> inside keeps its alt either way — role
+		// presentation applies to the wrapper alone, not to its contents.
+		const syncPointerState = () => {
+			shots.forEach((shot) => {
+				shot.tabIndex = pointer.matches ? 0 : -1;
+				if (pointer.matches) shot.removeAttribute('role');
+				else shot.setAttribute('role', 'presentation');
+			});
+		};
+
+		syncPointerState();
+		pointer.addEventListener('change', syncPointerState);
+
+		shots.forEach((shot) => {
+			shot.addEventListener('click', () => {
+				if (!pointer.matches) return;
+				const img = shot.querySelector('img');
+				if (!img) return;
+				// currentSrc, not src: it is the file the browser actually chose and
+				// already has in cache, so the enlarged view paints instantly instead
+				// of starting a second request. They are the same string today (no
+				// srcset on these), which is exactly why this is worth stating — the
+				// day a srcset appears, this keeps working.
+				full.src = img.currentSrc || img.src;
+				full.alt = img.alt;
+				dialog.showModal();
+			});
+		});
+
+		// A click ANYWHERE in the modal closes it — scrim or picture, no target
+		// check, which is the whole of the dismissal now. The zoom-out cursor
+		// runs over the same area (see .lightbox in global.css), so the pointer
+		// is never over a pixel that promises something this doesn't do.
+		//
+		// ⚠ THIS USED TO BE FOUR TIMES LONGER, and the deleted version was not
+		// wrong — it is worth knowing what it was solving before writing it
+		// again. It tracked pointerdown and pointerup separately and required
+		// both ends of the press to land on the scrim, because a `click` reports
+		// the nearest common ancestor of press and release: a drag starting on
+		// the image and ending on the scrim was indistinguishable from a scrim
+		// click, and closed the picture you were dragging on. That mattered only
+		// while the image was NOT a dismiss target. Now that everything is one,
+		// there are no two cases left to tell apart, and the guard would be
+		// machinery for a distinction the design no longer draws.
+		dialog.addEventListener('click', () => dialog.close());
+	}
+</script>
