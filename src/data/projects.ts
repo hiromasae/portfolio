@@ -110,14 +110,8 @@ export const projects: Project[] = [
 			'A lot of project platforms feel more focused on submission rules than the work itself. Shipyard was meant to feel lighter and more current, with a cleaner way for teams to show what they built and for other people to browse through projects.',
 		work:
 			'I led the product UI decisions with the dev team, working inside their loop instead of handing off finished screens. The main showcase and the discovery flows were the two pieces I owned end to end, and both went through several rounds as the scope of the product moved. Keeping the layouts loose enough to absorb that meant the later changes landed as adjustments rather than redesigns.',
-		cover: '/images/shipyard1.webp',
-		images: [
-			'/images/shipyard1.webp',
-			'/images/shipyard2.webp',
-			'/images/shipyard3.webp',
-			'/images/shipyard4.webp',
-			'/images/shipyard5.webp',
-		],
+		cover: '/images/shipyard.png',
+		images: ['/images/shipyard.png'],
 		link: 'https://shipyardhq.tech/',
 	},
 ];
