@@ -2,11 +2,19 @@
     `images` — see the field's note for why both forms exist. */
 export interface ProjectImage {
 	src: string;
-	/** Rendered under the image. Only set this where the shot cannot explain
-	    itself: two of migaki's are the same prompt built without and with the
-	    skill, and nothing in the pictures says which is which. A caption on a
-	    shot that already reads is noise, which is why the other three projects
-	    carry none — and why migaki's own terminal shots go uncaptioned. */
+	/** Rendered ABOVE the image — see the template for why. Set it where the
+	    shot's ROLE isn't self-evident, which is not the same question as
+	    whether the shot is readable. All four of migaki's are perfectly
+	    legible and not one of them says what it is doing in the sequence: two
+	    are the same prompt built without and with the skill, and nothing in the
+	    pixels says which is which; the other two are terminals whose job in the
+	    argument is invisible until named. The other three projects carry none
+	    because theirs are plain product shots in a set — each is another view
+	    of one thing, so there is no role to disambiguate.
+
+	    An uncaptioned image also falls back to `— image N` for its alt text,
+	    which is worth nothing to a screen reader. That alone is reason enough
+	    not to leave a shot unlabelled when it has anything to say. */
 	caption?: string;
 }
 
@@ -66,16 +74,28 @@ export const projects: Project[] = [
 		   Keep the convention if you add more; migaki5 is the next detail shot,
 		   not a second cover.
 
-		   ⚠ THE FILE NUMBERS ARE NOT THE PAGE ORDER. The array below runs
-		   1, 3, 2, 4 and that is deliberate (2026-08-14, Hiro): the page argues
-		   rather than lists. migaki1 is the same prompt built WITHOUT the skill,
-		   migaki3 is the skill actually running, migaki2 is the result WITH it,
-		   and migaki4 is the taste-decisions list it hands back. Baseline, the
-		   intervention, the result, the reasoning. Sorting these back into
-		   numeric order would put the before and after side by side and drop
-		   the run that connects them, which reads as four screenshots instead
-		   of one argument. Renumber the files if the mismatch ever bites — but
-		   the order is the thing to preserve, not the digits.
+		   The four run in file order, and the shape is comparison first then
+		   mechanism: migaki1 and migaki2 are the same prompt built without and
+		   with the skill, migaki3 is that skill running, migaki4 is the
+		   taste-decisions list it hands back.
+
+		   ⚠ THE PAIR MUST STAY ADJACENT. This briefly ran 1,3,2,4 to follow the
+		   chronology — migaki3 is the run that produced migaki2, so it wanted to
+		   sit in front of it — and that was reverted (2026-08-14, Hiro) because
+		   it cost more than it bought. Comparing two images means holding both
+		   at once, and migaki3 is ~475px of dense terminal wedged between them.
+		   The chronology is the weaker claim: put anything between 1 and 2 and
+		   the page's strongest evidence stops working. If migaki3's link to
+		   migaki2 needs restating, its caption is the place, not the order.
+
+		   ⚠ migaki4 IS A DIFFERENT RUN, and its output is not on the page. It
+		   rewrites the WITHOUT page (`without/index.html`) rather than
+		   continuing from migaki2 — its decisions name Ferrite and quote the
+		   invented 96.6%/8.14s figures visible in migaki1. So it points
+		   BACKWARDS at the first image, which is what its caption has to carry
+		   now that three images separate them. The honest fix is a fifth shot
+		   of the rewritten page, closing the loop migaki4 opens; until then the
+		   caption is doing that work alone.
 
 		   The cover is the only one on the site that isn't a product
 		   screenshot, because migaki has no product to shoot — it's three
@@ -97,17 +117,18 @@ export const projects: Project[] = [
 		   what it's handed. The four below render uncropped at 920px, so their
 		   ratio only sets their height — the two landing pages are the squarer
 		   pair at ~1.37 and stand about 670px tall, the two terminals are wider
-		   and sit shorter. In the 1,3,2,4 order above that alternates tall,
-		   short, tall, short, which is a happy accident worth not breaking: the
-		   two outputs being the tall ones is what stops the page reading as a
-		   wall of equal rectangles. All five are shot at ~2530 wide, which is
-		   the 2x the 920px render needs to stay crisp; don't drop below that. */
+		   and sit shorter. In file order that reads tall, tall, short, short.
+		   The 1,3,2,4 order alternated them instead, which was the one thing
+		   that arrangement had going for it; it was spent deliberately, because
+		   an even rhythm is a smaller prize than a comparison that works. All
+		   five are shot at ~2530 wide, which is the 2x the 920px render needs
+		   to stay crisp; don't drop below that. */
 		cover: '/images/migaki0.webp',
 		images: [
 			{ src: '/images/migaki1.webp', caption: 'Without migaki' },
-			'/images/migaki3.webp',
 			{ src: '/images/migaki2.webp', caption: 'With migaki' },
-			'/images/migaki4.webp',
+			{ src: '/images/migaki3.webp', caption: 'The skill running' },
+			{ src: '/images/migaki4.webp', caption: 'What it proposed for the first page' },
 		],
 	},
 	{
