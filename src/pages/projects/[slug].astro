@@ -504,8 +504,43 @@ const others = projects.filter((other) => other.slug !== project.slug);
 		// dismiss. A click on the ::backdrop is reported with the DIALOG as its
 		// target — that is the whole mechanism this listener runs on, and the
 		// reason it can live on the dialog rather than on the document.
-		dialog.addEventListener('click', (event) => {
-			// TODO(human)
+		//
+		// IT WATCHES BOTH ENDS OF THE PRESS, which is the whole reason this is
+		// two listeners and not a one-line `click` handler. A click fires on the
+		// nearest common ancestor of where the press and the release landed, so
+		// a drag that starts ON the image and ends on the scrim — a slipped
+		// mouse, a swipe, a text-selection attempt — reports the DIALOG as its
+		// target exactly as a scrim click does. Reading only the click event,
+		// dragging off a picture closes the picture.
+		//
+		// Requiring both endpoints outside is also precisely the rule the
+		// platform's own light dismiss follows, so the two paths dismiss on the
+		// same gesture rather than this being a looser imitation of it. That is
+		// worth more than firing on `click` for its own sake: there is no
+		// keyboard path through here to preserve (Esc is the keyboard's answer,
+		// and it is the platform's), so `click` would buy nothing and cost the
+		// symmetry.
+		//
+		// `=== dialog` rather than a closest() walk, on purpose: the dialog
+		// shrink-wraps the image and carries no padding, so the only pixels that
+		// report the dialog itself ARE the backdrop. Anything looser would start
+		// counting the image and the close chip as "outside".
+		//
+		// In a browser that has light dismiss this rarely gets the chance to run
+		// — the platform has already closed the dialog — and if both do fire,
+		// close() on a closed dialog is a no-op.
+		let pressedOutside = false;
+
+		dialog.addEventListener('pointerdown', (event) => {
+			pressedOutside = event.target === dialog;
+		});
+
+		dialog.addEventListener('pointerup', (event) => {
+			const dismiss = pressedOutside && event.target === dialog;
+			// Cleared on every release, so a press that ends anywhere else can't
+			// leave the flag armed for the next one.
+			pressedOutside = false;
+			if (dismiss) dialog.close();
 		});
 	}
 </script>
