@@ -505,30 +505,29 @@
 	   A drum is red, an invader is purple, a boot is leather. The colour is
 	   describing the object, which is the one job it can do honestly here.
 
-	   All five verbatim Tokyo Night Light, and every one clears AA on its own
+	   All four verbatim Tokyo Night Light, and every one clears AA on its own
 	   against --paper — measured, not assumed. They are also aria-hidden
 	   decoration sitting beside a label that says the same thing, so AA is the
 	   floor being cleared for the sighted reader's sake, not a WCAG obligation
 	   these would otherwise fail.
 
-	   THE YELLOW RAN DEEPENED for a day (#704711, 6.72:1 on the old ground,
-	   08-04 → 08-05), because verbatim #8f5e15 landed at 4.62:1 — level with
-	   what was then the muted text, the faintest thing inside an --ink-heading
-	   line. Reverted to verbatim in the 08-05 palette-purity pass (Hiro: only
-	   Tokyo Night colours outside --paper, the inks and the button), which ranks
-	   palette fidelity above that complaint. The wave is still the faintest mark
-	   in the row and that remains the accepted reading — but the margin it clears
-	   AA by stopped being thin on 08-12: the near-white ground took it 4.62 → 5.36
-	   without touching the hex. Nothing in this row is near a floor any more
-	   (5.36 to 8.06), which is the quiet dividend of moving the paper rather
-	   than the palette.
+	   THE ROW HAD A FIFTH until 08-14: --mark-wave, the yellow worn by the
+	   greeting's hand. It was never an interest mark — it lived here because it
+	   was the same kind of object — and the hand now takes the heading's own
+	   --ink-heading (Hiro's ask; see .greeting-wave), which left the token with
+	   no consumer, so it is gone from both themes. The yellow survives verbatim
+	   as --tool-js at the same hex, and its history — the day it ran deepened,
+	   and the 4.62:1 that cost — moved to that block with it.
+
+	   Nothing in this row is near a floor (5.84 to 8.06), which is the quiet
+	   dividend of the 08-12 near-white ground: it lifted these without a hex
+	   being touched.
 
 	   Dark's mirror block carries the verbatim night values; see there. */
 	--mark-drums: #8c4351; /* red, verbatim — 6.68:1 */
 	--mark-invader: #5a3e8e; /* magenta, verbatim — 8.06:1 */
 	--mark-clapper: #2959aa; /* blue, verbatim — 6.53:1 */
 	--mark-boot: #965027; /* orange, verbatim — 5.84:1; was --ink-num's value until the 08-05 AAA pass deepened the numeral */
-	--mark-wave: #8f5e15; /* yellow, verbatim — 5.36:1, see above */
 
 	/* ── The toolbox marks ──
 	   One hue per tool (Hiro, 08-05), and unlike the interests row these have
@@ -553,14 +552,22 @@
 	   either share a hue or take green off the mark, and the second is not on
 	   offer. See the --dye-name block.
 
-	   All seven verbatim Tokyo Night Light — the yellow rode --mark-wave's
-	   deepened value for a day until the 08-05 palette-purity pass reverted
-	   both; the history and the 4.62:1 it then cost live on that block. Every
-	   one clears AA against --paper, and since the 08-12 ground lift every one
-	   clears it by a real margin (5.36 to 9.00, from 4.62 to 7.76) with no hex
-	   touched. */
+	   All seven verbatim Tokyo Night Light. Every one clears AA against
+	   --paper, and since the 08-12 ground lift every one clears it by a real
+	   margin (5.36 to 9.00, from 4.62 to 7.76) with no hex touched.
+
+	   THE YELLOW RAN DEEPENED for a day (#704711, 6.72:1 on the old ground,
+	   08-04 → 08-05), because verbatim #8f5e15 landed at 4.62:1 — level with
+	   what was then the muted text, the faintest thing inside an --ink-heading
+	   line. Reverted to verbatim in the 08-05 palette-purity pass (Hiro: only
+	   Tokyo Night colours outside --paper, the inks and the button), which ranks
+	   palette fidelity above that complaint. It is still the faintest mark in
+	   this row and that remains the accepted reading — but the margin it clears
+	   AA by stopped being thin on 08-12: the near-white ground took it 4.62 →
+	   5.36 without touching the hex. The deepened value was shared with the
+	   about page's --mark-wave, which was retired on 08-14; see that block. */
 	--tool-astro: #5a3e8e; /* magenta, verbatim — 8.06:1 */
-	--tool-js: #8f5e15; /* yellow, verbatim — 5.36:1, --mark-wave's value */
+	--tool-js: #8f5e15; /* yellow, verbatim — 5.36:1, the faintest in this row — see above */
 	--tool-tailwind: #0f4b6e; /* cyan, verbatim — 9.00:1, --ink-title's value */
 	--tool-react: #33635c; /* teal, verbatim — 6.58:1 */
 	--tool-figma: #2959aa; /* blue, verbatim — 6.53:1 */
@@ -1199,12 +1206,8 @@
 	--ink-num: #ff9e64; /* 9.49:1 */
 
 	/* ── The about page's marks ──
-	   The light block carries the reasoning. All five verbatim Tokyo Night
-	   here — including the yellow, which needs no help on this ground: 9.65:1
-	   against the night paper, where its light counterpart carries 4.62 and
-	   ran deepened for a day before the 08-05 palette-purity pass put it back
-	   on verbatim. That asymmetry is the papers being inverted, the same thing
-	   --dye-name's pair shows.
+	   The light block carries the reasoning, including why this row lost its
+	   fifth (--mark-wave) on 08-14. All four verbatim Tokyo Night here.
 
 	   Every one of these clears its light counterpart by 1.3–1.9×, which is
 	   this theme's usual margin and not a per-mark decision. */
@@ -1212,7 +1215,6 @@
 	--mark-invader: #bb9af7; /* magenta, verbatim — 8.34:1 */
 	--mark-clapper: #7aa2f7; /* blue, verbatim — 7.66:1 */
 	--mark-boot: #ff9e64; /* orange, verbatim — 9.49:1, and --ink-num's own value */
-	--mark-wave: #e0af68; /* yellow, verbatim — 9.65:1 */
 
 	/* ── The toolbox marks ──
 	   The light block carries the hue-to-brand reasoning and the note that
@@ -2840,13 +2842,19 @@ body {
    vertical-align is the whole alignment story here: an inline-block's default
    baseline is its bottom margin edge, which hangs the whole hand below the
    text. -0.06em seats the palm on the baseline and lets the fingers rise into
-   the line, which is what the emoji did. */
+   the line, which is what the emoji did.
+
+   No colour of its own: the hand is stroked in currentColor, so with nothing
+   set here it inherits the h1's --ink-heading and reads as part of the
+   greeting rather than as a mark set beside it. The four tool-marks above
+   keep their hues because colour is how they identify a thing; this one is
+   punctuation. This was the only consumer of --mark-wave, so that token went
+   with the colour; the yellow itself is still in the file as --tool-js. */
 .greeting-wave {
 	display: inline-block;
 	width: 0.9em;
 	height: 0.9em;
 	vertical-align: -0.06em;
-	color: var(--mark-wave);
 }
 .greeting-wave svg {
 	display: block;
