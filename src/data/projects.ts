@@ -42,29 +42,42 @@ export const projects: Project[] = [
 			'A coding agent will build almost anything you describe, but left to its own defaults it keeps landing on the same look. Write the fix down once and the document starts aging the day you save it. migaki (磨き, "to polish") is a design skill that tries to solve both halves of that at once: a visual sense an agent can actually apply, that does not decay into a period piece.',
 		work:
 			"The skill is three markdown files. The first holds the timeless perceptual principles, the part of visual judgement that doesn't move. The second catalogues the patterns that read as AI-generated or dated, and the third what reads as excellent right now. Those last two rewrite themselves weekly, so the sense it works from tracks the present instead of settling into a style guide from last year. Anything that can read a skill file gets the whole thing.",
-		/* The only cover that isn't a product screenshot, because migaki has no
-		   product to shoot — it's three markdown files. So the shot is the files
-		   themselves: core.md, edge.md and slop.md open in three panes, which at
-		   the card's 304px reads as three columns of syntax colour long before
-		   any of it reads as words. That's the same bar the other covers clear;
-		   none of them are legible at card size either.
+		/* migaki is numbered 0-4 rather than 1-n like the others (2026-08-14,
+		   Hiro): migaki0 is the card cover and nothing else, migaki1-4 are the
+		   detail page in order. The gap is the point — it keeps the cover free
+		   to be cropped for the card without owning a slot in the sequence
+		   below. Keep the convention if you add more; migaki5 is the next
+		   detail shot, not a second cover.
 
-		   It lands in the site's palette by construction rather than by grading:
-		   the editor theme in the shot is Tokyo Night, and so is this site — see
-		   --surface-sunken and --ink-title in global.css, both taken verbatim
-		   from it. A screenshot from any other theme would need colour work to
-		   sit next to the others. Keep that in mind before re-shooting.
+		   The cover is the only one on the site that isn't a product
+		   screenshot, because migaki has no product to shoot — it's three
+		   markdown files. So the shot is the files themselves: core.md, edge.md
+		   and slop.md open in three panes, which at the card's 304px reads as
+		   three columns of syntax colour long before any of it reads as words.
+		   That's the same bar the other covers clear; none of them are legible
+		   at card size either.
 
-		   It is also the detail page's first image (2026-08-14, Hiro), which
-		   reverses the earlier call to keep it card-only. The worry then was
-		   that a 16/9 crop would look starved rendered uncropped at 920px; the
-		   re-shoot is 2462x1438, near enough to 16/9 that the card crops almost
-		   nothing, and three panes of syntax colour hold up at 920px where a
-		   tighter crop wouldn't have. Re-shoot at that ratio or wider — a
-		   squarer file would sit badly in the card frame, which crops to 16/9
-		   regardless of what it's handed. */
-		cover: '/images/migaki1.webp',
-		images: ['/images/migaki1.webp'],
+		   Everything here lands in the site's palette by construction rather
+		   than by grading: the editor theme in every shot is Tokyo Night, and
+		   so is this site — see --surface-sunken and --ink-title in global.css,
+		   both taken verbatim from it. A screenshot from any other theme would
+		   need colour work to sit next to the others. Keep that in mind before
+		   re-shooting.
+
+		   Ratios differ by job. The cover is 2462x1438 and wants to stay near
+		   16/9 or wider, because the card frame crops to 16/9 regardless of
+		   what it's handed. The four below render uncropped at 920px, so their
+		   ratio only sets their height — 1 and 2 are the squarer pair at ~1.37
+		   and stand about 670px tall, 3 and 4 are wider and sit shorter. All
+		   five are shot at ~2530 wide, which is the 2x the 920px render needs
+		   to stay crisp; don't drop below that. */
+		cover: '/images/migaki0.webp',
+		images: [
+			'/images/migaki1.webp',
+			'/images/migaki2.webp',
+			'/images/migaki3.webp',
+			'/images/migaki4.webp',
+		],
 	},
 	{
 		slug: 'stacksmith',
