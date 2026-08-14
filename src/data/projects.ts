@@ -78,7 +78,6 @@ export const projects: Project[] = [
 		images: [
 			'/images/stacksmith1.png',
 			'/images/stacksmith2.png',
-			'/images/stacksmith3.png',
 			'/images/stacksmith4.png',
 		],
 		link: 'https://app.subframe.com/a4820e3a0486/design/e6b3b72d-a1bb-41d8-95b6-dfe778ef8e78/share',

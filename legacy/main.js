@@ -222,7 +222,7 @@ const projectData = {
     title: 'Stacksmith: AI Tool Stack Discovery',
     link: 'https://app.subframe.com/a4820e3a0486/design/e6b3b72d-a1bb-41d8-95b6-dfe778ef8e78/share',
     thumb: { type: 'image', src: 'images/stacksmith1.png' },
-    images: ['images/stacksmith1.png', 'images/stacksmith2.png', 'images/stacksmith3.png', 'images/stacksmith4.png'],
+    images: ['images/stacksmith1.png', 'images/stacksmith2.png', 'images/stacksmith4.png'],
     problem: 'There are a lot of AI tools now, but most directories still feel like long lists with no real context. Stacksmith was my attempt to make that easier to sort through by showing what tools fit different roles, where they overlap, and how they might work together in an actual stack.',
     contributions: [
       'Designed flows for browsing tools by role and use case',
