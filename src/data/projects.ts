@@ -42,7 +42,23 @@ export const projects: Project[] = [
 			'A coding agent will build almost anything you describe, but left to its own defaults it keeps landing on the same look. Write the fix down once and the document starts aging the day you save it. migaki (磨き, "to polish") is a design skill that tries to solve both halves of that at once: a visual sense an agent can actually apply, that does not decay into a period piece.',
 		work:
 			"The skill is three markdown files. The first holds the timeless perceptual principles, the part of visual judgement that doesn't move. The second catalogues the patterns that read as AI-generated or dated, and the third what reads as excellent right now. Those last two rewrite themselves weekly, so the sense it works from tracks the present instead of settling into a style guide from last year. Anything that can read a skill file gets the whole thing.",
-		cover: '',
+		/* The only cover that isn't a product screenshot, because migaki has no
+		   product to shoot — it's three markdown files. So the shot is the files
+		   themselves: core.md, edge.md and slop.md open in three panes, which at
+		   the card's 304px reads as three columns of syntax colour long before
+		   any of it reads as words. That's the same bar the other covers clear;
+		   none of them are legible at card size either.
+
+		   It lands in the site's palette by construction rather than by grading:
+		   the editor theme in the shot is Tokyo Night, and so is this site — see
+		   --surface-sunken and --ink-title in global.css, both taken verbatim
+		   from it. A screenshot from any other theme would need colour work to
+		   sit next to the others. Keep that in mind before re-shooting.
+
+		   NOT in `images` (see placeholders below) — this is framed for a 16/9
+		   card, and the detail page renders its images uncropped at 920px, which
+		   is a different picture's job. */
+		cover: '/images/migaki1.webp',
 		images: [],
 		placeholders: 3,
 	},
