@@ -190,14 +190,35 @@ const others = projects.filter((other) => other.slug !== project.slug);
 				Array.from({ length: project.placeholders ?? 0 }).map(() => (
 					<div class="aspect-[16/9] w-full rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface-sunken)] bg-clip-padding" />
 				))}
+			{/* ── The screenshots open (2026-08-14, Hiro: hovering an image should
+			    give the zoom cursor, clicking should open it full screen) ──
+			    Each shot is wrapped in a real <button>, not a click handler on the
+			    <img>. The wrapper is what makes the gesture reachable by keyboard
+			    and announced as a control; an img with a listener is neither, and
+			    this page's screenshots are the only thing on it worth enlarging.
+			    The button is a bare block box (see .shot in global.css) — the
+			    border, radius and bed still belong to the <img>, so the rendered
+			    page is pixel-identical to what it was before the wrapper existed.
+
+			    The aria-label names the POSITION ("image 2 of 5") rather than
+			    repeating the alt text underneath it, which the button already
+			    exposes; a screen reader reaching this hears the alt, then what the
+			    control does with it. */}
 			{
 				project.images.map((src, i) => (
-					<img
-						src={src}
-						alt={`${project.title} — image ${i + 1}`}
-						loading={i === 0 ? 'eager' : 'lazy'}
-						class="w-full rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface)]"
-					/>
+					<button
+						type="button"
+						class="shot"
+						data-shot
+						aria-label={`Enlarge image ${i + 1} of ${project.images.length}`}
+					>
+						<img
+							src={src}
+							alt={`${project.title} — image ${i + 1}`}
+							loading={i === 0 ? 'eager' : 'lazy'}
+							class="w-full rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface)]"
+						/>
+					</button>
 				))
 			}
 		</section>
@@ -405,4 +426,86 @@ const others = projects.filter((other) => other.slug !== project.slug);
 	<footer class="mx-auto max-w-[960px] px-5 py-10 text-xs text-[var(--ink-soft)]">
 		<span>© 2026 Hiro Eernisse</span>
 	</footer>
+
+	{/* ── The lightbox (2026-08-14, Hiro) ──
+	    ONE dialog for the whole page, re-pointed at whichever shot was clicked,
+	    rather than one per image. There is only ever one open, the markup for a
+	    fourth screenshot would be identical to the first three, and a single
+	    element means a single place for the close button and the dismissal
+	    handler to live.
+
+	    A NATIVE <dialog> opened with showModal(), which is doing more work here
+	    than it looks. Four behaviours come free and are NOT reimplemented below,
+	    so read this before "adding" any of them:
+	      · Esc closes it (the platform's close request);
+	      · it renders in the TOP LAYER, above everything, so it needs no z-index
+	        and cannot be trapped by the nav's stacking context or the page's
+	        transformed .reveal blocks — either of which would defeat a plain
+	        fixed-position div;
+	      · the rest of the page goes inert, so a tab press can't land on a nav
+	        link behind the image, and focus returns to the shot you opened when
+	        it closes;
+	      · ::backdrop is a real element to paint, so the scrim isn't a div.
+
+	    closedby="any" asks the browser for LIGHT DISMISS — a click on the
+	    backdrop closes it with no script at all. It is why the dialog shrink-
+	    wraps the image (see .lightbox in global.css) instead of filling the
+	    viewport: "outside" has to be outside the dialog's own box for the
+	    browser to count it. Not every browser has it yet, hence the fallback in
+	    the script below; a browser with neither still closes on Esc and on the
+	    button. */}
+	<dialog id="lightbox" class="lightbox" closedby="any" aria-label="Enlarged screenshot">
+		{/* Drawn in the same hand as the nav's icons — 24-unit box, 2px square
+		    caps, mitered — but NOT added to Icon.astro: every glyph in there
+		    carries a measured --len for the load intro's stroke-draw, and this
+		    one is never drawn on load. Two paths rather than one `M6 6l12 12M18
+		    6L6 18`, so the caps at all four ends are the path's own.
+
+		    It wears a chip (see global.css) instead of the nav's bare .btn-icon
+		    treatment, because a bare stroke glyph would be sitting on an
+		    arbitrary screenshot rather than on the page's own ground. */}
+		<button type="button" class="lightbox__close" data-lightbox-close aria-label="Close">
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="2">
+				<path d="M6.5 6.5 17.5 17.5" />
+				<path d="M17.5 6.5 6.5 17.5" />
+			</svg>
+		</button>
+		{/* src and alt are both set by the script — empty here so the page never
+		    fetches a second copy of a screenshot nobody has asked to enlarge. */}
+		<img class="lightbox__img" alt="" />
+	</dialog>
 </Layout>
+
+<script>
+	const dialog = document.getElementById('lightbox') as HTMLDialogElement | null;
+	const full = dialog?.querySelector<HTMLImageElement>('.lightbox__img');
+
+	if (dialog && full) {
+		document.querySelectorAll<HTMLButtonElement>('[data-shot]').forEach((shot) => {
+			shot.addEventListener('click', () => {
+				const img = shot.querySelector('img');
+				if (!img) return;
+				// currentSrc, not src: it is the file the browser actually chose and
+				// already has in cache, so the enlarged view paints instantly instead
+				// of starting a second request. They are the same string today (no
+				// srcset on these), which is exactly why this is worth stating — the
+				// day a srcset appears, this keeps working.
+				full.src = img.currentSrc || img.src;
+				full.alt = img.alt;
+				dialog.showModal();
+			});
+		});
+
+		dialog
+			.querySelector('[data-lightbox-close]')
+			?.addEventListener('click', () => dialog.close());
+
+		// Click-outside-to-close, for browsers without closedby="any" light
+		// dismiss. A click on the ::backdrop is reported with the DIALOG as its
+		// target — that is the whole mechanism this listener runs on, and the
+		// reason it can live on the dialog rather than on the document.
+		dialog.addEventListener('click', (event) => {
+			// TODO(human)
+		});
+	}
+</script>

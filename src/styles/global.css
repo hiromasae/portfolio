@@ -3703,3 +3703,245 @@ html.reveal-skip #projects::before {
 #theme-toggle-wrap .contact-slider.is-rolling .contact-slider-text {
 	animation: theme-label-roll var(--dur-gesture) var(--nav-ease);
 }
+
+/* ── The screenshot lightbox ── (2026-08-14, Hiro: hovering an image should
+   change the cursor to the zoom magnifying cursor, and clicking should open a
+   modal with a full screen view)
+
+   Three pieces: the trigger the screenshots wear, the dialog the enlarged copy
+   lands in, and the close chip. The dialog's *behaviour* — Esc, top layer,
+   inert page, focus return — is the platform's, not this file's; the note in
+   [slug].astro says which parts come free so they aren't reimplemented.
+
+   THE CURSOR IS THE WHOLE AFFORDANCE at rest. Nothing else about a screenshot
+   changes on hover: no tint, no lift, no overlaid glyph. That is deliberate,
+   and it is the decision here most likely to be "improved" later — the page is
+   a reading surface with a few large images on it, and the card grid at the
+   foot already owns the site's hover vocabulary (a travelling panel, a title
+   underline, an arrow). A second, different hover gesture on the images would
+   read as a second kind of card. `zoom-in` is a real UA cursor, drawn by the
+   OS in its own idiom, and it says "this opens bigger" more precisely than
+   anything that could be painted here. */
+.shot {
+	display: block;
+	width: 100%;
+	/* Stated rather than left to preflight: this button has to occupy exactly
+	   the box its <img> did before the wrapper existed, or every gap in the
+	   section's space-y-5 shifts. */
+	padding: 0;
+	border: 0;
+	background: none;
+	cursor: zoom-in;
+}
+
+/* The ring goes on the BUTTON, whose box is the image's exactly, so keyboard
+   focus outlines the screenshot itself — offset outward far enough to clear
+   the image's own --line border rather than doubling it. Same 2px
+   --focus-ring as .btn and .btn-icon; there is one focus treatment here. */
+.shot:focus-visible {
+	outline: 2px solid var(--focus-ring);
+	outline-offset: 3px;
+}
+
+/* ── The dialog SHRINK-WRAPS the image ──
+   Not a full-viewport sheet with a centred image inside it, and the
+   difference is functional rather than stylistic: the browser's own light
+   dismiss (closedby="any") fires on a click outside the dialog's BORDER BOX,
+   and a dialog that fills the viewport has no outside. Shrink-wrapped, the
+   scrim really is outside it, and both dismissals — the browser's and the
+   script's fallback — read the same geometry.
+
+   Centring is the UA's — a modal dialog is inset: 0 with a fit-content size,
+   and `margin: auto` is what resolves the leftover space to equal halves on
+   both axes. THE MARGIN HAS TO BE RESTATED HERE: Tailwind's preflight zeroes
+   the margin on every element, dialog included, and with margin: 0 the auto
+   insets collapse to the start edges — the enlarged image sat in the top-left
+   corner of the viewport rather than the middle of it. Found in the browser,
+   not by reading; the rule that breaks this is in a stylesheet this file
+   imports on line 1 and never mentions again.
+
+   cursor: zoom-out over the scrim is the counterpart to .shot's zoom-in, and
+   it is the only thing advertising that clicking away closes this. The image
+   sets it back to default below — a zoom-out cursor over the picture would
+   promise a dismissal that clicking there does not perform. */
+.lightbox {
+	margin: auto;
+	padding: 0;
+	border: 0;
+	background: none;
+	max-width: none;
+	max-height: none;
+	overflow: visible;
+	cursor: zoom-out;
+}
+
+/* The image drives the dialog's size from inside it: width and height stay
+   auto, so neither axis is stretched and the aspect is the file's. dvh rather
+   than vh so a phone's retracting URL bar can't crop the foot of a tall
+   screenshot.
+
+   The 4vw/6dvh left over is what lets the scrim read AS a scrim — an image
+   bled to the viewport edge reads as a navigation, not an overlay — and on a
+   desktop it is also the margin the close chip sits in, clear of the picture.
+
+   ⚠ THESE ARE CEILINGS, NOT SIZES: with both dimensions auto the image never
+   grows past its own pixels, so a file smaller than the box opens at 1:1
+   rather than being blown up soft. Today's screenshots are ~1070px wide
+   against a 913px slot on the page, so the enlargement is real on any normal
+   window — but it is bounded by the FILE, and on a short viewport (88dvh under
+   ~700px) the height ceiling can land the enlarged copy at or below the size
+   it already had in the page. That is the accepted trade: a lightbox that
+   upscales is a lightbox that shows you a blurrier picture than the one you
+   clicked, and this page's whole subject is other people's UI. If a future
+   screenshot really is too small to be worth opening, the fix is a bigger
+   file, not a bigger multiplier here. */
+.lightbox__img {
+	display: block;
+	width: auto;
+	height: auto;
+	max-width: 92vw;
+	max-height: 88dvh;
+	border-radius: var(--radius);
+	cursor: default;
+	/* The same bed the page's own screenshots sit on, so a PNG with
+	   transparency doesn't show the scrim through itself. */
+	background: var(--surface);
+}
+
+/* ── The scrim ──
+   A LITERAL rgba, not a token, and the exception is worth stating in a file
+   that tokenises everything: ::backdrop only inherits custom properties from
+   its originating element in browsers new enough to carry that fix, and a
+   var() that fails to resolve here paints NOTHING — the failure mode is a
+   full-screen image floating over a live, undimmed page. A fixed value cannot
+   fail that way.
+
+   One value for both themes, on purpose. The scrim's job is to put the page
+   away and leave an arbitrary screenshot the only lit thing on screen, and
+   that job doesn't change with the ground it covers; a light-theme scrim pale
+   enough to match the paper would leave a white screenshot floating on
+   near-white. It is the dark theme's --paper taken further down. */
+.lightbox::backdrop {
+	background: rgba(6, 7, 11, 0.86);
+}
+
+/* ── The close chip ──
+   FIXED to the viewport corner, not absolute to the image. Its position is
+   then identical on every project page whatever the screenshot's shape — a
+   9:16 phone capture and a 16:9 desktop one put their own top-right corners
+   in wildly different places, and a control that moves with the content is a
+   control you have to go looking for. position: fixed inside a top-layer
+   element resolves against the viewport, so this needs no z-index.
+
+   It lands ON the image at narrow widths, where 92vw leaves only a few pixels
+   of margin, which is why it wears a chip at all: --surface with a real
+   border, the same materials as a nav button, so it stays legible over a
+   screenshot of anything. The nav's bare .btn-icon treatment (stroke glyph,
+   no ground) is right on the page's own paper and wrong on someone's UI. */
+.lightbox__close {
+	position: fixed;
+	top: 0.75rem;
+	right: 0.75rem;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	/* ~44px at the 19px root — a full touch target, which the nav's icons get
+	   to skip only because they have a whole bar of forgiveness around them. */
+	width: 2.3rem;
+	height: 2.3rem;
+	padding: 0.5rem;
+	border: 1px solid var(--line-strong);
+	border-radius: var(--radius);
+	background: var(--surface);
+	color: var(--ink-soft);
+	cursor: pointer;
+	transition:
+		color var(--dur-tap) ease,
+		border-color var(--dur-tap) ease;
+}
+
+.lightbox__close svg {
+	width: 100%;
+	height: 100%;
+}
+
+.lightbox__close:hover {
+	color: var(--ink);
+	border-color: var(--ink-soft);
+}
+
+.lightbox__close:focus-visible {
+	outline: 2px solid var(--focus-ring);
+	outline-offset: 2px;
+}
+
+/* ── The entrance ──
+   Fade the scrim, and let the image arrive from a hair under full size. Both
+   run on the pop pair the nav's hover label already uses (--dur-pop-in with
+   --ease-pop going in, the shorter --dur-pop-out coming back), so the site
+   has one opening gesture rather than a bespoke one per surface.
+
+   `display` and `overlay` are transitioned with allow-discrete, and that is
+   what keeps the element in the top layer long enough for the CLOSING half to
+   be seen at all — without it the dialog is yanked out the instant close()
+   runs and the exit never renders. @starting-style is the entry side of the
+   same mechanism: it supplies the value to animate FROM for an element that
+   has only just been rendered. A browser with neither shows and hides it
+   instantly, which is still a correct lightbox. */
+.lightbox,
+.lightbox::backdrop {
+	opacity: 0;
+	transition:
+		opacity var(--dur-pop-out) ease,
+		display var(--dur-pop-out) allow-discrete,
+		overlay var(--dur-pop-out) allow-discrete;
+}
+
+.lightbox[open],
+.lightbox[open]::backdrop {
+	opacity: 1;
+	transition-duration: var(--dur-pop-in);
+	transition-timing-function: var(--ease-pop);
+}
+
+@starting-style {
+	.lightbox[open],
+	.lightbox[open]::backdrop {
+		opacity: 0;
+	}
+}
+
+/* Scale on the IMAGE alone, never the dialog: the close chip is a child of
+   the dialog and is fixed to the viewport, and scaling the dialog would drag
+   the chip's rendered position along with it. --pill-press's 0.94 is far too
+   much travel for something this size — a near-full-viewport image scaling 6%
+   reads as a zoom rather than an entrance. */
+.lightbox__img {
+	scale: 0.985;
+	transition: scale var(--dur-pop-out) ease;
+}
+
+.lightbox[open] .lightbox__img {
+	scale: 1;
+	transition: scale var(--dur-pop-in) var(--ease-pop);
+}
+
+@starting-style {
+	.lightbox[open] .lightbox__img {
+		scale: 0.985;
+	}
+}
+
+/* The lightbox still opens and closes — only the travel goes. Nothing in the
+   gesture carries meaning the appearance doesn't already. */
+@media (prefers-reduced-motion: reduce) {
+	.lightbox,
+	.lightbox::backdrop,
+	.lightbox__img,
+	.lightbox[open],
+	.lightbox[open]::backdrop,
+	.lightbox[open] .lightbox__img {
+		transition: none;
+		scale: 1;
+	}
+}
