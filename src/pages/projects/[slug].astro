@@ -20,20 +20,26 @@ const figures = project.images.map((entry) =>
 	typeof entry === 'string' ? { src: entry, caption: undefined } : entry
 );
 
-/* The caption's type treatment — and like the rest of this page's type, it is
-   the about page's rather than ours. Size and colour are that page's figcaption
-   verbatim (about.astro): 0.7rem on --ink-soft. Unstyled, these captions
-   inherited the 19px root and so came out BIGGER than the 16.625px prose above
-   them, which is the wrong way round for a label; 13.3px puts them a step below
-   the body, where a caption belongs. 0.7rem rather than text-xs (14.25px) for
-   the same reason the about page went there — see its note.
+/* The caption's type is the prose's, exactly (2026-08-14, Hiro's ask): the same
+   text-sm / leading-relaxed the two paragraphs above carry, with no colour and
+   no weight of its own, so it inherits --ink and --weight-body the same way they
+   do. That is the whole rule — if the prose moves, these follow, and this const
+   should never grow a size or colour the paragraphs don't have.
 
-   The margin is the one number not taken from that page (it uses mt-2 under a
-   much smaller photo). 0.625rem is 11.875px, exactly HALF the section's
-   space-y-5 gap of 23.75px, so a caption always sits twice as close to the
-   image it labels as to the next figure down. That 2:1 is the whole job:
-   keep the ratio if the outer gap ever moves. */
-const captionClass = 'mt-2.5 text-[0.7rem] text-[var(--ink-soft)]';
+   ⚠ It briefly ran at 0.7rem on --ink-soft, the about page's figcaption. That
+   is the obvious treatment and it was overruled deliberately, so don't restore
+   it as a fix: these are not descriptive captions, they are the labels the
+   before/after argument turns on, and a label set quieter than the prose it is
+   evidence for reads as an aside. The one thing worth keeping from that pass is
+   what it was fixing — UNSTYLED, a figcaption inherits the 19px root and comes
+   out BIGGER than the 16.625px prose. text-sm is what stops that; empty is not.
+
+   Margin is BOTTOM because the caption sits above its image (see the template).
+   0.625rem is 11.875px against the section's space-y-5 of 23.75px, so a label
+   is always twice as close to the image it names as to the figure before it.
+   That 2:1 is doing all the grouping work now that the type carries no contrast
+   of its own — keep the ratio if the outer gap ever moves. */
+const captionClass = 'mb-2.5 text-sm leading-relaxed';
 
 /* Everything except the one you're reading, in projects.ts order — the same
    order the home grid uses, so the strip reads as that grid with one card
@@ -215,19 +221,29 @@ const others = projects.filter((other) => other.slug !== project.slug);
 			{/* <figure> per shot, so the caption belongs to its picture in the
 			    accessibility tree rather than floating as a stray paragraph
 			    between two images. The wrapper also becomes the section's
-			    space-y-5 child, which is what keeps a caption tight to the
-			    image above it instead of sitting midway between two — the gap
-			    inside the figure has to stay well under that 5. */}
+			    space-y-5 child, which is what gives the caption a gap of its
+			    own to be tighter than — the one inside the figure has to stay
+			    well under that 5.
+
+			    CAPTION FIRST, above the image (2026-08-14, Hiro asked whether
+			    it should be; this is that). Spec-legal — figcaption may be the
+			    figure's first or last child — and it earns the position twice
+			    over. A reader cannot un-see a picture, so a label underneath
+			    arrives after the impression it was meant to frame, which for a
+			    before/after is exactly backwards. And with the shots ordered
+			    1,3,2,4 a caption below image 1 would sit directly above the
+			    terminal shot, where it can attach to either neighbour; above,
+			    it binds forward to one image only. */}
 			{
 				figures.map(({ src, caption }, i) => (
 					<figure>
+						{caption && <figcaption class={captionClass}>{caption}</figcaption>}
 						<img
 							src={src}
 							alt={caption ? `${project.title} — ${caption}` : `${project.title} — image ${i + 1}`}
 							loading={i === 0 ? 'eager' : 'lazy'}
 							class="w-full rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface)]"
 						/>
-						{caption && <figcaption class={captionClass}>{caption}</figcaption>}
 					</figure>
 				))
 			}
