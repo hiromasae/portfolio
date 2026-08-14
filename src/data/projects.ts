@@ -55,12 +55,16 @@ export const projects: Project[] = [
 		   from it. A screenshot from any other theme would need colour work to
 		   sit next to the others. Keep that in mind before re-shooting.
 
-		   NOT in `images` (see placeholders below) — this is framed for a 16/9
-		   card, and the detail page renders its images uncropped at 920px, which
-		   is a different picture's job. */
+		   It is also the detail page's first image (2026-08-14, Hiro), which
+		   reverses the earlier call to keep it card-only. The worry then was
+		   that a 16/9 crop would look starved rendered uncropped at 920px; the
+		   re-shoot is 2462x1438, near enough to 16/9 that the card crops almost
+		   nothing, and three panes of syntax colour hold up at 920px where a
+		   tighter crop wouldn't have. Re-shoot at that ratio or wider — a
+		   squarer file would sit badly in the card frame, which crops to 16/9
+		   regardless of what it's handed. */
 		cover: '/images/migaki1.webp',
-		images: [],
-		placeholders: 3,
+		images: ['/images/migaki1.webp'],
 	},
 	{
 		slug: 'stacksmith',
