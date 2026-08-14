@@ -1,3 +1,15 @@
+/** One detail-page image that carries a caption. Bare strings stay legal in
+    `images` — see the field's note for why both forms exist. */
+export interface ProjectImage {
+	src: string;
+	/** Rendered under the image. Only set this where the shot cannot explain
+	    itself: two of migaki's are the same prompt built without and with the
+	    skill, and nothing in the pictures says which is which. A caption on a
+	    shot that already reads is noise, which is why the other three projects
+	    carry none — and why migaki's own terminal shots go uncaptioned. */
+	caption?: string;
+}
+
 export interface Project {
 	slug: string;
 	title: string;
@@ -14,7 +26,12 @@ export interface Project {
 	    bullet list: the detail page renders it as one block. */
 	work: string;
 	cover: string;
-	images: string[];
+	/** Detail page images, in order. A bare string is a shot that needs no
+	    caption; the object form welds one to its own src. Keep them welded
+	    rather than parallel-arraying the captions — migaki's shots were
+	    renumbered once already (see its note), and a captions[] indexed
+	    alongside would have silently shifted onto the wrong pictures. */
+	images: (string | ProjectImage)[];
 	/** Number of empty frames to stand in for screenshots that don't exist yet.
 	    Only read when `images` is empty, and only by the detail page; an empty
 	    `cover` leaves the card's own frame blank the same way. Delete the field
@@ -44,10 +61,21 @@ export const projects: Project[] = [
 			"The skill is three markdown files. The first holds the timeless perceptual principles, the part of visual judgement that doesn't move. The second catalogues the patterns that read as AI-generated or dated, and the third what reads as excellent right now. Those last two rewrite themselves weekly, so the sense it works from tracks the present instead of settling into a style guide from last year. Anything that can read a skill file gets the whole thing.",
 		/* migaki is numbered 0-4 rather than 1-n like the others (2026-08-14,
 		   Hiro): migaki0 is the card cover and nothing else, migaki1-4 are the
-		   detail page in order. The gap is the point — it keeps the cover free
-		   to be cropped for the card without owning a slot in the sequence
-		   below. Keep the convention if you add more; migaki5 is the next
-		   detail shot, not a second cover.
+		   detail shots. The gap is the point — it keeps the cover free to be
+		   cropped for the card without owning a slot in the sequence below.
+		   Keep the convention if you add more; migaki5 is the next detail shot,
+		   not a second cover.
+
+		   ⚠ THE FILE NUMBERS ARE NOT THE PAGE ORDER. The array below runs
+		   1, 3, 2, 4 and that is deliberate (2026-08-14, Hiro): the page argues
+		   rather than lists. migaki1 is the same prompt built WITHOUT the skill,
+		   migaki3 is the skill actually running, migaki2 is the result WITH it,
+		   and migaki4 is the taste-decisions list it hands back. Baseline, the
+		   intervention, the result, the reasoning. Sorting these back into
+		   numeric order would put the before and after side by side and drop
+		   the run that connects them, which reads as four screenshots instead
+		   of one argument. Renumber the files if the mismatch ever bites — but
+		   the order is the thing to preserve, not the digits.
 
 		   The cover is the only one on the site that isn't a product
 		   screenshot, because migaki has no product to shoot — it's three
@@ -67,15 +95,18 @@ export const projects: Project[] = [
 		   Ratios differ by job. The cover is 2462x1438 and wants to stay near
 		   16/9 or wider, because the card frame crops to 16/9 regardless of
 		   what it's handed. The four below render uncropped at 920px, so their
-		   ratio only sets their height — 1 and 2 are the squarer pair at ~1.37
-		   and stand about 670px tall, 3 and 4 are wider and sit shorter. All
-		   five are shot at ~2530 wide, which is the 2x the 920px render needs
-		   to stay crisp; don't drop below that. */
+		   ratio only sets their height — the two landing pages are the squarer
+		   pair at ~1.37 and stand about 670px tall, the two terminals are wider
+		   and sit shorter. In the 1,3,2,4 order above that alternates tall,
+		   short, tall, short, which is a happy accident worth not breaking: the
+		   two outputs being the tall ones is what stops the page reading as a
+		   wall of equal rectangles. All five are shot at ~2530 wide, which is
+		   the 2x the 920px render needs to stay crisp; don't drop below that. */
 		cover: '/images/migaki0.webp',
 		images: [
-			'/images/migaki1.webp',
-			'/images/migaki2.webp',
+			{ src: '/images/migaki1.webp', caption: 'Without migaki' },
 			'/images/migaki3.webp',
+			{ src: '/images/migaki2.webp', caption: 'With migaki' },
 			'/images/migaki4.webp',
 		],
 	},

@@ -13,6 +13,28 @@ export function getStaticPaths() {
 
 const { project } = Astro.props;
 
+/* Both `images` forms flattened to one shape so the template doesn't branch —
+   see the field's note in projects.ts for why a caption rides on its own src
+   rather than in a parallel array. */
+const figures = project.images.map((entry) =>
+	typeof entry === 'string' ? { src: entry, caption: undefined } : entry
+);
+
+/* The caption's type treatment — and like the rest of this page's type, it is
+   the about page's rather than ours. Size and colour are that page's figcaption
+   verbatim (about.astro): 0.7rem on --ink-soft. Unstyled, these captions
+   inherited the 19px root and so came out BIGGER than the 16.625px prose above
+   them, which is the wrong way round for a label; 13.3px puts them a step below
+   the body, where a caption belongs. 0.7rem rather than text-xs (14.25px) for
+   the same reason the about page went there — see its note.
+
+   The margin is the one number not taken from that page (it uses mt-2 under a
+   much smaller photo). 0.625rem is 11.875px, exactly HALF the section's
+   space-y-5 gap of 23.75px, so a caption always sits twice as close to the
+   image it labels as to the next figure down. That 2:1 is the whole job:
+   keep the ratio if the outer gap ever moves. */
+const captionClass = 'mt-2.5 text-[0.7rem] text-[var(--ink-soft)]';
+
 /* Everything except the one you're reading, in projects.ts order — the same
    order the home grid uses, so the strip reads as that grid with one card
    pulled out rather than as a second, differently-sorted list. NOT sorted by
@@ -190,14 +212,23 @@ const others = projects.filter((other) => other.slug !== project.slug);
 				Array.from({ length: project.placeholders ?? 0 }).map(() => (
 					<div class="aspect-[16/9] w-full rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface-sunken)] bg-clip-padding" />
 				))}
+			{/* <figure> per shot, so the caption belongs to its picture in the
+			    accessibility tree rather than floating as a stray paragraph
+			    between two images. The wrapper also becomes the section's
+			    space-y-5 child, which is what keeps a caption tight to the
+			    image above it instead of sitting midway between two — the gap
+			    inside the figure has to stay well under that 5. */}
 			{
-				project.images.map((src, i) => (
-					<img
-						src={src}
-						alt={`${project.title} — image ${i + 1}`}
-						loading={i === 0 ? 'eager' : 'lazy'}
-						class="w-full rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface)]"
-					/>
+				figures.map(({ src, caption }, i) => (
+					<figure>
+						<img
+							src={src}
+							alt={caption ? `${project.title} — ${caption}` : `${project.title} — image ${i + 1}`}
+							loading={i === 0 ? 'eager' : 'lazy'}
+							class="w-full rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface)]"
+						/>
+						{caption && <figcaption class={captionClass}>{caption}</figcaption>}
+					</figure>
 				))
 			}
 		</section>
