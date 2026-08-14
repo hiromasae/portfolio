@@ -203,7 +203,16 @@ const others = projects.filter((other) => other.slug !== project.slug);
 			    The aria-label names the POSITION ("image 2 of 5") rather than
 			    repeating the alt text underneath it, which the button already
 			    exposes; a screen reader reaching this hears the alt, then what the
-			    control does with it. */}
+			    control does with it.
+
+			    ⚠ THE BUTTON IS ONLY A BUTTON ON A POINTER DEVICE (2026-08-14,
+			    Hiro: mobile shouldn't have any zooming in or out, since you can
+			    zoom with your fingers on the page directly). The markup is static
+			    and identical everywhere, so the script downstairs is what decides:
+			    on a coarse pointer it takes the tab stop and the button role back
+			    off these and never opens anything. Read that block before treating
+			    this element as unconditionally interactive — it is markup for the
+			    case where a cursor exists. */}
 			{
 				project.images.map((src, i) => (
 					<button
@@ -431,8 +440,22 @@ const others = projects.filter((other) => other.slug !== project.slug);
 	    ONE dialog for the whole page, re-pointed at whichever shot was clicked,
 	    rather than one per image. There is only ever one open, the markup for a
 	    fourth screenshot would be identical to the first three, and a single
-	    element means a single place for the close button and the dismissal
-	    handler to live.
+	    element means a single place for the dismissal handler to live.
+
+	    ── IT CLOSES WHEREVER YOU CLICK, AND THERE IS NO CLOSE BUTTON
+	    (2026-08-14, Hiro, revising the same day's first version) ──
+	    The zoom cursor is the entire control surface: zoom-in over a shot on the
+	    page, zoom-out over every pixel of the open modal, image included. The
+	    gesture reverses itself, so the thing that opened it closes it.
+
+	    It shipped with an X chip fixed in the top-right corner for a few hours.
+	    What the chip was actually for was TOUCH — a cursor cannot be an
+	    affordance where there is no cursor — and the answer to that turned out
+	    to be that touch has no business here at all: a phone pinch-zooms the
+	    page itself, far better than any modal would. So the feature is now
+	    gated to pointer devices (see the script), and once mobile is out of
+	    scope the chip has nobody left to serve. The cost, accepted knowingly:
+	    clicking a screenshot to point at something in it closes it.
 
 	    A NATIVE <dialog> opened with showModal(), which is doing more work here
 	    than it looks. Four behaviours come free and are NOT reimplemented below,
@@ -448,28 +471,19 @@ const others = projects.filter((other) => other.slug !== project.slug);
 	      · ::backdrop is a real element to paint, so the scrim isn't a div.
 
 	    closedby="any" asks the browser for LIGHT DISMISS — a click on the
-	    backdrop closes it with no script at all. It is why the dialog shrink-
-	    wraps the image (see .lightbox in global.css) instead of filling the
-	    viewport: "outside" has to be outside the dialog's own box for the
-	    browser to count it. Not every browser has it yet, hence the fallback in
-	    the script below; a browser with neither still closes on Esc and on the
-	    button. */}
-	<dialog id="lightbox" class="lightbox" closedby="any" aria-label="Enlarged screenshot">
-		{/* Drawn in the same hand as the nav's icons — 24-unit box, 2px square
-		    caps, mitered — but NOT added to Icon.astro: every glyph in there
-		    carries a measured --len for the load intro's stroke-draw, and this
-		    one is never drawn on load. Two paths rather than one `M6 6l12 12M18
-		    6L6 18`, so the caps at all four ends are the path's own.
+	    backdrop closes it with no script at all. With the whole modal now a
+	    dismiss target the script covers that case anyway, so this is belt and
+	    braces rather than the mechanism; it stays because it means the scrim
+	    keeps working if the module never loads. It is still why the dialog
+	    shrink-wraps the image (see .lightbox in global.css) instead of filling
+	    the viewport: "outside" has to be outside the dialog's own box for the
+	    browser to count it.
 
-		    It wears a chip (see global.css) instead of the nav's bare .btn-icon
-		    treatment, because a bare stroke glyph would be sitting on an
-		    arbitrary screenshot rather than on the page's own ground. */}
-		<button type="button" class="lightbox__close" data-lightbox-close aria-label="Close">
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="2">
-				<path d="M6.5 6.5 17.5 17.5" />
-				<path d="M17.5 6.5 6.5 17.5" />
-			</svg>
-		</button>
+	    THE DIALOG IS THE ONLY FOCUSABLE THING IN HERE now that the close button
+	    is gone — showModal() focuses the dialog element itself, the aria-label
+	    below is what a screen reader announces on arrival, and Esc is the way
+	    out without a pointer. */}
+	<dialog id="lightbox" class="lightbox" closedby="any" aria-label="Enlarged screenshot">
 		{/* src and alt are both set by the script — empty here so the page never
 		    fetches a second copy of a screenshot nobody has asked to enlarge. */}
 		<img class="lightbox__img" alt="" />
@@ -481,8 +495,48 @@ const others = projects.filter((other) => other.slug !== project.slug);
 	const full = dialog?.querySelector<HTMLImageElement>('.lightbox__img');
 
 	if (dialog && full) {
-		document.querySelectorAll<HTMLButtonElement>('[data-shot]').forEach((shot) => {
+		// ── The whole feature is gated on there being a POINTER ──
+		// (2026-08-14, Hiro: mobile shouldn't have any zooming in or out, since
+		// you can zoom with your fingers on the page directly.) A phone already
+		// has a better version of this gesture than any modal could offer — it
+		// pinch-zooms the real page, in place, at whatever magnification the
+		// reader wants, with no state to get out of. Opening a fixed-size copy
+		// of the same picture on top of it is strictly worse.
+		//
+		// `(hover: hover) and (pointer: fine)` is the pair, not either alone:
+		// hover alone lets in a stylus, and pointer alone lets in a TV remote.
+		// Both together mean a mouse or a trackpad, which is exactly the device
+		// class where a cursor can carry the affordance.
+		//
+		// A LIVE QUERY, read inside each handler rather than branched on once at
+		// startup: an iPad that gets a trackpad attached mid-session flips this
+		// from false to true, and a laptop user who picks the screen up flips it
+		// back. Reading it per event means the feature simply follows the device
+		// rather than being decided by whatever was true when the page loaded.
+		const pointer = matchMedia('(hover: hover) and (pointer: fine)');
+
+		const shots = document.querySelectorAll<HTMLButtonElement>('[data-shot]');
+
+		// The markup ships a <button> unconditionally (it has to — the page is
+		// static), so on a coarse pointer the interactivity is taken back off
+		// here: no tab stop, and no "button" in the accessibility tree, because
+		// a control that announces itself and then does nothing is worse than a
+		// plain image. The <img> inside keeps its alt either way — role
+		// presentation applies to the wrapper alone, not to its contents.
+		const syncPointerState = () => {
+			shots.forEach((shot) => {
+				shot.tabIndex = pointer.matches ? 0 : -1;
+				if (pointer.matches) shot.removeAttribute('role');
+				else shot.setAttribute('role', 'presentation');
+			});
+		};
+
+		syncPointerState();
+		pointer.addEventListener('change', syncPointerState);
+
+		shots.forEach((shot) => {
 			shot.addEventListener('click', () => {
+				if (!pointer.matches) return;
 				const img = shot.querySelector('img');
 				if (!img) return;
 				// currentSrc, not src: it is the file the browser actually chose and
@@ -496,51 +550,21 @@ const others = projects.filter((other) => other.slug !== project.slug);
 			});
 		});
 
-		dialog
-			.querySelector('[data-lightbox-close]')
-			?.addEventListener('click', () => dialog.close());
-
-		// Click-outside-to-close, for browsers without closedby="any" light
-		// dismiss. A click on the ::backdrop is reported with the DIALOG as its
-		// target — that is the whole mechanism this listener runs on, and the
-		// reason it can live on the dialog rather than on the document.
+		// A click ANYWHERE in the modal closes it — scrim or picture, no target
+		// check, which is the whole of the dismissal now. The zoom-out cursor
+		// runs over the same area (see .lightbox in global.css), so the pointer
+		// is never over a pixel that promises something this doesn't do.
 		//
-		// IT WATCHES BOTH ENDS OF THE PRESS, which is the whole reason this is
-		// two listeners and not a one-line `click` handler. A click fires on the
-		// nearest common ancestor of where the press and the release landed, so
-		// a drag that starts ON the image and ends on the scrim — a slipped
-		// mouse, a swipe, a text-selection attempt — reports the DIALOG as its
-		// target exactly as a scrim click does. Reading only the click event,
-		// dragging off a picture closes the picture.
-		//
-		// Requiring both endpoints outside is also precisely the rule the
-		// platform's own light dismiss follows, so the two paths dismiss on the
-		// same gesture rather than this being a looser imitation of it. That is
-		// worth more than firing on `click` for its own sake: there is no
-		// keyboard path through here to preserve (Esc is the keyboard's answer,
-		// and it is the platform's), so `click` would buy nothing and cost the
-		// symmetry.
-		//
-		// `=== dialog` rather than a closest() walk, on purpose: the dialog
-		// shrink-wraps the image and carries no padding, so the only pixels that
-		// report the dialog itself ARE the backdrop. Anything looser would start
-		// counting the image and the close chip as "outside".
-		//
-		// In a browser that has light dismiss this rarely gets the chance to run
-		// — the platform has already closed the dialog — and if both do fire,
-		// close() on a closed dialog is a no-op.
-		let pressedOutside = false;
-
-		dialog.addEventListener('pointerdown', (event) => {
-			pressedOutside = event.target === dialog;
-		});
-
-		dialog.addEventListener('pointerup', (event) => {
-			const dismiss = pressedOutside && event.target === dialog;
-			// Cleared on every release, so a press that ends anywhere else can't
-			// leave the flag armed for the next one.
-			pressedOutside = false;
-			if (dismiss) dialog.close();
-		});
+		// ⚠ THIS USED TO BE FOUR TIMES LONGER, and the deleted version was not
+		// wrong — it is worth knowing what it was solving before writing it
+		// again. It tracked pointerdown and pointerup separately and required
+		// both ends of the press to land on the scrim, because a `click` reports
+		// the nearest common ancestor of press and release: a drag starting on
+		// the image and ending on the scrim was indistinguishable from a scrim
+		// click, and closed the picture you were dragging on. That mattered only
+		// while the image was NOT a dismiss target. Now that everything is one,
+		// there are no two cases left to tell apart, and the guard would be
+		// machinery for a distinction the design no longer draws.
+		dialog.addEventListener('click', () => dialog.close());
 	}
 </script>

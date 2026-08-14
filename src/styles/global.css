@@ -3713,15 +3713,25 @@ html.reveal-skip #projects::before {
    inert page, focus return — is the platform's, not this file's; the note in
    [slug].astro says which parts come free so they aren't reimplemented.
 
-   THE CURSOR IS THE WHOLE AFFORDANCE at rest. Nothing else about a screenshot
-   changes on hover: no tint, no lift, no overlaid glyph. That is deliberate,
-   and it is the decision here most likely to be "improved" later — the page is
-   a reading surface with a few large images on it, and the card grid at the
-   foot already owns the site's hover vocabulary (a travelling panel, a title
-   underline, an arrow). A second, different hover gesture on the images would
-   read as a second kind of card. `zoom-in` is a real UA cursor, drawn by the
-   OS in its own idiom, and it says "this opens bigger" more precisely than
-   anything that could be painted here. */
+   THE CURSOR IS THE WHOLE AFFORDANCE — at rest AND once it is open, which is
+   the site's only gesture that reverses itself: zoom-in over a shot, zoom-out
+   over every pixel of the modal. Nothing else about a screenshot changes on
+   hover: no tint, no lift, no overlaid glyph. That is deliberate, and it is
+   the decision here most likely to be "improved" later — the page is a reading
+   surface with a few large images on it, and the card grid at the foot already
+   owns the site's hover vocabulary (a travelling panel, a title underline, an
+   arrow). A second, different hover gesture on the images would read as a
+   second kind of card. Both cursors are real UA cursors, drawn by the OS in
+   its own idiom, and the pair says "this opens bigger" / "this puts it back"
+   more precisely than anything that could be painted here.
+
+   ⚠ WHICH IS WHY THE FEATURE DOES NOT EXIST ON TOUCH (2026-08-14, Hiro). An
+   affordance made entirely of cursors is nothing at all on a device with no
+   cursor, and the honest conclusion was to drop the feature there rather than
+   to paint a chip for it: a phone pinch-zooms the page itself, in place, at
+   any magnification, with no state to escape. The script gates the behaviour
+   on the same media query this file gates the cursor on — change one and the
+   other has to move with it. */
 .shot {
 	display: block;
 	width: 100%;
@@ -3731,7 +3741,15 @@ html.reveal-skip #projects::before {
 	padding: 0;
 	border: 0;
 	background: none;
-	cursor: zoom-in;
+}
+
+/* The cursor is the only thing this query changes; the button's box is
+   identical on every device, so nothing about the page's layout depends on
+   which side of it a visitor lands. */
+@media (hover: hover) and (pointer: fine) {
+	.shot {
+		cursor: zoom-in;
+	}
 }
 
 /* The ring goes on the BUTTON, whose box is the image's exactly, so keyboard
@@ -3760,10 +3778,13 @@ html.reveal-skip #projects::before {
    not by reading; the rule that breaks this is in a stylesheet this file
    imports on line 1 and never mentions again.
 
-   cursor: zoom-out over the scrim is the counterpart to .shot's zoom-in, and
-   it is the only thing advertising that clicking away closes this. The image
-   sets it back to default below — a zoom-out cursor over the picture would
-   promise a dismissal that clicking there does not perform. */
+   cursor: zoom-out is the counterpart to .shot's zoom-in and the only thing
+   advertising the way out, so it is set HERE and inherited by everything
+   inside — the picture included, since clicking the picture closes it too. An
+   earlier version of this rule pinned the image back to `default` on the
+   argument that a zoom-out cursor over it would promise a dismissal clicking
+   there did not perform. The promise is true now; the exception went with the
+   close button (2026-08-14). */
 .lightbox {
 	margin: auto;
 	padding: 0;
@@ -3781,8 +3802,9 @@ html.reveal-skip #projects::before {
    screenshot.
 
    The 4vw/6dvh left over is what lets the scrim read AS a scrim — an image
-   bled to the viewport edge reads as a navigation, not an overlay — and on a
-   desktop it is also the margin the close chip sits in, clear of the picture.
+   bled to the viewport edge reads as a navigation, not an overlay — and it is
+   now also the only band of pure backdrop there is, since the picture itself
+   dismisses too. Take it to 100 and the modal loses its frame.
 
    ⚠ THESE ARE CEILINGS, NOT SIZES: with both dimensions auto the image never
    grows past its own pixels, so a file smaller than the box opens at 1:1
@@ -3802,7 +3824,6 @@ html.reveal-skip #projects::before {
 	max-width: 92vw;
 	max-height: 88dvh;
 	border-radius: var(--radius);
-	cursor: default;
 	/* The same bed the page's own screenshots sit on, so a PNG with
 	   transparency doesn't show the scrim through itself. */
 	background: var(--surface);
@@ -3825,55 +3846,23 @@ html.reveal-skip #projects::before {
 	background: rgba(6, 7, 11, 0.86);
 }
 
-/* ── The close chip ──
-   FIXED to the viewport corner, not absolute to the image. Its position is
-   then identical on every project page whatever the screenshot's shape — a
-   9:16 phone capture and a 16:9 desktop one put their own top-right corners
-   in wildly different places, and a control that moves with the content is a
-   control you have to go looking for. position: fixed inside a top-layer
-   element resolves against the viewport, so this needs no z-index.
+/* ── There is no close button ── (2026-08-14, Hiro)
+   A chip lived here for a few hours: 2.3rem, fixed to the viewport's top-right
+   corner, --surface over a --line-strong border so it stayed legible on top of
+   an arbitrary screenshot. It is recorded rather than merely deleted because
+   the argument for it was sound and would otherwise be rediscovered — a cursor
+   is not an affordance on a touchscreen, and the chip was the only visible way
+   out.
 
-   It lands ON the image at narrow widths, where 92vw leaves only a few pixels
-   of margin, which is why it wears a chip at all: --surface with a real
-   border, the same materials as a nav button, so it stays legible over a
-   screenshot of anything. The nav's bare .btn-icon treatment (stroke glyph,
-   no ground) is right on the page's own paper and wrong on someone's UI. */
-.lightbox__close {
-	position: fixed;
-	top: 0.75rem;
-	right: 0.75rem;
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	/* ~44px at the 19px root — a full touch target, which the nav's icons get
-	   to skip only because they have a whole bar of forgiveness around them. */
-	width: 2.3rem;
-	height: 2.3rem;
-	padding: 0.5rem;
-	border: 1px solid var(--line-strong);
-	border-radius: var(--radius);
-	background: var(--surface);
-	color: var(--ink-soft);
-	cursor: pointer;
-	transition:
-		color var(--dur-tap) ease,
-		border-color var(--dur-tap) ease;
-}
+   What retired it was not "cleaner": it was scoping the whole feature to
+   pointer devices, which left the chip serving a case that no longer reaches
+   it. On a device with a cursor the modal is one continuous dismiss target
+   wearing a zoom-out cursor, so a button would be a second answer to a
+   question already answered everywhere on the screen.
 
-.lightbox__close svg {
-	width: 100%;
-	height: 100%;
-}
-
-.lightbox__close:hover {
-	color: var(--ink);
-	border-color: var(--ink-soft);
-}
-
-.lightbox__close:focus-visible {
-	outline: 2px solid var(--focus-ring);
-	outline-offset: 2px;
-}
+   ⚠ IF TOUCH EVER COMES BACK, this comes back with it. Bringing the lightbox
+   to a touchscreen without a visible control would leave a full-screen image
+   and no announced way to close it. The two decisions are one decision. */
 
 /* ── The entrance ──
    Fade the scrim, and let the image arrive from a hair under full size. Both
@@ -3911,11 +3900,15 @@ html.reveal-skip #projects::before {
 	}
 }
 
-/* Scale on the IMAGE alone, never the dialog: the close chip is a child of
-   the dialog and is fixed to the viewport, and scaling the dialog would drag
-   the chip's rendered position along with it. --pill-press's 0.94 is far too
-   much travel for something this size — a near-full-viewport image scaling 6%
-   reads as a zoom rather than an entrance. */
+/* Scale on the IMAGE. It sat here originally because the dialog also held the
+   close chip — fixed to the viewport, and scaling the dialog would have
+   dragged the chip's rendered position with it. With the chip gone the dialog
+   shrink-wraps nothing but this image, so the two are now the same box and the
+   choice is free; it stays on the image because that is where the picture is.
+
+   --pill-press's 0.94 is far too much travel for something this size — a
+   near-full-viewport image scaling 6% reads as a zoom rather than an
+   entrance. */
 .lightbox__img {
 	scale: 0.985;
 	transition: scale var(--dur-pop-out) ease;
