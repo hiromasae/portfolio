@@ -580,8 +580,13 @@ const onHome = path === '/';
 	// "light mode" is what that control is called everywhere else.
 	const themeLabel = () =>
 		document.documentElement.dataset.theme === 'dark' ? 'Light mode' : 'Dark mode';
+	// Everything downstream of data-theme that isn't CSS. The favicon rides
+	// along here rather than in the click handler so it stays correct on a
+	// bfcache restore or any other path that re-runs this script with a theme
+	// already saved — the same reason the aria-label is synced and not set once.
 	const syncThemeState = () => {
 		themeToggle?.setAttribute('aria-label', themeLabel());
+		window.__syncFavicon?.(document.documentElement.dataset.theme);
 	};
 	syncThemeState();
 	themeToggle?.addEventListener('click', () => {
