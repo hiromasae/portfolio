@@ -1871,10 +1871,51 @@ body {
 	transition: text-decoration-color var(--dur-pop-out) var(--nav-ease);
 }
 
-#site-nav .nav-logo:hover,
+/* ── HOVER IS GUARDED, and this is the block that explains why ──
+   2026-08-15, Hiro: "tapping on the wordmark on the home page makes it stuck in
+   its hover state". It was, and this rule was it. A touch browser has no pointer
+   to leave with, so it fakes one: a tap sets :hover on what was tapped and holds
+   it until something else is tapped. Usually a navigation hides that — the next
+   document starts clean — which is exactly why the report says HOME and only
+   home. There the wordmark's click is preventDefault'd (Nav.astro scrolls to the
+   top in place rather than reloading the list you're already reading), so the
+   page it strands the state on is the page you keep looking at, and the
+   underline just sits there under two letters.
+
+   (hover: hover) asks whether the PRIMARY pointer can hover at all. On a phone
+   it cannot, so the rule never applies and there is no state left to strand —
+   which also means the affordance is only ever suppressed where it was never
+   legible: an underline that means "your cursor is here" says nothing to a
+   finger.
+
+   NOT `and (pointer: fine)`, which .shot's cursor query pairs it with. That one
+   is about PRECISION — a zoom-in cursor is a drawing made for a mouse — and this
+   one is about CAPABILITY. A coarse pointer that can hover (a stylus that
+   reports it, a TV remote) should still get the underline.
+
+   :focus-visible stays OUTSIDE the query, split off below for that reason. It is
+   the keyboard's copy of this state and has nothing to do with pointers;
+   guarding it would take the underline off tab-focus on every touchscreen
+   laptop.
+
+   The bar's other latching states were fixed the same day and the same way —
+   .btn-quiet (the Contact trigger, the other thing Hiro reported), .btn-icon
+   (the theme toggle: the one remaining control in the mobile bar that a tap
+   doesn't navigate away from) and .contact-row. The toggle's hover LABEL is
+   JavaScript, so it carries the same gate in Nav.astro rather than here. Every
+   hover-only affordance added to this bar from now on wants this treatment;
+   the test for whether it needs it is not "is it in the mobile bar" but "does
+   the tap leave the visitor on this page". */
 #site-nav .nav-logo:focus-visible {
 	text-decoration-color: currentColor;
 	transition-duration: 0s;
+}
+
+@media (hover: hover) {
+	#site-nav .nav-logo:hover {
+		text-decoration-color: currentColor;
+		transition-duration: 0s;
+	}
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2670,8 +2711,15 @@ body {
 	transition: color var(--dur-tap) ease;
 }
 
-.btn-quiet:hover {
-	color: var(--ink);
+/* Guarded — see the nav-logo block above for the whole argument. This family is
+   the Contact trigger now, and the trigger is a MOBILE-ONLY control that opens a
+   panel instead of navigating: on a phone every tap of it used to leave the word
+   inked and underlined for good. It is the clearest case on the site of a hover
+   state with no way out. */
+@media (hover: hover) {
+	.btn-quiet:hover {
+		color: var(--ink);
+	}
 }
 
 .btn-quiet:focus-visible {
@@ -2719,9 +2767,13 @@ body {
 	padding-bottom: 3px;
 	transition: background-size var(--dur-card) var(--nav-ease);
 }
-.btn-quiet:hover .btn-quiet__label,
 .btn-quiet:focus-visible .btn-quiet__label {
 	background-size: 100% 2px;
+}
+@media (hover: hover) {
+	.btn-quiet:hover .btn-quiet__label {
+		background-size: 100% 2px;
+	}
 }
 /* The base rule carries the exit transition (quick, no delay) so un-hovering
    retracts the pair at once instead of replaying the stagger in reverse —
@@ -2734,10 +2786,15 @@ body {
 	transform: translateX(0);
 	transition: transform var(--dur-gesture) var(--nav-ease);
 }
-.btn-quiet:hover .btn-quiet__arrow,
 .btn-quiet:focus-visible .btn-quiet__arrow {
 	transform: translateX(-0.2rem);
 	transition: transform var(--dur-gesture) var(--nav-ease) calc(var(--dur-card) * 0.55);
+}
+@media (hover: hover) {
+	.btn-quiet:hover .btn-quiet__arrow {
+		transform: translateX(-0.2rem);
+		transition: transform var(--dur-gesture) var(--nav-ease) calc(var(--dur-card) * 0.55);
+	}
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2797,8 +2854,16 @@ body {
 	inset: calc(var(--nav-icon-gap) / -2);
 }
 
-.btn-icon:hover {
-	color: var(--ink);
+/* Guarded — see the nav-logo block above. The four contact icons are already out
+   of reach of a finger (#contact-group is display: none below 640px), but the
+   THEME TOGGLE wears this class at every width, and a tap on it changes the
+   theme without leaving the page — so the glyph used to stay at full ink
+   afterwards, reading as permanently half-pressed. Not what Hiro reported, and
+   the same bug: it was next in line. */
+@media (hover: hover) {
+	.btn-icon:hover {
+		color: var(--ink);
+	}
 }
 
 .btn-icon:focus-visible {
@@ -3271,11 +3336,17 @@ body {
 		background-color var(--dur-pop-out) var(--nav-ease),
 		border-color var(--dur-pop-out) var(--nav-ease);
 }
-#site-nav .btn-icon:hover {
-	transition:
-		color var(--dur-pop-in) var(--ease-pop),
-		background-color var(--dur-pop-in) var(--ease-pop),
-		border-color var(--dur-pop-in) var(--ease-pop);
+/* Guarded with the state it times. On its own this rule changes no value, only
+   the clock a value travels on, so leaving it out of the query would be
+   invisible rather than wrong — it is in there so the pair reads as one thing
+   and a later edit can't reintroduce the paint half by accident. */
+@media (hover: hover) {
+	#site-nav .btn-icon:hover {
+		transition:
+			color var(--dur-pop-in) var(--ease-pop),
+			background-color var(--dur-pop-in) var(--ease-pop),
+			border-color var(--dur-pop-in) var(--ease-pop);
+	}
 }
 
 /* The cluster's gap is a token because three rules are cut against it — this
@@ -3630,10 +3701,22 @@ body {
 		color var(--dur-tap) ease,
 		background-color var(--dur-tap) ease;
 }
-.contact-row:hover,
+/* Guarded — see the nav-logo block. This one is the least visible of the set,
+   because every row closes the panel on click and a closed panel can't show you
+   its stranded tint. It is guarded anyway: a tap that starts on a row and turns
+   into a scroll doesn't count as a click, so the panel stays open with the row
+   lit under a finger that has moved on — and "which row is live" is the exact
+   thing that tint is for, so a wrong one is worse here than a wrong colour
+   anywhere else in the bar. */
 .contact-row:focus-visible {
 	color: var(--ink);
 	background-color: var(--surface-sunken);
+}
+@media (hover: hover) {
+	.contact-row:hover {
+		color: var(--ink);
+		background-color: var(--surface-sunken);
+	}
 }
 .contact-row:focus-visible {
 	outline: 2px solid var(--focus-ring);
@@ -4029,8 +4112,10 @@ html.reveal-skip #projects::before {
 	   transition, which lags behind both. */
 	transition: transform var(--dur-pop-out) var(--nav-ease);
 }
-#site-nav .btn-icon:hover > svg {
-	transition: transform var(--dur-pop-in) var(--ease-pop);
+@media (hover: hover) {
+	#site-nav .btn-icon:hover > svg {
+		transition: transform var(--dur-pop-in) var(--ease-pop);
+	}
 }
 
 /* ── Per-icon hover motion ──
@@ -4051,12 +4136,22 @@ html.reveal-skip #projects::before {
 	}
 
 	/* The contact icons share one gesture — a clean lift — so they read
-	   as a family rather than separate tricks. */
-	.btn-icon:hover .icon-email,
-	.btn-icon:hover .icon-linkedin,
-	.btn-icon:hover .icon-github,
-	.btn-icon:hover .icon-twitter {
-		transform: translateY(-3px);
+	   as a family rather than separate tricks.
+
+	   Guarded on (hover: hover) as well (2026-08-15, see the nav-logo block).
+	   A phone never sees this row at all, so the case that needs it is a touch
+	   TABLET at 640 and up, where the icons are the contact surface: three of
+	   them navigate away and clear themselves, but EMAIL copies to the clipboard
+	   and preventDefaults, so a tap used to leave that one glyph lifted 3px above
+	   its neighbours for as long as the visitor stayed on the page. A stranded
+	   colour is a wrong state; a stranded transform is a broken alignment. */
+	@media (hover: hover) {
+		.btn-icon:hover .icon-email,
+		.btn-icon:hover .icon-linkedin,
+		.btn-icon:hover .icon-github,
+		.btn-icon:hover .icon-twitter {
+			transform: translateY(-3px);
+		}
 	}
 
 	/* Pressed: the lifted icon dips back and scales in for a tactile click.

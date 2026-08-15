@@ -1146,6 +1146,20 @@ const onHome = path === '/';
 			window.clearTimeout(gapHideTimer);
 			hide();
 		});
+		// ── NOT gated on (hover: hover), unlike the toggle's pill ──
+		// 2026-08-15. The row is display: none below 640px, so the device that
+		// could strand this label is a touch TABLET, where tapping an icon
+		// synthesises mouseenter and withholds mouseleave until the next tap.
+		// The toggle's twin was gated for exactly that; this one is left alone,
+		// because the two labels are not saying the same kind of thing. The
+		// toggle's names a state the tap is about to change, and the theme
+		// flipping across the whole page is a louder confirmation than any word;
+		// this one carries "Copied!", which is the ONLY evidence that tapping
+		// email did anything at all — the clipboard is invisible and that row
+		// deliberately doesn't navigate. Gating it would buy a tidier resting
+		// state at the price of a silent copy. The stranded LIFT was the real
+		// defect and it is fixed in CSS, so what lingers here is a label under
+		// the icon you just tapped, saying what it did, until you tap elsewhere.
 		group.addEventListener('focusin', (e) => {
 			const icon = (e.target as HTMLElement).closest<HTMLElement>('.btn-icon');
 			if (icon) showAt(icon);
@@ -1433,9 +1447,38 @@ const onHome = path === '/';
 		// plainly wrong now that its region is exactly the drawn button (see the
 		// hit-box block in global.css). The pill is pointer-events: none, so it
 		// can't take the hover away from the button it hangs under.
-		themeToggle.addEventListener('mouseenter', showPill);
-		themeToggle.addEventListener('mouseleave', hidePill);
-		themeToggle.addEventListener('focus', showPill);
+		// ── The mouse half is gated on (hover: hover) ──
+		// 2026-08-15, alongside the CSS hover guards (the argument in full is in
+		// global.css, at the nav-logo's underline). A touch browser synthesises
+		// mouseenter on tap and doesn't send the matching mouseleave until you
+		// tap something else, so this label — the only hover label a phone can
+		// still reach, now that the sliding one went behind display: none at
+		// 640 — popped open on every theme change and hung there naming the
+		// state you had just left.
+		//
+		// Read once, not per event: the media query answers a question about the
+		// device's primary pointer, and a device does not grow a mouse between
+		// two taps. A hybrid that reports hover keeps the label, which is right —
+		// it has a cursor to explain.
+		//
+		// FOCUS AND BLUR STAY UNGATED — they are the keyboard's route to the same
+		// label and have nothing to do with pointers, so a touchscreen laptop
+		// tabbing to the toggle is still told what the button does. But focus
+		// alone would have let the bug straight back in through the other door:
+		// Chrome gives a clicked <button> DOM focus, so on Android the tap would
+		// fire `focus`, show the pill, and hold it until something else was
+		// tapped — the media query above would have changed nothing. Hence
+		// :focus-visible, which is the browser's own judgement about whether the
+		// focus came from a keyboard, and is exactly the question being asked.
+		// (Safari doesn't focus buttons on click at all, which is why this only
+		// ever needed fixing on one engine.)
+		if (window.matchMedia('(hover: hover)').matches) {
+			themeToggle.addEventListener('mouseenter', showPill);
+			themeToggle.addEventListener('mouseleave', hidePill);
+		}
+		themeToggle.addEventListener('focus', () => {
+			if (themeToggle.matches(':focus-visible')) showPill();
+		});
 		themeToggle.addEventListener('blur', hidePill);
 
 		// ── A hidden pill must not keep its box ──
