@@ -3802,10 +3802,13 @@ body {
 	   flex, so the plate holds still while the word changes. */
 	white-space: nowrap;
 }
-/* The ↗ marks a link that leaves the site — the language the hover pill used,
-   kept so the one row that does NOT leave (email, which copies) is marked by
-   its absence. Dimmer than the label: it is an annotation on the row, not a
-   second thing to read. */
+/* The ↗ marks a link that takes you somewhere else — the language the hover
+   pill used. ALL FOUR ROWS WEAR IT as of 2026-08-15 (Hiro): it read as "opens a
+   tab" while email copied to the clipboard, and email hands off to a mail app
+   here, so the absence was marking the one row that leaves hardest as the only
+   one that doesn't. It no longer distinguishes between the rows — see the note
+   in Nav.astro for why that trade was taken. Dimmer than the label: it is an
+   annotation on the row, not a second thing to read. */
 .contact-row__ext {
 	width: 0.7rem;
 	height: 0.7rem;

@@ -110,14 +110,23 @@ const onHome = path === '/';
 		    duplication is the price of the split and is the first thing to
 		    re-examine if this ever feels heavy.
 
-		    THE EMAIL LINK DELIBERATELY DIFFERS BETWEEN THEM. Here it copies the
-		    address to the clipboard — the gesture this row's pill, its "Copied!"
-		    stamp and its whole fourteen-variant exploration were built for, and
-		    the thing a desktop visitor with no mail client actually wants. In the
-		    menu it is a plain mailto: that hands off to the mail app (Hiro,
-		    2026-08-15). Each surface NAMES what it does, which is what keeps that
-		    honest: the icon's label reads "Copy email", the menu's row reads
-		    "Email". */}
+		    THE EMAIL LINK DIFFERS, BUT NOT BY SURFACE — BY POINTER. It copies the
+		    address to the clipboard on a pointer that can hover, and hands off to
+		    the mail app on one that can't. That is a different axis from the one
+		    picking the surfaces around it, and deliberately so (Hiro, 2026-08-15:
+		    tapping email in tablet view should redirect too; desktop is the only
+		    one that copies). Copying is the gesture this row's pill, its "Copied!"
+		    stamp and its whole fourteen-variant exploration were built for, and it
+		    is worth having where there is a cursor to read the confirmation and,
+		    often, no mail client to hand off TO. On a finger it is neither: the
+		    clipboard is somewhere the visitor then has to paste FROM, and the mail
+		    app is one tap away. So the menu's rows are plain mailto: links, and so
+		    is the icon row's email on a touch tablet — the copy path is stripped
+		    in the script at the top of the icon block, not gated at 640.
+
+		    Each surface still NAMES what it does, which is what keeps it honest:
+		    the icon's label reads "Copy email" where it copies and "Email" where
+		    it doesn't, and the menu's row reads "Email". */}
 		{/* Centred on the bar itself (2026-08-02). The layout box is wider than
 		    what the cluster draws — the buttons are scaled down inside it — but
 		    both are centred on the same line, so the drawn icons land on the
@@ -304,28 +313,36 @@ const onHome = path === '/';
 							>
 								<Icon name={c.icon} />
 								<span class="contact-row__label">{c.label}</span>
-								{/* The site's new-tab language, kept from the pill this
-								    replaces: the ↗ marks links that open a TAB, which is
-								    why email still doesn't wear one. It leaves too, now
-								    that it hands off to a mail app — but the page it
-								    leaves from stays exactly where it is, and marking all
-								    four would leave the arrow saying nothing. */}
-								{!isEmail && (
-									<svg
-										class="contact-row__ext"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										stroke-width="2"
-										stroke-linecap="square"
-										stroke-linejoin="miter"
-										aria-hidden="true"
-									>
-										<path d="M15 3h6v6" />
-										<path d="M10 14 21 3" />
-										<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-									</svg>
-								)}
+								{/* ── All FOUR wear it now (2026-08-15, Hiro: the email
+								    button should have a new page icon as well since it
+								    does redirect the user) ──
+								    The mark used to mean "opens a TAB", which is why
+								    email — alone in copying to the clipboard — went
+								    without. Email hands off to a mail app on every
+								    surface that shows this panel, so the old reading
+								    made the one row that hands you to another
+								    APPLICATION the only one not marked as leaving.
+
+								    So the ↗ now means "this takes you somewhere else",
+								    and the honest consequence is that it no longer
+								    DISTINGUISHES between these four — it annotates the
+								    list rather than singling anything out. That is the
+								    trade: a promise every row keeps beats a
+								    distinction that was drawn on the wrong axis. */}
+								<svg
+									class="contact-row__ext"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2"
+									stroke-linecap="square"
+									stroke-linejoin="miter"
+									aria-hidden="true"
+								>
+									<path d="M15 3h6v6" />
+									<path d="M10 14 21 3" />
+									<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+								</svg>
 							</a>
 						);
 					})
@@ -939,6 +956,46 @@ const onHome = path === '/';
 	if (group && pill && pillText && pillStamp && pillPress) {
 		const icons = Array.from(group.querySelectorAll<HTMLAnchorElement>('.btn-icon'));
 
+		// ── COPYING IS A HOVER-POINTER GESTURE ──
+		// 2026-08-15, Hiro: tapping email in tablet view should redirect to the
+		// mail app too; desktop is the only one that copies. The split was drawn
+		// at 640px until now, which was the wrong axis — it made "does this copy
+		// or hand off" a question about WINDOW WIDTH, so a touch tablet held wide
+		// enough to show this row got the desktop's clipboard gesture, with no
+		// clipboard worth having and no cursor to read the "Copied!" that
+		// confirmed it. It is a question about the POINTER, and this asks that.
+		//
+		// The whole intervention is to strip data-copy. Everything downstream is
+		// keyed off that attribute and simply doesn't happen without it: the copy
+		// listener below early-returns before it binds, so the click is never
+		// intercepted, and a plain mailto: does what mailto: does. No flag
+		// threaded through the copy path, and nothing to keep in sync with it.
+		//
+		// The label has to move with the behaviour or the button lies. "Copy
+		// email" is baked in at build time by the same isEmail branch that set
+		// data-copy — server-rendered markup can't know what pointer will arrive,
+		// so this is the one thing that must be corrected in the browser. Both
+		// the accessible name and the pill's word change together.
+		//
+		// data-handoff is what tells the pill's ↗ that this one leaves now (see
+		// isExternal below) — the same conclusion the menu's rows reached today,
+		// on the same reasoning: a link that puts you in another application is
+		// leaving, whether or not it opens a tab to do it.
+		// Read once and shared with the pill's bindings further down, so the two
+		// answers can never disagree: the surface that copies is the surface that
+		// gets a hover label, because both are the same claim about the pointer.
+		const canHoverPointer = window.matchMedia('(hover: hover)').matches;
+
+		if (!canHoverPointer) {
+			for (const icon of icons) {
+				if (!icon.dataset.copy) continue;
+				icon.removeAttribute('data-copy');
+				icon.dataset.handoff = 'true';
+				icon.dataset.label = 'Email';
+				icon.setAttribute('aria-label', 'Email');
+			}
+		}
+
 		// Hidden clone of the pill, used to measure the exact width each label
 		// needs — including the external-link arrow when shown — so the pill's
 		// width can animate to an explicit px value. Both boxes have to be freed
@@ -956,7 +1013,12 @@ const onHome = path === '/';
 		const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 		const labelFor = (icon: HTMLElement) => icon.getAttribute('data-label') ?? '';
-		const isExternal = (icon: HTMLElement) => icon.getAttribute('target') === '_blank';
+		// The ↗ means "this takes you somewhere else", which is target="_blank"
+		// for three of them and — on a pointer that can't hover, where email hands
+		// off instead of copying — email as well. Same rule the menu's rows now
+		// follow; see the ↗ note in the markup above.
+		const isExternal = (icon: HTMLElement) =>
+			icon.getAttribute('target') === '_blank' || icon.dataset.handoff === 'true';
 
 		// Drop any in-flight stamp and return the label to a clean, visible resting
 		// state (used before every direct repositioning).
@@ -1133,36 +1195,48 @@ const onHome = path === '/';
 				window.addEventListener('pointerup', release);
 				window.addEventListener('pointercancel', release);
 			});
-			icon.addEventListener('mouseenter', () => {
-				window.clearTimeout(gapHideTimer);
-				showAt(icon);
-			});
-			icon.addEventListener('mouseleave', () => {
-				window.clearTimeout(gapHideTimer);
-				gapHideTimer = window.setTimeout(hide, 0);
-			});
+			// ── The mouse half, bound only where a mouse exists ──
+			// 2026-08-15. This block spent one commit deliberately UNGATED, on the
+			// argument that a touch tablet at 640+ needed the pill because it
+			// carried "Copied!" — the only evidence that tapping email had done
+			// anything. Making the copy a hover gesture (see the block at the top)
+			// retired that argument the same day: on a tablet every one of these
+			// four now navigates, to a tab or to a mail app, and a label that
+			// lingers after a tap is answering a question the navigation already
+			// answered. So it is gated like the toggle's twin, and for the same
+			// reason — a touch browser synthesises mouseenter on tap and withholds
+			// mouseleave until the next one.
+			//
+			// What that costs a tablet is the naming, which is the icon row's
+			// known weakness and the reason the menu exists below 640. A peek like
+			// the toggle's (pop on pointerdown, hold, go) would buy it back and is
+			// the obvious next move if tablets ever matter here; it is not built
+			// because the tap is already leaving the page, so the word would be
+			// racing the navigation that made it unnecessary.
+			if (canHoverPointer) {
+				icon.addEventListener('mouseenter', () => {
+					window.clearTimeout(gapHideTimer);
+					showAt(icon);
+				});
+				icon.addEventListener('mouseleave', () => {
+					window.clearTimeout(gapHideTimer);
+					gapHideTimer = window.setTimeout(hide, 0);
+				});
+			}
 		});
 		group.addEventListener('mouseleave', () => {
 			window.clearTimeout(gapHideTimer);
 			hide();
 		});
-		// ── NOT gated on (hover: hover), unlike the toggle's pill ──
-		// 2026-08-15. The row is display: none below 640px, so the device that
-		// could strand this label is a touch TABLET, where tapping an icon
-		// synthesises mouseenter and withholds mouseleave until the next tap.
-		// The toggle's twin was gated for exactly that; this one is left alone,
-		// because the two labels are not saying the same kind of thing. The
-		// toggle's names a state the tap is about to change, and the theme
-		// flipping across the whole page is a louder confirmation than any word;
-		// this one carries "Copied!", which is the ONLY evidence that tapping
-		// email did anything at all — the clipboard is invisible and that row
-		// deliberately doesn't navigate. Gating it would buy a tidier resting
-		// state at the price of a silent copy. The stranded LIFT was the real
-		// defect and it is fixed in CSS, so what lingers here is a label under
-		// the icon you just tapped, saying what it did, until you tap elsewhere.
+		// Keyboard focus keeps the label at every width — it is the tab user's
+		// only way to be told which glyph they are on, and it has nothing to do
+		// with pointers. :focus-visible rather than bare focus, for the reason the
+		// toggle's carries the same test: Chrome focuses a clicked LINK, so on a
+		// tablet the tap would hand the pill straight back through this door and
+		// strand it there, gated mouseenter or not.
 		group.addEventListener('focusin', (e) => {
 			const icon = (e.target as HTMLElement).closest<HTMLElement>('.btn-icon');
-			if (icon) showAt(icon);
+			if (icon && icon.matches(':focus-visible')) showAt(icon);
 		});
 		group.addEventListener('focusout', (e) => {
 			if (!group.contains(e.relatedTarget as Node)) hide();
