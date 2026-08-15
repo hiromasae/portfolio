@@ -140,7 +140,51 @@ const tools = [
 			    figure follows at --i: 1 — the standard 150ms stagger, matched to
 			    the home page's hero→grid beat; see the note there for how a
 			    bespoke 450ms gap fell out of step with the hairline finale. */}
-			{/* rounded-[var(--radius)] + --line + bg-clip-padding is the site's card
+			{/* ── NO CARD BELOW sm (Hiro, 2026-08-15) ── Every card class below is
+			    gated behind sm:, so on a phone this is plain prose sitting on the
+			    page ground and the card materialises at 640px.
+
+			    The reason is DOUBLE INSET, and it is arithmetic rather than taste.
+			    main carries px-5 and the card carried px-5 inside it, so the text
+			    paid 23.75px twice on each side. Measured on a 390px phone: main is
+			    342.5px and the card left 295px of text — 17.7× the 16.625px type,
+			    about 35 characters a line, against 511.5px and ~62ch for the same
+			    paragraph at lg. The frame was taking 16% of an already-short measure
+			    and putting it under the 45-character floor the row note holds
+			    everything else to. Plain, the column is the full 342.5 and ~41ch,
+			    and the bio paragraph sets in four lines instead of five.
+
+			    NOT an orphan fix, which is the plausible wrong reason to read into
+			    this. "I'm a Design Engineer based in the San Francisco Bay Area."
+			    is 489px and wraps to two lines at both widths — the sentence that
+			    drove px-5 in the first place is indifferent here. The gain is
+			    measure across the whole card, not one line break.
+
+			    sm (640px) is where the arithmetic stops biting, not a round number.
+			    The card is capped at 28rem = 532px, so from ~600px of main upward
+			    the cap binds before the viewport does and the second inset comes out
+			    of slack instead of out of the measure; below that the cap is inert
+			    and the two paddings compound. If either px-5 moves, re-derive this
+			    breakpoint rather than assuming it.
+
+			    THE PADDING GOES WITH THE BORDER, all four sides, and that pairing is
+			    the whole fix — keeping the inset while dropping the frame would
+			    spend the measure on nothing visible. Vertical too: main's py-12
+			    (57px) already opens the page, so the greeting needs no second lid.
+
+			    What SURVIVES the gate, deliberately: max-w-[28rem], which is the
+			    stacked prose cap and predates the card (see the row note); and both
+			    .card-rule sections, which are drawn on the sections themselves and
+			    now span the full content column. That is the page-ruled-into-bands
+			    device the 08-05 note calls this card a smaller-scale copy of — at
+			    phone width it simply reverts to the original scale, which is why
+			    losing the frame costs the sections nothing.
+
+			    The figure below is untouched. An image is its own object and reads
+			    as framed at any width; a paragraph does not need a frame to read as
+			    a paragraph.
+
+			    rounded-[var(--radius)] + --line + bg-clip-padding is the site's card
 			    material, the same one the photo beside it and the project cards
 			    wear, so the two halves of the row read as one set of parts. The
 			    clip is load-bearing rather than decorative: --line is translucent,
@@ -190,7 +234,7 @@ const tools = [
 			    written down and correct on the page — the eye measures a text
 			    block's top and bottom air against its LINE HEIGHT (27px), not
 			    against its side margins. */}
-			<div class="reveal max-w-[28rem] rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface)] bg-clip-padding px-5 pb-[56px] pt-10 lg:min-w-0 lg:max-w-none lg:flex-1" style="--i: 0">
+			<div class="reveal max-w-[28rem] sm:rounded-[var(--radius)] sm:border sm:border-[var(--line)] sm:bg-[var(--surface)] sm:bg-clip-padding sm:px-5 sm:pb-[56px] sm:pt-10 lg:min-w-0 lg:max-w-none lg:flex-1" style="--i: 0">
 				{/* text-3xl, two steps ABOVE the section headings (Hiro, 08-05, in two
 				    asks the same day — text-xl → 2xl → 3xl). It
 				    sat at their exact size from 08-02, on the argument that a
