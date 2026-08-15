@@ -160,21 +160,36 @@ const onHome = path === '/';
 			<div id="contact-menu" class="contact-menu" hidden>
 				{
 					contacts.map((c) => {
+						// The email row is a PLAIN mailto: link (2026-08-15, Hiro: tapping
+						// email should redirect the user to their default email app). It
+						// used to intercept the click and copy the address to the clipboard
+						// instead — the gesture the pill's whole "Copied!" apparatus was
+						// built for, and the reason this row carried a data-copy attribute.
+						// Handing off to the mail app is what a mailto: does by default, so
+						// the fix was to stop preventing it; every line of the copy path is
+						// gone rather than kept behind a flag.
+						//
+						// Worth knowing what that trades: on a desktop with no mail client
+						// configured, a mailto: can appear to do nothing, where copying
+						// always worked. b887ca1 has the copy path if it is ever wanted
+						// back as a secondary gesture (a long-press, or a second row) — but
+						// not as the primary, which is now the OS's job.
 						const isEmail = c.href.startsWith('mailto:');
 						return (
 							<a
 								class="contact-row"
 								href={c.href}
-								data-copy={isEmail ? c.href.replace('mailto:', '') : undefined}
 								target={isEmail ? undefined : '_blank'}
 								rel="noopener"
 							>
 								<Icon name={c.icon} />
 								<span class="contact-row__label">{c.label}</span>
-								{/* The site's existing new-tab language, kept from the
-								    pill it replaces: the ↗ marks links that leave, and
-								    its absence marks the one that doesn't (email
-								    copies to the clipboard instead of navigating). */}
+								{/* The site's new-tab language, kept from the pill this
+								    replaces: the ↗ marks links that open a TAB, which is
+								    why email still doesn't wear one. It leaves too, now
+								    that it hands off to a mail app — but the page it
+								    leaves from stays exactly where it is, and marking all
+								    four would leave the arrow saying nothing. */}
 								{!isEmail && (
 									<svg
 										class="contact-row__ext"
@@ -794,22 +809,6 @@ const onHome = path === '/';
 		const reduceMenu = window.matchMedia('(prefers-reduced-motion: reduce)');
 		const isOpen = () => contactToggle.getAttribute('aria-expanded') === 'true';
 
-		// The email row's label doubles as its own confirmation, so the resting
-		// word has to be remembered before anything overwrites it.
-		const copyRow = contactMenu.querySelector<HTMLAnchorElement>('a[data-copy]');
-		const copyLabel = copyRow?.querySelector<HTMLElement>('.contact-row__label') ?? null;
-		const copyRest = copyLabel?.textContent ?? '';
-
-		// ── The confirmation holds until the menu closes ──
-		// The same rule the pill's "Copied!" ended up on (2026-08-04): the
-		// acknowledgement stays for as long as the gesture that earned it. There
-		// the boundary was hovering away; here it is the panel shutting, which is
-		// the only way out of this surface. So there is no timer — closing is what
-		// resets it, and every close path goes through setMenu.
-		const resetCopied = () => {
-			if (copyLabel) copyLabel.textContent = copyRest;
-		};
-
 		// Hide only once the exit animation has actually played (see .is-closing
 		// in global.css). Guarded on target, because the rows' own hover
 		// transitions bubble animationend through this element too.
@@ -840,7 +839,6 @@ const onHome = path === '/';
 				contactMenu.classList.remove('is-closing');
 				contactMenu.hidden = true;
 			}
-			resetCopied();
 		};
 
 		contactToggle.addEventListener('click', () => setMenu(!isOpen(), true));
@@ -874,43 +872,20 @@ const onHome = path === '/';
 			setMenu(false);
 		});
 
-		// A link that leaves the site takes the panel with it (the new tab is the
-		// feedback; a menu still standing behind it is a leftover). The email row
-		// is the exception — it navigates nowhere and its confirmation is the
-		// whole point of staying.
-		contactMenu.querySelectorAll('a[target="_blank"]').forEach((link) => {
+		// EVERY row closes the panel, not just the ones that open a tab
+		// (2026-08-15). It was scoped to a[target="_blank"] while email stayed
+		// behind to show its "Copied!" — email hands off to a mail app now, so
+		// there is nothing left to stay open for, and a panel still standing
+		// over the page while the OS switches apps is the same leftover the
+		// external rows were closing to avoid.
+		//
+		// No preventDefault anywhere in here: the click closing the menu and the
+		// browser following the href are not in competition. The row's own
+		// navigation — new tab, or mail app — is the thing this control exists
+		// to cause.
+		contactMenu.querySelectorAll('.contact-row').forEach((link) => {
 			link.addEventListener('click', () => setMenu(false));
 		});
-
-		// ── Copy, optimistically ──
-		// Claim it, then do it, and correct the claim if the write rejects — the
-		// reasoning the pill's version carried: a clipboard rejection is a
-		// permission refusal and comes back immediately, so the correction lands
-		// within a frame or two and still tells the truth. Wrapped in
-		// Promise.resolve() rather than called bare because navigator.clipboard is
-		// undefined on an insecure origin, which throws SYNCHRONOUSLY and would
-		// escape a .catch() hung off the call itself.
-		if (copyRow && copyLabel) {
-			copyRow.addEventListener('click', (e) => {
-				e.preventDefault();
-				copyLabel.textContent = 'Copied!';
-				if (!reduceMenu.matches) {
-					// Blink the word out and back over --dur-press, the same swap the
-					// pill's stamp ended up as: the plate underneath is not moving
-					// here, so the change of identity is the only thing to mark.
-					copyLabel.style.transition = 'none';
-					copyLabel.style.opacity = '0';
-					void copyLabel.offsetHeight; // reflow, so the rebound animates
-					copyLabel.style.transition = 'opacity var(--dur-press) ease';
-					copyLabel.style.opacity = '1';
-				}
-				Promise.resolve()
-					.then(() => navigator.clipboard.writeText(copyRow.dataset.copy ?? ''))
-					.catch(() => {
-						copyLabel.textContent = 'Press ⌘C to copy';
-					});
-			});
-		}
 	}
 
 	// ── Theme toggle label ──
@@ -932,12 +907,24 @@ const onHome = path === '/';
 	if (toggleWrap && themeToggle && togglePill && togglePillText && togglePillPress) {
 		const reduceToggle = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-		// Hidden clone for width measurement (mirrors the contact slider's, inner
-		// box and all): the pill's width transition needs explicit px, and the
+		// Hidden clone for width measurement (it mirrors the pill, inner box and
+		// all): the pill's width transition needs an explicit px value, and the
 		// two labels differ slightly in width.
+		//
+		// left: -9999px, NOT left: 0 (2026-08-15). visibility: hidden keeps this
+		// from being SEEN, not from being LAID OUT — at left: 0 it sat at the
+		// wrap's left edge with width: auto, so the moment it had measured
+		// "Light mode" it was ~88px wide inside a wrap that sits at the window's
+		// right edge, and it pushed documentElement.scrollWidth to 325 against a
+		// 320px client. An invisible ruler was making the page scroll sideways,
+		// and only after the first hover, which is why it went unseen. Off to the
+		// LEFT is the cure rather than merely further right: in LTR nothing left
+		// of the origin is scrollable, so a negative offset costs nothing, where
+		// any positive one is still overflow waiting for a narrow enough window.
+		// offsetWidth does not care where it is measured.
 		const measurer = togglePill.cloneNode(true) as HTMLElement;
 		measurer.style.cssText =
-			'position:absolute;visibility:hidden;top:-9999px;left:0;transform:none;transition:none;width:auto;';
+			'position:absolute;visibility:hidden;top:-9999px;left:-9999px;transform:none;transition:none;width:auto;';
 		measurer.querySelector<HTMLElement>('.contact-slider-in')!.style.cssText =
 			'width:auto;opacity:1;animation:none;';
 		toggleWrap.appendChild(measurer);
@@ -1025,6 +1012,27 @@ const onHome = path === '/';
 		themeToggle.addEventListener('mouseleave', hidePill);
 		themeToggle.addEventListener('focus', showPill);
 		themeToggle.addEventListener('blur', hidePill);
+
+		// ── A hidden pill must not keep its box ──
+		// 2026-08-15. placePill writes an explicit px width and translateX, and
+		// they SURVIVE the hide — the exit is opacity and scale, so the box stays
+		// exactly where it was last placed. Narrow the window after that and an
+		// invisible, aria-hidden, pointer-events: none decoration is left hanging
+		// past the viewport, making the whole page scroll sideways. Caught at 320
+		// after a hover at 1200: documentElement.scrollWidth 325 against a 320
+		// client, with the pill spanning 236 → 325.
+		//
+		// Only when it is NOT showing, and no transition to worry about because
+		// there is nothing on screen to animate. Clearing the properties rather
+		// than zeroing them hands the box back to the stylesheet's own width: 0.
+		// (Resizing mid-hover is left alone: the pointer is on the button, so the
+		// next mouseenter/placePill has it, and stealing the pill out from under
+		// a live hover would be the more visible bug.)
+		window.addEventListener('resize', () => {
+			if (shown) return;
+			togglePill.style.width = '';
+			togglePill.style.transform = '';
+		});
 
 		// ── The press ──
 		// 2026-08-04, the same gesture the contact pills got, on the same tokens:

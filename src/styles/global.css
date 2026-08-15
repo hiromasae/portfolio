@@ -1620,22 +1620,36 @@ body {
 	   to be the page's gutter at that width, or the bar and the page come apart
 	   — and the page's gutter is flat. */
 	--nav-inset: 1.25rem;
-	/* The gap between the Contact trigger's caret and the toggle's glyph — the
-	   bar's only remaining interior gap since the icon row became a menu
-	   (2026-08-15), and therefore the one that has to carry the whole reading
-	   of "two controls, not one pair".
+	/* The DRAWN distance from the Contact caret's ink to the toggle's circle —
+	   the bar's only interior gap since the icon row became a menu (2026-08-15),
+	   and therefore the one thing carrying how those two read together.
 
-	   Spent MINUS the toggle's own glyph inset, exactly like --nav-inset's
-	   right side and for the same reason: the toggle draws its circle 0.5rem ×
-	   --nav-icon-scale (6.3px) inside its button box, so a plain gap here would
-	   land the drawn distance 6.3px wider than the number. Written as the
-	   expression so it follows the scale; retune the 1.5rem, never the term.
+	   0.75rem = 14.25px, down from 1.5rem (Hiro, same day: the contact button
+	   should be tighter against the light/dark toggle). They are one group —
+	   the bar's right-hand controls — and at 28.5px they read as two errands
+	   with the window's air between them. Under the 22.5px of vertical air the
+	   bar holds above and below its glyphs, which is the threshold where things
+	   in this bar start belonging to each other.
 
-	   1.5rem = 28.5px drawn. Measured against the bar's own units: the caret is
-	   type and the toggle is a control, and at the 22.6px the icon row used to
-	   hold BETWEEN its glyphs the two read as a set of two buttons. A word and
-	   a control need more air than two of a kind do. */
-	--nav-toggle-gap: 1.5rem;
+	   ── The term subtracts the toggle's WHOLE inset, not just its padding ──
+	   The glyph does not start at the wrap's left edge, and until this was
+	   corrected the token could not go below ~25px however small it was set.
+	   Three things stand between them, all of them consequences of a full-size
+	   box drawn small (see close ranks):
+	     2.9rem × (1 − scale)   the box's own contraction plus its rightward
+	                            translate, which land the drawn button 18.7px in
+	     0.5rem × scale         the button's padding, drawn: 6.3px
+	   25.0px in total at scale 0.66. Subtracting it makes this token mean
+	   exactly what it says, at any scale, and lets it go tight — the margin it
+	   computes is NEGATIVE (−10.8px here), which is fine on a flex item and is
+	   simply the trigger moving right toward a toggle that stays pinned to the
+	   column edge.
+
+	   The floor is the hit boxes, not the ink: the trigger's pseudo reaches
+	   0.35rem past its box and the toggle's region starts 6.3px before its
+	   glyph, so at 14.25px they still clear each other by ~1.3px. Anything
+	   tighter and two controls start sharing a tap. */
+	--nav-toggle-gap: 0.75rem;
 }
 
 /* ── The phone bar: what the menu settled ──
@@ -3259,10 +3273,32 @@ body {
 	}
 }
 
-/* The gap to the theme toggle, less the toggle's own glyph inset — see
-   --nav-toggle-gap, which is written as this expression's source. */
+/* The gap to the theme toggle, less the whole distance between the wrap's edge
+   and the glyph the visitor actually sees — the contraction, the translate and
+   the padding, all three. --nav-toggle-gap has the derivation and the reason
+   the result is allowed to go negative.
+
+   ── And the wrap must not collect clicks it doesn't draw ──
+   The same fault the contact group had on 08-14, arriving here the moment the
+   gap tightened: this box is `relative`, it comes after the trigger in the
+   DOM, and its left edge sits 18.7px left of the button it holds — because
+   that button is drawn small and translated right inside it (see close ranks).
+   So it paints over the trigger's hit pseudo and swallows the pixels between
+   the two controls. Measured before the fix: the trigger owned 917→1000 and
+   the toggle 1020→1057, with 1001→1019 belonging to an empty box — dead
+   ground between two neighbours, exactly where a thumb aiming at either one
+   lands. Same cure as the group's: the wrap stops taking events and the
+   button takes them back. The pill inside is already pointer-events: none.
+   The trigger's region now runs to 1019.4 and the toggle's begins at 1020.7,
+   which is the 1.3px of clearance --nav-toggle-gap's floor is calculated on. */
 #theme-toggle-wrap {
-	margin-left: calc(var(--nav-toggle-gap) - 0.5rem * var(--nav-icon-scale));
+	margin-left: calc(
+		var(--nav-toggle-gap) - (2.9rem * (1 - var(--nav-icon-scale)) + 0.5rem * var(--nav-icon-scale))
+	);
+	pointer-events: none;
+}
+#theme-toggle-wrap .btn-icon {
+	pointer-events: auto;
 }
 
 /* ── The contact panel ──
