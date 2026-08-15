@@ -105,10 +105,17 @@ const { name } = Astro.props;
     the values and their ratios live.
 
     NO --len on any shape, deliberately. The load intro's stroke-draw is scoped
-    to `#contact-group .btn-icon svg` and the theme toggle (see the load-intro
-    block in global.css), so nothing here is ever dashed and there is no length
-    to keep in sync. If one of these ever moves into the nav, measure
-    getTotalLength() first — the four above document why.
+    to the theme toggle's circle alone (see the load-intro block in global.css),
+    so nothing here is ever dashed and there is no length to keep in sync. If
+    one of these ever moves into the nav, measure getTotalLength() first — the
+    four above document why.
+
+    ⚠ 2026-08-15: the four contact marks above are NO LONGER DRAWN by the intro
+    either. They moved out of the bar and into the contact menu, which is closed
+    at load, so nothing strokes them — but their --len values are kept, and
+    kept accurate, because the menu is one design change away from putting an
+    icon back in the bar and re-measuring four paths by hand is exactly the
+    tax this file exists to avoid.
 
     Same drawing system as the contact icons otherwise: 24-unit box, 2px
     stroke, square caps, miter joins at limit 2. Butt caps appear only on
