@@ -8,9 +8,23 @@ export interface ProjectImage {
 	    legible and not one of them says what it is doing in the sequence: two
 	    are the same prompt built without and with the skill, and nothing in the
 	    pixels says which is which; the other two are terminals whose job in the
-	    argument is invisible until named. The other three projects carry none
+	    argument is invisible until named. EJS carries TWO for the same reason
+	    — its first two shots are one page before and after a redesign, and the
+	    green is the same green in both. The remaining projects carry none
 	    because theirs are plain product shots in a set — each is another view
 	    of one thing, so there is no role to disambiguate.
+
+	    ⚠ EJS's last two shots are BARE ON PURPOSE (2026-08-15, Hiro), and this
+	    reverses what was written here a few hours earlier. The claim then was
+	    that a comparison contaminates everything after it — that an uncaptioned
+	    third shot would read as a third alternative rather than as another view
+	    — so all four were labelled. Two of those labels were "Support" and
+	    "Documentation", which is the tell: a caption that only names the page it
+	    is a picture of has nothing to disambiguate, and the sequence had run out
+	    of comparison long before it ran out of images. So the rule stays exactly
+	    as stated above — captions where the ROLE is unclear — and EJS is now an
+	    example of it rather than an exception to it. Don't restore them for
+	    symmetry with the pair; the pair is not a set the rest has to match.
 
 	    An uncaptioned image also falls back to `— image N` for its alt text,
 	    which is worth nothing to a screen reader. That alone is reason enough
@@ -130,6 +144,52 @@ export const projects: Project[] = [
 			{ src: '/images/migaki3.webp', caption: 'The skill running' },
 			{ src: '/images/migaki4.webp', caption: 'What it proposed for the first page' },
 		],
+	},
+	{
+		slug: 'ejs',
+		title: 'EJS: Landing Page Facelift',
+		company: 'Open source',
+		year: '2026',
+		tags: ['Open Source', 'Landing Page', 'UI/UX'],
+		role: 'Redesigned the marketing site: hero, support page, and docs.',
+		blurb: 'A redesign of the EJS landing page, so the library says what it does up front.',
+		problem:
+			"ejs.co has looked more or less the same for years. There's a wordmark, a four-word tagline, and a lot of olive green. What it never gets around to is what EJS actually does, or why you would pick it over the alternatives. The only thing promoted above the fold is a different project. The Jake banner sits above EJS's own logo. Twenty million people install this library every week and the page tells them almost nothing about it.",
+		work:
+			"I led with a plain statement of what the library does, generate HTML with plain JS, and put the install command right under it in a chip you can copy. The numbers that make the case on their own are on the page for the first time: 20M+ weekly downloads, 7.7k stars, zero dependencies. I also built the two pages a one-screen site had nowhere to put. Support sends a question to Stack Overflow or GitHub Issues, and the docs have an on-this-page rail so the reference is something you can move around in. The olive green stays, since it is what people recognise, but it runs as a band and an accent instead of the whole canvas.",
+		/* ── Image order is 1, 0, 2, 3, and that is deliberate (Hiro's ask) ──
+		   NOT a numbering mistake to be tidied up. ejs1 is the EXISTING site and
+		   ejs0 is its replacement, so the sequence opens on a before/after pair
+		   and the file numbers simply don't run in the order the argument does.
+		   Renumbering the files would fix the cosmetics and cost the reason —
+		   ejs0 is the COVER (see below), and cover-plus-details is the same split
+		   migaki draws with its own 0/1-4 gap.
+
+		   ⚠ THE PAIR MUST STAY ADJACENT, for the reason migaki's note gives at
+		   length: comparing two images means holding both at once, and anything
+		   wedged between them breaks the only comparison this page makes. The two
+		   after that are single views of the new site and can be reordered freely.
+
+		   ejs0 does double duty as cover AND as the second figure, which is the
+		   one place this project departs from migaki's convention (there the
+		   cover owns no slot in the sequence). It earns the exception: the after
+		   half of a before/after cannot be a shot the page doesn't show, and the
+		   hero is also the only frame that reads at card size. The card crops it
+		   to 16/9 from 1.90, which trims ~3% off each side — the headline starts
+		   far enough in to survive that, so check the left edge if this is ever
+		   re-shot narrower.
+
+		   All four are ~2530 wide, the 2x the 920px render wants; the same figure
+		   migaki records. Both a .png and a .webp are committed for each, matching
+		   every other project here, and the .webp is what the site loads. */
+		cover: '/images/ejs0.webp',
+		images: [
+			{ src: '/images/ejs1.webp', caption: 'The site as it is today' },
+			{ src: '/images/ejs0.webp', caption: 'The same page, rebuilt' },
+			'/images/ejs2.webp',
+			'/images/ejs3.webp',
+		],
+		link: 'https://ejs.co/',
 	},
 	{
 		slug: 'stacksmith',
