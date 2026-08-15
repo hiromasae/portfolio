@@ -17,14 +17,19 @@ const onHome = path === '/';
 	    2026-08-02).
 
 	    NO px-5 here, unlike every other 960px shell on the site (2026-08-14).
-	    The bar's ends are set by ONE token — --nav-inset, spent on .nav-inner —
-	    because on a phone they have to come in off the column, and a bar whose
-	    margin is the column's gutter PLUS its own inset can't do that: the
-	    gutter is the floor and it is already most of the margin. Moving the
-	    whole distance onto the one rule that draws it costs nothing here (the
-	    sum is identical at every width ≥768, so no wide layout moved) and makes
-	    the phone ramp a single number. See the small-phone block in global.css.
-	    The 960px cap and the centring stay — they are what this box is for. */}
+	    The bar's ends are set by ONE token instead — --nav-inset, spent on
+	    .nav-inner, which holds the column's own 1.25rem gutter so the bar's
+	    contents land exactly on the page's edges (2026-08-15).
+
+	    It has to be one rule rather than px-5 here plus a correction further in,
+	    and the reason is the toggle: its glyph sits 6.3px inside its button, so
+	    the RIGHT end only lands on the column edge if the padding there is the
+	    gutter MINUS that distance. Split across two boxes that correction would
+	    have to be a negative padding, which does not exist. Merged, it is one
+	    subtraction in one calc — see the .nav-inner rule in global.css.
+	    The 960px cap and the centring stay — they are what this box is for, and
+	    with the gutter moved inward the shell's box and every other shell's box
+	    still resolve to the same content column. */}
 	<div class="mx-auto max-w-[960px]">
 		{/* The bar's bottom hairline is NOT in here — it hangs off #site-nav, out
 		    past this 960px shell, so it spans the window the way the bar's paper
