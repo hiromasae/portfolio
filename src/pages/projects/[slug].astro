@@ -44,24 +44,28 @@ const captionClass = 'mb-2.5 text-sm leading-relaxed';
 /* Everything except the one you're reading, in projects.ts order — the same
    order the home grid uses, so the strip reads as that grid with one card
    pulled out rather than as a second, differently-sorted list. NOT sorted by
-   year or "relatedness": there are three projects, the tags field hasn't been
-   rendered anywhere since 07-29, and any similarity metric over three items is
-   theatre.
+   year or "relatedness": the tags field hasn't been rendered anywhere since
+   07-29, and any similarity metric over a handful of items is theatre.
 
-   Three cards today, and the strip asks ProjectGrid for three columns so they
-   land in one row (2026-08-11, Hiro). That coupling is HAND-MAINTAINED, not
-   derived: `columns` is a literal 3 down in the strip, not others.length, and
-   the two numbers agreeing is the thing to re-check when a project is added or
-   removed. Deriving it was the obvious move and is the wrong one — the grid
-   stops at three columns because a fourth shrinks the cards past their titles
-   (ProjectGrid.astro has the measurements), so a fifth project wants a
-   different answer here, not a bigger number.
+   The strip asks ProjectGrid for three columns (2026-08-11, Hiro), and that
+   coupling is HAND-MAINTAINED, not derived: `columns` is a literal 3 down in
+   the strip, not others.length. Deriving it was the obvious move and is the
+   wrong one — the grid stops at three columns because a fourth shrinks the
+   cards past their titles (ProjectGrid.astro has the measurements), so more
+   projects want a different answer here, not a bigger number.
 
-   What that answer should be, when it comes up: leave this at 3 and let the
-   fourth card sit alone on row two, which is what the grid did before today and
-   still does on the home page. The alternative — capping the strip at three
-   cards — trades a ragged row for hiding work, and this strip is the page's
-   only way onward.
+   ── AND THAT CASE HAS NOW ARRIVED (2026-08-15, with the EJS project) ──
+   Five projects means `others` is four, so the strip renders three across and
+   ONE ALONE ON ROW TWO. That is the outcome the previous note chose in advance
+   and it stands: it is what the grid did before 08-11 and still does on the
+   home page, and the alternative — capping the strip at three cards — trades a
+   ragged row for hiding work, on a strip that is the page's only way onward.
+
+   ⚠ The lone card is FULL WIDTH OF ITS TRACK, i.e. a third of the row, not
+   stretched. So row two reads as an unfinished row, which is the honest shape
+   and is the thing most likely to be "fixed" by someone who finds it without
+   this note. The number to change if it ever stops being acceptable is the
+   project count, not the column count.
 
    At ONE project it would render a single third-width card under a "More
    projects" heading, which reads oddly — see the strip below for the guard. */
@@ -381,8 +385,9 @@ const others = projects.filter((other) => other.slug !== project.slug);
 		    project left, `others` is empty and the whole strip goes rather than
 		    rendering a heading over nothing. It reads `> 1` rather than `> 0`
 		    deliberately — one lone card sitting at a third of the grid's width
-		    under a plural heading is worse than no strip at all. Four projects
-		    today, so this renders three and fills exactly one row.
+		    under a plural heading is worse than no strip at all. Five projects
+		    today, so this renders four: three across, one on a second row (see
+		    the `others` note for why that is the chosen shape and not a bug).
 
 		    ── columns={3} (2026-08-11, Hiro: make these smaller so they all fit
 		    in one row and fit the width of the page) ── The default is 2, which
