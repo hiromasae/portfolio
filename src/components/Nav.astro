@@ -1518,7 +1518,65 @@ const onHome = path === '/';
 		// can scale underneath it without either gesture touching the other's
 		// transform. That separation is why the label can change identity and be
 		// pressed at the same instant, which is exactly what a click does here.
-		themeToggle.addEventListener('pointerdown', () => {
+		// ── The touch PEEK ──
+		// 2026-08-15, Hiro: tapping the toggle on a touchscreen should briefly
+		// show the pill, with the text transition. On a phone this label had gone
+		// silent — its mouseenter is bound only where the pointer can hover (see
+		// the binding above), and below 640px it is the bar's only pill, so the
+		// most animated object in the nav was one a phone never saw.
+		//
+		// It hangs off POINTERDOWN rather than click, and that is the whole trick:
+		// at pointerdown the theme has not flipped yet, so placePill() puts the
+		// OLD word on the plate, and the click handler's roll below then swaps it
+		// for the new one exactly as it does under a cursor. Showing it on click
+		// instead would place the pill with the new label already in it — the
+		// state, but not the transition, which is the half Hiro asked for. It also
+		// means the plate pops the instant the finger lands, which is the
+		// touch-down acknowledgement this button otherwise has no way to give.
+		//
+		// pointerType, not the media query: on a hybrid a mouse press is already
+		// hovering (`shown`), and a finger on the same machine still gets the
+		// peek. The `!shown` guard is what keeps a cursor's hover from being
+		// converted into something that times out.
+		let peekTimer = 0;
+		let peeking = false;
+		// Long enough to read two words after the roll has finished, and it has to
+		// be a TIMER — the contacts' "Copied!" holds until you leave the icon, and
+		// on touch there is no leaving. Measured from the release rather than the
+		// press so a long hold doesn't eat the dwell.
+		const PEEK_HOLD = 1100;
+		const endPeek = () => {
+			if (!peeking) return;
+			window.clearTimeout(peekTimer);
+			peekTimer = window.setTimeout(() => {
+				peeking = false;
+				hidePill();
+			}, PEEK_HOLD);
+		};
+
+		themeToggle.addEventListener('pointerdown', (e) => {
+			// Before the reduced-motion guard below: the pop is CSS's to soften or
+			// drop, and a visitor who has asked for less motion still gets to be
+			// told which theme the button is offering.
+			//
+			// The dwell is armed from the RELEASE, on the window, for the reason
+			// the press below binds there too — a press dragged off the button
+			// never fires anything on it, and a pill with no unhover to fall back
+			// on would simply stay. The click's own re-arm (further down) then
+			// restarts the count from after the roll, so a real tap gets the full
+			// hold and an abandoned press still clears itself.
+			if (!shown && e.pointerType !== 'mouse') {
+				window.clearTimeout(peekTimer);
+				peeking = true;
+				showPill();
+				const settle = () => {
+					window.removeEventListener('pointerup', settle);
+					window.removeEventListener('pointercancel', settle);
+					endPeek();
+				};
+				window.addEventListener('pointerup', settle);
+				window.addEventListener('pointercancel', settle);
+			}
 			if (reduceToggle) return;
 			togglePillPress.style.transition = `transform var(--dur-press) var(--ease-pop)`;
 			togglePillPress.style.transform = 'scale(var(--pill-press))';
@@ -1562,6 +1620,12 @@ const onHome = path === '/';
 		themeToggle.addEventListener('click', () => {
 			if (!shown) return;
 			const text = themeLabel();
+			// Restart the touch dwell here rather than letting the release's count
+			// run: the hold is meant to be time spent looking at the NEW word, and
+			// measured from the press it would already be part-spent by the time
+			// the roll lands on it. A no-op under a cursor, where nothing is
+			// peeking and the pill leaves when the pointer does.
+			endPeek();
 			if (reduceToggle) {
 				togglePill.style.width = `${widthFor(text)}px`;
 				togglePillText.textContent = text;

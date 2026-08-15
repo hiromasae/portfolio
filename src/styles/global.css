@@ -3467,6 +3467,39 @@ body {
 	background-position: left bottom;
 }
 
+/* ── The word sat 1.32px HIGH, and the underline was why ──
+   2026-08-15, Hiro: the trigger doesn't look centred against the rest of the
+   bar. Measured, it wasn't: the ink of "Contact" centred 1.32px above the bar's
+   axis and the caret 1.23px above it, while the theme toggle's glyph beside them
+   sat at exactly 0.00.
+
+   Not a typographic subtlety — a box error, and the underline caused it.
+   .btn-quiet__label reserves 3px of padding BELOW the text so the wipe clears
+   the descenders, and .contact-caret carries a matching 3px so the two flex
+   items have equal boxes. `align-items: center` then centres those boxes, empty
+   clearance and all, which lifts everything drawn inside them by half of it. The
+   toggle has no such reservation, so it alone was honest, and standing next to
+   it is what made the error visible.
+
+   The correction is the same 3px added back at the TOP as MARGIN, so the flex
+   line centres a box that is symmetric about the ink. Margin rather than
+   padding, for two different reasons in the two elements: on the label,
+   padding-top would be inside the background box and the wipe would grow a 3px
+   gap over the word; on the caret it would be worse than cosmetic, because
+   Tailwind's preflight sets border-box globally and its height is a fixed
+   0.85rem — padding there STEALS from the drawing rather than surrounding it,
+   and the glyph would squash. A margin sits outside both and moves the box
+   without resizing anything.
+
+   Scoped to .contact-trigger, not to .btn-quiet: a lone text link in a page
+   flow has nothing beside it to be 1.5px out against, and the back-to-projects
+   link this family was drawn for was exactly that. Being off-axis only means
+   something in a row. */
+.contact-trigger .btn-quiet__label,
+.contact-trigger .contact-caret {
+	margin-top: 3px;
+}
+
 /* ── The word is 20px tall; the target must not be ──
    Measured: the trigger's drawn box is 88 × 20.4px, because a 0.875rem line at
    line-height 1 is all it is. That is UNDER WCAG 2.2's 24px floor on the short
@@ -3516,6 +3549,38 @@ body {
 }
 #contact-toggle[aria-expanded='true'] .contact-caret {
 	transform: rotate(180deg);
+}
+
+/* ── The OPEN state ──
+   2026-08-15, Hiro. Until now `aria-expanded="true"` moved exactly one thing: a
+   13px caret rotating. Everything else about the control was identical open and
+   shut, which on this control is worse than it sounds — the trigger EXISTS only
+   below 640px, where hover never fires and :focus-visible needs a keyboard, so
+   the word had no state at all on the one device it was built for. A disclosure
+   that is a phone's only route to any of Hiro's contacts should look live while
+   its panel is standing open.
+
+   Nothing new is drawn for it. The wipe was already here, already tuned, and
+   already pointed the right way (see the block above — its direction was flipped
+   for this control) — and it too had never run on a phone, because it was
+   spoken for by :hover alone. Handing it to the open state puts the site's
+   last underline in front of the visitors who own this control: it draws in as
+   the panel opens, retracts as it closes, and the caret's rotation becomes a
+   confirmation instead of the entire signal.
+
+   The clocks were already in step and are left alone: the label's background-
+   size rides --dur-card (300ms) and the panel's contact-pop runs --dur-pop-in
+   (280ms), so the line and the plate arrive together within a frame.
+
+   ID + attribute outranks .btn-quiet:hover, which is what holds the word inked
+   after a pointer wanders off an open menu. On a desktop window narrow enough
+   to show this control, open and hovered therefore look alike — correct for a
+   disclosure, and not worth a third colour to distinguish. */
+#contact-toggle[aria-expanded='true'] {
+	color: var(--ink);
+}
+#contact-toggle[aria-expanded='true'] .btn-quiet__label {
+	background-size: 100% 2px;
 }
 @media (prefers-reduced-motion: reduce) {
 	.contact-caret {
