@@ -90,6 +90,126 @@ const onHome = path === '/';
 				</a>
 			</div>
 
+		{/* ── Two contact surfaces, one per pointer ──
+		    2026-08-15, Hiro: the dropdown should only be for mobile. So both are
+		    in the markup and the breakpoint picks one — the icon row below 640px
+		    is `display: none`, the menu at 640 and up is. See the contact-surface
+		    block in global.css for the switch and why 640.
+
+		    The split is not a compromise, it is the two arguments landing in
+		    different places. The menu exists because the sliding label that names
+		    these icons is hover-only, so on a touch device four glyphs are
+		    unlabeled and unlabelable. A pointer has hover: the label names each
+		    icon on the way past, every link is one click, and the row costs no
+		    width the bar hasn't got. Give each pointer the surface its own
+		    argument produces.
+
+		    What that costs is TWO of everything below — two sets of links in the
+		    DOM (only one ever exposed, since display: none is out of the
+		    accessibility tree), and two scripts in the block at the bottom. The
+		    duplication is the price of the split and is the first thing to
+		    re-examine if this ever feels heavy.
+
+		    THE EMAIL LINK DELIBERATELY DIFFERS BETWEEN THEM. Here it copies the
+		    address to the clipboard — the gesture this row's pill, its "Copied!"
+		    stamp and its whole fourteen-variant exploration were built for, and
+		    the thing a desktop visitor with no mail client actually wants. In the
+		    menu it is a plain mailto: that hands off to the mail app (Hiro,
+		    2026-08-15). Each surface NAMES what it does, which is what keeps that
+		    honest: the icon's label reads "Copy email", the menu's row reads
+		    "Email". */}
+		{/* Centred on the bar itself (2026-08-02). The layout box is wider than
+		    what the cluster draws — the buttons are scaled down inside it — but
+		    both are centred on the same line, so the drawn icons land on the
+		    bar's centre. See the close-ranks block in global.css. */}
+		{/* No `gap-*` utility on this box: the gap is --nav-icon-gap in global.css,
+		    because the close-ranks translate and the hit-box pseudo are both cut
+		    against it and the three have to move together. */}
+		<div
+			id="contact-group"
+			class="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center"
+		>
+			{
+				contacts.map((c, i) => {
+					const isEmail = c.href.startsWith('mailto:');
+					const hoverLabel = isEmail ? 'Copy email' : c.label;
+					// --nav-icon-i is markup order, which the load intro's draw stagger
+					// marches along; --nav-icon-c is the same position as a signed offset
+					// from the cluster's centre, in box-and-gap pitches, which is what the
+					// close-ranks translate in global.css needs.
+					return (
+						<a
+							href={c.href}
+							class="btn-icon"
+							style={`--nav-icon-i: ${i}; --nav-icon-c: ${i - (contacts.length - 1) / 2}`}
+							aria-label={hoverLabel}
+							data-label={hoverLabel}
+							data-copy={isEmail ? c.href.replace('mailto:', '') : undefined}
+							target={isEmail ? undefined : '_blank'}
+							rel="noopener"
+						>
+							<Icon name={c.icon} />
+						</a>
+					);
+				})
+			}
+			{/* One shared label that glides between the icons on hover/focus,
+			    naming the hovered one. Positioned entirely by script. Bare text
+			    since 2026-08-03 — it wore an ink chip before that.
+			    The ↗ shows only for external (new-tab) links.
+
+			    FOUR elements, and every split is load-bearing. Each owns exactly
+			    one transform channel, which is the whole reason there are four:
+			      .contact-slider      the POSITIONER (its transform is where the pill
+			                           is, its transition is the slide between icons)
+			      .contact-slider-press the PRESS (2026-08-04). Dips the entire pill —
+			                           plate, label and ↗ — while the pointer is down,
+			                           so it presses with the button it names. It has
+			                           to be its own box: the plate's transform is
+			                           owned outright by the pop, whose animations are
+			                           `both`-filled and therefore beat an inline
+			                           style forever after they finish.
+			      .contact-slider-in   the visible plate, and the only thing that
+			                           plays the pop. Putting the pop on the positioner
+			                           would replay it on every slide, since the slide
+			                           moves the same transform property.
+			      .contact-slider-stamp the CONTENT, which the copy confirmation
+			                           stamps. It is its own box so the stamp scales
+			                           the whole row — the label and the ↗ together —
+			                           about the plate's centre. Scaling the text span
+			                           alone would leave the arrow behind and swing the
+			                           word off-centre on external links. (Punching the
+			                           plate was the thing this box existed to AVOID
+			                           until 2026-08-04; the press does exactly that
+			                           now, one box up, which is why the two gestures
+			                           no longer share an element.)
+			                           (It briefly also held a confirmation tick,
+			                           removed 2026-08-03 — the stamp says it.) */}
+			<span class="contact-slider" aria-hidden="true">
+				<span class="contact-slider-press">
+				<span class="contact-slider-in">
+					<span class="contact-slider-stamp">
+						<span class="contact-slider-text"></span>
+						<svg
+							class="contact-slider-ext"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="square"
+							stroke-linejoin="miter"
+							aria-hidden="true"
+						>
+							<path d="M15 3h6v6" />
+							<path d="M10 14 21 3" />
+							<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+						</svg>
+					</span>
+				</span>
+				</span>
+			</span>
+		</div>
+
 		{/* ── Contact: one word, four links behind it ──
 		    2026-08-15, Hiro. This was a row of four icon links centred on the
 		    bar, with a shared label that slid between them naming the hovered
@@ -788,11 +908,315 @@ const onHome = path === '/';
 		});
 	}
 
-	// ── Contact menu ──
+	// ── Sliding contact label (the DESKTOP surface) ──
+	// Restored 2026-08-15 with the icon row it belongs to, after a few hours in
+	// which the menu was the only contact surface at every width. It runs
+	// unconditionally: below 640px #contact-group is display: none, so `group`
+	// still resolves but nothing it binds can ever fire — a hidden element gets
+	// no hover, no focus and no click. Guarding it on a matchMedia would buy
+	// nothing and would need re-running on resize.
+	//
+	// The measurer below carries the left: -9999px fix that the toggle's clone
+	// got the same day; at left: 0 an invisible ruler at the centre of the bar
+	// is one narrow window away from making the page scroll sideways.
+	//
+	// A single label glides between the contact icons, always sitting under
+	// whichever one is hovered or focused, and naming it. (Still called the pill
+	// throughout: it wore an ink chip until 2026-08-03.) When
+	// moving between icons it slides + resizes — the one motion this pill has.
+	// Appearing and disappearing are the POP (2026-08-02, Hiro's pick from a
+	// twenty-variant exploration): it springs open from 80% and leaves by
+	// shrinking. Those live entirely in CSS, driven by the is-in / is-out
+	// classes set below — see the pop block in global.css. Everything between
+	// showAt and hide (placement, measurement, the copy-feedback roll) is
+	// independent of which gesture is in force.
+	const group = document.getElementById('contact-group');
+	const pill = group?.querySelector<HTMLElement>('.contact-slider');
+	const pillText = pill?.querySelector<HTMLElement>('.contact-slider-text');
+	const pillStamp = pill?.querySelector<HTMLElement>('.contact-slider-stamp');
+	const pillPress = pill?.querySelector<HTMLElement>('.contact-slider-press');
+
+	if (group && pill && pillText && pillStamp && pillPress) {
+		const icons = Array.from(group.querySelectorAll<HTMLAnchorElement>('.btn-icon'));
+
+		// Hidden clone of the pill, used to measure the exact width each label
+		// needs — including the external-link arrow when shown — so the pill's
+		// width can animate to an explicit px value. Both boxes have to be freed
+		// to shrink-wrap: the outer one is width-driven by script, and the inner
+		// one is width: 100% of it, which would resolve to nothing here.
+		const measurer = pill.cloneNode(true) as HTMLElement;
+		measurer.style.cssText =
+			'position:absolute;visibility:hidden;top:-9999px;left:-9999px;transform:none;transition:none;width:auto;';
+		const measurerIn = measurer.querySelector<HTMLElement>('.contact-slider-in')!;
+		measurerIn.style.cssText = 'width:auto;opacity:1;animation:none;';
+		group.appendChild(measurer);
+		const measurerText = measurer.querySelector<HTMLElement>('.contact-slider-text')!;
+
+		let visible = false;
+		const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+		const labelFor = (icon: HTMLElement) => icon.getAttribute('data-label') ?? '';
+		const isExternal = (icon: HTMLElement) => icon.getAttribute('target') === '_blank';
+
+		// Drop any in-flight stamp and return the label to a clean, visible resting
+		// state (used before every direct repositioning).
+		const resetText = () => {
+			pillStamp.style.transition = 'none';
+			pillStamp.style.transform = 'none';
+			pillStamp.style.opacity = '1';
+		};
+
+		// Position + size the pill under `icon`, showing `text`. Links that open
+		// in a new tab also get the trailing ↗ arrow.
+		const place = (icon: HTMLElement, text: string) => {
+			const gRect = group.getBoundingClientRect();
+			const iRect = icon.getBoundingClientRect();
+			const centerX = iRect.left - gRect.left + iRect.width / 2;
+			const external = isExternal(icon);
+			resetText();
+			measurerText.textContent = text;
+			measurer.classList.toggle('is-external', external);
+			pillText.textContent = text;
+			pill.classList.toggle('is-external', external);
+			pill.style.width = `${measurer.offsetWidth}px`;
+			pill.style.transform = `translateX(${centerX}px) translateX(-50%)`;
+		};
+
+		// ── The copy confirmation: the pill rides the button's press ──
+		// 2026-08-03. The gesture began as Hiro's pick from a fourteen-variant
+		// exploration (roll, odometer both ways, crossfade, pop, wipe, letters,
+		// flip, defocus, stamp, tick, plate flash, colour sweep, countdown) — the
+		// STAMP, which dropped the label in from 135% on a hard 1.6 overshoot.
+		//
+		// It came out because it could not be synchronised with the icon, and the
+		// reason is worth keeping: a stamp lands by SHRINKING (1.35 → 1) while the
+		// pressed glyph releases by GROWING (0.9 → 1). Aligning the start frame
+		// and the duration did nothing, because the two were mirror images —
+		// maximally opposed at exactly the moment both springs overshoot. Same
+		// clock, opposite motion, and it read as two things happening at once.
+		//
+		// So the pill now does what the icon does, on the same events and the same
+		// pair of tokens: it dips on pointerdown over --dur-press, and springs
+		// back to 1 over --dur-pop-in on --ease-pop when the press is let go — the
+		// label changing at the turn. One object with two parts, which is what the
+		// button and its own name should have been all along.
+		//
+		// ── 2026-08-04: the dip moved out to the whole pill ──
+		// Hiro: "the whole pill and the text within". It was scaling the CONTENT
+		// box, so the words shrank inside a plate that sat perfectly still — which
+		// is the one thing a chip cannot do while the button under it is being
+		// pressed. It now runs on .contact-slider-press, one box further out, and
+		// takes the plate with it. Two consequences worth knowing:
+		//   · the depth is --pill-press (0.94), NOT the glyph's 0.9 — see the token
+		//     for why a bigger box needs a smaller ratio to travel the same amount;
+		//   · the copy confirmation no longer dips at all. It used to share this
+		//     element, and two nested 0.9s multiply to 0.81 — the word would punch
+		//     twice as deep as the plate carrying it. The swap is an opacity blink
+		//     now and the plate supplies every bit of the motion.
+		//
+		// The earlier roll (out right, in from the left) is also worth not
+		// rediscovering: horizontal is the axis this pill already owns, since its
+		// identity is SLIDING SIDEWAYS between the four icons. A text roll on that
+		// axis inside a box that travels on it is two messages in one channel.
+		// Scale is free precisely because nothing else here uses it.
+
+		// The dip. Every contact icon gets it, not just the one that copies: the
+		// pill hangs under whichever icon is hovered and the press belongs to the
+		// BUTTON, so a pill that sat still under three of the four would be the
+		// same mismatch this block exists to fix.
+		const pressPill = () => {
+			if (reduce) return;
+			pillPress.style.transition = `transform var(--dur-press) var(--ease-pop)`;
+			pillPress.style.transform = 'scale(var(--pill-press))';
+		};
+
+		// The release. Mirrors `#site-nav .btn-icon:hover > svg` exactly — on
+		// mouseup :active drops, the pointer is still hovering, and the glyph
+		// returns to its lift on --dur-pop-in / --ease-pop. Same numbers here, so
+		// the two finish on the same frame.
+		const releasePill = () => {
+			if (reduce) return;
+			pillPress.style.transition = `transform var(--dur-pop-in) var(--ease-pop)`;
+			pillPress.style.transform = 'scale(1)';
+		};
+
+		// Blink only, never a scale: the plate's press is already supplying the
+		// motion for the one event that calls this, and a second scale here would
+		// compound with it. (It took a `dip` flag for a few hours on 2026-08-04,
+		// back when a 1.5s timer also stamped the label back unpressed. The
+		// confirmation holds until unhover now, so that caller is gone and the
+		// flag with it.)
+		const stampText = (text: string) => {
+			// The width is deliberately NOT re-measured: the pill stays at the
+			// resting label's width so the plate never resizes under the swap.
+			// "Copied!" is the shorter word, so it simply sits centred in a
+			// rectangle cut for "Copy email" — which is why the gesture scales the
+			// content box (whose centre is the plate's) and not the text span.
+			pillText.textContent = text;
+			if (reduce) return;
+			// Blink the ink out and back. The word changes at the turn of the
+			// plate's press, which is the moment that wants marking, and the plate
+			// is already doing the moving. --dur-press means the word is fully
+			// there in the time the glyph takes to dip, so the swap reads as
+			// instant.
+			pillStamp.style.transition = 'none';
+			pillStamp.style.opacity = '0';
+			void pillStamp.offsetHeight; // reflow, so the rebound animates
+			pillStamp.style.transition = `opacity var(--dur-press) ease`;
+			pillStamp.style.opacity = '1';
+		};
+
+		const showAt = (icon: HTMLElement, text = labelFor(icon)) => {
+			if (visible) {
+				place(icon, text); // already up: this is the slide, no entrance replay
+				return;
+			}
+			// Land in position with the slide suppressed — the pill still carries
+			// the transform and width it was hidden at, so leaving the transition
+			// live would glide it in from the last icon hovered.
+			pill.style.transition = 'none';
+			place(icon, text);
+			void pill.offsetWidth; // reflow, so the restored transition can't see this frame
+			pill.style.transition = '';
+			// Re-trigger the pop from its first frame. Removing is-in and forcing a
+			// reflow before re-adding matters when the exit is still in flight: the
+			// class is already gone in that case, but the animation is not, and
+			// without the reflow the browser can coalesce the two and play nothing.
+			pill.classList.remove('is-out', 'is-in');
+			void pill.offsetWidth;
+			pill.classList.add('is-in');
+			visible = true;
+		};
+
+		const hide = () => {
+			if (!visible) return;
+			visible = false;
+			// Hand over to the exit animation, which is `both`-filled and so holds
+			// the pill hidden at its end frame — nothing to clean up on a timer.
+			pill.classList.remove('is-in');
+			pill.classList.add('is-out');
+		};
+
+		// Show the label only while the cursor is actually over an icon.
+		//
+		// The hide is DEFERRED BY A TICK, not by a delay. Leaving one icon for
+		// the next fires mouseleave and mouseenter from the same pointer move, so
+		// a zero timeout is always cancelled before it can run — which is what
+		// keeps an icon-to-icon move a slide instead of an exit followed by a
+		// fresh entrance. Any real leave hides on the very next tick, in step with
+		// the glyph dropping back.
+		//
+		// This used to be a 90ms grace, which existed to bridge the dead sliver
+		// BETWEEN the icons. The hit boxes tile edge to edge now (see the
+		// .btn-icon::after block in global.css) so there is no sliver left to
+		// bridge, and the 90ms had become a head start the icon's drop got over
+		// the label's — 2026-08-02, Hiro: the two read as disjointed. Restoring a
+		// delay here re-opens that gap; widen the hit boxes instead.
+		let gapHideTimer = 0;
+		icons.forEach((icon) => {
+			// The press. Its release is bound to the WINDOW, not to the icon: a
+			// press dragged off the button never fires pointerup on it, and the pill
+			// must not be left stuck at 0.9. The glyph has the same problem and CSS
+			// solves it for free — :active drops wherever the pointer ends up — so
+			// this is just what it costs to keep a script-driven element honest
+			// beside a state-driven one.
+			// On a real click, pointerup's release and the click handler's stampText
+			// both run before the next paint, so the extra assignment is invisible
+			// rather than a competing animation.
+			icon.addEventListener('pointerdown', () => {
+				pressPill();
+				const release = () => {
+					window.removeEventListener('pointerup', release);
+					window.removeEventListener('pointercancel', release);
+					releasePill();
+				};
+				window.addEventListener('pointerup', release);
+				window.addEventListener('pointercancel', release);
+			});
+			icon.addEventListener('mouseenter', () => {
+				window.clearTimeout(gapHideTimer);
+				showAt(icon);
+			});
+			icon.addEventListener('mouseleave', () => {
+				window.clearTimeout(gapHideTimer);
+				gapHideTimer = window.setTimeout(hide, 0);
+			});
+		});
+		group.addEventListener('mouseleave', () => {
+			window.clearTimeout(gapHideTimer);
+			hide();
+		});
+		group.addEventListener('focusin', (e) => {
+			const icon = (e.target as HTMLElement).closest<HTMLElement>('.btn-icon');
+			if (icon) showAt(icon);
+		});
+		group.addEventListener('focusout', (e) => {
+			if (!group.contains(e.relatedTarget as Node)) hide();
+		});
+
+		// Copy-to-clipboard: stamp the confirmation into the pill. The (rare)
+		// fallback hint is much longer than either label, so that one goes through
+		// place() and does resize, since a clipped instruction is worse than a
+		// moving box.
+		//
+		// ── The confirmation holds until you leave the icon ──
+		// 2026-08-04, Hiro: "Copied!" used to time out after 1.5s and stamp the
+		// label back under a pointer that had never moved — the pill answering a
+		// question nobody had re-asked, and worse, undoing its own confirmation
+		// while you were still looking at it. It now stays for exactly as long as
+		// the hover that earned it.
+		//
+		// There is no revert code, and that is the point: hovering AWAY is what
+		// resets it, and every path back into the pill already goes through
+		// place(), which rewrites the label and the width from the icon it is
+		// landing under. So the slide to a neighbour, the return after an exit and
+		// a fresh focus all clear "Copied!" on their own. The same now holds for
+		// the ⌘C hint, which had the same timer and wants the persistence even
+		// more — it is an instruction, and one that vanishes while you are
+		// reaching for the key is the one kind of hint worth nothing.
+		//
+		// ── The stamp fires BEFORE the write, not after it ──
+		// 2026-08-03, Hiro: the stamp has to run with the button's press. It could
+		// not, while it was sequenced after `await navigator.clipboard.writeText`.
+		// The glyph's press gesture is pure CSS :active, so it releases on mouseup
+		// — the same tick as `click` — while an awaited stamp could only start on
+		// a later microtask, once the clipboard promise had settled. Two halves of
+		// one gesture on two different clocks, and the icon always won.
+		//
+		// So the feedback is OPTIMISTIC: claim it, then do it, and correct the
+		// claim if the write rejects. Safe here because a clipboard rejection is a
+		// permission refusal, which comes back immediately rather than late — the
+		// correction lands within a frame or two, and it still tells the truth.
+		icons.forEach((icon) => {
+			const address = icon.dataset.copy;
+			if (!address) return;
+			icon.addEventListener('click', (e) => {
+				e.preventDefault();
+
+				// Synchronous, so this frame is the one the press releases on.
+				if (!visible) showAt(icon);
+				stampText('Copied!');
+
+				// Wrapped rather than called bare: on an insecure origin
+				// navigator.clipboard is undefined, which throws SYNCHRONOUSLY and
+				// would escape a .catch() hung off the call itself. The old
+				// try/await/catch covered that for free; this is what replaces it.
+				Promise.resolve()
+					.then(() => navigator.clipboard.writeText(address))
+					.catch(() => {
+						showAt(icon, 'Press ⌘C to copy'); // longer hint: resize to fit
+					});
+			});
+		});
+	}
+
+	// ── Contact menu (the MOBILE surface) ──
 	// A disclosure: the button says what it opens, the panel holds the links as
-	// words. It replaces the sliding label that used to name four icon buttons
-	// (removed 2026-08-15 — the markup note above has the argument, and b887ca1
-	// has the whole thing working if it is ever wanted back).
+	// words — which is the whole point of it, since the sliding label above
+	// cannot name anything without a hover. Below 640px this is the bar's
+	// contact surface and the icon row is display: none; above it, the reverse.
+	// Like that block, this one runs unconditionally and simply never fires on
+	// the width where its elements are hidden.
 	//
 	// Adapted from the settings menu at faf42e8, which ran the same contract for
 	// a day: `hidden` as the closed state, aria-expanded on the trigger, Escape
@@ -892,14 +1316,15 @@ const onHome = path === '/';
 	// The pill wipes in showing the theme a click would switch TO, and a click
 	// rolls the text to the next label, doubling as the confirmation.
 	//
-	// It used to be a TWIN — the same class as the contacts' shared slider,
-	// deliberately kept a separate element so that one pill gliding across the
-	// gap wouldn't read as the toggle joining their cluster. Since the icon row
-	// became a menu (2026-08-15) this is the only pill left on the site, and
-	// the argument for the split has outlived the thing it was splitting from.
-	// The class stays because the look, the pop, the press and the roll are all
-	// still exactly what this button wants; see the ⚠ at .contact-slider in
-	// global.css for what "slider" now means.
+	// A TWIN of the contacts' shared slider: same class, so the same look, pop,
+	// press and roll, but deliberately its own element — one pill gliding across
+	// the gap between the row and this button would read as the toggle joining
+	// their cluster.
+	//
+	// The twinning holds at every width even though its sibling does not: below
+	// 640px the icon row is display: none and this is the bar's only pill, above
+	// it there are two. Nothing here needs to know which — a lone pill and a
+	// travelling one differ only in whether anything ever asks them to move.
 	const toggleWrap = document.getElementById('theme-toggle-wrap');
 	const togglePill = toggleWrap?.querySelector<HTMLElement>('.contact-slider');
 	const togglePillText = togglePill?.querySelector<HTMLElement>('.contact-slider-text');

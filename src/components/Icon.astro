@@ -110,12 +110,12 @@ const { name } = Astro.props;
     one of these ever moves into the nav, measure getTotalLength() first — the
     four above document why.
 
-    ⚠ 2026-08-15: the four contact marks above are NO LONGER DRAWN by the intro
-    either. They moved out of the bar and into the contact menu, which is closed
-    at load, so nothing strokes them — but their --len values are kept, and
-    kept accurate, because the menu is one design change away from putting an
-    icon back in the bar and re-measuring four paths by hand is exactly the
-    tax this file exists to avoid.
+    2026-08-15: the four contact marks above are drawn by the intro at 640px
+    and up ONLY. Below that the bar shows the contact menu instead of the icon
+    row (see the contact-surface block in global.css), the row is display: none,
+    and the intro wipes the menu's trigger in its place. Their --len values
+    matter at every width regardless — the same marks are used inside the menu's
+    rows, one media query away from being stroked again.
 
     Same drawing system as the contact icons otherwise: 24-unit box, 2px
     stroke, square caps, miter joins at limit 2. Butt caps appear only on

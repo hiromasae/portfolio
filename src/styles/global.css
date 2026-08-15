@@ -1594,6 +1594,45 @@ body {
 	   half the drawn gap — see the .btn-icon::after note). Comfortably over WCAG
 	   2.2's 24px floor, but this is the token that spends that margin. */
 	--nav-icon-scale: 0.66;
+	/* ── The contacts' gap ──
+	   A LAYOUT gap: the buttons are drawn at --nav-icon-scale, so what lands on
+	   screen is this × 0.66. Three rules are cut against it and none of them may
+	   be retuned by eye — the close-ranks translate (which contracts the cluster
+	   on a box-and-gap pitch), the ::after hit boxes (half of it, so neighbouring
+	   regions meet exactly), and the gap on #contact-group itself. It is a token
+	   for that reason: they have to move together or the cluster stops being one
+	   uniform miniature.
+
+	   0.8rem, from 0.375rem (2026-08-03, Hiro: more room between the icons).
+	   The target is the bar's VERTICAL air: at 0.375 the glyphs sat 17.2px apart
+	   while there was 22.5px above and below them, so the cluster was tighter
+	   across than it was deep and read as one crowded object rather than four
+	   controls. 0.8rem draws a 10.0px gap between the button boxes and puts the
+	   GLYPHS 22.6px apart — the same 22.5px, so the cluster now sits on one unit
+	   in both axes.
+	   Smaller steps, if this overshoots: 0.5rem lands the glyphs at 18.8px,
+	   which is --nav-inset (19px) almost exactly; 0.7rem lands them at 21.3px.
+	   What it costs is that --nav-inset is now the bar's TIGHTEST horizontal gap
+	   at 19px, which inverts the argument in that token's own note — the ends
+	   would want ~1.2rem to lead again. Left alone deliberately: the inset holds
+	   the wordmark and the toggle, and widening it moves them, which is not what
+	   was asked for here.
+
+	   UNCHANGED AT EVERY WIDTH, and that is the finding of the 08-14 phone pass
+	   rather than an omission: the cluster's rhythm was never what made the
+	   narrow bar crowd. Its ENDS were. Tightening this to 0.4rem on phones was
+	   the first fix and it bought ~15px by making the one thing in the bar that
+	   is already a unit read tighter than it is drawn everywhere else. Taking
+	   the same pixels off the ends instead leaves the four icons on one gap at
+	   every width — see the small-phone block below.
+
+	   That held for a day. With the ends pinned to the page's own gutter
+	   (--nav-inset, 08-15) there is no longer anywhere else to take them from,
+	   and this is the one dimension in the bar that is a length and can ramp.
+	   0.8rem holds at 360 and up; under that it closes to 0.5rem at 320, which
+	   is the whole of the narrow-phone accommodation. See the small-phone
+	   block below for what that buys and what it costs. */
+	--nav-icon-gap: 0.8rem;
 	/* How far the bar's outermost DRAWN elements sit inside the WINDOW — the
 	   wordmark on the left, the toggle's glyph on the right. See the .nav-inner
 	   rule below, which spends it asymmetrically to land them equal.
@@ -1667,20 +1706,28 @@ body {
    more than it had.
 
    The contacts became a menu instead (2026-08-15 — the block in Nav.astro has
-   that argument, which is about NAMING and not about width). The row is three
-   drawn things now: the wordmark, the word "Contact" with its caret, and the
-   toggle. Measured at 320 with everything at its authored value and the ends on
-   the column: ~113px of content into 261.5px of room. The arithmetic that drove
-   every number in this block simply stopped being tight, so the accommodations
-   went with it — --nav-icon-gap is gone as a token (nothing left to space), and
-   --nav-inset is flat at the column's gutter.
+   that argument, which is about NAMING and not about width), and then the menu
+   became the MOBILE surface only, which is what finally settled this. Below
+   640px the bar holds three drawn things — the wordmark, the word "Contact"
+   with its caret, and the toggle — measured at 320 with everything at its
+   authored value and the ends on the column: ~113px of content into 261.5px of
+   room. The six-thing arithmetic above now belongs to widths of 640 and up,
+   where 261.5px of room is 592.5 and none of it was ever tight.
+
+   So both accommodations are gone rather than re-tuned: --nav-inset is flat at
+   the column's gutter, and --nav-icon-gap is back to a flat 0.8rem because the
+   row it spaces no longer exists at any width that cannot afford it. The
+   crowding was never solved by finding 30px. It was solved by not asking a
+   320px window to hold six things.
 
    WHAT TO DO IF THIS EVER GETS TIGHT AGAIN, in the order the evidence supports:
    the ends are not available (they are the page's own gutter, and Hiro asked
-   for that alignment explicitly); --nav-toggle-gap is the first dial, and it is
-   the only interior gap left; the trigger's word can shorten before any glyph
-   shrinks, because --nav-icon-scale IS the toggle's touch target. Every one of
-   those was learned by doing it the other way first.
+   for that alignment explicitly); --nav-toggle-gap is the first dial below 640,
+   where it is the only interior gap; the trigger's word can shorten before any
+   glyph shrinks, because --nav-icon-scale IS the toggle's touch target; and
+   above 640 the honest answer is the one that worked — move something out of
+   the row rather than shave what is in it. Every one of those was learned by
+   doing it the other way first.
 
    The 320 measurements throughout this file are read in a desktop browser,
    where scrollbar-gutter: stable costs 11px of layout that a phone's overlay
@@ -2713,6 +2760,43 @@ body {
 	transition: color var(--dur-tap) ease;
 }
 
+/* ── Hit boxes tile edge to edge ──
+   The drawn buttons sit --nav-icon-gap × --nav-icon-scale apart (10.0px at
+   0.8rem and 0.66), and that sliver used to be dead ground: crossing it
+   dropped the hover, and lingering there cleared the label after the grace
+   delay. This pseudo extends each button's hit region by HALF the layout gap
+   on every side, so neighbouring regions meet exactly — sweeping the row is
+   one continuous hover and the label just slides along.
+
+   Half the LAYOUT gap, not half the drawn gap, and that's not an approximation:
+   the pseudo is inside the button, so it scales with it, and half the layout
+   gap × the scale is precisely half the drawn gap, whatever either token is
+   set to. Which is why it is written as an expression — retune it only at
+   --nav-icon-gap, never by eye.
+
+   Vertically it now reaches 5.0px past the drawn button (it was 2.5px at the
+   old 0.375rem gap), pure forgiveness for a diagonal approach. Still short of
+   the pill: the group's layout box is the FULL-SIZE 2.9rem one, so there are
+   9.4px of slack below the drawn button before its edge, and the pill hangs
+   0.3rem below that — and is pointer-events: none regardless.
+
+   A pseudo rather than padding because padding would change the 2.9rem box the
+   close-ranks translate in the nav is cut against. Vertical by the same amount,
+   which is pure forgiveness for a diagonal approach; it can't reach the pill
+   below (that's 0.3rem down and pointer-events: none anyway).
+
+   CONTACTS ONLY (2026-08-03, Hiro). This was on every .btn-icon, which handed
+   the theme toggle the same overspill — but the toggle stands alone at the far
+   right with nothing beside it, so there was no gap for it to close and the
+   extra ring was just an invisible box reaching past the glyph. Its hover
+   region is now exactly the drawn button (2.9rem × --nav-icon-scale, ~32px).
+   Anything that gives the toggle a neighbour brings this back for it. */
+#contact-group .btn-icon::after {
+	content: '';
+	position: absolute;
+	inset: calc(var(--nav-icon-gap) / -2);
+}
+
 .btn-icon:hover {
 	color: var(--ink);
 }
@@ -2926,21 +3010,17 @@ body {
 }
 
 /* ── The hover label ──
-   ⚠ IT NO LONGER SLIDES (2026-08-15). This was a single label that glided
-   between the four contact icons, sitting under whichever was hovered and
-   naming it — and the slide is what the class is named for and what most of
-   the reasoning below is protecting. The icons became a menu whose links carry
-   their own words, so the only button left wearing one of these is the theme
-   toggle, which stands alone and has nothing to glide between.
+   A single label that glides between the contact icons, sitting just below
+   whichever one is hovered or focused and naming it. It wore an ink chip until
+   2026-08-03 and is bare text now (see .contact-slider-in); it is still ONE
+   object that moves, which is what every rule below is protecting.
 
-   What survives is still exactly right for that one button — the pop, the
-   press, the roll on click, the plate — so the rules are kept whole rather
-   than flattened into something simpler, and for a concrete reason: the
-   travelling machinery is what makes the pill ONE object rather than a label
-   redrawn per state, and the roll depends on that split. Flattening it would
-   also throw away the answer to a question that took a fourteen-variant
-   exploration (see the press and pop blocks). Read the slide talk as
-   history — b887ca1 has the four icons it moved between.
+   TWO CONSUMERS, and only one of them slides. The icon row wears it as
+   designed. The theme toggle wears a second instance of the same classes and
+   stands alone, so its copy never travels — the pop, the press and the roll
+   are what it is there for. (For a few hours on 2026-08-15 the toggle was the
+   ONLY consumer, while the menu was the contact surface at every width; the
+   row came back with the 640px split, and so did the slide.)
 
    TWO elements, and the division of labour is the whole design:
 
@@ -3073,6 +3153,23 @@ body {
 	overflow: hidden;
 }
 
+/* The content box the stamp scales. Carries the flex row so the plate above
+   keeps its own job (padding, fill, clip) and the stamp gets a box whose centre
+   is the plate's centre — see the note in Nav.astro's markup.
+
+   It also held a drawn confirmation tick for an hour on 2026-08-03, gated on an
+   .is-copied class. Removed (Hiro): the stamp is the confirmation, and a second
+   mark arriving 0.11s behind it on its own clock split one event into two. If a
+   tick is ever wanted back, this box is where it goes — it exists to scale the
+   label and its companions as one, which is the whole reason a tick beside the
+   word would have worked here at all. */
+.contact-slider-stamp {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.3rem;
+}
+
 
 
 /* ── The pop ──
@@ -3138,6 +3235,19 @@ body {
 	display: block;
 }
 
+/* Trailing ↗ shown only for external (new-tab) links. */
+.contact-slider-ext {
+	width: 0.72rem;
+	height: 0.72rem;
+	flex: none;
+	display: none;
+	opacity: 0.85;
+}
+
+.contact-slider.is-external .contact-slider-ext {
+	display: block;
+}
+
 .btn-icon svg {
 	width: 1.05rem;
 	height: 1.05rem;
@@ -3168,6 +3278,66 @@ body {
 		border-color var(--dur-pop-in) var(--ease-pop);
 }
 
+/* The cluster's gap is a token because three rules are cut against it — this
+   one, the close-ranks pitch below, and the ::after hit boxes above. It is set
+   here rather than as a Tailwind `gap-*` in the markup so all three read the
+   same source; see --nav-icon-gap for the value and what it is measured
+   against.
+
+   ── The z-index is what puts the pill OVER the bar's hairline ──
+   2026-08-03, Hiro: the rule was painting across the label. The pill already
+   carries z-index: 60, and that was doing nothing, because this box is a
+   STACKING CONTEXT — the markup centres it with Tailwind's -translate-x-1/2 /
+   -translate-y-1/2, and a transform creates one. So the 60 was being resolved
+   among the pill's siblings inside this box, while the box ITSELF entered the
+   bar's stacking order at z-index: auto — and #site-nav::after, being a
+   pseudo-element, comes after every child in paint order and won.
+   Raising the group is the fix rather than raising the pill again: the whole
+   cluster is what has to clear the rule, and it is the outermost box that
+   actually competes with it. The toggle's twin pill never had this problem —
+   #theme-toggle-wrap is position: relative with no transform, so it is not a
+   stacking context and its pill's own 60 has always applied. */
+#contact-group {
+	gap: var(--nav-icon-gap);
+	z-index: 60;
+
+	/* ── The box must not collect clicks it doesn't draw ──
+	   2026-08-14. The close-ranks note below ends "the contact group's [layout
+	   box] is wider than what it draws, which is only a problem if it ever
+	   grows enough to reach the wordmark." It never grew — the WINDOW shrank.
+	   At 320 the box runs 32.9 → 276.1 while the buttons it holds only reach
+	   74.3 → 234.7, so 41.3px of empty box overhangs at each end — and this
+	   element is the z-index: 60 above, so it paints over both its neighbours.
+	   (Those are the numbers AFTER the small-phone ramp above: tightening the
+	   cluster shrinks what it draws and leaves the layout box exactly as wide,
+	   so spacing alone could never have fixed this.)
+
+	   The cost was not cosmetic: a tap on the theme toggle's visual CENTRE, and
+	   one on the wordmark, both landed on this div and did nothing. Measured,
+	   not reasoned — elementFromPoint returned #contact-group at both, and a
+	   click dispatched at the toggle's centre left data-theme unchanged. On the
+	   site's default dark theme that button is a light-mode visitor's only way
+	   out (see its block in Nav.astro), and it was dead on a 320px phone.
+
+	   pointer-events, not a smaller box: the oversized box is the mechanism —
+	   four full-size 2.9rem buttons are what the close-ranks translate contracts
+	   INTO a miniature, and the markup centres the cluster by centring this box.
+	   Shrinking it would unpick both. The icons take the events back (their
+	   ::after hit boxes inherit it, so the tiling below is untouched), and the
+	   pill is already pointer-events: none of its own accord.
+
+	   Not scoped to the narrow bar: no width has ever wanted this box to be
+	   clickable where it is empty — at 960 the overhang simply had nothing under
+	   it to steal from. Fixing it here means the geometry can't silently take a
+	   click again the next time something moves. The group's own mouseleave
+	   backstop in Nav.astro still fires: enter/leave are dispatched along the
+	   hit target's ancestor chain, and the icons are its descendants. */
+	pointer-events: none;
+}
+#contact-group .btn-icon {
+	pointer-events: auto;
+}
+
 /* ── Close ranks ──
    The button's box is 2.9rem (0.5rem padding ×2 + a 1.9rem glyph) and it is
    scaled about its OWN centre, which shrinks the glyph and leaves the space
@@ -3176,27 +3346,36 @@ body {
    contracts about that edge, half its own box away — and its drawn glyph lands
    on the inset .nav-inner gives it rather than half a box inside it.
 
-   ── It used to be a pair of rules (removed 2026-08-15) ──
-   The contacts had the other one. Four buttons on a --nav-icon-gap pitch,
-   each translating back toward the CLUSTER's centre in proportion to its
-   distance from it (--nav-icon-c, a signed box-and-gap offset set in the
-   markup: −1.5 … 1.5 for four), so the row contracted as one uniform
-   miniature with its drawn spacing exactly proportionate to its glyphs. It
-   went with the icon row when contact became a menu; b887ca1 has it, and
-   anything that puts a ROW of scaled buttons back in the bar wants it back
-   rather than a re-derivation — getting the pitch right by eye is what it
-   existed to prevent.
+   ── Two rules, because the two clusters sit differently ──
+   The contacts contract about their own CENTRE — --nav-icon-c is a button's
+   signed offset from it in box-and-gap pitches (set in Nav.astro's markup:
+   −1.5 … 1.5 for four) — so the drawn row stays centred on the layout box the
+   markup centres in the bar. The toggle stands alone against the container's
+   right edge, so it contracts about that edge instead.
+   (The contacts' rule was deleted for a few hours on 2026-08-15, when the menu
+   was the only contact surface at every width, and came back with the 640px
+   split. Anything that puts another ROW of scaled buttons in the bar wants
+   this rather than a re-derivation: getting the pitch right by eye is what it
+   exists to prevent.)
 
-   Note the LAYOUT box stays full size either way. That was harmless for the
-   lone toggle and was NOT harmless for the group: its box stayed 4 buttons
-   wide while its ink shrank, and at 320 the overhang covered both neighbours
-   and silently ate their clicks (fixed 08-14 with pointer-events, removed
-   08-15 with the group itself). If a scaled row ever comes back, that fix is
-   part of it. */
+   Note the LAYOUT boxes stay full size either way. That is harmless for the
+   lone toggle and is NOT harmless for the group: its box is 4 buttons wide
+   while its ink is not, so the overhang can cover its neighbours and silently
+   eat their clicks — which is exactly what it did at 320 before the menu took
+   that width over. Both wraps carry pointer-events for that reason; see their
+   rules. */
+#site-nav #contact-group .btn-icon {
+	transform: translateX(
+			calc(-1 * var(--nav-icon-c, 0) * (2.9rem + var(--nav-icon-gap)) * (1 - var(--nav-icon-scale)))
+		)
+		scale(var(--nav-icon-scale)); /* glyph: ~1.33rem */
+}
 #site-nav #theme-toggle-wrap .btn-icon {
 	transform: translateX(calc(2.9rem / 2 * (1 - var(--nav-icon-scale))))
 		scale(var(--nav-icon-scale));
 }
+
+
 
 /* ── The Contact trigger ──
    2026-08-15. .btn-quiet supplies everything a borderless text control on this
@@ -3299,6 +3478,58 @@ body {
 }
 #theme-toggle-wrap .btn-icon {
 	pointer-events: auto;
+}
+
+/* ── Which contact surface, and where the line falls ──
+   2026-08-15, Hiro: the dropdown should only be for mobile. Both surfaces are
+   in the markup (see the note in Nav.astro) and this is the only thing that
+   chooses between them.
+
+   MOBILE-FIRST, so the menu is the default and the icon row is the override.
+   That ordering is deliberate: the menu is the surface that works with no
+   hover, no width and no pointer, so it is what a browser gets when the
+   media query never resolves. The row is the enhancement.
+
+   640px, which is Tailwind's `sm` — the one breakpoint this project already
+   uses (about.astro and [slug].astro carry sm: utilities), so the bar divides
+   where the rest of the site divides rather than inventing a second line for
+   maintainers to remember. In px because that is what Tailwind's own sm is,
+   and media-query lengths resolve against the initial font size regardless of
+   this file's 19px root.
+
+   The number is not load-bearing for FIT — the icon row measures comfortably
+   from ~360 up (its own gaps beat the cluster's at 1.93× there), so this could
+   sit lower. It sits at 640 because the argument is POINTER, not width: below
+   this line the visitor is overwhelmingly on a phone, and the icons' names
+   live in a hover label a phone cannot reach. A width query is a proxy for
+   that and a coarse one; `(hover: none)` is the honest test and was rejected
+   anyway — a desktop browser at a narrow window would then get the icon row
+   with the labels intact but nowhere near enough room, which is the worse
+   failure of the two.
+
+   display: none, not visibility or a class: it takes the hidden surface out of
+   layout AND out of the accessibility tree, so only one set of contact links
+   is ever exposed and only one can ever be focused. Both scripts still run
+   against their own hidden elements and simply never fire — nothing hidden
+   here gets a hover, a focus or a click. */
+#contact-group {
+	display: none;
+}
+@media (min-width: 640px) {
+	#contact-menu-wrap {
+		display: none;
+	}
+	#contact-group {
+		display: flex;
+	}
+	/* With the menu gone the toggle is the only thing left in flow after the
+	   wordmark, so it takes back the auto margin the trigger was carrying —
+	   and with it the whole --nav-toggle-gap correction, which is about sitting
+	   beside a word and means nothing here. The icon row is out of flow
+	   (absolutely centred), so it neither pushes the toggle nor is pushed. */
+	#theme-toggle-wrap {
+		margin-left: auto;
+	}
 }
 
 /* ── The contact panel ──
@@ -3508,6 +3739,7 @@ html.nav-intro-draw #contact-toggle {
    are unitless numbers — those go invalid at computed-value time, which
    silently collapses the keyframes' from-offset to 0 and kills the whole
    draw. px lengths ARE user units for SVG, so the numbers are identical. */
+html.nav-intro-draw:not(.nav-intro-go) #contact-group .btn-icon svg :is(path, rect),
 html.nav-intro-draw:not(.nav-intro-go) .theme-toggle svg > circle {
 	stroke-dasharray: calc(var(--len) * 1px) calc(var(--len) * 2px);
 	stroke-dashoffset: calc((var(--len) + 1) * 1px);
@@ -3559,6 +3791,10 @@ html.nav-intro-draw.nav-intro-go #site-nav .nav-logo {
    as a missing movement. */
 html.nav-intro-draw.nav-intro-go #contact-toggle {
 	animation: nav-load-wipe var(--dur-nav) var(--nav-ease) 240ms both;
+}
+html.nav-intro-draw.nav-intro-go #contact-group .btn-icon svg :is(path, rect) {
+	animation: nav-load-stroke var(--dur-draw) var(--nav-ease)
+		calc(240ms + var(--nav-icon-i, 0) * 90ms) backwards;
 }
 html.nav-intro-draw.nav-intro-go .theme-toggle svg > circle {
 	animation: nav-load-stroke var(--dur-draw) var(--nav-ease) 600ms backwards;
