@@ -8,17 +8,23 @@ export interface ProjectImage {
 	    legible and not one of them says what it is doing in the sequence: two
 	    are the same prompt built without and with the skill, and nothing in the
 	    pixels says which is which; the other two are terminals whose job in the
-	    argument is invisible until named. EJS carries them for the same reason
+	    argument is invisible until named. EJS carries TWO for the same reason
 	    — its first two shots are one page before and after a redesign, and the
 	    green is the same green in both. The remaining projects carry none
 	    because theirs are plain product shots in a set — each is another view
 	    of one thing, so there is no role to disambiguate.
 
-	    Note what the rule is NOT: it is not "captions on the pair only". Once a
-	    sequence opens on a comparison, every shot after it inherits the
-	    question — an uncaptioned third image reads as a third alternative
-	    rather than as another view — so EJS labels all four. migaki does the
-	    same, and neither does it out of tidiness.
+	    ⚠ EJS's last two shots are BARE ON PURPOSE (2026-08-15, Hiro), and this
+	    reverses what was written here a few hours earlier. The claim then was
+	    that a comparison contaminates everything after it — that an uncaptioned
+	    third shot would read as a third alternative rather than as another view
+	    — so all four were labelled. Two of those labels were "Support" and
+	    "Documentation", which is the tell: a caption that only names the page it
+	    is a picture of has nothing to disambiguate, and the sequence had run out
+	    of comparison long before it ran out of images. So the rule stays exactly
+	    as stated above — captions where the ROLE is unclear — and EJS is now an
+	    example of it rather than an exception to it. Don't restore them for
+	    symmetry with the pair; the pair is not a set the rest has to match.
 
 	    An uncaptioned image also falls back to `— image N` for its alt text,
 	    which is worth nothing to a screen reader. That alone is reason enough
@@ -146,11 +152,11 @@ export const projects: Project[] = [
 		year: '2026',
 		tags: ['Open Source', 'Landing Page', 'UI/UX'],
 		role: 'Redesigned the marketing site: hero, support page, and docs.',
-		blurb: 'A redesign of the EJS landing page, so the library says what it does before you go looking.',
+		blurb: 'A redesign of the EJS landing page, so the library says what it does up front.',
 		problem:
-			"ejs.co is one screen, and it is broadly the screen it has always been: a wordmark, four words of tagline, and a field of olive green. Nothing on it says what EJS does, why you would reach for it over the alternatives, or how many people already have. The one piece of promotion above the fold is an ad for a different project — the Jake banner sits above EJS's own logo. A library with twenty million weekly downloads was introducing itself worse than a library with none.",
+			"ejs.co has looked more or less the same for years. There's a wordmark, a four-word tagline, and a lot of olive green. What it never gets around to is what EJS actually does, or why you would pick it over the alternatives. The only thing promoted above the fold is a different project — the Jake banner sits above EJS's own logo. Twenty million people install this library every week and the page tells them almost nothing about it.",
 		work:
-			"The rebuild leads with the sentence the old page never wrote — generate HTML with plain JS — and puts the install command directly under it as a chip you can copy. The three numbers that were always the strongest argument for EJS go on the page for the first time: 20M+ weekly downloads, 7.7k stars, zero dependencies. Past the hero, the pages a one-screen site never had room for — support that routes a question to Stack Overflow or GitHub Issues rather than leaving you to pick, and docs with an on-this-page rail so the reference is navigable instead of one long scroll. The olive green stays, because it is the thing people recognise, but it is a band and an accent now rather than the whole canvas, which gives the type somewhere quiet to sit.",
+			"I led with a plain statement of what the library does, generate HTML with plain JS, and put the install command right under it in a chip you can copy. The numbers that make the case on their own are on the page for the first time: 20M+ weekly downloads, 7.7k stars, zero dependencies. I also built the two pages a one-screen site had nowhere to put — support that sends a question to Stack Overflow or GitHub Issues, and docs with an on-this-page rail so the reference is something you can move around in. The olive green stays, since it is what people recognise, but it runs as a band and an accent instead of the whole canvas.",
 		/* ── Image order is 1, 0, 2, 3, and that is deliberate (Hiro's ask) ──
 		   NOT a numbering mistake to be tidied up. ejs1 is the EXISTING site and
 		   ejs0 is its replacement, so the sequence opens on a before/after pair
@@ -180,8 +186,8 @@ export const projects: Project[] = [
 		images: [
 			{ src: '/images/ejs1.webp', caption: 'The site as it is today' },
 			{ src: '/images/ejs0.webp', caption: 'The same page, rebuilt' },
-			{ src: '/images/ejs2.webp', caption: 'Support' },
-			{ src: '/images/ejs3.webp', caption: 'Documentation' },
+			'/images/ejs2.webp',
+			'/images/ejs3.webp',
 		],
 		link: 'https://ejs.co/',
 	},
