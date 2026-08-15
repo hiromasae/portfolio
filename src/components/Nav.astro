@@ -14,8 +14,23 @@ const onHome = path === '/';
 	{/* The bar has one state. Its type and buttons are authored at full size
 	    and scaled down into it — see the nav geometry block in global.css,
 	    which also records the expanded masthead this replaced (removed
-	    2026-08-02). */}
-	<div class="mx-auto max-w-[960px] px-5">
+	    2026-08-02).
+
+	    NO px-5 here, unlike every other 960px shell on the site (2026-08-14).
+	    The bar's ends are set by ONE token instead — --nav-inset, spent on
+	    .nav-inner, which holds the column's own 1.25rem gutter so the bar's
+	    contents land exactly on the page's edges (2026-08-15).
+
+	    It has to be one rule rather than px-5 here plus a correction further in,
+	    and the reason is the toggle: its glyph sits 6.3px inside its button, so
+	    the RIGHT end only lands on the column edge if the padding there is the
+	    gutter MINUS that distance. Split across two boxes that correction would
+	    have to be a negative padding, which does not exist. Merged, it is one
+	    subtraction in one calc — see the .nav-inner rule in global.css.
+	    The 960px cap and the centring stay — they are what this box is for, and
+	    with the gutter moved inward the shell's box and every other shell's box
+	    still resolve to the same content column. */}
+	<div class="mx-auto max-w-[960px]">
 		{/* The bar's bottom hairline is NOT in here — it hangs off #site-nav, out
 		    past this 960px shell, so it spans the window the way the bar's paper
 		    does (2026-08-03, second pass; it rode inside this shell's padding for
@@ -75,6 +90,48 @@ const onHome = path === '/';
 				</a>
 			</div>
 
+		{/* ── Two contact surfaces, one per pointer ──
+		    2026-08-15, Hiro: the dropdown should only be for mobile. So both are
+		    in the markup and the breakpoint picks one — the icon row below 640px
+		    is `display: none`, the menu at 640 and up is. See the contact-surface
+		    block in global.css for the switch and why 640.
+
+		    The split is not a compromise, it is the two arguments landing in
+		    different places. The menu exists because the sliding label that names
+		    these icons is hover-only, so on a touch device four glyphs are
+		    unlabeled and unlabelable. A pointer has hover: the label names each
+		    icon on the way past, every link is one click, and the row costs no
+		    width the bar hasn't got. Give each pointer the surface its own
+		    argument produces.
+
+		    What that costs is TWO of everything below — two sets of links in the
+		    DOM (only one ever exposed, since display: none is out of the
+		    accessibility tree), and two scripts in the block at the bottom. The
+		    duplication is the price of the split and is the first thing to
+		    re-examine if this ever feels heavy.
+
+		    THERE ARE TWO LINES HERE, AND THEY ARE NOT IN THE SAME PLACE. 640px
+		    picks the SURFACE (menu below, icons above). 769px picks the
+		    BEHAVIOUR: below it email hands off to the mail app and the icons wear
+		    no hover pill, above it email copies to the clipboard and the pills
+		    come back (Hiro, 2026-08-15: anything wider than tablet should have
+		    the hover pills, and email should copy there). The gap between the two
+		    is deliberate and is exactly one device — a tablet, which gets the
+		    icon row because it has the width for it, and a phone's answers
+		    because it has a phone's pointer.
+
+		    Copying is the gesture this row's pill, its "Copied!" stamp and its
+		    whole fourteen-variant exploration were built for, and it is worth
+		    having where there is a cursor to read the confirmation and, often, no
+		    mail client to hand off TO. Below the line it is neither: the clipboard
+		    is somewhere the visitor then has to paste FROM, and the mail app is
+		    one tap away.
+
+		    Each state NAMES what it does, which is what keeps it honest: the
+		    icon's label reads "Copy email" where it copies and "Email" where it
+		    hands off — re-synced in the browser whenever the window crosses the
+		    line, since server-rendered markup cannot know which side it will land
+		    on — and the menu's row reads "Email". */}
 		{/* Centred on the bar itself (2026-08-02). The layout box is wider than
 		    what the cluster draws — the buttons are scaled down inside it — but
 		    both are centred on the same line, so the drawn icons land on the
@@ -167,6 +224,137 @@ const onHome = path === '/';
 			</span>
 		</div>
 
+		{/* ── Contact: one word, four links behind it ──
+		    2026-08-15, Hiro. This was a row of four icon links centred on the
+		    bar, with a shared label that slid between them naming the hovered
+		    one. What replaced it is a disclosure: the word, and a panel.
+
+		    The argument that moved it was NAMING, not tidiness. The sliding
+		    label was hover-only, so on a phone the four glyphs were unlabeled
+		    and unlabelable — a visitor had to recognise a bird and an "in"
+		    square to find LinkedIn. In the panel every link is a word. That the
+		    bar also stops being six elements in 320px is the second prize; see
+		    the phone block in global.css, which lost its reason to ramp.
+
+		    What it costs is a tap: these four are the ONLY links to any of
+		    Hiro's contacts anywhere on the site — nothing in the footer, nothing
+		    on /about — so the site's whole conversion now sits behind a click.
+		    That was weighed and accepted. If it is ever reversed, git has the
+		    icon row and its slider whole at b887ca1; the note the removal turns
+		    on is that a trigger reading "Contact" NAMES ITSELF, which is exactly
+		    what the settings gear (removed 08-06, faf42e8) did not.
+
+		    `ml-auto` moves here from the toggle: this pair is now the bar's
+		    right-hand group, and the wordmark is the only thing left in flow
+		    before it. The wrap is deliberately NOT positioned — the panel
+		    resolves against .nav-inner instead, so its right edge can land on
+		    the page's column edge rather than on this button's. */}
+		<div id="contact-menu-wrap" class="ml-auto flex items-center">
+			{/* .btn-quiet, revived. It has styled nothing since "Back to
+			    projects" came off (2026-08-10) and its note says the next
+			    borderless text link on the site wants exactly it — this is that
+			    link: same 0.875rem, same --weight-ui, same --ink-soft → --ink,
+			    same focus ring. The wipe direction is the one thing overridden
+			    (see .contact-trigger in global.css): that rule's underline
+			    travels right-to-left to arrive at an arrow on the LEFT, and this
+			    caret is on the right. */}
+			<button
+				id="contact-toggle"
+				type="button"
+				class="btn-quiet contact-trigger"
+				aria-expanded="false"
+				aria-controls="contact-menu"
+			>
+				<span class="btn-quiet__label">Contact</span>
+				{/* Rotates 180° while open — the affordance the caret exists for.
+				    Same drawing system as every other glyph in the bar: 24-unit
+				    box, 2px stroke, square cap. No --len: the load intro wipes
+				    this button as one box (label and caret together) rather than
+				    stroke-drawing it, so there is no dash math to keep in step. */}
+				<svg
+					class="contact-caret"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="square"
+					stroke-linejoin="miter"
+					aria-hidden="true"
+				>
+					<path d="m5 9 7 7 7-7" />
+				</svg>
+			</button>
+
+			{/* `hidden` IS the closed state — the attribute, not a class, so the
+			    links are out of the tab order and off the accessibility tree
+			    while shut, and every re-open restarts the entrance animation for
+			    free (display flips do). Escape and an outside click close it;
+			    Escape returns focus to the button. Same contract the settings
+			    menu ran on, and its script is the one this was adapted from. */}
+			<div id="contact-menu" class="contact-menu" hidden>
+				{
+					contacts.map((c) => {
+						// The email row is a PLAIN mailto: link (2026-08-15, Hiro: tapping
+						// email should redirect the user to their default email app). It
+						// used to intercept the click and copy the address to the clipboard
+						// instead — the gesture the pill's whole "Copied!" apparatus was
+						// built for, and the reason this row carried a data-copy attribute.
+						// Handing off to the mail app is what a mailto: does by default, so
+						// the fix was to stop preventing it; every line of the copy path is
+						// gone rather than kept behind a flag.
+						//
+						// Worth knowing what that trades: on a desktop with no mail client
+						// configured, a mailto: can appear to do nothing, where copying
+						// always worked. b887ca1 has the copy path if it is ever wanted
+						// back as a secondary gesture (a long-press, or a second row) — but
+						// not as the primary, which is now the OS's job.
+						const isEmail = c.href.startsWith('mailto:');
+						return (
+							<a
+								class="contact-row"
+								href={c.href}
+								target={isEmail ? undefined : '_blank'}
+								rel="noopener"
+							>
+								<Icon name={c.icon} />
+								<span class="contact-row__label">{c.label}</span>
+								{/* ── All FOUR wear it now (2026-08-15, Hiro: the email
+								    button should have a new page icon as well since it
+								    does redirect the user) ──
+								    The mark used to mean "opens a TAB", which is why
+								    email — alone in copying to the clipboard — went
+								    without. Email hands off to a mail app on every
+								    surface that shows this panel, so the old reading
+								    made the one row that hands you to another
+								    APPLICATION the only one not marked as leaving.
+
+								    So the ↗ now means "this takes you somewhere else",
+								    and the honest consequence is that it no longer
+								    DISTINGUISHES between these four — it annotates the
+								    list rather than singling anything out. That is the
+								    trade: a promise every row keeps beats a
+								    distinction that was drawn on the wrong axis. */}
+								<svg
+									class="contact-row__ext"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2"
+									stroke-linecap="square"
+									stroke-linejoin="miter"
+									aria-hidden="true"
+								>
+									<path d="M15 3h6v6" />
+									<path d="M10 14 21 3" />
+									<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+								</svg>
+							</a>
+						);
+					})
+				}
+			</div>
+		</div>
+
 		{/* Light/dark toggle: the classic contrast glyph — a circle half ink,
 		    half paper, drawn at the contact icons' size and stroke. The filled
 		    side marks the current theme (right = light, left = dark); on toggle
@@ -196,7 +384,11 @@ const onHome = path === '/';
 		    ever wanted — with the caveat that two settings didn't earn one.
 		    The sticky-bar preference was dropped outright rather than moved:
 		    sticky is the design's call to make. */}
-		<div id="theme-toggle-wrap" class="relative ml-auto flex self-center">
+		{/* No `ml-auto` any more (2026-08-15): the Contact trigger beside it
+		    carries it now and this rides along at the end of that group. The
+		    gap between the two is --nav-toggle-gap in global.css, where the
+		    toggle's own glyph inset is subtracted out of it. */}
+		<div id="theme-toggle-wrap" class="relative flex self-center">
 			{/* The pre-JS name. Dark is the site's default (stamped on <html> in
 			    Layout.astro), so the button starts out offering the way OUT of
 			    it; the script's syncThemeState corrects this on load for a
@@ -743,7 +935,18 @@ const onHome = path === '/';
 		});
 	}
 
-	// ── Sliding contact label ──
+	// ── Sliding contact label (the DESKTOP surface) ──
+	// Restored 2026-08-15 with the icon row it belongs to, after a few hours in
+	// which the menu was the only contact surface at every width. It runs
+	// unconditionally: below 640px #contact-group is display: none, so `group`
+	// still resolves but nothing it binds can ever fire — a hidden element gets
+	// no hover, no focus and no click. Guarding it on a matchMedia would buy
+	// nothing and would need re-running on resize.
+	//
+	// The measurer below carries the left: -9999px fix that the toggle's clone
+	// got the same day; at left: 0 an invisible ruler at the centre of the bar
+	// is one narrow window away from making the page scroll sideways.
+	//
 	// A single label glides between the contact icons, always sitting under
 	// whichever one is hovered or focused, and naming it. (Still called the pill
 	// throughout: it wore an ink chip until 2026-08-03.) When
@@ -763,6 +966,63 @@ const onHome = path === '/';
 	if (group && pill && pillText && pillStamp && pillPress) {
 		const icons = Array.from(group.querySelectorAll<HTMLAnchorElement>('.btn-icon'));
 
+		// ── THE DESKTOP LINE: 769px, one step above the surface line ──
+		// 2026-08-15, Hiro: anything wider than tablet (768) should have the
+		// hover pills, and email should copy there rather than redirect. So this
+		// row now spans two behaviours, not one:
+		//
+		//   640–768  the icons, bare. No pill, and email is a plain mailto: that
+		//            hands off to the mail app — a tablet's answer, on the
+		//            surface a tablet gets.
+		//   769+     the pills come back and email copies to the clipboard. The
+		//            desktop gesture, with a cursor to read the confirmation.
+		//
+		// 769 rather than 768 because Hiro named 768 as the TABLET width, and an
+		// iPad in portrait is exactly that — the rule is "wider than", so the
+		// tablet itself stays on the tablet side. One number to change if the
+		// intent was Tailwind's md instead.
+		//
+		// WIDTH IS A LIVE QUESTION, which is the whole reason this is a
+		// matchMedia object and not a boolean. The pointer test above it can be
+		// read once at load — a machine does not grow a mouse — but a window is
+		// dragged across this line constantly, so every consumer asks `wide`
+		// AT THE MOMENT IT ACTS: the click asks when it is clicked, the hover
+		// asks when it is hovered, and the label is re-synced on change. Reading
+		// this into a const at startup is the bug this comment exists to prevent.
+		const wide = window.matchMedia('(min-width: 769px)');
+
+		// Still read once, and still a different question: whether the visitor
+		// has a pointer that can hover at all. It gates the mouse BINDINGS, not
+		// the width rules — a hover pill on a device with no hover is not a
+		// narrower version of this feature, it is a tap artifact that never
+		// leaves (see the sticky-hover work earlier today).
+		const canHoverPointer = window.matchMedia('(hover: hover)').matches;
+
+		// The label has to move with the behaviour or the button lies. "Copy
+		// email" is baked in at build time, and server-rendered markup cannot
+		// know what window it will land in — so the accessible name, the pill's
+		// word and the pill's ↗ are all corrected here, together, and again
+		// whenever the window crosses the line. data-handoff is what tells
+		// isExternal below that this one leaves now: a link that puts you in
+		// another application is leaving, whether or not it opens a tab to do it.
+		//
+		// data-copy stays put in both states. It is the ADDRESS, not a switch —
+		// the click handler decides, and keeping the data around is what lets the
+		// decision be made at click time rather than baked in at load.
+		const syncEmailAffordance = () => {
+			for (const icon of icons) {
+				if (!icon.dataset.copy) continue;
+				const copies = wide.matches;
+				const label = copies ? 'Copy email' : 'Email';
+				icon.dataset.label = label;
+				icon.setAttribute('aria-label', label);
+				if (copies) delete icon.dataset.handoff;
+				else icon.dataset.handoff = 'true';
+			}
+		};
+		syncEmailAffordance();
+		wide.addEventListener('change', syncEmailAffordance);
+
 		// Hidden clone of the pill, used to measure the exact width each label
 		// needs — including the external-link arrow when shown — so the pill's
 		// width can animate to an explicit px value. Both boxes have to be freed
@@ -770,7 +1030,7 @@ const onHome = path === '/';
 		// one is width: 100% of it, which would resolve to nothing here.
 		const measurer = pill.cloneNode(true) as HTMLElement;
 		measurer.style.cssText =
-			'position:absolute;visibility:hidden;top:-9999px;left:0;transform:none;transition:none;width:auto;';
+			'position:absolute;visibility:hidden;top:-9999px;left:-9999px;transform:none;transition:none;width:auto;';
 		const measurerIn = measurer.querySelector<HTMLElement>('.contact-slider-in')!;
 		measurerIn.style.cssText = 'width:auto;opacity:1;animation:none;';
 		group.appendChild(measurer);
@@ -780,7 +1040,12 @@ const onHome = path === '/';
 		const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 		const labelFor = (icon: HTMLElement) => icon.getAttribute('data-label') ?? '';
-		const isExternal = (icon: HTMLElement) => icon.getAttribute('target') === '_blank';
+		// The ↗ means "this takes you somewhere else", which is target="_blank"
+		// for three of them and — on a pointer that can't hover, where email hands
+		// off instead of copying — email as well. Same rule the menu's rows now
+		// follow; see the ↗ note in the markup above.
+		const isExternal = (icon: HTMLElement) =>
+			icon.getAttribute('target') === '_blank' || icon.dataset.handoff === 'true';
 
 		// Drop any in-flight stamp and return the label to a clean, visible resting
 		// state (used before every direct repositioning).
@@ -957,22 +1222,54 @@ const onHome = path === '/';
 				window.addEventListener('pointerup', release);
 				window.addEventListener('pointercancel', release);
 			});
-			icon.addEventListener('mouseenter', () => {
-				window.clearTimeout(gapHideTimer);
-				showAt(icon);
-			});
-			icon.addEventListener('mouseleave', () => {
-				window.clearTimeout(gapHideTimer);
-				gapHideTimer = window.setTimeout(hide, 0);
-			});
+			// ── The mouse half: a real pointer, and a desktop-width window ──
+			// 2026-08-15, two gates for two different failures.
+			//
+			// canHoverPointer is bound-time and about the DEVICE: a touch browser
+			// synthesises mouseenter on tap and withholds mouseleave until the
+			// next one, so binding these on a tablet strands the label under
+			// whatever was last tapped. (This block spent one commit ungated, on
+			// the argument that a tablet needed the pill to carry "Copied!" — the
+			// copy moved off the tablet the same day, and took the argument with
+			// it.)
+			//
+			// `wide` is asked INSIDE the handler and is about the WINDOW: Hiro's
+			// line is that the pills belong above 768, and a desktop window
+			// dragged narrower crosses that line without rebinding anything. So
+			// the listener stays bound and simply declines below it — which also
+			// means dragging back out restores the pill mid-session with no
+			// resize plumbing of its own.
+			//
+			// What 640–768 loses is the naming, which is the icon row's known
+			// weakness and the reason the menu exists below 640. A peek like the
+			// toggle's would buy it back for a tablet; it isn't built because a
+			// tap there already navigates, so the word would be racing the
+			// navigation that made it unnecessary.
+			if (canHoverPointer) {
+				icon.addEventListener('mouseenter', () => {
+					if (!wide.matches) return;
+					window.clearTimeout(gapHideTimer);
+					showAt(icon);
+				});
+				icon.addEventListener('mouseleave', () => {
+					window.clearTimeout(gapHideTimer);
+					gapHideTimer = window.setTimeout(hide, 0);
+				});
+			}
 		});
 		group.addEventListener('mouseleave', () => {
 			window.clearTimeout(gapHideTimer);
 			hide();
 		});
+		// Keyboard focus keeps the label at every width — it is the tab user's
+		// only way to be told which glyph they are on, and it has nothing to do
+		// with pointers. :focus-visible rather than bare focus, for the reason the
+		// toggle's carries the same test: Chrome focuses a clicked LINK, so on a
+		// tablet the tap would hand the pill straight back through this door and
+		// strand it there, gated mouseenter or not.
 		group.addEventListener('focusin', (e) => {
 			const icon = (e.target as HTMLElement).closest<HTMLElement>('.btn-icon');
-			if (icon) showAt(icon);
+			if (icon && icon.matches(':focus-visible')) showAt(icon);
 		});
 		group.addEventListener('focusout', (e) => {
 			if (!group.contains(e.relatedTarget as Node)) hide();
@@ -1011,15 +1308,34 @@ const onHome = path === '/';
 		// claim if the write rejects. Safe here because a clipboard rejection is a
 		// permission refusal, which comes back immediately rather than late — the
 		// correction lands within a frame or two, and it still tells the truth.
+		// The dwell that keeps a copy from being silent where nothing can unhover
+		// it — the toggle pill's peek, borrowed. It only ever arms on a pointer
+		// with no hover, which above 769px means a landscape tablet: wide enough
+		// for Hiro's desktop rule, with no cursor to walk away and clear the
+		// confirmation the way the block above assumes. Without it "Copied!"
+		// would be strictly true and permanent.
+		let copyPeekTimer = 0;
+		const COPY_PEEK_HOLD = 1400;
+		const armCopyPeek = () => {
+			window.clearTimeout(copyPeekTimer);
+			copyPeekTimer = window.setTimeout(hide, COPY_PEEK_HOLD);
+		};
+
 		icons.forEach((icon) => {
 			const address = icon.dataset.copy;
 			if (!address) return;
 			icon.addEventListener('click', (e) => {
+				// Asked at click time, not at bind time: the window may have been
+				// dragged across the line since load. Below it this listener does
+				// nothing at all and the mailto: hands off to the mail app, which
+				// is the tablet behaviour Hiro asked for on 2026-08-15.
+				if (!wide.matches) return;
 				e.preventDefault();
 
 				// Synchronous, so this frame is the one the press releases on.
 				if (!visible) showAt(icon);
 				stampText('Copied!');
+				if (!canHoverPointer) armCopyPeek();
 
 				// Wrapped rather than called bare: on an insecure origin
 				// navigator.clipboard is undefined, which throws SYNCHRONOUSLY and
@@ -1034,15 +1350,121 @@ const onHome = path === '/';
 		});
 	}
 
+	// ── Contact menu (the MOBILE surface) ──
+	// A disclosure: the button says what it opens, the panel holds the links as
+	// words — which is the whole point of it, since the sliding label above
+	// cannot name anything without a hover. Below 640px this is the bar's
+	// contact surface and the icon row is display: none; above it, the reverse.
+	// Like that block, this one runs unconditionally and simply never fires on
+	// the width where its elements are hidden.
+	//
+	// Adapted from the settings menu at faf42e8, which ran the same contract for
+	// a day: `hidden` as the closed state, aria-expanded on the trigger, Escape
+	// and outside-click dismissal, and an exit that SPLITS by gesture. What is
+	// deliberately NOT borrowed is menu semantics — no role="menu", no
+	// aria-haspopup, no arrow-key roving. These are four links, and a disclosure
+	// of links wants exactly the native Tab order it already has; claiming menu
+	// semantics would promise keyboard behaviour this doesn't implement.
+	const contactWrap = document.getElementById('contact-menu-wrap');
+	const contactToggle = document.getElementById('contact-toggle');
+	const contactMenu = document.getElementById('contact-menu');
+
+	if (contactWrap && contactToggle && contactMenu) {
+		const reduceMenu = window.matchMedia('(prefers-reduced-motion: reduce)');
+		const isOpen = () => contactToggle.getAttribute('aria-expanded') === 'true';
+
+		// Hide only once the exit animation has actually played (see .is-closing
+		// in global.css). Guarded on target, because the rows' own hover
+		// transitions bubble animationend through this element too.
+		const onCloseEnd = (e: AnimationEvent) => {
+			if (e.target !== contactMenu) return;
+			contactMenu.removeEventListener('animationend', onCloseEnd);
+			if (!contactMenu.classList.contains('is-closing')) return;
+			contactMenu.hidden = true;
+			contactMenu.classList.remove('is-closing');
+		};
+
+		// `pop` is the deliberate dismissal — pressing the trigger again — which
+		// gets the pill's own shrink. An outside click, Escape or a link taking
+		// you away is incidental, and takes the site's hard cut. That split is
+		// faf42e8's, kept verbatim: an intentional close is acknowledged, an
+		// accidental one just goes.
+		const setMenu = (open: boolean, pop = false) => {
+			contactToggle.setAttribute('aria-expanded', String(open));
+			if (open) {
+				contactMenu.classList.remove('is-closing');
+				contactMenu.hidden = false;
+				return;
+			}
+			if (pop && !reduceMenu.matches && !contactMenu.hidden) {
+				contactMenu.classList.add('is-closing');
+				contactMenu.addEventListener('animationend', onCloseEnd);
+			} else {
+				contactMenu.classList.remove('is-closing');
+				contactMenu.hidden = true;
+			}
+		};
+
+		contactToggle.addEventListener('click', () => setMenu(!isOpen(), true));
+
+		// pointerdown, not click: the panel must be gone before the thing under
+		// the pointer reacts, and a card's own click handler runs on click. The
+		// trigger is excluded so its click handler owns that case — otherwise the
+		// two fight and the menu closes and reopens in one press.
+		document.addEventListener('pointerdown', (e) => {
+			if (!isOpen()) return;
+			const t = e.target as Node;
+			if (contactMenu.contains(t) || contactToggle.contains(t)) return;
+			setMenu(false);
+		});
+
+		document.addEventListener('keydown', (e) => {
+			if (e.key !== 'Escape' || !isOpen()) return;
+			setMenu(false);
+			// Focus has to come home: it is sitting on a row that is about to
+			// leave the accessibility tree, and a keyboard visitor who lands back
+			// at the top of the document has been thrown out of the bar.
+			contactToggle.focus();
+		});
+
+		// Tabbing past the last row closes it. Without this the panel stays open
+		// behind a visitor who has already walked out of it, and the next Escape
+		// would yank focus back to a button they had left.
+		document.addEventListener('focusin', (e) => {
+			if (!isOpen()) return;
+			if (contactWrap.contains(e.target as Node)) return;
+			setMenu(false);
+		});
+
+		// EVERY row closes the panel, not just the ones that open a tab
+		// (2026-08-15). It was scoped to a[target="_blank"] while email stayed
+		// behind to show its "Copied!" — email hands off to a mail app now, so
+		// there is nothing left to stay open for, and a panel still standing
+		// over the page while the OS switches apps is the same leftover the
+		// external rows were closing to avoid.
+		//
+		// No preventDefault anywhere in here: the click closing the menu and the
+		// browser following the href are not in competition. The row's own
+		// navigation — new tab, or mail app — is the thing this control exists
+		// to cause.
+		contactMenu.querySelectorAll('.contact-row').forEach((link) => {
+			link.addEventListener('click', () => setMenu(false));
+		});
+	}
+
 	// ── Theme toggle label ──
-	// A twin of the contact pill: same class (so same look, entrance wipe and
-	// exit wipe) under its own button. A lone button needs none of the shared
-	// slider's slide-between machinery — the pill just wipes in showing the
-	// theme a click would switch TO, and a click rolls the text to the next
-	// label (the same roll as the email icon's "Copied!", doubling as
-	// confirmation). Kept separate from the shared slider on purpose: one pill
-	// gliding across the ml-8 gap would read as the toggle joining the
-	// contacts cluster.
+	// The pill wipes in showing the theme a click would switch TO, and a click
+	// rolls the text to the next label, doubling as the confirmation.
+	//
+	// A TWIN of the contacts' shared slider: same class, so the same look, pop,
+	// press and roll, but deliberately its own element — one pill gliding across
+	// the gap between the row and this button would read as the toggle joining
+	// their cluster.
+	//
+	// The twinning holds at every width even though its sibling does not: below
+	// 640px the icon row is display: none and this is the bar's only pill, above
+	// it there are two. Nothing here needs to know which — a lone pill and a
+	// travelling one differ only in whether anything ever asks them to move.
 	const toggleWrap = document.getElementById('theme-toggle-wrap');
 	const togglePill = toggleWrap?.querySelector<HTMLElement>('.contact-slider');
 	const togglePillText = togglePill?.querySelector<HTMLElement>('.contact-slider-text');
@@ -1050,12 +1472,24 @@ const onHome = path === '/';
 	if (toggleWrap && themeToggle && togglePill && togglePillText && togglePillPress) {
 		const reduceToggle = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-		// Hidden clone for width measurement (mirrors the contact slider's, inner
-		// box and all): the pill's width transition needs explicit px, and the
+		// Hidden clone for width measurement (it mirrors the pill, inner box and
+		// all): the pill's width transition needs an explicit px value, and the
 		// two labels differ slightly in width.
+		//
+		// left: -9999px, NOT left: 0 (2026-08-15). visibility: hidden keeps this
+		// from being SEEN, not from being LAID OUT — at left: 0 it sat at the
+		// wrap's left edge with width: auto, so the moment it had measured
+		// "Light mode" it was ~88px wide inside a wrap that sits at the window's
+		// right edge, and it pushed documentElement.scrollWidth to 325 against a
+		// 320px client. An invisible ruler was making the page scroll sideways,
+		// and only after the first hover, which is why it went unseen. Off to the
+		// LEFT is the cure rather than merely further right: in LTR nothing left
+		// of the origin is scrollable, so a negative offset costs nothing, where
+		// any positive one is still overflow waiting for a narrow enough window.
+		// offsetWidth does not care where it is measured.
 		const measurer = togglePill.cloneNode(true) as HTMLElement;
 		measurer.style.cssText =
-			'position:absolute;visibility:hidden;top:-9999px;left:0;transform:none;transition:none;width:auto;';
+			'position:absolute;visibility:hidden;top:-9999px;left:-9999px;transform:none;transition:none;width:auto;';
 		measurer.querySelector<HTMLElement>('.contact-slider-in')!.style.cssText =
 			'width:auto;opacity:1;animation:none;';
 		toggleWrap.appendChild(measurer);
@@ -1073,14 +1507,25 @@ const onHome = path === '/';
 		// pill lands under the glyph rather than under its full-size layout box
 		// (mirrors place()). The center is CLAMPED to keep the pill inside the
 		// scrollport: the bar right-anchors the toggle so near the viewport edge
-		// that a centered pill would cross clientWidth — and scrollbar-gutter:
-		// stable ends painting there, silently shearing the pill's right side.
+		// that a centered pill would cross it — and scrollbar-gutter: stable ends
+		// painting there, silently shearing the pill's right side.
+		//
+		// The bound is the BAR'S OWN right edge, not documentElement.clientWidth
+		// (2026-08-14). #site-nav is the full-bleed box — its rect is exactly the
+		// painted width, gutter already subtracted, which is the thing the pill
+		// must not cross. clientWidth is not: measured at a 320px window with the
+		// gutter reserved it read 320 against a 309px layout, so the clamp let
+		// the pill 3px past the paint and sheared the very edge it exists to
+		// protect. Invisible until the phone pass brought the toggle in to a 16px
+		// end margin (see --nav-inset in global.css), which is what finally
+		// pushed the natural centre past the bound on a narrow window.
 		const placePill = (text: string) => {
 			const wRect = toggleWrap.getBoundingClientRect();
 			const bRect = themeToggle.getBoundingClientRect();
 			const width = widthFor(text);
-			const maxCenter =
-				document.documentElement.clientWidth - 8 - width / 2 - wRect.left;
+			const paintedRight =
+				nav?.getBoundingClientRect().right ?? document.documentElement.clientWidth;
+			const maxCenter = paintedRight - 8 - width / 2 - wRect.left;
 			const centerX = Math.min(
 				bRect.left - wRect.left + bRect.width / 2,
 				maxCenter
@@ -1128,10 +1573,60 @@ const onHome = path === '/';
 		// plainly wrong now that its region is exactly the drawn button (see the
 		// hit-box block in global.css). The pill is pointer-events: none, so it
 		// can't take the hover away from the button it hangs under.
-		themeToggle.addEventListener('mouseenter', showPill);
-		themeToggle.addEventListener('mouseleave', hidePill);
-		themeToggle.addEventListener('focus', showPill);
+		// ── The mouse half is gated on (hover: hover) ──
+		// 2026-08-15, alongside the CSS hover guards (the argument in full is in
+		// global.css, at the nav-logo's underline). A touch browser synthesises
+		// mouseenter on tap and doesn't send the matching mouseleave until you
+		// tap something else, so this label — the only hover label a phone can
+		// still reach, now that the sliding one went behind display: none at
+		// 640 — popped open on every theme change and hung there naming the
+		// state you had just left.
+		//
+		// Read once, not per event: the media query answers a question about the
+		// device's primary pointer, and a device does not grow a mouse between
+		// two taps. A hybrid that reports hover keeps the label, which is right —
+		// it has a cursor to explain.
+		//
+		// FOCUS AND BLUR STAY UNGATED — they are the keyboard's route to the same
+		// label and have nothing to do with pointers, so a touchscreen laptop
+		// tabbing to the toggle is still told what the button does. But focus
+		// alone would have let the bug straight back in through the other door:
+		// Chrome gives a clicked <button> DOM focus, so on Android the tap would
+		// fire `focus`, show the pill, and hold it until something else was
+		// tapped — the media query above would have changed nothing. Hence
+		// :focus-visible, which is the browser's own judgement about whether the
+		// focus came from a keyboard, and is exactly the question being asked.
+		// (Safari doesn't focus buttons on click at all, which is why this only
+		// ever needed fixing on one engine.)
+		if (window.matchMedia('(hover: hover)').matches) {
+			themeToggle.addEventListener('mouseenter', showPill);
+			themeToggle.addEventListener('mouseleave', hidePill);
+		}
+		themeToggle.addEventListener('focus', () => {
+			if (themeToggle.matches(':focus-visible')) showPill();
+		});
 		themeToggle.addEventListener('blur', hidePill);
+
+		// ── A hidden pill must not keep its box ──
+		// 2026-08-15. placePill writes an explicit px width and translateX, and
+		// they SURVIVE the hide — the exit is opacity and scale, so the box stays
+		// exactly where it was last placed. Narrow the window after that and an
+		// invisible, aria-hidden, pointer-events: none decoration is left hanging
+		// past the viewport, making the whole page scroll sideways. Caught at 320
+		// after a hover at 1200: documentElement.scrollWidth 325 against a 320
+		// client, with the pill spanning 236 → 325.
+		//
+		// Only when it is NOT showing, and no transition to worry about because
+		// there is nothing on screen to animate. Clearing the properties rather
+		// than zeroing them hands the box back to the stylesheet's own width: 0.
+		// (Resizing mid-hover is left alone: the pointer is on the button, so the
+		// next mouseenter/placePill has it, and stealing the pill out from under
+		// a live hover would be the more visible bug.)
+		window.addEventListener('resize', () => {
+			if (shown) return;
+			togglePill.style.width = '';
+			togglePill.style.transform = '';
+		});
 
 		// ── The press ──
 		// 2026-08-04, the same gesture the contact pills got, on the same tokens:
@@ -1149,7 +1644,65 @@ const onHome = path === '/';
 		// can scale underneath it without either gesture touching the other's
 		// transform. That separation is why the label can change identity and be
 		// pressed at the same instant, which is exactly what a click does here.
-		themeToggle.addEventListener('pointerdown', () => {
+		// ── The touch PEEK ──
+		// 2026-08-15, Hiro: tapping the toggle on a touchscreen should briefly
+		// show the pill, with the text transition. On a phone this label had gone
+		// silent — its mouseenter is bound only where the pointer can hover (see
+		// the binding above), and below 640px it is the bar's only pill, so the
+		// most animated object in the nav was one a phone never saw.
+		//
+		// It hangs off POINTERDOWN rather than click, and that is the whole trick:
+		// at pointerdown the theme has not flipped yet, so placePill() puts the
+		// OLD word on the plate, and the click handler's roll below then swaps it
+		// for the new one exactly as it does under a cursor. Showing it on click
+		// instead would place the pill with the new label already in it — the
+		// state, but not the transition, which is the half Hiro asked for. It also
+		// means the plate pops the instant the finger lands, which is the
+		// touch-down acknowledgement this button otherwise has no way to give.
+		//
+		// pointerType, not the media query: on a hybrid a mouse press is already
+		// hovering (`shown`), and a finger on the same machine still gets the
+		// peek. The `!shown` guard is what keeps a cursor's hover from being
+		// converted into something that times out.
+		let peekTimer = 0;
+		let peeking = false;
+		// Long enough to read two words after the roll has finished, and it has to
+		// be a TIMER — the contacts' "Copied!" holds until you leave the icon, and
+		// on touch there is no leaving. Measured from the release rather than the
+		// press so a long hold doesn't eat the dwell.
+		const PEEK_HOLD = 1100;
+		const endPeek = () => {
+			if (!peeking) return;
+			window.clearTimeout(peekTimer);
+			peekTimer = window.setTimeout(() => {
+				peeking = false;
+				hidePill();
+			}, PEEK_HOLD);
+		};
+
+		themeToggle.addEventListener('pointerdown', (e) => {
+			// Before the reduced-motion guard below: the pop is CSS's to soften or
+			// drop, and a visitor who has asked for less motion still gets to be
+			// told which theme the button is offering.
+			//
+			// The dwell is armed from the RELEASE, on the window, for the reason
+			// the press below binds there too — a press dragged off the button
+			// never fires anything on it, and a pill with no unhover to fall back
+			// on would simply stay. The click's own re-arm (further down) then
+			// restarts the count from after the roll, so a real tap gets the full
+			// hold and an abandoned press still clears itself.
+			if (!shown && e.pointerType !== 'mouse') {
+				window.clearTimeout(peekTimer);
+				peeking = true;
+				showPill();
+				const settle = () => {
+					window.removeEventListener('pointerup', settle);
+					window.removeEventListener('pointercancel', settle);
+					endPeek();
+				};
+				window.addEventListener('pointerup', settle);
+				window.addEventListener('pointercancel', settle);
+			}
 			if (reduceToggle) return;
 			togglePillPress.style.transition = `transform var(--dur-press) var(--ease-pop)`;
 			togglePillPress.style.transform = 'scale(var(--pill-press))';
@@ -1193,6 +1746,12 @@ const onHome = path === '/';
 		themeToggle.addEventListener('click', () => {
 			if (!shown) return;
 			const text = themeLabel();
+			// Restart the touch dwell here rather than letting the release's count
+			// run: the hold is meant to be time spent looking at the NEW word, and
+			// measured from the press it would already be part-spent by the time
+			// the roll lands on it. A no-op under a cursor, where nothing is
+			// peeking and the pill leaves when the pointer does.
+			endPeek();
 			if (reduceToggle) {
 				togglePill.style.width = `${widthFor(text)}px`;
 				togglePillText.textContent = text;
