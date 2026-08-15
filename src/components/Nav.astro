@@ -14,8 +14,18 @@ const onHome = path === '/';
 	{/* The bar has one state. Its type and buttons are authored at full size
 	    and scaled down into it — see the nav geometry block in global.css,
 	    which also records the expanded masthead this replaced (removed
-	    2026-08-02). */}
-	<div class="mx-auto max-w-[960px] px-5">
+	    2026-08-02).
+
+	    NO px-5 here, unlike every other 960px shell on the site (2026-08-14).
+	    The bar's ends are set by ONE token — --nav-inset, spent on .nav-inner —
+	    because on a phone they have to come in off the column, and a bar whose
+	    margin is the column's gutter PLUS its own inset can't do that: the
+	    gutter is the floor and it is already most of the margin. Moving the
+	    whole distance onto the one rule that draws it costs nothing here (the
+	    sum is identical at every width ≥768, so no wide layout moved) and makes
+	    the phone ramp a single number. See the small-phone block in global.css.
+	    The 960px cap and the centring stay — they are what this box is for. */}
+	<div class="mx-auto max-w-[960px]">
 		{/* The bar's bottom hairline is NOT in here — it hangs off #site-nav, out
 		    past this 960px shell, so it spans the window the way the bar's paper
 		    does (2026-08-03, second pass; it rode inside this shell's padding for
@@ -1068,14 +1078,25 @@ const onHome = path === '/';
 		// pill lands under the glyph rather than under its full-size layout box
 		// (mirrors place()). The center is CLAMPED to keep the pill inside the
 		// scrollport: the bar right-anchors the toggle so near the viewport edge
-		// that a centered pill would cross clientWidth — and scrollbar-gutter:
-		// stable ends painting there, silently shearing the pill's right side.
+		// that a centered pill would cross it — and scrollbar-gutter: stable ends
+		// painting there, silently shearing the pill's right side.
+		//
+		// The bound is the BAR'S OWN right edge, not documentElement.clientWidth
+		// (2026-08-14). #site-nav is the full-bleed box — its rect is exactly the
+		// painted width, gutter already subtracted, which is the thing the pill
+		// must not cross. clientWidth is not: measured at a 320px window with the
+		// gutter reserved it read 320 against a 309px layout, so the clamp let
+		// the pill 3px past the paint and sheared the very edge it exists to
+		// protect. Invisible until the phone pass brought the toggle in to a 16px
+		// end margin (see --nav-inset in global.css), which is what finally
+		// pushed the natural centre past the bound on a narrow window.
 		const placePill = (text: string) => {
 			const wRect = toggleWrap.getBoundingClientRect();
 			const bRect = themeToggle.getBoundingClientRect();
 			const width = widthFor(text);
-			const maxCenter =
-				document.documentElement.clientWidth - 8 - width / 2 - wRect.left;
+			const paintedRight =
+				nav?.getBoundingClientRect().right ?? document.documentElement.clientWidth;
+			const maxCenter = paintedRight - 8 - width / 2 - wRect.left;
 			const centerX = Math.min(
 				bRect.left - wRect.left + bRect.width / 2,
 				maxCenter

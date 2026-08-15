@@ -1618,104 +1618,131 @@ body {
 	   the wordmark and the toggle, and widening it moves them, which is not what
 	   was asked for here.
 
-	   0.8rem is what this resolves to at 375px and up. Below that it ramps down
-	   to 0.4rem — see the small-phone block after these tokens for the whole
-	   argument and where the vw slope comes from. */
-	--nav-icon-gap: clamp(0.4rem, 13.8vw - 36.6px, 0.8rem);
-	/* How far the bar's outermost DRAWN elements sit inside the column edges —
-	   the wordmark on the left, the toggle's glyph on the right. See the
-	   .nav-inner rule below, which spends it asymmetrically to land them equal.
+	   UNCHANGED AT EVERY WIDTH, and that is the finding of the 08-14 phone pass
+	   rather than an omission: the cluster's rhythm was never what made the
+	   narrow bar crowd. Its ENDS were. Tightening this to 0.4rem on phones was
+	   the first fix and it bought ~15px by making the one thing in the bar that
+	   is already a unit read tighter than it is drawn everywhere else. Taking
+	   the same pixels off the ends instead leaves the four icons on one gap at
+	   every width — see the small-phone block below. */
+	--nav-icon-gap: 0.8rem;
+	/* How far the bar's outermost DRAWN elements sit inside the WINDOW — the
+	   wordmark on the left, the toggle's glyph on the right. See the .nav-inner
+	   rule below, which spends it asymmetrically to land them equal.
 
-	   1rem = 19px, up from 0.5rem the same day it was introduced. Measured
-	   against the bar's other gaps: the icon glyphs sit 18.3px apart and there
-	   is 22.5px above and below them, so at 9.5px the ENDS were the tightest
-	   spacing in the bar — the outer margin of a box should be its largest gap,
-	   not its smallest, and the hairline made the box legible enough to read
-	   that as a mistake. 19px puts the ends within a pixel of the icons' own
-	   rhythm, so the bar runs on one horizontal unit, and squares the box up
-	   against the 22.5px verticals.
+	   ── It used to measure from the COLUMN, and 2.25rem is that same distance ──
+	   2026-08-14. This was 1rem, spent INSIDE the 960px shell's px-5, so the
+	   real distance from the window edge was 23.75 + 19 = 42.75px = 2.25rem —
+	   the number now written here. The shell's padding came off in Nav.astro and
+	   the whole distance moved onto this one token; nothing at 768px and up
+	   changed by a pixel. What it buys is that the bar's margin can now go BELOW
+	   the column's gutter, which is what a phone needs and what two nested
+	   insets structurally could not do.
 
-	   1rem is what this resolves to at 375px and up; below that it ramps down to
-	   0.4rem, which is a hard floor rather than a taste pick — see the
-	   small-phone block below, and the .nav-inner rule for why the formula there
-	   cannot take an inset under ~0.33rem. */
-	--nav-inset: clamp(0.4rem, 20.7vw - 58.7px, 1rem);
+	   The 1rem this replaced was itself up from 0.5rem, the same day it was
+	   introduced, and that reasoning still holds inside the number: measured
+	   against the bar's other gaps, the icon glyphs sit 22.6px apart and there
+	   is 22.5px above and below them, so at 9.5px from the column the ENDS were
+	   the tightest spacing in the bar — the outer margin of a box should be its
+	   largest gap, not its smallest, and the hairline made the box legible
+	   enough to read that as a mistake.
+
+	   16px is the phone floor, reached at 320 and ramped back to the full
+	   2.25rem by 600 — the whole argument, the measurements and the slope are in
+	   the small-phone block below. In px at both ends because the range is
+	   device widths, which are px; rem here is 19px. */
+	--nav-inset: clamp(16px, 9.55vw - 14.6px, 2.25rem);
 }
 
-/* ── Small phones: the bar's air, retuned ──
+/* ── The phone bar: the ends come in, and only the ends ──
    2026-08-14. The bar is a FIXED-WIDTH object: 25.7px of wordmark, four
    36.4px buttons on 10.0px gaps, a 36.4px toggle — 237.7px of drawn content
-   that never scales with the window — plus 85.5px of margin (the column's
-   px-5 at both ends, and --nav-inset again inside it at both ends). That is
-   323px before a single pixel of space between the three groups, so at 320
-   the bar is past full and they don't merely crowd, they OVERLAP: measured,
-   the wordmark's box and the email button's ran 1.6px into each other and the
-   Twitter button ran 6.0px into the toggle's. Drawn, the glyphs cleared by
-   4.6px and 6.4px — LESS than the 10.0px the contacts hold between
-   themselves, so the bar read as one crowded strip of six things rather than
-   as wordmark | contacts | toggle. The hit boxes are worse than the glyphs:
-   they tile half a gap past each button (see .btn-icon::after), so the
-   toggle's left edge belonged to the Twitter link.
+   that never scales with the window. Against that, the margin it used to
+   carry was 85.5px: the column's px-5 at both ends and 1rem of --nav-inset
+   again inside it at both ends. 323px of demand into a 320px window, so the
+   bar was past full before a single pixel of space between its three groups,
+   and they didn't merely crowd — they OVERLAPPED. Measured at 320: the
+   wordmark's box and the email button's ran 1.6px into each other, the
+   Twitter button ran 6.0px into the toggle's, and drawn, the glyphs cleared
+   by 4.6px and 6.4px against the 10.0px the contacts hold BETWEEN themselves.
+   Six things on one rhythm; no three groups. The hit boxes were worse than
+   the glyphs: they tile half a gap past each button (see .btn-icon::after),
+   so the toggle's left edge belonged to the Twitter link.
 
-   What moves here is AIR ONLY — the two tokens tuned against the desktop
-   bar's own rhythm, and nothing that is load-bearing elsewhere:
-     · --nav-inset 1rem → 0.4rem, worth 22.8px. The bar stops being its own
-       inset unit at this width and its contents come to rest on the column
-       edge — where the cards' years and the footer's copyright already sit.
-       The alignment the interior-inset block below records as this token's
-       cost is simply handed back at the width that can't afford it.
-       0.4rem is a FLOOR, not a taste pick: that block spends the inset
-       asymmetrically as --nav-inset − 0.5rem × --nav-icon-scale (6.3px) on
-       the right, so anything under ~0.33rem computes negative, clamps to
-       zero, and silently breaks the one thing the asymmetry buys — both drawn
-       ends landing on the same inset.
-     · --nav-icon-gap 0.8rem → 0.4rem, worth 15.0px, and the reason the first
-       lever reads at all: it tightens the CLUSTER, so the space bought above
-       becomes separation BETWEEN the groups instead of more room inside one.
-       The three rules cut against this token are expressions, not numbers, so
-       they follow it — including the hit boxes, which come to 41.4px square,
-       still tiling edge to edge with no dead sliver between neighbours and
-       still well over WCAG 2.2's 24px floor.
-
-   What deliberately does NOT move: --nav-icon-scale and --nav-logo-scale. The
-   contact icons are the only nav actions on a phone and that scale IS their
-   touch target (see the token, raised once for exactly this reason), and
-   shrinking the mark to buy ~10px would make the identity the smallest thing
-   in the bar on the one device where it is the only thing naming the site.
-   Air is the cheap thing here; ink is not.
-
-   ── The measurement that set the range ──
-   The test isn't "do the groups fit", it's whether the gaps BETWEEN the three
-   groups beat the gap INSIDE the cluster — under that, four icons and their
-   two neighbours read as one run of six. Untightened, measured drawn against
-   the cluster's own 22.6px:
+   ── Which pixels to take ──
+   The test is not "does it fit", it's whether the gaps BETWEEN the groups beat
+   the gap INSIDE the cluster; under that ratio the bar reads as one run of six
+   whatever the widths are. Measured drawn, against the cluster's own 22.6px:
      320 →  4.6 / 6.4   (0.2× — overlapping boxes)
      341 → 15.1 / 17.0  (0.7× — the groups are TIGHTER than the icons)
      360 → 24.6 / 26.5  (1.1× — a hair over; still reads as one strip)
      375 → 32.1 / 34.0  (1.4× — reads as three groups)
-   So the desktop tuning starts working at ~375, and 320 needs both levers at
-   their floor to reach 1.34×. A step between the two was the first fix and it
-   was wrong in the other direction: slack splits evenly into the two end gaps,
-   so floored tokens carried up to 374 extrapolate to ~3.2× — a tight little
-   cluster stranded in a wide bar. So both tokens RAMP across that range
-   instead. Measured on the ramp: 1.34/1.45 at 320, 1.39/1.48 at 344,
-   1.41/1.50 at 360, 1.43/1.51 at 375 — one proportion held across the whole
-   phone range, landing on the authored values exactly where it ends (375
-   measures 32.2 / 22.5 / 34.1 against the untightened 32.1 / 22.6 / 34.0
-   above, which is the ramp meeting the old bar inside a tenth of a pixel).
-   No step to land on, and no breakpoint for the rest of the site to start
-   dividing itself against: this file has no width breakpoints and still
-   doesn't; the bar reads its own width.
+   There are only two places to find the missing space: the cluster's own gap
+   or the bar's ends. Taking it from the gap was the first fix (0.8rem → 0.4rem
+   under 375) and it worked on the numbers while being wrong on the merits — it
+   made the one part of the bar that IS a single unit read tighter than it is
+   drawn at every other width, to protect margins that were the actual excess.
+   Hiro, same day, on the shipped version: the side margins should be smaller.
+   They should: 42.75px a side is 13% of a 320px window spent on nothing, and
+   26% of the window gone before the bar draws anything.
 
-   The slopes: 100vw × (span ÷ 55px window) with the offset that lands the
-   floor at 320 — inset 11.4px/55 → 20.7vw − 58.7px, gap 7.6px/55 → 13.8vw −
-   36.6px. Both hit their clamps within 0.1px at the ends, so the clamps are
-   what actually resolve at 320 and at 375 and the slope only serves the middle.
-   In px on purpose: rem here is 19px (the 118.75% root), and the range is
-   device widths, which are px. vw includes the scrollbar gutter where a
-   classic scrollbar is in play, which shifts the ramp by ~11px of window on
-   those browsers — harmless on a ramp, and the reason the FLOOR rather than
-   the slope is what guarantees 320. */
+   So the ends give the pixels back and the cluster keeps its rhythm — one gap
+   between the icons at every width, phone to desktop. --nav-inset ramps from
+   its authored 2.25rem (42.75px, exactly the old column-plus-inset sum) down
+   to a 16px floor at 320, and the four icons never move relative to each
+   other. Measured on the ramp — drawn end margin, then the group gaps as a
+   multiple of the cluster's own 22.6px:
+     320 → 16.0px ends, 1.39× / 1.47×
+     360 → 19.8px ends, 2.11× / 2.19×
+     390 → 22.6px ends, 2.65× / 2.73×   ← ends land exactly on the icon gap
+     430 → 26.5px ends, 3.36× / 3.45×
+     600 → 42.7px ends, the ramp closing on the authored value
+   The 320 row is measured in a desktop browser, where scrollbar-gutter: stable
+   costs 11px of layout that a phone's overlay scrollbar does not — so it is
+   the pessimistic reading of that width, not the phone's. 16px is the floor
+   because it is about the smallest end margin that still keeps the tighter
+   group gap clear of the cluster's own at the narrowest real width; it is
+   also, not by coincidence, the gutter the phone OSes use.
+
+   ── What this knowingly gives up ──
+   The --nav-inset note above argues that the outer margin of a box should be
+   its largest gap, not its smallest. Below ~390 that inverts: at 320 the ends
+   are 16px while the icons sit 22.6px apart, so the bar's tightest horizontal
+   spacing is once again at its edges. It is not reachable both ways — holding
+   the ends at 22.6 there would cost 13px from each group gap and drop the
+   ratio to ~1.05×, which is the "one strip of six" failure the table above
+   starts with. On a 320px window something has to be the tightest thing, and
+   the end margin is the one that costs nothing to read: no two elements are
+   being told apart by it. Above ~390, where the window can pay for both, the
+   original argument holds again.
+
+   ── Why the shell's px-5 had to go (Nav.astro) ──
+   Two nested insets cannot produce a margin smaller than the outer one, and
+   the column's gutter was 23.75 of the 42.75. Sixteen was not reachable from
+   here at all until the whole distance moved onto this token. Nothing at 768
+   and up moved by a pixel as a result — the sum is identical there, which is
+   what makes the change safe to have made at all.
+
+   ── The ramp ──
+   16px at 320 → 2.25rem at 600, as 100vw × (26.75px ÷ 280px) with the offset
+   that lands the floor at 320: 9.55vw − 14.6px. Both ends resolve to their
+   clamps within 0.1px, so the clamps are what actually hold at 320 and 600 and
+   the slope only serves the middle. 600 rather than 768 as the top: the bar's
+   content is fixed-width, so the need for tight ends fades fast above 430, and
+   ending here leaves every tablet and desktop width at the authored value
+   instead of dragging them into a phone's compromise. No breakpoint: this file
+   has none, and one here would be a step for every other rule on the site to
+   start dividing itself against. The bar reads its own width instead.
+   vw includes the scrollbar gutter where a classic scrollbar is in play, which
+   runs the ramp ~11px of window early on those browsers — harmless on a ramp,
+   and the reason the FLOOR, not the slope, is what guarantees 320.
+
+   What deliberately does NOT move at any width: --nav-icon-scale and
+   --nav-logo-scale. The contact icons are the only nav actions on a phone and
+   that scale IS their touch target (see the token, raised once for exactly
+   this reason), and shrinking the mark to buy ~10px would make the identity
+   the smallest thing in the bar on the one device where it is the only thing
+   naming the site. Air is the cheap thing here; ink is not. */
 
 /* Ended at 0.4rem the same day it moved twice: 0.25 → 0.15 (Hiro: tighter
    vertical inner padding) → 0.4 (Hiro: slightly taller). The tightening that
@@ -1752,7 +1779,23 @@ body {
    year and the footer's copyright, which all sit on the column edge. The bar is
    its own inset unit. If that alignment is ever wanted back, this is the rule
    that broke it — and it is worth knowing that the hairline can no longer stand
-   in for the column, so nothing else in the bar marks it. */
+   in for the column, so nothing else in the bar marks it.
+
+   ── It carries the WHOLE distance now (2026-08-14) ──
+   The 960px shell's px-5 came off in Nav.astro, so these two paddings are the
+   entire span between the window edge and the bar's ink — not the inner half
+   of it. The sum is unchanged at 768 and up (23.75 + 19 = 42.75 = the 2.25rem
+   the token now holds), so nothing about the desktop bar moved; below that the
+   token ramps down to 16px and takes the ends in with it. The "one more step"
+   of nesting described above is therefore gone: the bar's contents are inset
+   from the WINDOW, and the column no longer stands between them, which is what
+   let the phone margin drop under the column's own gutter.
+
+   The asymmetry is what sets the floor. padding-right computes as the inset
+   minus 6.3px, so an inset under ~0.33rem goes negative, clamps to zero, and
+   silently drops the correction — both drawn ends stop landing on the same
+   line. 16px clears that by a wide margin; anything proposed under ~7px does
+   not, and would need the correction moved to a margin to work at all. */
 #site-nav .nav-inner {
 	padding-left: var(--nav-inset);
 	padding-right: calc(var(--nav-inset) - 0.5rem * var(--nav-icon-scale));
