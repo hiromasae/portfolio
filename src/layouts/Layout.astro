@@ -18,6 +18,17 @@ const {
 <html lang="en" data-theme="dark">
 	<head>
 		<meta charset="utf-8" />
+		{/* Two marks, one per mode — the dark one (pale green on near-black) is
+		    the default, matching data-theme above, so the tab is already right
+		    with JS off. The pair CANNOT be hung off `media="(prefers-color-
+		    scheme: …)"` link tags the way the usual recipe does: this site's
+		    mode is its own, stored in localStorage and defaulting to dark
+		    regardless of the OS (see the script below), so the OS query would
+		    disagree with the page on every visitor who hasn't matched their
+		    desktop to it. The href is driven from data-theme instead — resolved
+		    pre-paint here, re-synced by the nav toggle. Declared ahead of that
+		    script because the script reaches for this element by id. */}
+		<link rel="icon" id="favicon" type="image/svg+xml" href="/hirofavicondark.svg" />
 		{/* Resolve the theme before first paint so there's no flash of the wrong
 		    mode. Only an explicit saved choice can move it off dark; the OS
 		    preference is deliberately NOT consulted, so a visitor on a light
@@ -26,9 +37,20 @@ const {
 		    only thing to change — the attribute above stays as the fallback. */}
 		<script is:inline>
 			(function () {
+				// Exposed globally because the nav's toggle needs it too, and that
+				// script is a module bundled separately from this inline one.
+				window.__syncFavicon = function (theme) {
+					var href = theme === 'light' ? '/hirofaviconlight.svg' : '/hirofavicondark.svg';
+					var link = document.getElementById('favicon');
+					// Skipping the no-op write matters: re-setting href to the value
+					// it already holds makes some browsers drop and refetch the icon,
+					// which reads as a flicker in the tab on every unrelated call.
+					if (link && link.getAttribute('href') !== href) link.setAttribute('href', href);
+				};
 				try {
 					if (localStorage.getItem('theme') === 'light') {
 						document.documentElement.dataset.theme = 'light';
+						window.__syncFavicon('light');
 					}
 				} catch (e) {}
 			})();
@@ -61,7 +83,6 @@ const {
 				}
 			}
 		</style>
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="generator" content={Astro.generator} />
 		<meta name="description" content={description} />
