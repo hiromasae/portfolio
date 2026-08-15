@@ -110,23 +110,28 @@ const onHome = path === '/';
 		    duplication is the price of the split and is the first thing to
 		    re-examine if this ever feels heavy.
 
-		    THE EMAIL LINK DIFFERS, BUT NOT BY SURFACE — BY POINTER. It copies the
-		    address to the clipboard on a pointer that can hover, and hands off to
-		    the mail app on one that can't. That is a different axis from the one
-		    picking the surfaces around it, and deliberately so (Hiro, 2026-08-15:
-		    tapping email in tablet view should redirect too; desktop is the only
-		    one that copies). Copying is the gesture this row's pill, its "Copied!"
-		    stamp and its whole fourteen-variant exploration were built for, and it
-		    is worth having where there is a cursor to read the confirmation and,
-		    often, no mail client to hand off TO. On a finger it is neither: the
-		    clipboard is somewhere the visitor then has to paste FROM, and the mail
-		    app is one tap away. So the menu's rows are plain mailto: links, and so
-		    is the icon row's email on a touch tablet — the copy path is stripped
-		    in the script at the top of the icon block, not gated at 640.
+		    THERE ARE TWO LINES HERE, AND THEY ARE NOT IN THE SAME PLACE. 640px
+		    picks the SURFACE (menu below, icons above). 769px picks the
+		    BEHAVIOUR: below it email hands off to the mail app and the icons wear
+		    no hover pill, above it email copies to the clipboard and the pills
+		    come back (Hiro, 2026-08-15: anything wider than tablet should have
+		    the hover pills, and email should copy there). The gap between the two
+		    is deliberate and is exactly one device — a tablet, which gets the
+		    icon row because it has the width for it, and a phone's answers
+		    because it has a phone's pointer.
 
-		    Each surface still NAMES what it does, which is what keeps it honest:
-		    the icon's label reads "Copy email" where it copies and "Email" where
-		    it doesn't, and the menu's row reads "Email". */}
+		    Copying is the gesture this row's pill, its "Copied!" stamp and its
+		    whole fourteen-variant exploration were built for, and it is worth
+		    having where there is a cursor to read the confirmation and, often, no
+		    mail client to hand off TO. Below the line it is neither: the clipboard
+		    is somewhere the visitor then has to paste FROM, and the mail app is
+		    one tap away.
+
+		    Each state NAMES what it does, which is what keeps it honest: the
+		    icon's label reads "Copy email" where it copies and "Email" where it
+		    hands off — re-synced in the browser whenever the window crosses the
+		    line, since server-rendered markup cannot know which side it will land
+		    on — and the menu's row reads "Email". */}
 		{/* Centred on the bar itself (2026-08-02). The layout box is wider than
 		    what the cluster draws — the buttons are scaled down inside it — but
 		    both are centred on the same line, so the drawn icons land on the
@@ -956,45 +961,62 @@ const onHome = path === '/';
 	if (group && pill && pillText && pillStamp && pillPress) {
 		const icons = Array.from(group.querySelectorAll<HTMLAnchorElement>('.btn-icon'));
 
-		// ── COPYING IS A HOVER-POINTER GESTURE ──
-		// 2026-08-15, Hiro: tapping email in tablet view should redirect to the
-		// mail app too; desktop is the only one that copies. The split was drawn
-		// at 640px until now, which was the wrong axis — it made "does this copy
-		// or hand off" a question about WINDOW WIDTH, so a touch tablet held wide
-		// enough to show this row got the desktop's clipboard gesture, with no
-		// clipboard worth having and no cursor to read the "Copied!" that
-		// confirmed it. It is a question about the POINTER, and this asks that.
+		// ── THE DESKTOP LINE: 769px, one step above the surface line ──
+		// 2026-08-15, Hiro: anything wider than tablet (768) should have the
+		// hover pills, and email should copy there rather than redirect. So this
+		// row now spans two behaviours, not one:
 		//
-		// The whole intervention is to strip data-copy. Everything downstream is
-		// keyed off that attribute and simply doesn't happen without it: the copy
-		// listener below early-returns before it binds, so the click is never
-		// intercepted, and a plain mailto: does what mailto: does. No flag
-		// threaded through the copy path, and nothing to keep in sync with it.
+		//   640–768  the icons, bare. No pill, and email is a plain mailto: that
+		//            hands off to the mail app — a tablet's answer, on the
+		//            surface a tablet gets.
+		//   769+     the pills come back and email copies to the clipboard. The
+		//            desktop gesture, with a cursor to read the confirmation.
 		//
-		// The label has to move with the behaviour or the button lies. "Copy
-		// email" is baked in at build time by the same isEmail branch that set
-		// data-copy — server-rendered markup can't know what pointer will arrive,
-		// so this is the one thing that must be corrected in the browser. Both
-		// the accessible name and the pill's word change together.
+		// 769 rather than 768 because Hiro named 768 as the TABLET width, and an
+		// iPad in portrait is exactly that — the rule is "wider than", so the
+		// tablet itself stays on the tablet side. One number to change if the
+		// intent was Tailwind's md instead.
 		//
-		// data-handoff is what tells the pill's ↗ that this one leaves now (see
-		// isExternal below) — the same conclusion the menu's rows reached today,
-		// on the same reasoning: a link that puts you in another application is
-		// leaving, whether or not it opens a tab to do it.
-		// Read once and shared with the pill's bindings further down, so the two
-		// answers can never disagree: the surface that copies is the surface that
-		// gets a hover label, because both are the same claim about the pointer.
+		// WIDTH IS A LIVE QUESTION, which is the whole reason this is a
+		// matchMedia object and not a boolean. The pointer test above it can be
+		// read once at load — a machine does not grow a mouse — but a window is
+		// dragged across this line constantly, so every consumer asks `wide`
+		// AT THE MOMENT IT ACTS: the click asks when it is clicked, the hover
+		// asks when it is hovered, and the label is re-synced on change. Reading
+		// this into a const at startup is the bug this comment exists to prevent.
+		const wide = window.matchMedia('(min-width: 769px)');
+
+		// Still read once, and still a different question: whether the visitor
+		// has a pointer that can hover at all. It gates the mouse BINDINGS, not
+		// the width rules — a hover pill on a device with no hover is not a
+		// narrower version of this feature, it is a tap artifact that never
+		// leaves (see the sticky-hover work earlier today).
 		const canHoverPointer = window.matchMedia('(hover: hover)').matches;
 
-		if (!canHoverPointer) {
+		// The label has to move with the behaviour or the button lies. "Copy
+		// email" is baked in at build time, and server-rendered markup cannot
+		// know what window it will land in — so the accessible name, the pill's
+		// word and the pill's ↗ are all corrected here, together, and again
+		// whenever the window crosses the line. data-handoff is what tells
+		// isExternal below that this one leaves now: a link that puts you in
+		// another application is leaving, whether or not it opens a tab to do it.
+		//
+		// data-copy stays put in both states. It is the ADDRESS, not a switch —
+		// the click handler decides, and keeping the data around is what lets the
+		// decision be made at click time rather than baked in at load.
+		const syncEmailAffordance = () => {
 			for (const icon of icons) {
 				if (!icon.dataset.copy) continue;
-				icon.removeAttribute('data-copy');
-				icon.dataset.handoff = 'true';
-				icon.dataset.label = 'Email';
-				icon.setAttribute('aria-label', 'Email');
+				const copies = wide.matches;
+				const label = copies ? 'Copy email' : 'Email';
+				icon.dataset.label = label;
+				icon.setAttribute('aria-label', label);
+				if (copies) delete icon.dataset.handoff;
+				else icon.dataset.handoff = 'true';
 			}
-		}
+		};
+		syncEmailAffordance();
+		wide.addEventListener('change', syncEmailAffordance);
 
 		// Hidden clone of the pill, used to measure the exact width each label
 		// needs — including the external-link arrow when shown — so the pill's
@@ -1195,26 +1217,32 @@ const onHome = path === '/';
 				window.addEventListener('pointerup', release);
 				window.addEventListener('pointercancel', release);
 			});
-			// ── The mouse half, bound only where a mouse exists ──
-			// 2026-08-15. This block spent one commit deliberately UNGATED, on the
-			// argument that a touch tablet at 640+ needed the pill because it
-			// carried "Copied!" — the only evidence that tapping email had done
-			// anything. Making the copy a hover gesture (see the block at the top)
-			// retired that argument the same day: on a tablet every one of these
-			// four now navigates, to a tab or to a mail app, and a label that
-			// lingers after a tap is answering a question the navigation already
-			// answered. So it is gated like the toggle's twin, and for the same
-			// reason — a touch browser synthesises mouseenter on tap and withholds
-			// mouseleave until the next one.
+			// ── The mouse half: a real pointer, and a desktop-width window ──
+			// 2026-08-15, two gates for two different failures.
 			//
-			// What that costs a tablet is the naming, which is the icon row's
-			// known weakness and the reason the menu exists below 640. A peek like
-			// the toggle's (pop on pointerdown, hold, go) would buy it back and is
-			// the obvious next move if tablets ever matter here; it is not built
-			// because the tap is already leaving the page, so the word would be
-			// racing the navigation that made it unnecessary.
+			// canHoverPointer is bound-time and about the DEVICE: a touch browser
+			// synthesises mouseenter on tap and withholds mouseleave until the
+			// next one, so binding these on a tablet strands the label under
+			// whatever was last tapped. (This block spent one commit ungated, on
+			// the argument that a tablet needed the pill to carry "Copied!" — the
+			// copy moved off the tablet the same day, and took the argument with
+			// it.)
+			//
+			// `wide` is asked INSIDE the handler and is about the WINDOW: Hiro's
+			// line is that the pills belong above 768, and a desktop window
+			// dragged narrower crosses that line without rebinding anything. So
+			// the listener stays bound and simply declines below it — which also
+			// means dragging back out restores the pill mid-session with no
+			// resize plumbing of its own.
+			//
+			// What 640–768 loses is the naming, which is the icon row's known
+			// weakness and the reason the menu exists below 640. A peek like the
+			// toggle's would buy it back for a tablet; it isn't built because a
+			// tap there already navigates, so the word would be racing the
+			// navigation that made it unnecessary.
 			if (canHoverPointer) {
 				icon.addEventListener('mouseenter', () => {
+					if (!wide.matches) return;
 					window.clearTimeout(gapHideTimer);
 					showAt(icon);
 				});
@@ -1275,15 +1303,34 @@ const onHome = path === '/';
 		// claim if the write rejects. Safe here because a clipboard rejection is a
 		// permission refusal, which comes back immediately rather than late — the
 		// correction lands within a frame or two, and it still tells the truth.
+		// The dwell that keeps a copy from being silent where nothing can unhover
+		// it — the toggle pill's peek, borrowed. It only ever arms on a pointer
+		// with no hover, which above 769px means a landscape tablet: wide enough
+		// for Hiro's desktop rule, with no cursor to walk away and clear the
+		// confirmation the way the block above assumes. Without it "Copied!"
+		// would be strictly true and permanent.
+		let copyPeekTimer = 0;
+		const COPY_PEEK_HOLD = 1400;
+		const armCopyPeek = () => {
+			window.clearTimeout(copyPeekTimer);
+			copyPeekTimer = window.setTimeout(hide, COPY_PEEK_HOLD);
+		};
+
 		icons.forEach((icon) => {
 			const address = icon.dataset.copy;
 			if (!address) return;
 			icon.addEventListener('click', (e) => {
+				// Asked at click time, not at bind time: the window may have been
+				// dragged across the line since load. Below it this listener does
+				// nothing at all and the mailto: hands off to the mail app, which
+				// is the tablet behaviour Hiro asked for on 2026-08-15.
+				if (!wide.matches) return;
 				e.preventDefault();
 
 				// Synchronous, so this frame is the one the press releases on.
 				if (!visible) showAt(icon);
 				stampText('Copied!');
+				if (!canHoverPointer) armCopyPeek();
 
 				// Wrapped rather than called bare: on an insecure origin
 				// navigator.clipboard is undefined, which throws SYNCHRONOUSLY and
