@@ -1,8 +1,18 @@
 @import "tailwindcss";
 
 :root {
-	/* One face for the whole site — headings included. */
-	--font-sans: "Recursive", "Segoe UI", system-ui, -apple-system, sans-serif;
+	/* One face for the whole site — headings included. Recursive, self-hosted:
+	   --font-recursive is defined by the <Font> tag in Layout.astro from the
+	   `fonts` block in astro.config.mjs, and it already carries the whole
+	   stack — the face itself, then the metric-matched fallbacks Astro
+	   generates from the real file (which is why the swap no longer resets
+	   every text box), then the plain families named in that config. This
+	   used to spell the stack out, and the tail here is now DECLARED IN
+	   astro.config.mjs's `fallbacks` — change it there, not here. The literal
+	   after the comma is only for the case where the variable never lands
+	   (the tag missing from a new layout), so the site degrades to system
+	   type instead of to an invalid declaration. */
+	--font-sans: var(--font-recursive, "Segoe UI", system-ui, -apple-system, sans-serif);
 
 	/* ── Weight tokens ── The scale itself — which tier wears what — is
 	   documented on body's font-weight rule. LIGHT RUNS ONE NOTCH HEAVIER

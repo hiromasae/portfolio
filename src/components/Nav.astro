@@ -667,9 +667,13 @@ const onHome = path === '/';
 		//
 		// Waiting costs nothing visible — the bar is held hidden pre-paint until
 		// 'go' either way, so this just lands the entrance a beat later on type
-		// that then holds still. The race is the insurance: a slow, blocked or
-		// offline CDN must not swallow the entrance, so at 1200ms it plays over
-		// the fallback exactly as it does today.
+		// that then holds still. The race is the insurance: a font request that
+		// stalls must not swallow the entrance, so at 1200ms it plays over the
+		// fallback exactly as it does today. That ceiling was set when the face
+		// came off a third-party CDN and is now generous — same-origin and
+		// preloaded, it arrives with the page — but generous is the right side
+		// to be wrong on for a timeout that only ever fires when something has
+		// already gone wrong.
 		//
 		// fonts.load(), NOT fonts.ready alone (2026-08-06). ready resolves
 		// when nothing is *currently* loading — and at 'interactive' the woff2
@@ -680,9 +684,25 @@ const onHome = path === '/';
 		// (Hiro's report; the 07-29 note here previously claimed fonts were
 		// "already pending by here", which a warm dev cache made true enough to
 		// ship). load() forces the request NOW and resolves when the face is
-		// usable; the ready chase behind it catches any other face. The
-		// descriptor names the body's own face and floor weight — keep it in
-		// step with --font-sans and the weight scale in global.css.
+		// usable; the ready chase behind it catches any other face.
+		//
+		// THE FAMILY NAME IS ASKED FOR, NOT SPELLED OUT (2026-08-16). This
+		// read '300 1rem "Recursive"' while the face came off the Google CDN
+		// under that literal name. Self-hosting put it behind Astro's font
+		// pipeline (see the `fonts` block in astro.config.mjs), which emits it
+		// under a CONTENT-HASHED family — Recursive-69d2… today, something
+		// else the moment the config or the file changes. The old literal
+		// would not have thrown or logged: load() on a family nothing declares
+		// resolves immediately, so the ceremony would fire on the fallback
+		// face and the snap it exists to prevent would come back, silently, in
+		// whichever release changed the hash. So ask the page what it is
+		// actually setting text in. body carries font-family: var(--font-sans)
+		// (global.css) and a computed font-family is the resolved LIST, which
+		// is exactly what load()'s shorthand takes; the generated
+		// metric-matched fallback sitting in that list is a local() face and
+		// resolves in the same tick, so the real woff2 is still the only thing
+		// waited on. The floor weight stays literal — keep it in step with the
+		// weight scale in global.css.
 		var whenTypeSettled = function (run) {
 			var fired = false;
 			var once = function () {
@@ -691,9 +711,17 @@ const onHome = path === '/';
 				run();
 			};
 			window.setTimeout(once, 1200);
+			var stack = '';
 			try {
-				document.fonts
-					.load('300 1rem "Recursive"')
+				stack = getComputedStyle(document.body).fontFamily;
+			} catch (e) {}
+			try {
+				// No stack to name means no face worth forcing: fall through to
+				// ready alone rather than call load() on something like plain
+				// `sans-serif`, which resolves at once and would hand back a
+				// promise that looks settled while the webfont is still in
+				// flight — worse than the 1200ms race this falls back on.
+				(stack ? document.fonts.load('300 1rem ' + stack) : Promise.resolve())
 					.then(function () {
 						return document.fonts.ready;
 					})
