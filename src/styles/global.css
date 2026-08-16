@@ -2765,9 +2765,12 @@ body {
 .btn-quiet {
 	display: inline-flex;
 	align-items: center;
-	/* Tighter than .btn's 0.5rem: the arrow NUDGES away from the label on
-	   hover (see below), so this gap is the small end of a range, not a
-	   fixed value. At 0.5rem the hovered state opened a visible hole. */
+	/* Tighter than .btn's 0.5rem. The figure was chosen as the small end of a
+	   range rather than a fixed value, because the arrow used to NUDGE away
+	   from the label on hover and 0.5rem opened a visible hole once it had; the
+	   nudge came off 2026-08-16 and the gap is now simply the gap. Kept at 0.4
+	   rather than reset to 0.5: the pair reads correctly at this distance, and
+	   the removal was about movement, not spacing. */
 	gap: 0.4rem;
 	font-size: 0.875rem;
 	/* Secondary UI weight — was 500, stepped down with the rest 2026-08-04;
@@ -2831,23 +2834,23 @@ body {
    .contact-trigger overrode `background-position` to send it the other way for
    a caret on the right. Both of those are now dead code (removed with this
    change) and neither has a replacement — a fade has no direction to point
-   anywhere. What still says which way a control faces is the ARROW, which is
-   why the nudge below survived the cut and why "Show more" turns its glyph
-   rather than its line.
+   anywhere. What still says which way a control faces is the ARROW, by POINTING
+   — which is why "Show more" turns its glyph rather than its line.
 
-   The arrow's nudge lost its DELAY in the same pass. The 165ms
-   (--dur-card × 0.55) existed to let the wipe get most of the way across
-   before the glyph moved — a stagger behind a 300ms gesture. With the line
-   arriving instantly there is nothing in front to stagger behind, and the
-   delay read as the arrow being slow off the mark. The 200ms travel stays:
-   the nudge is the one thing here that MOVES, and --dur-gesture is the site's
-   clock for that.
+   ⚠ 2026-08-16: THE ARROW'S NUDGE IS GONE TOO, at Hiro's ask, so this block is
+   now the entire hover state. The glyph had kept a 200ms slide on
+   --dur-gesture after the wipe went (it had lost only its 165ms stagger, which
+   existed to let the band get across first and read as sluggish once nothing
+   was in front of it). Nothing on the control MOVES for a cursor now: the line
+   inks, the ink darkens, and that is the whole answer. See the arrow's own
+   block below for why the removal had to happen in the base as well as in the
+   --down variant.
 
-   No tilt on this one: the ↗ carries a MEANING (this leaves the site), and
-   there's no second meaning here for a rotation to encode, so it would be
-   decoration. The nudge is the whole idea. (The projects grid's toggle DOES
-   rotate — see .btn-quiet--down — because there the rotation encodes open vs
-   shut, which is a second meaning.) */
+   No tilt on the ↗ if one ever returns: it carries a MEANING (this leaves the
+   site), and there is no second meaning here for a rotation to encode, so it
+   would be decoration. (The projects grid's toggle DOES rotate — see
+   .btn-quiet--down — because there the rotation encodes open vs shut, which is
+   a second meaning, and it is the one piece of arrow movement that survived.) */
 .btn-quiet__label {
 	/* NO `display: inline-block` and NO `padding-bottom`, and both deletions
 	   have the same cause: they existed to give the background band a box to
@@ -2908,36 +2911,48 @@ body {
 		transition: none;
 	}
 }
-.btn-quiet__arrow {
-	transform: translateX(0);
-	transition: transform var(--dur-gesture) var(--nav-ease);
-}
-.btn-quiet:focus-visible .btn-quiet__arrow {
-	transform: translateX(-0.2rem);
-}
-@media (hover: hover) {
-	.btn-quiet:hover .btn-quiet__arrow {
-		transform: translateX(-0.2rem);
-	}
-}
+/* ── NO ARROW NUDGE ──
+   2026-08-16, Hiro: the Show more / Show less glyph should not move on hover.
+   What stood here was the family's nudge — `transform: translateX(0)` at rest,
+   `translateX(-0.2rem)` on :hover and :focus-visible, on --dur-gesture — drawn
+   for a BACK link so the arrow pulled the way it pointed. Both state rules are
+   gone and the rest rule went with them: a rest transform is only there to give
+   a state something to move FROM, and there is no state left.
+
+   ⚠ REMOVED FROM THE BASE, not just from the --down variant, and it had to be.
+   The projects toggle is .btn-quiet__arrow's ONLY consumer (the Contact trigger
+   wears .contact-caret and never joined this family), and
+   `.btn-quiet:hover .btn-quiet__arrow` (0,3,0) outranks
+   `.btn-quiet--down .btn-quiet__arrow` (0,2,0) — so deleting only the variant's
+   override would have left the base standing and sent the glyph sliding LEFT
+   while it points down, which is worse than the state being removed. If a
+   second consumer ever wants a nudge, write it on that variant, not here.
+
+   The hover state itself is intact: the label still inks and underlines, so the
+   control still answers a cursor — it just answers with the line instead of
+   with movement. The variant's TURN is also untouched; that encodes open vs
+   shut, which is a state and not a hover. */
 
 /* ── Reduced motion ──
-   Two rest rules are now enough, and that is worth a line because it briefly
-   was not. While the nudge carried its 165ms delay, both state rules had to
-   re-declare `transition` to hold it, and `.btn-quiet:hover .btn-quiet__arrow`
-   (0,3,0) beat a bare `.btn-quiet__arrow` (0,1,0) inside this very block — a
-   media query changes nothing about specificity — so the glyph slid under the
-   setting anyway. Dropping the delay let the states stop declaring transitions
-   at all, which is what makes the rest rules authoritative again.
+   Rest rules only, and that is worth a line because it briefly was not. While
+   the arrow's nudge carried a 165ms delay, its state rules had to re-declare
+   `transition` to hold it, and `.btn-quiet:hover .btn-quiet__arrow` (0,3,0)
+   beat a bare `.btn-quiet__arrow` (0,1,0) inside this very block — a media
+   query changes nothing about specificity — so the glyph slid under the setting
+   anyway. Dropping the delay let the states stop declaring transitions at all,
+   which is what made the rest rules authoritative again. The nudge itself is
+   gone now (2026-08-16, see the block above), so what this suppresses on the
+   arrow is the variant's rotate; keep the selector, because the family is meant
+   to outlive its current consumers and the next arrow inherits this guard.
 
-   That bug was live for exactly one day and was never reachable before it:
-   .btn-quiet__arrow had no consumer between "Back to projects" coming off
-   (2026-08-10) and "Show more" landing (08-15) — .contact-trigger uses
-   .contact-caret and suppresses that separately.
+   .btn-quiet__arrow is listed with no base rule of its own to disable. That is
+   deliberate: the property this has to reach lives on
+   `.btn-quiet--down .btn-quiet__arrow`, and this selector cannot beat it —
+   which is why that variant carries its OWN copy of this block further down.
 
-   The nudge and the underline both still HAPPEN under the setting; only their
-   transitions go, which turns each into a step. That is the treatment the
-   whole site gives reduced motion — see the wordmark's block. */
+   Whatever still changes under the setting still HAPPENS; only the transitions
+   go, which turns each into a step. That is the treatment the whole site gives
+   reduced motion — see the wordmark's block. */
 @media (prefers-reduced-motion: reduce) {
 	.btn-quiet,
 	.btn-quiet__label,
@@ -2948,49 +2963,39 @@ body {
 
 /* ── .btn-quiet turned a quarter: an arrow that points ALONG the page ──
    2026-08-15, the projects grid's Show more / Show less. The base family was
-   drawn for a BACK link, with its arrow on the left and its nudge going
-   further left; this control's direction is vertical, because the thing it
-   reveals is below it rather than behind it. The rule to hold if a third
-   variant ever appears is the one the two share: THE GLYPH NUDGES THE WAY IT
-   POINTS. (The wipe used to turn with them and no longer exists — see the base
-   block for what its removal cost and why the arrow is now the only thing on
-   the control that carries a direction at all.)
+   drawn for a BACK link, with its arrow on the left; this control's direction
+   is vertical, because the thing it reveals is below it rather than behind it.
 
-   ⚠ EQUAL SPECIFICITY TO THE BASE, so these must stay BELOW it.
-   `.btn-quiet--down:hover .btn-quiet__arrow` and
-   `.btn-quiet:hover .btn-quiet__arrow` are both (0,3,0); order is the only
-   thing deciding them. Moving this block above .btn-quiet would leave the
-   arrow sliding left while pointing down. */
+   The variant used to carry a second half of that argument — a hover nudge on
+   the Y axis, so THE GLYPH NUDGED THE WAY IT POINTED — and it came off on
+   2026-08-16 at Hiro's ask. What survives is the pointing itself and the turn;
+   nothing on this control moves in response to a cursor any more, on either
+   axis. If a third variant ever appears, the shared rule left to hold is the
+   quieter one: THE GLYPH POINTS AT WHAT IT WILL DO.
+
+   The block can stay where it is. It once had to sit BELOW .btn-quiet because
+   the two hover rules were both (0,3,0) and order was the only thing deciding
+   which axis won; with the base's arrow rules gone there is no longer anything
+   above to lose to. Only `rotate`, sizing and the reduced-motion copy below are
+   left, and none of them collide with the base. */
 
 /* The glyph's box, matched to .contact-caret's — the bar's figure for a mark
    standing beside 0.875rem text. The width/height attributes in the markup are
    the pre-CSS fallback; this is what actually sizes it.
-   The rest transform is spelled on the Y axis for the same reason the states
-   below are — translateX(0) and translateY(0) are the same matrix, and reading
-   `transform: translateX(0)` next to a hover that moves in Y is how a
-   maintainer talks themselves into "fixing" the wrong axis.
    `rotate` is declared at rest so the turn below has something to animate FROM;
    a rotation appearing out of nothing has no start value and would snap. */
 .btn-quiet--down .btn-quiet__arrow {
-	transform: translateY(0);
 	rotate: 0deg;
 	width: 0.85rem;
 	height: 0.85rem;
 	display: block;
-	/* Two properties on the site's travel clock: the nudge (transform) and the
-	   turn (rotate). Same duration and curve, because they are the same glyph
-	   moving — but they answer different things, a pointer and a state. */
-	transition:
-		transform var(--dur-gesture) var(--nav-ease),
-		rotate var(--dur-gesture) var(--nav-ease);
-}
-.btn-quiet--down:focus-visible .btn-quiet__arrow {
-	transform: translateY(0.2rem);
-}
-@media (hover: hover) {
-	.btn-quiet--down:hover .btn-quiet__arrow {
-		transform: translateY(0.2rem);
-	}
+	/* ONE property on the site's travel clock now: the turn. The nudge that used
+	   to ride alongside it (translateY(0.2rem) on :hover and :focus-visible, the
+	   Y-axis answer to the base family's leftward one) came off 2026-08-16 — see
+	   the base block for why it had to go from both places at once. `transform`
+	   is not declared here at all any more, at rest or in any state: nothing sets
+	   one, so there is nothing to return to and nothing to transition. */
+	transition: rotate var(--dur-gesture) var(--nav-ease);
 }
 
 /* ── Expanded: the arrow turns over and the nudge follows it for free ──
@@ -3007,23 +3012,24 @@ body {
    the site whose whole job is open-vs-shut, so it earns the same device rather
    than borrowing one.
 
-   ⚠ THE NUDGE IS NOT RE-DECLARED FOR THIS STATE, and must not be. The
-   individual `rotate` property composes BEFORE `transform` (the fixed order is
-   translate, rotate, scale, then transform), so the hover's
-   `transform: translateY(0.2rem)` is applied in the glyph's own space and then
-   turned with it — which means the same declaration that nudges the arrow DOWN
-   while it points down nudges it UP once it has turned over. One rule, both
-   directions, and the "nudges the way it points" rule above holds without a
-   second copy of it. Writing an explicit translateY(-0.2rem) here would double
-   the flip and send the glyph back down. */
+   ROTATION IS ALL THIS STATE CHANGES, and since 2026-08-16 that is the only
+   thing the glyph does at all. The state used to get a hover nudge for free
+   alongside it: the individual `rotate` property composes BEFORE `transform`
+   (the fixed order is translate, rotate, scale, then transform), so the hover's
+   `transform: translateY(0.2rem)` was applied in the glyph's own space and then
+   turned with it — one declaration that nudged DOWN while the arrow pointed
+   down and UP once it had turned over. That is worth keeping on the record for
+   whoever adds movement back here: it is the reason a state like this one never
+   needed its own copy of the nudge, and the reason an explicit
+   translateY(-0.2rem) would have doubled the flip rather than fixing it. */
 #project-list.is-enhanced:not(.is-collapsed) .btn-quiet--down .btn-quiet__arrow {
 	rotate: 180deg;
 }
 
 /* The variant's own copy of the family's reduced-motion block, because it sits
-   below that one and would otherwise out-order it. The nudge and the turn both
-   still HAPPEN under the setting; only their transitions go, which makes each
-   a step rather than a move. */
+   below that one and would otherwise out-order it. The turn still HAPPENS under
+   the setting — only its transition goes, which makes it a step rather than a
+   move. (It used to suppress the nudge as well; that came off 2026-08-16.) */
 @media (prefers-reduced-motion: reduce) {
 	.btn-quiet--down .btn-quiet__arrow {
 		transition: none;
@@ -3763,15 +3769,18 @@ body {
 	inset-inline: -0.35rem;
 }
 
-/* The caret ROTATES rather than nudging: .btn-quiet's arrow slides along the
-   axis it points down, which says "go this way", and this one says "there is
-   more here" — a disclosure's affordance is its state, not a direction of
-   travel. It is the only rotating thing in the bar, and that is the right
-   number: rotation is how this control tells you it is open, so nothing else
-   may borrow it. On --dur-gesture/--nav-ease, the bar's own travel pair.
+/* The caret ROTATES rather than nudging. When this was written .btn-quiet's
+   arrow still slid along the axis it pointed down, which says "go this way",
+   and this one says "there is more here" — a disclosure's affordance is its
+   state, not a direction of travel. (That slide is gone as of 2026-08-16, so
+   the contrast is now with an arrow that does not move at all; the argument for
+   rotating rather than sliding is unchanged, and this stayed put.) It is the
+   only rotating thing in the bar, and that is the right number: rotation is how
+   this control tells you it is open, so nothing else may borrow it. On
+   --dur-gesture/--nav-ease, the bar's own travel pair.
 
-   The trigger's own hover nudge is therefore dropped (no .btn-quiet__arrow
-   here) — a caret that both slides and turns is two answers to one question. */
+   The trigger never took the family's hover nudge (no .btn-quiet__arrow here) —
+   a caret that both slides and turns is two answers to one question. */
 .contact-caret {
 	width: 0.85rem;
 	height: 0.85rem;
