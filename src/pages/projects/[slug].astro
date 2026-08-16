@@ -249,9 +249,20 @@ const others = [
 			    global.css left it standing on the explicit grounds that "the next
 			    borderless text link on the site wants exactly this". This is that
 			    link. It arrives with the whole family already decided — 0.875rem,
-			    --weight-ui, --ink-soft to --ink on hover, the site's one underline
-			    (instant in, --dur-pop-out out), a focus ring — so there is no new
-			    treatment on the page and nothing here to tune.
+			    --weight-ui, the site's one underline (instant in, --dur-pop-out
+			    out), a focus ring — so there is no new treatment on the page.
+
+			    ── IT IS CYAN (2026-08-16, Hiro), which is the one thing the
+			    family does NOT decide for it ──
+			    Hence the --out modifier: --ink-link at rest instead of the
+			    family's --ink-soft, and no colour change on hover, because an
+			    accent has nowhere to darken TO — the family's hover ink is a grey.
+			    Read .btn-quiet--out in global.css for the argument, and for why
+			    its hover rule looks like a no-op and isn't. What the colour buys
+			    on THIS page is worth stating: the link sits a few lines above a
+			    figcaption set at the same size, and --ink-soft separated the two
+			    by half a step of grey. Cyan separates them by kind, which is what
+			    they actually differ by.
 
 			    The 07-29 removal that took the tags also took a "Visit" button,
 			    and the thing that made it worth removing was that it was a BOXED
@@ -299,7 +310,7 @@ const others = [
 			    note claims. */}
 			{project.linkLabel && project.link && (
 				<div class="mt-8">
-					<a href={project.link} target="_blank" rel="noopener" class="btn-quiet">
+					<a href={project.link} target="_blank" rel="noopener" class="btn-quiet btn-quiet--out">
 						<span class="btn-quiet__label">{project.linkLabel}</span>
 						<svg
 							class="btn-quiet__arrow"

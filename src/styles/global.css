@@ -507,6 +507,32 @@
 	--ink-title: #0f4b6e; /* cyan, verbatim — 9.00:1, 1.28× the muted text since the ground lift */
 	--ink-num: #884213; /* 7.15:1 — deepened off verbatim for AAA, see above */
 
+	/* ── The link out (2026-08-16, Hiro: make the links cyan) ──
+	   The same verbatim cyan as --ink-title, and a SEPARATE SLOT anyway. The
+	   duplication is the point: these two are the same colour today and are not
+	   the same decision, because they are held to different floors. A title is
+	   large text and clears WCAG on the large-text bar with room (the block
+	   above says so); this is 16.625px of small text, so it has to make 7:1 on
+	   its own — which the verbatim value does, at 9.00:1. Retuning the title hue
+	   is a live possibility the --ink-title block contemplates in as many words
+	   (it was repicked once already, blue → cyan, as a PAIR with --dye-name).
+	   Aliasing this to that token would drag the link along with a move it was
+	   never measured for, and the failure would be silent.
+
+	   ⚠ WHAT THIS DOES TO THE "ONE HUE PER CLASS" RULE — read before assuming it
+	   broke it. That rule says the colour marks the CLASS of thing, and the
+	   class was "title". Check what actually wears cyan on the site today: the
+	   project card's h3, and nothing else — the project h1 dropped the accent on
+	   08-10 and the about page declined it on 08-04. That h3 is inside an <a>.
+	   So every cyan thing on the site is a link, and this link joins them rather
+	   than diluting them; if anything the rule now reads more cleanly than it
+	   did, because "title" had one member and "clickable" has two.
+	   That is an observation about today's markup, NOT a promise. Put a colour
+	   on a heading that isn't a link and the reading is spent — at which point
+	   this token is the one that has to move, since the title hue is the older
+	   claim on the colour. */
+	--ink-link: #0f4b6e; /* cyan, verbatim — 9.00:1, clears the 7:1 small-text floor */
+
 	/* ── The about page's marks ──
 	   One hue per mark, each picked to match the emoji it redraws rather than
 	   to sit in a scheme (Hiro, 08-04) — that is the whole brief, and it is
@@ -1214,6 +1240,16 @@
 	   theme's mark: the night ground ranks green above cyan on its own. */
 	--ink-title: #2ac3de; /* cyan, verbatim — 9.15:1, 1.30× the muted text since the AAA pass */
 	--ink-num: #ff9e64; /* 9.49:1 */
+
+	/* The link out — see the light block for why this is its own slot and not an
+	   alias of the title hue. Verbatim here too, and this side never needed a
+	   solve: 9.15:1 is comfortably past the 7:1 small-text floor.
+	   ⚠ It is also --focus-ring's exact value in this theme, which is fine and
+	   worth knowing: a focused link draws a ring in its own colour, 2px OUTSIDE
+	   its box on the page ground, where the ring reads at 9.15:1 against --paper.
+	   Same arrangement a focused project card has had since the ring was picked
+	   to share the title's hue deliberately (see the light block). */
+	--ink-link: #2ac3de; /* cyan, verbatim — 9.15:1, clears the 7:1 small-text floor */
 
 	/* ── The about page's marks ──
 	   The light block carries the reasoning, including why this row lost its
@@ -2823,6 +2859,42 @@ body {
 	outline: 2px solid var(--focus-ring);
 	outline-offset: 2px;
 	border-radius: var(--radius);
+}
+
+/* ── .btn-quiet--out: the link that leaves the site, in cyan ──
+   2026-08-16, Hiro: make the links cyan. The project pages' link out is the
+   only consumer; the Show more toggle (--down) and the Contact trigger stay on
+   the family's --ink-soft, and they should — neither one goes anywhere, and
+   this variant's whole claim is that the colour marks a destination.
+
+   ── NO COLOUR CHANGE ON HOVER, and that is copied, not invented ──
+   The family's hover is two things at once: the line inks and the ink darkens
+   (--ink-soft → --ink). An accent cannot take the second half — --ink is a
+   GREY, so a cyan link answering a cursor by going grey would read as the
+   colour draining out of it, which is the opposite of what a hover state is
+   for. The site already settled this exact case at .project-card__title, an
+   accent-coloured link whose hover rule sets the underline to `currentColor`
+   with the comment "the title wears --ink-title, and the line under it has to
+   travel with it". Same answer here: the hue is constant and the underline
+   arriving IS the whole gesture. Nothing else on this control moves anyway —
+   the arrow's nudge came off this morning.
+
+   ⚠ THE :hover RULE BELOW SETS THE SAME VALUE THIS ONE DOES, on purpose. It is
+   not a no-op and don't delete it as one: `.btn-quiet:hover` (0,2,0) outranks
+   a bare `.btn-quiet--out` (0,1,0), so without a hover rule of its own at equal
+   specificity the base family would repaint this link --ink the moment a cursor
+   touched it. It also has to sit INSIDE the same @media (hover: hover) guard to
+   be in the cascade at all when that rule is.
+
+   The 0s transition-duration the family's hover carries still applies and is
+   harmless — there is no colour change left for it to time. */
+.btn-quiet--out {
+	color: var(--ink-link);
+}
+@media (hover: hover) {
+	.btn-quiet--out:hover {
+		color: var(--ink-link);
+	}
 }
 
 /* ── Quiet link: label underline + arrow ──
