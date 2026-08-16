@@ -136,7 +136,22 @@ const columnClass = columns === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2';
 	{items.map((project, i) => (
 		<ProjectCard project={project} deferred={i >= deferredFrom} />
 	))}
-	{/* ── "Show more" ──
+	{/* ── The toggle: "Show more" / "Show less" ──
+	    ONE BUTTON, NOT TWO. It was a one-shot that removed itself until Hiro
+	    asked for a show-less (2026-08-15); a second control below the expanded
+	    grid would have been a second thing in the same place doing the inverse
+	    job, and the visitor would have watched one swap for the other. A toggle
+	    is what a disclosure is. The label text is the state — "Show less" can
+	    only mean the list is open — which is also why there is no aria-expanded
+	    here: the accessible NAME already carries it, and aria-controls would
+	    have to point at this button's own ancestor, which is not what that
+	    attribute means.
+
+	    Both strings live in data- attributes rather than in the script, so the
+	    words stay in the markup with the rest of the copy and the script only
+	    picks between them. The rendered label is the collapsed one, because
+	    that is the state the page opens in.
+
 	    A GRID ITEM, spanning every column, and that is the load-bearing part:
 	    the home page's .reveal sits on #project-list, so a button placed
 	    outside it would be the one thing on the page already at rest while the
@@ -162,15 +177,24 @@ const columnClass = columns === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2';
 	    `[hidden] { display: none }`) sits in @layer base, so ANY unlayered class
 	    rule here beats it and the attribute would simply not hide the button.
 	    The visibility runs through .projects-more instead, which is display:none
-	    until .is-collapsed says otherwise — the same switch, in the one place
+	    until .is-enhanced says otherwise — the same switch, in the one place
 	    that can actually hold it. */}
 	{hasDeferred && (
-		<button type="button" class="btn-quiet btn-quiet--down projects-more col-span-full justify-self-center">
+		<button
+			type="button"
+			class="btn-quiet btn-quiet--down projects-more col-span-full justify-self-center"
+			data-label-more="Show more"
+			data-label-less="Show less"
+		>
 			<span class="btn-quiet__label">Show more</span>
 			{/* The hero's arrow turned a quarter: same 24-unit box, same line +
 			    polyline, pointing at what it will reveal instead of where it
 			    will take you. Sized to .contact-caret's 0.85rem, the bar's
-			    figure for a glyph beside 0.875rem text. */}
+			    figure for a glyph beside 0.875rem text.
+			    It is drawn pointing DOWN in both states and turned over by CSS
+			    when the grid is open — see the rotate rule in global.css for why
+			    a rotation rather than a second set of points, and for the way
+			    that turn takes the hover nudge with it. */}
 			<svg
 				class="btn-quiet__arrow"
 				viewBox="0 0 24 24"
@@ -190,29 +214,37 @@ const columnClass = columns === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2';
 	)}
 </div>
 
-{/* ── The collapse, run PRE-PAINT ──
+{/* ── The opening state, set PRE-PAINT ──
     is:inline and placed immediately after the grid, so it executes while the
     parser is still on this page and before the first frame is painted. A
     module <script> (what Astro compiles a bare <script> to) is deferred until
     after the document parses, which is one or more painted frames later — the
     visitor would see all five cards, then watch one vanish.
 
-    It is also why the collapse is a CLASS added by script rather than the
-    default state in the CSS: the markup's resting state is the full list, so
-    anything that fails to run — JS off, a blocked bundle, a syntax error in a
-    browser this doesn't parse — leaves every project on the page. The button
-    is hidden until this same class appears, so the two can't disagree.
+    It is also why both states are CLASSES added by script rather than the
+    default in the CSS: the markup's resting state is the full list, so anything
+    that fails to run — JS off, a blocked bundle, a syntax error in a browser
+    this doesn't parse — leaves every project on the page and draws no button.
+    .is-enhanced is the flag for "a script is driving this"; .is-collapsed is
+    the state it happens to be in. The button hangs off the first, the cards off
+    the second, which is what lets the toggle stand in both (global.css has the
+    full note).
 
     The hash guard: a link to a card that happens to sit past the initial run
     (#project-shipyard) would otherwise land on a display:none element and
     scroll nowhere. Nothing on the site writes such a link today — the nav's
     per-card landing has been dormant since 2026-08-10, see Nav.astro — but a
     visitor's bookmark or a shared URL is outside our control, and the whole
-    feature is one line cheaper to make correct than to explain. */}
+    feature is one line cheaper to make correct than to explain. When it fires,
+    the page opens EXPANDED, so the label has to open as "Show less" — and it
+    has to be written here rather than in the module script below, or the
+    button paints with the wrong word on it for a frame or two. */}
 <script is:inline>
 	(function () {
 		var list = document.getElementById('project-list');
-		if (!list || !list.querySelector('.projects-more')) return;
+		var btn = list && list.querySelector('.projects-more');
+		if (!btn) return;
+		list.classList.add('is-enhanced');
 		// try/catch, not a regex on the hash: '#' alone and any hash a visitor
 		// can type are legal in a URL and illegal in a selector, and a throw
 		// here would abort the collapse and leave the button drawn over an
@@ -223,7 +255,11 @@ const columnClass = columns === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2';
 				target = list.querySelector(location.hash + '.project-card--deferred');
 			}
 		} catch (e) {}
-		if (!target) list.classList.add('is-collapsed');
+		if (target) {
+			btn.querySelector('.btn-quiet__label').textContent = btn.dataset.labelLess;
+		} else {
+			list.classList.add('is-collapsed');
+		}
 	})();
 </script>
 
@@ -467,45 +503,79 @@ const columnClass = columns === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2';
 	}
 </script>
 
-{/* ── "Show more": the expand ──
-    One class off the list and the whole thing is done — the deferred cards
-    stop being display:none and the button, which is only drawn while that same
-    class is present, goes with them. There is no second state to hold and
-    nothing to put back: the control is single-use by construction, so it does
-    not need disabling, relabelling, or removing from the DOM.
+{/* ── The toggle ──
+    One class on or off the list is the whole state change; the label and the
+    arrow follow from it (the arrow entirely in CSS — see the rotate rule in
+    global.css).
 
-    THE CARDS DO NOT ANIMATE IN, deliberately. The site's entrance rule is one
-    cascade on arrival and static thereafter (see the reveal block in
-    global.css and the carve-out it records); a card fading up in the middle of
-    a settled page would be the only element on the site that enters twice.
+    THE CARDS DO NOT ANIMATE, in either direction, deliberately. The site's
+    entrance rule is one cascade on arrival and static thereafter (see the
+    reveal block in global.css and the carve-out it records); a card fading up
+    in the middle of a settled page would be the only element on the site that
+    enters twice.
 
     A separate script from the panel's above because it is a separate concern
     and must run whether or not the panel bound — the panel's whole block sits
     behind `if (list && panel)`, and a grid that somehow lost its panel should
-    still expand rather than strand the visitor with four projects. */}
+    still open rather than strand the visitor with four projects. */}
 <script>
 	const moreList = document.getElementById('project-list');
 	const moreBtn = moreList?.querySelector<HTMLButtonElement>('.projects-more');
+	const moreLabel = moreBtn?.querySelector<HTMLElement>('.btn-quiet__label');
 
-	if (moreList && moreBtn) {
+	if (moreList && moreBtn && moreLabel) {
 		moreBtn.addEventListener('click', () => {
-			// Read BEFORE the class comes off: removing it hides the button, and a
-			// hidden element does not match :focus-visible.
+			const collapsing = !moreList.classList.contains('is-collapsed');
+			// Read before anything moves — see the focus note below.
 			const byKeyboard = moreBtn.matches(':focus-visible');
-			moreList.classList.remove('is-collapsed');
-			// The button just vanished from under whatever was focusing it, which
-			// for a keyboard visitor means focus falls to <body> and the next Tab
-			// starts from the top of the document — the cards they asked for are
-			// then behind every link on the page. Hand focus to the first of them
-			// instead, which also scrolls it into view (scroll-mt-24 on the card
-			// keeps it clear of the bar) and lights the panel through the focusin
-			// handler above, so the landing is marked.
+			const before = moreBtn.getBoundingClientRect().top;
+
+			moreList.classList.toggle('is-collapsed', collapsing);
+			moreLabel.textContent = collapsing ? moreBtn.dataset.labelMore! : moreBtn.dataset.labelLess!;
+
+			// ── The scroll correction is for COLLAPSE ONLY, and the asymmetry is
+			//    the whole point rather than an omission ──
+			// The cards sit ABOVE the button, so the two directions do opposite
+			// things to it. EXPANDING pushes it down by a card's height and the
+			// new row lands exactly where the button just was — which is the best
+			// possible outcome, because that is where the visitor is looking.
+			// Correcting for it would scroll the page down to chase the button and
+			// drag the new row straight back out of view, so expand is left alone.
+			// COLLAPSING is the mirror: the button jumps UP a card's height, out
+			// from under the cursor that just pressed it, and if the page was near
+			// its end the shortened document clamps the scroll on top of that.
+			// Anchoring turns it into what it should be — the list folds away and
+			// the control stays put.
+			//
+			// getBoundingClientRect, not offsetTop, precisely because the viewport
+			// is the frame of reference here rather than the document; reading it
+			// after the class change also means any clamping is already in the
+			// number. The two-argument scrollBy is always instant — this is a
+			// correction, not a journey, and a smooth one would read as the page
+			// sliding on its own. Native scroll anchoring is deliberately not
+			// relied on: it chooses its own anchor and engines disagree about
+			// changes above the viewport.
+			if (collapsing) {
+				const delta = moreBtn.getBoundingClientRect().top - before;
+				if (delta) window.scrollBy(0, delta);
+			}
+
+			// On EXPAND, hand focus to the first card that just appeared. The
+			// revealed cards sit BEFORE the button in the DOM, so a keyboard
+			// visitor who kept focus on the toggle would have to walk backwards to
+			// reach what they asked for, and a screen reader would be told nothing
+			// arrived at all. Landing on the card puts the next Tab back on the
+			// toggle — now reading "Show less" — which is the order you want.
 			//
 			// Guarded on :focus-visible so a POINTER click doesn't do the same: a
 			// mouse visitor is already looking at the row that appeared, and
-			// focusing a card there would light a panel under a card their cursor
-			// is nowhere near, plus scroll a page they did not ask to move.
-			if (byKeyboard) {
+			// focusing a card there would light the hover panel under a card their
+			// cursor is nowhere near.
+			//
+			// Nothing to do on COLLAPSE: the button is still here and still has
+			// focus, and it is the right place to be — the thing that changed is
+			// that the list it controls got shorter.
+			if (!collapsing && byKeyboard) {
 				moreList.querySelector<HTMLElement>('.project-card--deferred')?.focus();
 			}
 		});
