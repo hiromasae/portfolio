@@ -41,35 +41,58 @@ const figures = project.images.map((entry) =>
    of its own — keep the ratio if the outer gap ever moves. */
 const captionClass = 'mb-2.5 text-sm leading-relaxed';
 
-/* Everything except the one you're reading, in projects.ts order — the same
-   order the home grid uses, so the strip reads as that grid with one card
-   pulled out rather than as a second, differently-sorted list. NOT sorted by
-   year or "relatedness": the tags field hasn't been rendered anywhere since
-   07-29, and any similarity metric over a handful of items is theatre.
+/* ── THREE CARDS, THE THREE THAT FOLLOW THIS ONE (2026-08-16, Hiro: the strip
+   should only show three projects) ──
+   Not the first three of the list with the current one removed, and that
+   distinction is the entire reason this is six lines instead of a .slice(0, 3)
+   on the filter. Taking the top of a fixed list means the projects at the
+   BOTTOM of projects.ts are never in it: at five projects, plain
+   filter().slice(0, 3) shows migaki/ejs/stacksmith almost everywhere and
+   renders Shipyard on exactly zero pages — the last entry can only be reached
+   from the home grid, and the strip is the page's only way onward. A rule that
+   makes one project unreachable is not a shortening of the list, it is a
+   quiet unpublishing of the work at the end of it.
 
-   The strip asks ProjectGrid for three columns (2026-08-11, Hiro), and that
+   Wrapping fixes that arithmetically rather than by taste: every project is
+   the successor of exactly three others, so every project appears in exactly
+   three strips, and clicking the FIRST card each time walks you through all
+   five in projects.ts order and returns you to where you started. That is a
+   real reading path, which is more than a "related work" list of any three.
+
+   THE ORDER IS STILL projects.ts, ROTATED — never re-sorted. Same order the
+   home grid uses, so the strip reads as that grid resumed from where you are
+   rather than as a second, differently-sorted list. NOT sorted by year or
+   "relatedness": the tags field hasn't been rendered anywhere since 07-29, and
+   any similarity metric over a handful of items is theatre. The one visible
+   cost is the wrap point — on the last project the strip runs migaki, ejs,
+   stacksmith, so the row reads out of list order once per cycle. That is the
+   price of every project being reachable and it is worth it.
+
+   ⚠ NOT RANDOM, and don't make it so to "keep it fresh": this is a static
+   build, so a random pick is frozen at build time anyway — it would just be an
+   arbitrary fixed answer with no reason attached, and it would silently
+   reintroduce the unreachable-project bug on some builds and not others.
+
+   The strip asks ProjectGrid for three columns (2026-08-11, Hiro). That
    coupling is HAND-MAINTAINED, not derived: `columns` is a literal 3 down in
    the strip, not others.length. Deriving it was the obvious move and is the
    wrong one — the grid stops at three columns because a fourth shrinks the
-   cards past their titles (ProjectGrid.astro has the measurements), so more
-   projects want a different answer here, not a bigger number.
+   cards past their titles (ProjectGrid.astro has the measurements). The two
+   threes now agree by construction, which is new: from 08-11 to today they did
+   not, and four cards rendered three across with ONE ALONE ON ROW TWO. That
+   ragged second row is what this change removes, and the note it replaces had
+   chosen it deliberately over exactly this fix, on the grounds that capping
+   the strip trades a ragged row for hiding work. The wrap is what settles that
+   argument — nothing is hidden if everything is three clicks from everything.
 
-   ── AND THAT CASE HAS NOW ARRIVED (2026-08-15, with the EJS project) ──
-   Five projects means `others` is four, so the strip renders three across and
-   ONE ALONE ON ROW TWO. That is the outcome the previous note chose in advance
-   and it stands: it is what the grid did before 08-11 and still does on the
-   home page, and the alternative — capping the strip at three cards — trades a
-   ragged row for hiding work, on a strip that is the page's only way onward.
-
-   ⚠ The lone card is FULL WIDTH OF ITS TRACK, i.e. a third of the row, not
-   stretched. So row two reads as an unfinished row, which is the honest shape
-   and is the thing most likely to be "fixed" by someone who finds it without
-   this note. The number to change if it ever stops being acceptable is the
-   project count, not the column count.
-
-   At ONE project it would render a single third-width card under a "More
-   projects" heading, which reads oddly — see the strip below for the guard. */
-const others = projects.filter((other) => other.slug !== project.slug);
+   BELOW FIVE PROJECTS this simply yields fewer than three: the slice takes
+   what there is, and at four projects it is still a full row. At two the
+   strip disappears entirely — see the guard on the section below. */
+const current = projects.findIndex((other) => other.slug === project.slug);
+const others = [
+	...projects.slice(current + 1),
+	...projects.slice(0, current),
+].slice(0, 3);
 ---
 
 <Layout title={`${project.title} — Hiro Eernisse`} description={project.blurb}>
@@ -386,8 +409,9 @@ const others = projects.filter((other) => other.slug !== project.slug);
 		    rendering a heading over nothing. It reads `> 1` rather than `> 0`
 		    deliberately — one lone card sitting at a third of the grid's width
 		    under a plural heading is worse than no strip at all. Five projects
-		    today, so this renders four: three across, one on a second row (see
-		    the `others` note for why that is the chosen shape and not a bug).
+		    today and `others` is capped at three, so this is always one full
+		    row of three — see the `others` note for WHICH three, and for why
+		    that cap is a rotation rather than a truncation.
 
 		    ── columns={3} (2026-08-11, Hiro: make these smaller so they all fit
 		    in one row and fit the width of the page) ── The default is 2, which
