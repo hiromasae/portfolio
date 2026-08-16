@@ -1,4 +1,6 @@
 ---
+import { Font } from 'astro:assets';
+
 import '../styles/global.css';
 
 interface Props {
@@ -18,6 +20,17 @@ const {
 <html lang="en" data-theme="dark">
 	<head>
 		<meta charset="utf-8" />
+		{/* Type, FIRST in the head and ahead of even the favicon — this emits
+		    the @font-face (pointing at our own origin) and a
+		    <link rel="preload"> for the woff2, and a preload is only worth
+		    having if the parser reaches it early. Everything below it is
+		    inline and parses in the same breath, so the fetch is effectively
+		    kicked off with the HTML itself rather than after a stylesheet
+		    round-trip — which is the whole point of the move off the Google
+		    Fonts CDN. The face, its axis pinning, and why it is self-hosted
+		    are documented at the `fonts` block in astro.config.mjs; the CSS
+		    variable it defines is consumed by --font-sans in global.css. */}
+		<Font cssVariable="--font-recursive" preload />
 		{/* Two marks, one per mode — the dark one (pale green on near-black) is
 		    the default, matching data-theme above, so the tab is already right
 		    with JS off. The pair CANNOT be hung off `media="(prefers-color-
@@ -86,42 +99,6 @@ const {
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="generator" content={Astro.generator} />
 		<meta name="description" content={description} />
-		<!-- Recursive from Google Fonts — the site's only face, replacing Archivo
-		     (2026-08-03). A variable face, so the whole 300–700 range comes from
-		     one file, as a RANGE rather than four pinned stops: Recursive's wght
-		     runs 300–1000 continuously and there is no reason to quantise it.
-
-		     The floor is 300, Recursive's lightest, because the site's weight
-		     scale was moved DOWN a step on 2026-08-04 (Hiro: "much lighter") and
-		     body text now sits at 300 — see the scale in global.css's body rule.
-		     The ceiling stays 700 even though nothing currently asks above 500:
-		     on a variable face a wider range costs essentially nothing, and it
-		     means every weight the CSS can name is one the file really has. That
-		     is the lesson the .btn comment in global.css was written to record —
-		     a declared weight the font lacks gets synthesised or snapped, and
-		     under a webfont swap the two sides disagree visibly.
-
-		     The four other axes are PINNED IN THE URL, which is what makes this
-		     "Recursive Sans" and not the whole superfamily — Google instances the
-		     file at those values and ships one static-on-those-axes, variable-on-
-		     wght woff2, so the pinning costs nothing and can't drift:
-		       MONO 0  proportional sans, not the monospace end (this is the axis
-		               that makes it "Sans"; MONO 1 is Recursive Mono)
-		       CASL 0  Linear, the neutral drawing, not the Casual/handwritten one
-		       slnt 0  upright; nothing on the site sets italic
-		       CRSV 0  roman letterforms. The face's own default is 0.5 ("auto",
-		               cursive only when slanted) — harmless here since slnt is
-		               pinned upright, but 0 states it rather than relying on how
-		               auto resolves.
-		     Axis order in the URL is not free: the css2 API wants registered
-		     (lowercase) axes alphabetically, then custom (uppercase) ones, and
-		     rejects any other order. -->
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link
-			rel="stylesheet"
-			href="https://fonts.googleapis.com/css2?family=Recursive:slnt,wght,CASL,CRSV,MONO@0,300..700,0,0,0&display=swap"
-		/>
 		<title>{title}</title>
 	</head>
 	<body>
