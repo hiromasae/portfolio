@@ -60,12 +60,45 @@ export interface Project {
 	    from a project the moment it has real images — a placeholder that
 	    outlives its shoot is worse than no frame at all. */
 	placeholders?: number;
-	/** `tags`, `company`, `link` and now `role` are no longer rendered anywhere
-	    (tags/company/link dropped from the detail page 2026-07-29, role from the
-	    cards 2026-08-02; the cards now use only year, title and cover). Kept
-	    because they're real facts that are a nuisance to re-gather — delete them
-	    if they're still unused later. */
+	/** `tags`, `company` and `role` are not rendered anywhere (tags/company
+	    dropped from the detail page 2026-07-29, role from the cards 2026-08-02;
+	    the cards now use only year, title and cover). Kept because they're real
+	    facts that are a nuisance to re-gather — delete them if they're still
+	    unused later.
+
+	    `link` was in that list until 2026-08-16 and no longer is — see below. */
 	link?: string;
+	/** The link's VISIBLE TEXT, and also the switch that renders it at all: the
+	    detail page draws the link only where this is set, so a project can hold
+	    a `link` without publishing one. That is why this exists instead of the
+	    page deriving a label from the URL — deriving one would have put a link
+	    on all five pages at once, and the ask (2026-08-16, Hiro) was migaki and
+	    ejs.co specifically. The other three keep their URLs unrendered, exactly
+	    as they were; giving one a label is all it takes to publish it.
+
+	    ⚠ THIS REVERSES PART OF 2026-07-29, which took the "Visit" button off the
+	    detail page along with the tags. What went then was a BOXED .btn — the
+	    only piece of enclosed chrome on a borderless page (see .btn-quiet's note
+	    in global.css, which records that as the reason). What is back is the
+	    borderless text link that note reserves for "the next borderless text
+	    link on the site". So this is not the Visit button returning; don't
+	    re-litigate it as one.
+
+	    Write the DESTINATION, not an instruction — "ejs.co", not "Visit the
+	    site". The ↗ already says a link leaves the site, so the words are free
+	    to say where it goes, and a reader deciding whether to click wants the
+	    host more than the verb.
+
+	    ⚠ IT CANNOT WRAP, so length has a ceiling. .btn-quiet is an inline-flex
+	    row, which means a long label runs past the page's right edge instead of
+	    breaking — there is no second line for it to take. MEASURED at the
+	    narrowest width worth supporting: "github.com/hiromasae/migaki", the
+	    longest one here, renders 271px, and a 320px viewport leaves 272.5px
+	    inside main's px-5. That is ~1.5px of headroom, so this label is
+	    effectively AT the limit and a longer one would overflow. Anything past
+	    ~27 characters wants a shorter form (drop the owner, or name the host)
+	    rather than a fix in the CSS. */
+	linkLabel?: string;
 }
 
 export const projects: Project[] = [
@@ -144,6 +177,13 @@ export const projects: Project[] = [
 			{ src: '/images/migaki3.webp', caption: 'The skill running' },
 			{ src: '/images/migaki4.webp', caption: 'What it proposed for the first page' },
 		],
+		/* The repo, which for this project is the product: migaki ships as three
+		   markdown files and a plugin manifest, so there is no site to send
+		   anyone to and the source is the whole of it. Labelled with the full
+		   owner/name path rather than "GitHub" — the page has already said it is
+		   open source, so the useful thing left to say is WHICH repo. */
+		link: 'https://github.com/hiromasae/migaki',
+		linkLabel: 'github.com/hiromasae/migaki',
 	},
 	{
 		slug: 'ejs',
@@ -189,7 +229,16 @@ export const projects: Project[] = [
 			'/images/ejs2.webp',
 			'/images/ejs3.webp',
 		],
+		/* ⚠ THIS GOES TO THE SITE AS IT IS TODAY — the OLD page, the one the
+		   first screenshot is of, not the redesign. The redesign is not deployed
+		   anywhere, so ejs.co is the before half of this page's before/after and
+		   the link lands a visitor on it. That is honest and worth keeping (the
+		   prose is an argument about a real page, and the reader can check it),
+		   but it does mean the label must stay the bare host: anything warmer —
+		   "See it live" — would promise the work above and deliver its opposite.
+		   If the redesign ever ships, this URL is the first thing to revisit. */
 		link: 'https://ejs.co/',
+		linkLabel: 'ejs.co',
 	},
 	{
 		slug: 'stacksmith',

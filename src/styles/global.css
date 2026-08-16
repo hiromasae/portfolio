@@ -2761,7 +2761,22 @@ body {
    standing on the same terms as --ink-num above: the argument is intact and
    the next borderless text link on the site wants exactly this, but nothing is
    wearing it today. The [slug].astro footer note records what else went dead
-   with that button — it is more than the CSS. */
+   with that button — it is more than the CSS.
+
+   ── 2026-08-16: NOT ORPHANED. Two consumers, and neither is a back link ──
+   The paragraph above is kept because it is the derivation, but its last claim
+   is now false. What wears this:
+     · the projects grid's Show more / Show less toggle (.btn-quiet--down),
+       which took the family on 08-11 and is a BUTTON, not a link — it is why
+       the @media (hover: hover) guards and the __arrow rotation exist;
+     · the project pages' link out to the real thing (ejs.co, migaki's repo),
+       added today, which is the borderless text link this note was held open
+       for. See [slug].astro's own note for why it is this and not a .btn.
+   So the family is load-bearing twice over — but note that BOTH arrived after
+   the direction came out of the gesture (the wipe went 08-15, the arrow's nudge
+   this morning), and neither wants it back. The link out points AWAY with a ↗
+   and the toggle points DOWN at what it opens; a directional underline would be
+   a second, quieter answer to a question the glyph has already settled. */
 .btn-quiet {
 	display: inline-flex;
 	align-items: center;

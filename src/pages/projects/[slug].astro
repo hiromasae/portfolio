@@ -232,6 +232,93 @@ const others = [
 			    pass already used to retire the lead's shortfall. */}
 			<p class="text-sm leading-relaxed">{project.problem}</p>
 			<p class="mt-6 text-sm leading-relaxed">{project.work}</p>
+
+			{/* ── The link out (2026-08-16, Hiro: add links to migaki and ejs.co on
+			    the respective project pages) ──
+			    ⚠ It renders off `linkLabel`, NOT off `link`. Four of the five
+			    projects carry a URL and only two carry a label, so a `project.link
+			    && …` guard here would publish links on three pages nobody asked
+			    about — see the field's note in projects.ts for the whole argument.
+			    The `link &&` half of the condition below is a type guard, not a
+			    second switch; a label without a URL is a data error, and this
+			    renders nothing rather than an <a> with no href.
+
+			    ── WHY .btn-quiet, and why this is not the Visit button returning ──
+			    That style has been ORPHANED since 08-10, when the back-to-projects
+			    link (its only consumer) came off this page, and its note in
+			    global.css left it standing on the explicit grounds that "the next
+			    borderless text link on the site wants exactly this". This is that
+			    link. It arrives with the whole family already decided — 0.875rem,
+			    --weight-ui, --ink-soft to --ink on hover, the site's one underline
+			    (instant in, --dur-pop-out out), a focus ring — so there is no new
+			    treatment on the page and nothing here to tune.
+
+			    The 07-29 removal that took the tags also took a "Visit" button,
+			    and the thing that made it worth removing was that it was a BOXED
+			    .btn: the only piece of enclosed chrome on an otherwise borderless
+			    layout. That is the reason .btn-quiet exists at all. Borderless is
+			    the fix, so this is not a reversal of that call.
+
+			    THE ARROW IS THE ↗, and the family's note names this exact glyph as
+			    the one meaning it carries: this leaves the site. It is also the
+			    site's existing signal for target="_blank" (Nav.astro says so at the
+			    contact slider), so the mark and the behaviour agree. No tilt on it
+			    — a rotation would encode a second meaning and there isn't one; the
+			    only arrow on the site that turns is the projects toggle, where the
+			    turn IS open-vs-shut. And no hover nudge: nothing on this control
+			    moves for a cursor (2026-08-16, and the family lost its nudge the
+			    same day).
+
+			    Drawn in the family's idiom — 24 box, line + polyline, stroke 2,
+			    round caps — spanning 5→19 rather than a stock icon's 7→17. That is
+			    optical, not cosmetic: at width 14 the shaft has to cover roughly
+			    the same fraction of its box as the toggle's ↓ (which runs 4→19) or
+			    a diagonal reads a size smaller sitting next to it. The head's legs
+			    are 10 units, which is the right arrow's 9.9 to the pixel.
+
+			    ── PLACEMENT: end of the prose, not the header and not the foot ──
+			    Inside this section, so it rides the prose's own --i: 1 beat and
+			    enters as part of the block it belongs to rather than as a fifth
+			    thing. It is also inside --measure, so it starts on the same left
+			    edge as every line above it.
+			    NOT in the header: that is a settled two-line composition (year,
+			    title) and a link is a third register in it.
+			    NOT below the screenshots: the only gap down there is the 114px
+			    before "More projects", which was measured as an empty span and
+			    reads as one — a control parked in it would both break that and
+			    compete with the strip for the same click.
+
+			    mt-8 (38px) is chosen against its neighbours, which is the only way
+			    this page sets a gap: 28.5px between the two paragraphs, 47.5px from
+			    here to the screenshots. Sitting between the two makes the link
+			    further from the prose than the prose is from itself, and closer to
+			    it than the images are — so it reads as the end of the reading, not
+			    as a section of its own. The wrapper is a block <div> because
+			    .btn-quiet is inline-flex; margin on an atomic inline works but
+			    lands in a line box, and the div keeps the gap the plain 38px this
+			    note claims. */}
+			{project.linkLabel && project.link && (
+				<div class="mt-8">
+					<a href={project.link} target="_blank" rel="noopener" class="btn-quiet">
+						<span class="btn-quiet__label">{project.linkLabel}</span>
+						<svg
+							class="btn-quiet__arrow"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							aria-hidden="true"
+							width="14"
+							height="14"
+						>
+							<line x1="5" y1="19" x2="19" y2="5"></line>
+							<polyline points="9 5 19 5 19 15"></polyline>
+						</svg>
+					</a>
+				</div>
+			)}
 		</section>
 
 		<section class="reveal mt-10 space-y-5" style="--i: 2">
