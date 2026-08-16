@@ -140,8 +140,29 @@ import { projects } from '../data/projects';
 			    section's rule (#projects::before) stays OUTSIDE it — page-level
 			    structure enters in the hairline finale, not with the content. See
 			    the finale block in global.css, and the Props note in the component
-			    for why the caller owns this rather than the grid. */}
-			<ProjectGrid projects={projects} class="reveal" style="--i: 1" />
+			    for why the caller owns this rather than the grid.
+
+			    initial={4} (2026-08-15, Hiro: only show four project cards
+			    initially with a load more button). FOUR IS THE GRID, not a
+			    round number: the home page runs two columns from sm up, so four
+			    is exactly two full rows and the collapsed state has no short
+			    row in it — the list reads as complete until you notice the
+			    control under it, which is the difference between a page that
+			    holds something back and one that looks like it ran out. Below
+			    sm every card is its own row and the figure is just a count.
+
+			    Keep it a MULTIPLE OF THE COLUMN COUNT if either ever changes;
+			    the project page's strip runs three columns and would want 3 or
+			    6, though it passes no `initial` at all today. The remainder is
+			    the part that is allowed to be short: there is one project past
+			    the four right now, and a lone card in the revealed row is fine
+			    — by then the visitor has asked to see the rest.
+
+			    Everything else about the feature lives in ProjectGrid.astro
+			    and global.css. What stays a decision of THIS page is only the
+			    number, and that the home page is the page that defers at all —
+			    /projects/[slug]'s strip shows its whole (already short) set. */}
+			<ProjectGrid projects={projects} initial={4} class="reveal" style="--i: 1" />
 		</section>
 	</main>
 

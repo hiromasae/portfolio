@@ -42,9 +42,34 @@ interface Props {
 	   row (2026-08-11, Hiro); see the note over the class list for what a wider
 	   grid costs and where it stops paying. */
 	columns?: 2 | 3;
+	/* How many cards show before "Show more" is pressed. Omitted means the
+	   whole list at once, which is what the project page's strip wants and what
+	   this grid did everywhere until 2026-08-15 (Hiro: only show four project
+	   cards initially on the home page with a load more button).
+
+	   PROGRESSIVE, NOT CONDITIONAL RENDERING: every card is in the HTML either
+	   way, and the ones past this count are hidden by a CSS rule that only
+	   applies while the list carries .is-collapsed — a class the inline script
+	   below adds. So the no-JS reading is the FULL list with no button, rather
+	   than a truncated list behind a control that can't work, and a crawler
+	   sees every project. It also means the panel script needs no rebinding
+	   when cards appear: they were always in the DOM and always bound.
+
+	   The count is a request, not a promise. Passing a number at or above the
+	   list length collapses nothing and draws no button (see `deferredFrom`) —
+	   worth knowing before adding the fifth project makes this grid's own
+	   button appear or disappear. */
+	initial?: number;
 }
 
-const { projects: items, class: className, style, columns = 2 } = Astro.props;
+const { projects: items, class: className, style, columns = 2, initial } = Astro.props;
+
+/* The index the deferred run starts at, or items.length for "none deferred".
+   Both guards matter: no `initial` is the project page's strip, and an
+   `initial` that doesn't actually hide anything must not leave a button
+   standing that reveals nothing. */
+const deferredFrom = initial != null && initial < items.length ? initial : items.length;
+const hasDeferred = deferredFrom < items.length;
 
 /* Written out rather than interpolated — `sm:grid-cols-${columns}` is invisible
    to Tailwind's scanner, which reads source text and never runs this file, so
@@ -108,10 +133,99 @@ const columnClass = columns === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2';
 	    order as well as z-index (see .card-panel in global.css). Absolutely
 	    positioned, so it claims no grid track. */}
 	<div class="card-panel" aria-hidden="true"></div>
-	{items.map((project) => (
-		<ProjectCard project={project} />
+	{items.map((project, i) => (
+		<ProjectCard project={project} deferred={i >= deferredFrom} />
 	))}
+	{/* ── "Show more" ──
+	    A GRID ITEM, spanning every column, and that is the load-bearing part:
+	    the home page's .reveal sits on #project-list, so a button placed
+	    outside it would be the one thing on the page already at rest while the
+	    cards are still at opacity 0 — visible for the whole 0.8s cascade,
+	    announcing a list that hasn't arrived. Inside, it enters with the block
+	    it belongs to and the caller keeps owning the reveal (see Props).
+
+	    It also means the row gap positions it: gap-y-10 against a card whose
+	    -m-3 pulls its painted edge 0.75rem down, so the button sits 1.75rem
+	    under the last panel edge and 2.5rem under the last image. Nothing else
+	    is needed, and adding a margin here would put the control at a distance
+	    the grid's own rhythm didn't choose.
+
+	    CENTRED, not on the column's left edge. The page has a strong left edge
+	    — the wordmark, the leftmost year, the rule, the copyright all land on
+	    it — and this deliberately doesn't join it: the control belongs to the
+	    whole grid rather than to its first column, the way the hero's button
+	    belongs to the hero. justify-self is a one-word change if that reads
+	    wrong once there are more than five projects.
+
+	    NO `hidden` ATTRIBUTE, and this is not a style preference: global.css is
+	    unlayered while Tailwind's preflight (which is what defines
+	    `[hidden] { display: none }`) sits in @layer base, so ANY unlayered class
+	    rule here beats it and the attribute would simply not hide the button.
+	    The visibility runs through .projects-more instead, which is display:none
+	    until .is-collapsed says otherwise — the same switch, in the one place
+	    that can actually hold it. */}
+	{hasDeferred && (
+		<button type="button" class="btn-quiet btn-quiet--down projects-more col-span-full justify-self-center">
+			<span class="btn-quiet__label">Show more</span>
+			{/* The hero's arrow turned a quarter: same 24-unit box, same line +
+			    polyline, pointing at what it will reveal instead of where it
+			    will take you. Sized to .contact-caret's 0.85rem, the bar's
+			    figure for a glyph beside 0.875rem text. */}
+			<svg
+				class="btn-quiet__arrow"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				aria-hidden="true"
+				width="14"
+				height="14"
+			>
+				<line x1="12" y1="4" x2="12" y2="19"></line>
+				<polyline points="5 12 12 19 19 12"></polyline>
+			</svg>
+		</button>
+	)}
 </div>
+
+{/* ── The collapse, run PRE-PAINT ──
+    is:inline and placed immediately after the grid, so it executes while the
+    parser is still on this page and before the first frame is painted. A
+    module <script> (what Astro compiles a bare <script> to) is deferred until
+    after the document parses, which is one or more painted frames later — the
+    visitor would see all five cards, then watch one vanish.
+
+    It is also why the collapse is a CLASS added by script rather than the
+    default state in the CSS: the markup's resting state is the full list, so
+    anything that fails to run — JS off, a blocked bundle, a syntax error in a
+    browser this doesn't parse — leaves every project on the page. The button
+    is hidden until this same class appears, so the two can't disagree.
+
+    The hash guard: a link to a card that happens to sit past the initial run
+    (#project-shipyard) would otherwise land on a display:none element and
+    scroll nowhere. Nothing on the site writes such a link today — the nav's
+    per-card landing has been dormant since 2026-08-10, see Nav.astro — but a
+    visitor's bookmark or a shared URL is outside our control, and the whole
+    feature is one line cheaper to make correct than to explain. */}
+<script is:inline>
+	(function () {
+		var list = document.getElementById('project-list');
+		if (!list || !list.querySelector('.projects-more')) return;
+		// try/catch, not a regex on the hash: '#' alone and any hash a visitor
+		// can type are legal in a URL and illegal in a selector, and a throw
+		// here would abort the collapse and leave the button drawn over an
+		// already-full list. A bad hash simply isn't one of our cards.
+		var target = null;
+		try {
+			if (location.hash.length > 1) {
+				target = list.querySelector(location.hash + '.project-card--deferred');
+			}
+		} catch (e) {}
+		if (!target) list.classList.add('is-collapsed');
+	})();
+</script>
 
 {/* ── The travelling hover panel ──
     Drives .card-panel to whichever card is hovered or focused. Built on the
@@ -320,9 +434,16 @@ const columnClass = columns === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2';
 
 		// Keyboard: the panel follows focus too, so tabbing through the grid marks
 		// the same card the underline and the lift do.
+		//
+		// The `else` is for "Show more", which is the first thing inside this list
+		// that can take focus without being a card. Without it, tabbing off the
+		// last card onto the button leaves the panel lit under a card nothing is
+		// pointing at any more — focusout won't fire the hide either, since focus
+		// never left the list. It was a no-op before that button existed.
 		list.addEventListener('focusin', (e) => {
 			const card = (e.target as HTMLElement).closest<HTMLElement>('.project-card');
 			if (card) show(card);
+			else hide();
 		});
 		list.addEventListener('focusout', (e) => {
 			if (!list.contains(e.relatedTarget as Node)) hide();
@@ -342,6 +463,51 @@ const columnClass = columns === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2';
 			placed = place(current);
 			void panel.offsetWidth;
 			panel.style.transition = '';
+		});
+	}
+</script>
+
+{/* ── "Show more": the expand ──
+    One class off the list and the whole thing is done — the deferred cards
+    stop being display:none and the button, which is only drawn while that same
+    class is present, goes with them. There is no second state to hold and
+    nothing to put back: the control is single-use by construction, so it does
+    not need disabling, relabelling, or removing from the DOM.
+
+    THE CARDS DO NOT ANIMATE IN, deliberately. The site's entrance rule is one
+    cascade on arrival and static thereafter (see the reveal block in
+    global.css and the carve-out it records); a card fading up in the middle of
+    a settled page would be the only element on the site that enters twice.
+
+    A separate script from the panel's above because it is a separate concern
+    and must run whether or not the panel bound — the panel's whole block sits
+    behind `if (list && panel)`, and a grid that somehow lost its panel should
+    still expand rather than strand the visitor with four projects. */}
+<script>
+	const moreList = document.getElementById('project-list');
+	const moreBtn = moreList?.querySelector<HTMLButtonElement>('.projects-more');
+
+	if (moreList && moreBtn) {
+		moreBtn.addEventListener('click', () => {
+			// Read BEFORE the class comes off: removing it hides the button, and a
+			// hidden element does not match :focus-visible.
+			const byKeyboard = moreBtn.matches(':focus-visible');
+			moreList.classList.remove('is-collapsed');
+			// The button just vanished from under whatever was focusing it, which
+			// for a keyboard visitor means focus falls to <body> and the next Tab
+			// starts from the top of the document — the cards they asked for are
+			// then behind every link on the page. Hand focus to the first of them
+			// instead, which also scrolls it into view (scroll-mt-24 on the card
+			// keeps it clear of the bar) and lights the panel through the focusin
+			// handler above, so the landing is marked.
+			//
+			// Guarded on :focus-visible so a POINTER click doesn't do the same: a
+			// mouse visitor is already looking at the row that appeared, and
+			// focusing a card there would light a panel under a card their cursor
+			// is nowhere near, plus scroll a page they did not ask to move.
+			if (byKeyboard) {
+				moreList.querySelector<HTMLElement>('.project-card--deferred')?.focus();
+			}
 		});
 	}
 </script>

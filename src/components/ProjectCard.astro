@@ -2,8 +2,15 @@
 import type { Project } from '../data/projects';
 interface Props {
 	project: Project;
+	/* Past the grid's initial run, and so hidden until "Show more" is pressed
+	   (2026-08-15, Hiro). The card renders IN FULL either way — this only adds
+	   a hook the grid's collapsed state can hide against, so a visitor with no
+	   JS gets the whole list and never sees a button that would do nothing.
+	   See the `initial` prop in ProjectGrid.astro for the whole mechanism, and
+	   .project-card--deferred in global.css for the one rule it costs. */
+	deferred?: boolean;
 }
-const { project } = Astro.props;
+const { project, deferred = false } = Astro.props;
 ---
 
 <a
@@ -41,6 +48,7 @@ const { project } = Astro.props;
 		   name. See the .project-card block there, which also records why the
 		   long-running argument about how far to lift is finally over. */
 		'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]',
+		deferred && 'project-card--deferred',
 	]}
 >
 	{/* Metadata sits on the page background — reading as a label above the image,
