@@ -801,14 +801,23 @@ const onHome = path === '/';
 	const themeLabel = () =>
 		document.documentElement.dataset.theme === 'dark' ? 'Light mode' : 'Dark mode';
 	// Everything downstream of data-theme that isn't CSS. The favicon rides
-	// along here rather than in the click handler so it stays correct on a
-	// bfcache restore or any other path that re-runs this script with a theme
-	// already saved — the same reason the aria-label is synced and not set once.
+	// along here rather than in the click handler so it stays correct on any
+	// path that re-runs this script with a theme already saved — the same
+	// reason the aria-label is synced and not set once.
 	const syncThemeState = () => {
 		themeToggle?.setAttribute('aria-label', themeLabel());
 		window.__syncFavicon?.(document.documentElement.dataset.theme);
 	};
 	syncThemeState();
+	// A bfcache restore re-runs nothing, so the button's name would keep
+	// describing the theme this page was left in. Layout's pageshow handler has
+	// already corrected data-theme by the time this one runs — listeners fire in
+	// registration order and the inline script registers first — so this just
+	// reads the corrected value back. Idempotent, hence no persisted-only guard
+	// beyond the one below.
+	window.addEventListener('pageshow', (event) => {
+		if (event.persisted) syncThemeState();
+	});
 	themeToggle?.addEventListener('click', () => {
 		const root = document.documentElement;
 		const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
