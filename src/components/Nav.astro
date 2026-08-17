@@ -247,8 +247,13 @@ const onHome = path === '/';
 		    `ml-auto` moves here from the toggle: this pair is now the bar's
 		    right-hand group, and the wordmark is the only thing left in flow
 		    before it. The wrap is deliberately NOT positioned — the panel
-		    resolves against .nav-inner instead, so its right edge can land on
-		    the page's column edge rather than on this button's. */}
+		    resolves against .nav-inner instead, which is what lets it be
+		    placed by the PAGE rather than by this button. That bought the
+		    panel's right edge landing on the column edge until 2026-08-17;
+		    it now buys the panel being centred on the window (Hiro's call —
+		    see the .contact-menu block in global.css for the argument and
+		    what the centring cost). Positioning this wrap would break either
+		    version equally: the panel would hang off an 88px button. */}
 		<div id="contact-menu-wrap" class="ml-auto flex items-center">
 			{/* .btn-quiet, revived. It has styled nothing since "Back to
 			    projects" came off (2026-08-10) and its note says the next
