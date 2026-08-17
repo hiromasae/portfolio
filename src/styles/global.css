@@ -1732,6 +1732,34 @@ body {
 	   of change that breaks one. Now it is arithmetic. The value's own argument
 	   is at the .nav-pad rule below; this line is only where it lives. */
 	--nav-pad-y: 0.4rem;
+	/* ── What the caret costs the word, halved ──
+	   2026-08-17, Hiro: "make it so that the text is centred". The trigger was
+	   centred on the bar earlier the same day and its BOX landed dead on the
+	   axis — measured 0.00px — but the box is [label][gap][caret] and the
+	   caret hangs off one end only, so the word itself sat 11.87px left of
+	   centre and the bar read as leaning. Centring the box is not centring the
+	   thing anybody looks at.
+
+	   This is the same correction, and the same argument, as the unequal
+	   paddings on .nav-inner: the two sides are not equal and that is what
+	   makes them look equal. There, the toggle's glyph sits inside its box and
+	   the padding subtracts the difference; here the caret sits beside the
+	   word and this adds it back.
+
+	   (0.4rem + 0.85rem) / 2 = 0.625rem = 11.875px, which is half of what
+	   stands to the right of the label — .btn-quiet's `gap` plus
+	   .contact-caret's `width`. Written from both sources rather than as
+	   11.875px so it follows either of them; NEITHER IS A TOKEN, so if this
+	   ever drifts, those two rules are where to look. It is spent twice and in
+	   opposite directions — see #contact-menu-wrap, which moves right by it so
+	   the word lands on the axis, and .contact-menu, which takes it back off so
+	   the PANEL stays on the axis rather than following the button. Both read
+	   this, so they cannot disagree.
+
+	   Scoped by consequence rather than by media query: the only consumer that
+	   renders below 640 is the trigger, and at 640 and up its wrap is
+	   display: none. Nothing here needs to know that. */
+	--nav-trigger-optical: calc((0.4rem + 0.85rem) / 2);
 }
 
 /* ── The phone bar: what the menu settled ──
@@ -4180,6 +4208,25 @@ body {
 	   EVERY width and the base rule already says so. Nothing to override. */
 }
 
+/* ── The optical shift: the WORD on the axis, not the box ──
+   2026-08-17. Nav.astro centres this wrap with left-1/2 + -translate-x-1/2,
+   which lands the button's box dead on the bar's centre. This moves it right
+   by half of what stands to the right of the label, so the LABEL lands there
+   instead — see --nav-trigger-optical for the measurement and the argument.
+
+   A margin rather than a second translate: `transform` on this box is already
+   spent on the -50% that does the centring, and adding to it would mean
+   restating that centring here every time this number changed. Margin composes
+   with `left` before the transform runs, so the two corrections stay in
+   separate channels and either can be read on its own.
+
+   The caret does not move. It is annotation — it says "there is more here" —
+   and it is allowed to sit off-axis for the same reason the word is not: what
+   the eye centres on is the name of the control. */
+#contact-menu-wrap {
+	margin-left: var(--nav-trigger-optical);
+}
+
 /* ── The contact panel ──
    Card material (--surface, --line, bg-clip-padding, --radius) wearing the
    project cards' hover shadow AT REST — a floating layer is the one place
@@ -4245,7 +4292,15 @@ body {
 	position: absolute;
 	top: calc(100% + var(--nav-pad-y) + 0.5rem);
 	left: 50%;
-	translate: -50%;
+	/* The -50% centres this on its wrap. The second term takes back the
+	   optical shift that wrap carries (see #contact-menu-wrap above): the wrap
+	   moved right so the WORD would land on the bar's axis, and without this
+	   the panel would ride along and sit 11.875px right of it — which is the
+	   complaint that started this whole sequence, reintroduced by the fix for
+	   the next one. The word is on the axis and so is the panel; only the
+	   button's box and its caret are off it, and neither is a thing anyone
+	   measures by eye. */
+	translate: calc(-50% - var(--nav-trigger-optical));
 	z-index: 60;
 	min-width: 10.5rem;
 	padding: 0.25rem;
