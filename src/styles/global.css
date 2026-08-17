@@ -2887,9 +2887,45 @@ body {
    be in the cascade at all when that rule is.
 
    The 0s transition-duration the family's hover carries still applies and is
-   harmless — there is no colour change left for it to time. */
+   harmless — there is no colour change left for it to time.
+
+   ── THE PADDING IS A TAP TARGET, and it costs nothing (2026-08-17) ──
+   The <a> was 69.63 × 16.63px — the label's own ink and not one pixel more,
+   because `line-height: 1` on the family means the box IS the text. WCAG 2.2
+   SC 2.5.8 asks for 24 × 24, and the "inline" exception it offers does not
+   cover this: that exception is for a link inside a sentence, and this one is
+   alone in a block wrapper of its own. 4px top and bottom takes it to 24.63.
+   The other half of the case is touch-specific. The family's hover rules sit
+   inside @media (hover: hover) — correctly, see the guard's note — so on a
+   phone the underline NEVER arrives and there is no press feedback at all.
+   Colour and the ↗ are the entire affordance there, on a 16.63px-tall target.
+   That is the state this padding is for; on a pointer device it changes
+   nothing a user can see.
+
+   ⚠ WHY THIS DOES NOT MOVE THE PAGE, and why you do not need to retune the
+   wrapper's mt-8 to compensate. MEASURED, not reasoned: the wrapper <div> is
+   28.5px tall — its own line box, struck at the 19px root's line-height — and
+   the 16.63px anchor sat inside it with ~5.9px of slack above and below. The
+   grown box (24.63) still fits inside that 28.5 line box, so the div's height
+   is unchanged. The TEXT does not move either: an inline-flex box aligns on
+   its baseline, so padding-top pushes the box up rather than pushing the ink
+   down. Both facts are re-measured in the commit. If a later change gives this
+   control a taller line box or takes the wrapper away, re-measure before
+   assuming the gap above it is still the plain 38px [slug].astro claims.
+
+   ⚠ NOT `padding` shorthand and NOT a height. A height would fight
+   `align-items: center`; a shorthand would add horizontal padding, which this
+   does not want — the label is a URL and the arrow sits 0.4rem off it, and
+   widening the box would push the focus ring out past the ink on both sides
+   with nothing in the space. Vertical only.
+
+   The focus ring DOES grow with the box — 2px outside 24.63px now instead of
+   16.63. That is the ring becoming honest about where the target is, not a
+   regression; the whole point of the padding is that the clickable area was
+   never the same size as the ink. */
 .btn-quiet--out {
 	color: var(--ink-link);
+	padding-block: 4px;
 }
 @media (hover: hover) {
 	.btn-quiet--out:hover {
