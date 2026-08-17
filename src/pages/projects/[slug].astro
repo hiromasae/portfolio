@@ -13,12 +13,12 @@ export function getStaticPaths() {
 
 const { project } = Astro.props;
 
-/* Both `images` forms flattened to one shape so the template doesn't branch —
-   see the field's note in projects.ts for why a caption rides on its own src
-   rather than in a parallel array. */
-const figures = project.images.map((entry) =>
-	typeof entry === 'string' ? { src: entry, caption: undefined } : entry
-);
+/* `images` is one shape now — { src, w, h, caption? } — so there is nothing to
+   flatten here any more (2026-08-17; the bare-string form and the map that
+   normalised it went together). See the field's note in projects.ts for why a
+   caption and a size both ride on their own src rather than in parallel
+   arrays, and why the string form had to go. */
+const figures = project.images;
 
 /* The caption's type is the prose's, exactly (2026-08-14, Hiro's ask): the same
    text-sm / leading-relaxed the two paragraphs above carry, with no colour and
@@ -387,7 +387,7 @@ const others = [
 			    the caption a gap of its own to be tighter than — the one inside the
 			    figure has to stay well under that 5. */}
 			{
-				figures.map(({ src, caption }, i) => (
+				figures.map(({ src, w, h, caption }, i) => (
 					<figure>
 						{caption && <figcaption class={captionClass}>{caption}</figcaption>}
 						<button
@@ -396,8 +396,28 @@ const others = [
 							data-shot
 							aria-label={`Enlarge image ${i + 1} of ${figures.length}`}
 						>
+							{/* ── width/height are NOT the render size (2026-08-17) ──
+							    They are the file's own pixels, and the only thing the
+							    browser takes from them here is the ratio: preflight's
+							    height:auto still decides the height and w-full still
+							    decides the width, so these change nothing you can see
+							    on a loaded page. What they change is the page BEFORE
+							    it loads — with no ratio, height:auto is zero, and
+							    this section laid out as a stack of slivers that
+							    snapped to ~2,300px as the files arrived, walking the
+							    link-out, More projects and the footer down the page.
+
+							    They are also what makes the lazy below real: while
+							    every box was 0px tall they all sat at the top of the
+							    document, inside the viewport, so nothing was ever
+							    deferred and the browser pulled all four at once.
+
+							    Don't drop either attribute to "let CSS handle it" —
+							    CSS is handling it, and this is what it needs. */}
 							<img
 								src={src}
+								width={w}
+								height={h}
 								alt={caption ? `${project.title} — ${caption}` : `${project.title} — image ${i + 1}`}
 								loading={i === 0 ? 'eager' : 'lazy'}
 								class="w-full rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface)]"

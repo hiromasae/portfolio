@@ -1,7 +1,43 @@
-/** One detail-page image that carries a caption. Bare strings stay legal in
-    `images` — see the field's note for why both forms exist. */
+/** One detail-page image: its src, its intrinsic size, and optionally a
+    caption. The bare-string form `images` used to allow is gone (2026-08-17) —
+    see `w` for what killed it. */
 export interface ProjectImage {
 	src: string;
+	/** ⚠ THE FILE'S OWN PIXEL DIMENSIONS, not the size it renders at. These are
+	    REQUIRED, and the requirement is the point: they exist so the browser can
+	    reserve the right box before a single byte of the image arrives.
+
+	    Without them the detail page shifted about 2,300px (2026-08-17). The
+	    template hands each shot `w-full` and nothing else, and Tailwind's
+	    preflight ships `img,video{max-width:100%;height:auto}` — with no
+	    intrinsic ratio to work from, `height:auto` resolves to ZERO, so every
+	    shot laid out as a 0px sliver and the whole stack snapped to full height
+	    as the files landed. On migaki that walked the link-out, the More
+	    projects strip and the footer down the page in four jumps.
+
+	    The second-order half is worse and less obvious: while all four boxes
+	    sat at 0px they were all stacked at the top of the document, so all four
+	    were "in the viewport" when the lazy heuristic ran and `loading="lazy"`
+	    on shots 2..n bought exactly nothing — the browser fetched every one
+	    immediately. Sizing the boxes is what makes that attribute start working,
+	    which is why the two fixes are one fix.
+
+	    Width and height ATTRIBUTES do not fix the rendered size. Preflight's
+	    `height:auto` still governs, and `w-full` still sets the width; the
+	    numbers only supply the aspect ratio the reservation needs. So these can
+	    be the raw 2x source dimensions — nothing here needs to know about the
+	    920px the page actually renders at.
+
+	    ⚠ RE-SHOOT A SHOT AND YOU MUST UPDATE THESE. A stale pair is worse than
+	    no pair: the browser reserves a confidently wrong box and the page still
+	    jumps, only now it also lied. `sips -g pixelWidth -g pixelHeight <file>`
+	    prints both. The same discipline the card frame and the about photo
+	    already keep by other means — see ProjectCard's aspect-[16/9] frame and
+	    about.astro's width/height on me.webp; this was the one place on the site
+	    that kept neither. */
+	w: number;
+	/** @see w — always set as a pair. */
+	h: number;
 	/** Rendered ABOVE the image — see the template for why. Set it where the
 	    shot's ROLE isn't self-evident, which is not the same question as
 	    whether the shot is readable. All four of migaki's are perfectly
@@ -48,12 +84,20 @@ export interface Project {
 	    bullet list: the detail page renders it as one block. */
 	work: string;
 	cover: string;
-	/** Detail page images, in order. A bare string is a shot that needs no
-	    caption; the object form welds one to its own src. Keep them welded
-	    rather than parallel-arraying the captions — migaki's shots were
-	    renumbered once already (see its note), and a captions[] indexed
-	    alongside would have silently shifted onto the wrong pictures. */
-	images: (string | ProjectImage)[];
+	/** Detail page images, in order. Everything rides on its own src — the
+	    caption and now the intrinsic size both. Keep them welded rather than
+	    parallel-arraying either one: migaki's shots were renumbered once
+	    already (see its note), and a captions[] or a sizes[] indexed alongside
+	    would have silently shifted onto the wrong pictures.
+
+	    ⚠ ONE FORM ONLY, as of 2026-08-17. A bare string used to be legal here
+	    for a shot that needed no caption, and that was fine while src was the
+	    only thing a shot had to carry. It isn't: `w`/`h` are required now (see
+	    ProjectImage), a bare string cannot carry them, and every string form
+	    left legal is a hole this exact bug climbs back through the next time
+	    someone adds a picture. An uncaptioned shot is `{ src, w, h }` with no
+	    caption key — barely longer, and it can't be under-specified. */
+	images: ProjectImage[];
 	/** Number of empty frames to stand in for screenshots that don't exist yet.
 	    Only read when `images` is empty, and only by the detail page; an empty
 	    `cover` leaves the card's own frame blank the same way. Delete the field
@@ -172,10 +216,15 @@ export const projects: Project[] = [
 		   to stay crisp; don't drop below that. */
 		cover: '/images/migaki0.webp',
 		images: [
-			{ src: '/images/migaki1.webp', caption: 'Without migaki' },
-			{ src: '/images/migaki2.webp', caption: 'With migaki' },
-			{ src: '/images/migaki3.webp', caption: 'The skill running' },
-			{ src: '/images/migaki4.webp', caption: 'What it proposed for the first page' },
+			{ src: '/images/migaki1.webp', w: 2530, h: 1854, caption: 'Without migaki' },
+			{ src: '/images/migaki2.webp', w: 2530, h: 1844, caption: 'With migaki' },
+			{ src: '/images/migaki3.webp', w: 2528, h: 1312, caption: 'The skill running' },
+			{
+				src: '/images/migaki4.webp',
+				w: 2528,
+				h: 1376,
+				caption: 'What it proposed for the first page',
+			},
 		],
 		/* The repo, which for this project is the product: migaki ships as three
 		   markdown files and a plugin manifest, so there is no site to send
@@ -224,10 +273,10 @@ export const projects: Project[] = [
 		   every other project here, and the .webp is what the site loads. */
 		cover: '/images/ejs0.webp',
 		images: [
-			{ src: '/images/ejs1.webp', caption: 'The site as it is today' },
-			{ src: '/images/ejs0.webp', caption: 'The same page, rebuilt' },
-			'/images/ejs2.webp',
-			'/images/ejs3.webp',
+			{ src: '/images/ejs1.webp', w: 2532, h: 1322, caption: 'The site as it is today' },
+			{ src: '/images/ejs0.webp', w: 2530, h: 1332, caption: 'The same page, rebuilt' },
+			{ src: '/images/ejs2.webp', w: 2528, h: 1386 },
+			{ src: '/images/ejs3.webp', w: 2532, h: 1386 },
 		],
 		/* ⚠ THIS GOES TO THE SITE AS IT IS TODAY — the OLD page, the one the
 		   first screenshot is of, not the redesign. The redesign is not deployed
@@ -254,9 +303,9 @@ export const projects: Project[] = [
 			"I built the browsing around roles and use cases instead of categories, so you start from the job you're trying to do rather than a list you have to read end to end. Comparison views let you put stacks side by side, and mapping how the tools connect puts the overlaps and gaps on the page instead of leaving them for you to work out. The visual system came last, mostly to keep that density readable.",
 		cover: '/images/stacksmith1.png',
 		images: [
-			'/images/stacksmith1.png',
-			'/images/stacksmith2.png',
-			'/images/stacksmith4.png',
+			{ src: '/images/stacksmith1.png', w: 1920, h: 981 },
+			{ src: '/images/stacksmith2.png', w: 1920, h: 981 },
+			{ src: '/images/stacksmith4.png', w: 1920, h: 981 },
 		],
 		link: 'https://app.subframe.com/a4820e3a0486/design/e6b3b72d-a1bb-41d8-95b6-dfe778ef8e78/share',
 	},
@@ -273,7 +322,12 @@ export const projects: Project[] = [
 		work:
 			'I drew the user flows for the SumaAdmin platform, the architecture visuals that went into the review materials, and the supporting graphics around risk and process. Most of the work was deciding what to leave out: each diagram carries one idea, so a reviewer can follow the platform end to end without needing the engineering context underneath it. The set gave the team one consistent way to explain the product to people outside it.',
 		cover: '/images/suma1.webp',
-		images: ['/images/suma1.webp', '/images/suma2.webp', '/images/suma3.webp', '/images/suma4.webp'],
+		images: [
+			{ src: '/images/suma1.webp', w: 1100, h: 790 },
+			{ src: '/images/suma2.webp', w: 1069, h: 780 },
+			{ src: '/images/suma3.webp', w: 1068, h: 758 },
+			{ src: '/images/suma4.webp', w: 1068, h: 758 },
+		],
 		link: 'https://www.yoursuma.com/',
 	},
 	{
@@ -289,7 +343,7 @@ export const projects: Project[] = [
 		work:
 			'I led the product UI decisions with the dev team, working inside their loop instead of handing off finished screens. The main showcase and the discovery flows were the two pieces I owned end to end, and both went through several rounds as the scope of the product moved. Keeping the layouts loose enough to absorb that meant the later changes landed as adjustments rather than redesigns.',
 		cover: '/images/shipyard.png',
-		images: ['/images/shipyard.png'],
+		images: [{ src: '/images/shipyard.png', w: 2530, h: 1390 }],
 		link: 'https://shipyardhq.tech/',
 	},
 ];
