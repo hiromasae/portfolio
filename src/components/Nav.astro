@@ -244,12 +244,37 @@ const onHome = path === '/';
 		    on is that a trigger reading "Contact" NAMES ITSELF, which is exactly
 		    what the settings gear (removed 08-06, faf42e8) did not.
 
-		    `ml-auto` moves here from the toggle: this pair is now the bar's
-		    right-hand group, and the wordmark is the only thing left in flow
-		    before it. The wrap is deliberately NOT positioned — the panel
-		    resolves against .nav-inner instead, so its right edge can land on
-		    the page's column edge rather than on this button's. */}
-		<div id="contact-menu-wrap" class="ml-auto flex items-center">
+		    ── CENTRED ON THE BAR (2026-08-17, Hiro) ──
+		    It rode `ml-auto` until now, which made it and the toggle the bar's
+		    right-hand group and left the wordmark alone in flow before them.
+		    Below 640 that put ~180px of nothing in the middle of the row and
+		    the bar read as two objects at opposite ends of a void. Out of flow
+		    and centred, the one control the phone bar exists for sits where
+		    the eye lands, the toggle takes the right end back, and the void
+		    is gone without inventing a link to fill it.
+
+		    This is EXACTLY #contact-group's treatment, one block up — the
+		    desktop icon cluster has been centred this way since 08-02, and
+		    both surfaces now hang on the same line. `left-1/2` resolves
+		    against .nav-inner's padding box, which is the full bar, so the
+		    trigger lands on the window's true centre and not on the content
+		    box's (those differ by 3.1px here — .nav-inner's paddings are
+		    deliberately unequal, see its rule). Flex centring would have found
+		    the second one and put this 3.1px off the cluster it replaces.
+
+		    ── inset-y-0, NOT top-1/2 + -translate-y-1/2 ──
+		    The icon cluster uses the translate pair; this one must not. The
+		    PANEL lives inside this wrap (the outside-click check in the script
+		    below is `contactWrap.contains(e.target)`, so it cannot be moved
+		    out), which means this box is the panel's containing block and
+		    `top: 100%` on the panel is THIS element's height. Stretched to the
+		    row, that is the row's height and the panel's offset arithmetic is
+		    unchanged — it still measures from the row's bottom, adds the bar's
+		    padding and clears the hairline. Collapsed to the trigger's 16.6px
+		    it would resolve ~20px short and the panel would open ON the bar.
+		    So the height here is load-bearing for a rule in another file; see
+		    the .contact-menu block in global.css. */}
+		<div id="contact-menu-wrap" class="absolute inset-y-0 left-1/2 flex -translate-x-1/2 items-center">
 			{/* .btn-quiet, revived. It has styled nothing since "Back to
 			    projects" came off (2026-08-10) and its note says the next
 			    borderless text link on the site wants exactly it — this is that
@@ -384,10 +409,14 @@ const onHome = path === '/';
 		    ever wanted — with the caveat that two settings didn't earn one.
 		    The sticky-bar preference was dropped outright rather than moved:
 		    sticky is the design's call to make. */}
-		{/* No `ml-auto` any more (2026-08-15): the Contact trigger beside it
-		    carries it now and this rides along at the end of that group. The
-		    gap between the two is --nav-toggle-gap in global.css, where the
-		    toggle's own glyph inset is subtracted out of it. */}
+		{/* Still no `ml-auto` in the markup, but for a different reason than
+		    when that was written. On 2026-08-15 the Contact trigger beside it
+		    carried the auto margin and this rode along at the end of that
+		    group, on a --nav-toggle-gap the two were set against. The trigger
+		    is centred out of flow now, so this is the only thing left in the
+		    row after the wordmark and takes `margin-left: auto` from
+		    #theme-toggle-wrap in global.css — at every width, which is what
+		    let both that token and the ≥640 override go. */}
 		<div id="theme-toggle-wrap" class="relative flex self-center">
 			{/* The pre-JS name. Dark is the site's default (stamped on <html> in
 			    Layout.astro), so the button starts out offering the way OUT of
