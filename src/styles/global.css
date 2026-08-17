@@ -1705,36 +1705,25 @@ body {
 	   to be the page's gutter at that width, or the bar and the page come apart
 	   — and the page's gutter is flat. */
 	--nav-inset: 1.25rem;
-	/* The DRAWN distance from the Contact caret's ink to the toggle's circle —
-	   the bar's only interior gap since the icon row became a menu (2026-08-15),
-	   and therefore the one thing carrying how those two read together.
+	/* ── --nav-toggle-gap LIVED HERE, and there is nothing left for it to
+	   measure (removed 2026-08-17) ──
+	   It was the drawn distance from the Contact caret's ink to the toggle's
+	   circle, and from 08-15 it was the bar's only interior gap: the trigger
+	   sat immediately left of the toggle and the pair was the bar's right-hand
+	   group. Hiro centred the trigger on the bar today, which puts ~90px of
+	   nothing between them and makes the two no longer a pair at all. Its one
+	   consumer, #theme-toggle-wrap's margin-left, is a plain `auto` now.
 
-	   0.75rem = 14.25px, down from 1.5rem (Hiro, same day: the contact button
-	   should be tighter against the light/dark toggle). They are one group —
-	   the bar's right-hand controls — and at 28.5px they read as two errands
-	   with the window's air between them. Under the 22.5px of vertical air the
-	   bar holds above and below its glyphs, which is the threshold where things
-	   in this bar start belonging to each other.
-
-	   ── The term subtracts the toggle's WHOLE inset, not just its padding ──
-	   The glyph does not start at the wrap's left edge, and until this was
-	   corrected the token could not go below ~25px however small it was set.
-	   Three things stand between them, all of them consequences of a full-size
-	   box drawn small (see close ranks):
-	     2.9rem × (1 − scale)   the box's own contraction plus its rightward
-	                            translate, which land the drawn button 18.7px in
-	     0.5rem × scale         the button's padding, drawn: 6.3px
-	   25.0px in total at scale 0.66. Subtracting it makes this token mean
-	   exactly what it says, at any scale, and lets it go tight — the margin it
-	   computes is NEGATIVE (−10.8px here), which is fine on a flex item and is
-	   simply the trigger moving right toward a toggle that stays pinned to the
-	   column edge.
-
-	   The floor is the hit boxes, not the ink: the trigger's pseudo reaches
-	   0.35rem past its box and the toggle's region starts 6.3px before its
-	   glyph, so at 14.25px they still clear each other by ~1.3px. Anything
-	   tighter and two controls start sharing a tap. */
-	--nav-toggle-gap: 0.75rem;
+	   Two things in it are worth knowing before anyone writes another gap
+	   between a word and one of this bar's buttons, and they are the reason
+	   this stub is here rather than a silent deletion:
+	     · a gap to a scaled-down button has to subtract the button's whole
+	       inset — its contraction, its translate AND its padding, 25.0px at
+	       scale 0.66 — or the number cannot mean what it says and bottoms out
+	       around 25px however small it is set;
+	     · the floor is the HIT BOXES, not the ink. The two regions met with
+	       1.3px to spare at 14.25px.
+	   The full derivation is in git at the commit that removed this. */
 	/* The bar's vertical padding. A TOKEN as of 2026-08-17, and only because it
 	   has a second reader: .contact-menu's `top` has to add this back to clear
 	   the hairline, and that rule's note has said since it was written that "the
@@ -1776,12 +1765,20 @@ body {
 
    WHAT TO DO IF THIS EVER GETS TIGHT AGAIN, in the order the evidence supports:
    the ends are not available (they are the page's own gutter, and Hiro asked
-   for that alignment explicitly); --nav-toggle-gap is the first dial below 640,
-   where it is the only interior gap; the trigger's word can shorten before any
-   glyph shrinks, because --nav-icon-scale IS the toggle's touch target; and
-   above 640 the honest answer is the one that worked — move something out of
-   the row rather than shave what is in it. Every one of those was learned by
-   doing it the other way first.
+   for that alignment explicitly); there is no interior gap left to dial below
+   640 — the trigger is centred out of flow and --nav-toggle-gap, which was
+   this line's first suggestion, has been retired for having nothing to measure;
+   the trigger's word can shorten before any glyph shrinks, because
+   --nav-icon-scale IS the toggle's touch target; and above 640 the honest
+   answer is the one that worked — move something out of the row rather than
+   shave what is in it. Every one of those was learned by doing it the other
+   way first.
+
+   Note what the 08-17 pass adds to that last one: the row got ROOMIER without
+   anything leaving it, by moving the middle control to the middle. Fit was
+   never this bar's real problem below 640 — three things in 261.5px never
+   were tight — and the two passes that treated it as one both ended up
+   somewhere else.
 
    The 320 measurements throughout this file are read in a desktop browser,
    where scrollbar-gutter: stable costs 11px of layout that a phone's overlay
@@ -1808,18 +1805,38 @@ body {
    ink into it. Three findings, one shape: the row is nearly empty and it is
    spending a desktop bar's height to be that way.
 
+   ── The void was answered by MOVING something into it, not by tuning ──
+   Second pass the same day, and it is the change that made this block small.
+   Everything here first shipped as a set of accommodations for a row with a
+   hole in the middle of it — a shorter bar so the hole was a thinner band, a
+   bigger wordmark so the thing beside the hole was not also the quietest, and
+   a wider toggle gap so the two controls huddled at the far end stopped
+   reading as one object. Then Hiro centred the Contact trigger on the bar
+   (see Nav.astro) and there is no hole: wordmark left, the one control the
+   phone bar exists for in the middle, toggle right. Three things on the row's
+   three natural positions.
+
+   Two of the three accommodations survive that on their own merits and are
+   below. The third did not: --nav-toggle-gap was answering a problem that
+   only existed while both controls were crowded at the right end, and with
+   ~90px between them now it had nothing to measure — it is gone from the
+   token block above rather than re-tuned here. Which is the phone essay's own
+   advice, taken twice in three days: the crowding was solved by not asking a
+   320px window to hold six things, and the emptiness by putting the one thing
+   that matters where the eye already is.
+
    ── Why this is a max-width block when the surface switch above is not ──
    The contact-surface rule is mobile-first because the mobile surface is the
    one that has to survive a media query that never resolves — a browser that
    understands nothing must still get the menu, or the site loses every contact
-   link it has. Nothing here has that property. These are four deviations from
+   link it has. Nothing here has that property. These are deviations from
    values that are authored, argued and measured for the wide bar, and writing
    them as the base would mean restating the desktop numbers as overrides and
-   moving three of the longest comments in this file away from the values they
+   moving two of the longest comments in this file away from the values they
    explain. So the phone pass is the deviation, and it is one block rather than
-   four scattered overrides because it is one judgement: the narrow bar is
-   quieter and shorter than the wide one, and the three tokens have to move
-   together or it is only partly either.
+   scattered overrides because it is one judgement: the narrow bar is quieter
+   and shorter than the wide one, and the tokens have to move together or it is
+   only partly either.
 
    639.98 rather than 639: widths are fractional under zoom and on a device
    pixel ratio that doesn't divide evenly, and a bar that falls between two
@@ -1831,38 +1848,16 @@ body {
 		   block landed: the bar holds at 58.9px, so it does not).
 
 		   The wide bar can afford a quiet mark because it is not the only thing
-		   on the row; below 640 it is the one piece of identity on screen, with
-		   ~180px of air beside it and nothing else competing, and at 0.47 it was
-		   drawing less ink than the body headline underneath it. This does not
-		   fill the void — nothing here does, and a nav link invented to fill it
-		   would be worse than the air — but it stops the emptiest bar on the
-		   site from also holding its smallest wordmark. */
+		   on the row; below 640 it is the one piece of identity on screen, and
+		   at 0.47 it was drawing less ink than the body headline underneath it.
+
+		   It was raised while the row still had a hole in it, as the only
+		   answer available that did not invent a nav link — and it survives the
+		   centring that filled the hole, on a plainer argument: the mark is now
+		   one of three things on a three-position row, and being the leftmost
+		   is not a reason to be the faintest. The ~26px it drew at 0.47 read as
+		   the smallest thing in the bar; 29px reads as its left end. */
 		--nav-logo-scale: 0.53;
-		/* ── This one reverses a call, and the reversal was asked for ──
-		   0.75rem was set on 08-15 on the argument that the trigger and the
-		   toggle are one group — the bar's right-hand controls — and should read
-		   as one. That is a coherent reading and this block does not claim it was
-		   wrong; Hiro asked for the other one (2026-08-17) after seeing the two
-		   at equal weight on a phone, where they are the ONLY two controls: the
-		   word is the site's entire route to any contact and the circle is a
-		   preference, and at 14.25px they read as a matched pair of equal
-		   errands rather than as a conversion with a setting parked beside it.
-
-		   1.15rem = 21.85px, NOT the 1.5rem (28.5px) this came down from. That
-		   value was rejected by name and is not being restored: the point is to
-		   stop the two reading as one object, not to push them to opposite
-		   errands with the window's air between them. It clears the threshold
-		   the token's note is written against — the bar's vertical air, 17.6px
-		   once the padding below is spent — and stops there.
-
-		   It also pays for the toggle's hit box: expanding that region to 44px
-		   (see the rule beside #contact-group .btn-icon::after) reaches 3.8px
-		   left of the drawn circle, which at 0.75rem would have overlapped the
-		   trigger's own region — the two cleared each other by 1.3px, and that
-		   1.3px was the whole margin. At 1.15rem they clear by ~6px. The two
-		   changes are independent in intent and coupled in arithmetic; neither
-		   can be reverted alone without re-checking the other. */
-		--nav-toggle-gap: 1.15rem;
 		/* 0.1rem, from 0.4rem: the bar goes 70.3px → 58.9px, a 16% cut, and the
 		   floor named in the token's own note is 56px (the 2.9rem button box at
 		   padding 0) — so this spends nearly all of the remaining slack and
@@ -1872,11 +1867,10 @@ body {
 
 		   What it costs is the bar's vertical air, 23.3px → 17.6px from glyph
 		   ink to the bar's edge. That figure is a threshold elsewhere in this
-		   file — it is what --nav-icon-gap was tuned against, and what
-		   --nav-toggle-gap above is now measured against — so it moving is not
-		   free. But --nav-icon-gap spaces the icon row, which does not exist at
-		   this width, and the toggle gap is set against the NEW figure
-		   deliberately. Nothing else reads it.
+		   file — it is what --nav-icon-gap was tuned against — so it moving is
+		   not free. But --nav-icon-gap spaces the icon row, which does not
+		   exist at this width, and the other rule that read this number
+		   (--nav-toggle-gap) has since been retired. Nothing else reads it.
 
 		   Spent through the token rather than by overriding .nav-pad, so
 		   .contact-menu's `top` follows it down and the panel keeps clearing
@@ -3313,16 +3307,17 @@ body {
    region lands on 44.0px. Retune --nav-icon-scale and this follows; never set
    it by eye.
 
-   ── It reaches LEFT, toward the trigger, which is why the gap moved ──
-   3.8px of it, and the two regions cleared each other by 1.3px before this
-   existed (that clearance is what --nav-toggle-gap's floor was calculated on).
-   This would have put them 2.5px into each other — two controls sharing a tap,
-   on the two controls a phone has. The phone block above widens the gap to
-   1.15rem, which restores ~6px of clearance. That widening was asked for on
-   its own grounds and this rule rides on it; see the note there. Above 640 the
-   trigger is display: none and the toggle takes margin-left: auto, so it has
-   no neighbour to reach toward and the extra 3.8px falls into the column's
-   own gutter, where it is only slop.
+   ── It reaches 3.8px past the glyph on every side, into nothing ──
+   That was not free for about an hour. The trigger stood immediately left of
+   this button when the rule was written, the two hit regions cleared each
+   other by 1.3px, and reaching 3.8px left would have put them 2.5px into each
+   other — two controls sharing a tap, on the only two controls a phone has.
+   It was paid for by widening --nav-toggle-gap, and then the trigger was
+   centred on the bar (2026-08-17) and the whole question dissolved: they are
+   ~90px apart, that token is retired, and this button now has empty bar on
+   its left at every width and the column's gutter on its right. Worth knowing
+   that the coupling existed, because anything that moves a control back
+   alongside this one inherits it.
 
    Unconditional rather than scoped to the phone: a coarse pointer is not a
    width, the surface line at 640 is a proxy for POINTER and a poor one (its
@@ -4004,13 +3999,12 @@ body {
    of this box's height — if that ever stops being true, this breaks loudly
    instead of drifting quietly. Resolves to −13.69px, region 44.0px.
 
-   Horizontally 0.35rem is forgiveness only; the word is already 88px wide. It
-   used to say the region "cannot collide with anything ... by a wide margin at
-   every width", and that is no longer the case either: the toggle now carries
-   its own 44px region reaching 3.8px back toward this one, and below 640 the
-   two clear each other by 4.9px. That is comfortable, not wide, and it is
-   held by --nav-toggle-gap in the phone block. Both hit boxes and that gap are
-   now one system — see the note beside .theme-toggle::after. */
+   Horizontally 0.35rem is forgiveness only; the word is already 88px wide.
+   The original note said the region "cannot collide with anything ... by a
+   wide margin at every width" — briefly untrue on 2026-08-17, when the toggle
+   grew its own 44px region reaching back toward this one and the two cleared
+   by 4.9px, and true again by the end of the same day: this button is centred
+   on the bar now and its nearest neighbour is ~90px away. */
 .contact-trigger {
 	position: relative;
 }
@@ -4094,12 +4088,25 @@ body {
 	}
 }
 
-/* The gap to the theme toggle, less the whole distance between the wrap's edge
-   and the glyph the visitor actually sees — the contraction, the translate and
-   the padding, all three. --nav-toggle-gap has the derivation and the reason
-   the result is allowed to go negative.
+/* ── margin-left: auto, at every width now (2026-08-17) ──
+   This carried a calc — --nav-toggle-gap less the whole distance between the
+   wrap's edge and the glyph the visitor actually sees — because below 640 the
+   Contact trigger stood immediately to its left and the two had to be set
+   against each other. The trigger is centred on the bar now (see Nav.astro),
+   so it is out of flow and this wrap is once again the only thing left in the
+   row after the wordmark. It goes to the right end for the same one-word
+   reason the ≥640 override used to give, and that override is gone with the
+   calc: both surfaces take the same rule and there is nothing left to switch
+   between.
 
-   ── And the wrap must not collect clicks it doesn't draw ──
+   --nav-toggle-gap was retired in the same change. It had exactly one
+   consumer, this declaration, and nothing between these two controls to
+   measure any more. Its derivation — why a gap between a word and a
+   scaled-down button has to subtract the button's contraction, translate and
+   padding to mean what it says — is worth reading before writing another one;
+   it is in git at the commit that removed it.
+
+   ── The wrap must not collect clicks it doesn't draw ──
    The same fault the contact group had on 08-14, arriving here the moment the
    gap tightened: this box is `relative`, it comes after the trigger in the
    DOM, and its left edge sits 18.7px left of the button it holds — because
@@ -4110,12 +4117,13 @@ body {
    ground between two neighbours, exactly where a thumb aiming at either one
    lands. Same cure as the group's: the wrap stops taking events and the
    button takes them back. The pill inside is already pointer-events: none.
-   The trigger's region now runs to 1019.4 and the toggle's begins at 1020.7,
-   which is the 1.3px of clearance --nav-toggle-gap's floor is calculated on. */
+   The trigger's region now runs to 1019.4 and the toggle's begins at 1020.7.
+   That 1.3px of clearance is history — the two are ~90px apart since the
+   trigger moved to the centre — but the rule stays: this box is still wider
+   than the button it draws, and a wrap that swallows pixels it does not paint
+   is a fault whatever happens to be standing beside it. */
 #theme-toggle-wrap {
-	margin-left: calc(
-		var(--nav-toggle-gap) - (2.9rem * (1 - var(--nav-icon-scale)) + 0.5rem * var(--nav-icon-scale))
-	);
+	margin-left: auto;
 	pointer-events: none;
 }
 #theme-toggle-wrap .btn-icon {
@@ -4164,14 +4172,12 @@ body {
 	#contact-group {
 		display: flex;
 	}
-	/* With the menu gone the toggle is the only thing left in flow after the
-	   wordmark, so it takes back the auto margin the trigger was carrying —
-	   and with it the whole --nav-toggle-gap correction, which is about sitting
-	   beside a word and means nothing here. The icon row is out of flow
-	   (absolutely centred), so it neither pushes the toggle nor is pushed. */
-	#theme-toggle-wrap {
-		margin-left: auto;
-	}
+	/* The toggle's `margin-left: auto` used to be restated here, because below
+	   this line it carried a --nav-toggle-gap correction instead and this was
+	   the only width where it could simply go to the end. Both surfaces are
+	   now out of flow and centred — the icon row as it always was, the trigger
+	   since 2026-08-17 — so the toggle is the only thing after the wordmark at
+	   EVERY width and the base rule already says so. Nothing to override. */
 }
 
 /* ── The contact panel ──
@@ -4202,19 +4208,35 @@ body {
    at anything — not at its trigger, which it never did, and no longer at the
    page's edge either. It is now positioned by the window alone.
 
-   `left: 0; right: 0` + `margin-inline: auto` on a `width: fit-content` box,
-   NOT `left: 50%` with a translate. That is not a style preference: transform
-   on this element is spoken for twice over — contact-pop scales it in and
-   pill-pop-out scales it out, both writing the whole property — so a centring
-   translate would be clobbered for the length of every open and every close,
-   and the panel would jump to the left edge for the one moment it is moving.
-   Margin centring is invisible to both. Nothing here may be rewritten onto
-   transform without moving the offset into every keyframe that touches it.
+   ── It is centred on its WRAP, which is centred on the bar ──
+   Revised 2026-08-17, second pass. The first version centred this against
+   .nav-inner with `left: 0; right: 0` + `margin-inline: auto`, because the
+   wrap was in flow at the bar's right end and was deliberately not positioned.
+   The wrap is now absolutely centred itself (see Nav.astro), so it IS this
+   panel's containing block, and centring on it is centring on the bar. The
+   panel and the word it belongs to now arrive at the same axis by
+   construction rather than by two rules agreeing.
+
+   `translate: -50%`, the INDEPENDENT transform property — not
+   `transform: translateX(-50%)`. That distinction is the whole reason this
+   can be written as a translate at all: `transform` on this element is spoken
+   for twice over, since contact-pop scales it in and pill-pop-out scales it
+   out and both write the entire property, so a centring offset parked there
+   would be clobbered for the length of every open and every close and the
+   panel would jump sideways for exactly as long as it is moving. The
+   individual properties compose with `transform` instead of being overwritten
+   by it, and they apply first — so the panel is placed, then scaled about its
+   own centre-top. (`scale:` on .nav-left is the same tool for the same
+   reason.) Anything that moves this offset back onto `transform` has to move
+   it into every keyframe that touches this element.
 
    top is the row's bottom plus the bar's own padding plus a 0.5rem gap, so the
-   panel clears the hairline rather than tucking under it. It reads --nav-pad-y
-   rather than restating it, which is what lets the phone pass shorten the bar
-   without dragging the panel onto the rule (see that token).
+   panel clears the hairline rather than tucking under it. `100%` is the WRAP's
+   height, which is why that element is stretched to the row with inset-y-0 —
+   collapsed to the trigger's own 16.6px this would resolve ~20px short and
+   open the panel on top of the bar. It reads --nav-pad-y rather than restating
+   it, which is what lets the phone pass shorten the bar without dragging the
+   panel onto the rule (see that token).
 
    z-index 60 for the reason the hover pill carries it: #site-nav::after is a
    pseudo-element, so it paints after every child and would otherwise rule
@@ -4222,10 +4244,8 @@ body {
 .contact-menu {
 	position: absolute;
 	top: calc(100% + var(--nav-pad-y) + 0.5rem);
-	left: 0;
-	right: 0;
-	width: fit-content;
-	margin-inline: auto;
+	left: 50%;
+	translate: -50%;
 	z-index: 60;
 	min-width: 10.5rem;
 	padding: 0.25rem;
