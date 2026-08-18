@@ -60,12 +60,23 @@ const {
 					// which reads as a flicker in the tab on every unrelated call.
 					if (link && link.getAttribute('href') !== href) link.setAttribute('href', href);
 				};
-				try {
-					if (localStorage.getItem('theme') === 'light') {
-						document.documentElement.dataset.theme = 'light';
-						window.__syncFavicon('light');
-					}
-				} catch (e) {}
+				// Named and re-runnable because a bfcache restore doesn't re-run this
+				// script: the page comes back with whatever data-theme and favicon it
+				// had when it was left, which is stale if the toggle was hit on
+				// another page since. Writes both branches, not just light — a
+				// restored page can be sitting on light with 'dark' saved.
+				window.__applyTheme = function () {
+					var theme = 'dark';
+					try {
+						if (localStorage.getItem('theme') === 'light') theme = 'light';
+					} catch (e) {}
+					document.documentElement.dataset.theme = theme;
+					window.__syncFavicon(theme);
+				};
+				window.__applyTheme();
+				window.addEventListener('pageshow', function (event) {
+					if (event.persisted) window.__applyTheme();
+				});
 			})();
 		</script>
 		{/* Critical hide for the content reveal — global.css drives the actual
