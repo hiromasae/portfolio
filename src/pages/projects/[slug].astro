@@ -390,11 +390,32 @@ const others = [
 				figures.map(({ src, w, h, caption }, i) => (
 					<figure>
 						{caption && <figcaption class={captionClass}>{caption}</figcaption>}
+						{/* ── SHIPS INERT, PROMOTED BY SCRIPT (2026-08-18) ──
+						    disabled + role="presentation" + NO aria-label is the
+						    resting state, and all three are load-bearing. ARIA's
+						    presentational-roles conflict resolution drops the role
+						    if the element is FOCUSABLE or carries a global ARIA
+						    attribute, and a <button> is inherently focusable — so
+						    role="presentation" alone is silently ignored (verified
+						    against Chrome's AX tree: it stayed role=button, named).
+						    `disabled` is what makes it genuinely unfocusable and
+						    lets the role finally apply; the label lives in data-*
+						    until the script has a device that can use it.
+						    The <img> keeps its alt throughout — the role applies to
+						    the wrapper alone, not its subtree.
+
+						    Inert is also the RIGHT DEFAULT for the pre-JS window:
+						    the module is deferred, so shipping a live button means
+						    a touch screen reader announces one control per figure
+						    that does nothing until it lands. Absent-then-appearing beats
+						    present-and-lying. See syncPointerState below. */}
 						<button
 							type="button"
 							class="shot"
 							data-shot
-							aria-label={`Enlarge image ${i + 1} of ${figures.length}`}
+							data-shot-label={`Enlarge image ${i + 1} of ${figures.length}`}
+							role="presentation"
+							disabled
 						>
 							{/* ── width/height are NOT the render size (2026-08-17) ──
 							    They are the file's own pixels, and the only thing the
@@ -700,16 +721,42 @@ const others = [
 		const shots = document.querySelectorAll<HTMLButtonElement>('[data-shot]');
 
 		// The markup ships a <button> unconditionally (it has to — the page is
-		// static), so on a coarse pointer the interactivity is taken back off
-		// here: no tab stop, and no "button" in the accessibility tree, because
-		// a control that announces itself and then does nothing is worse than a
-		// plain image. The <img> inside keeps its alt either way — role
-		// presentation applies to the wrapper alone, not to its contents.
+		// static), but it ships it INERT: disabled, role="presentation", no
+		// label. So this promotes on a fine pointer rather than demoting on a
+		// coarse one, and the coarse state is simply the one the HTML already
+		// arrived in — nothing to wait for, nothing announced in the meantime.
+		// The <img> keeps its alt on both sides; role presentation applies to
+		// the wrapper alone, not to its contents.
+		//
+		// ⚠ ALL FOUR ATTRIBUTES MOVE TOGETHER, and the pair that looks
+		// redundant is not (2026-08-18). This previously toggled tabIndex and
+		// role only, which did NOTHING: ARIA's presentational-roles conflict
+		// resolution ignores role="presentation" on an element that is
+		// focusable or carries a global ARIA attribute, and a <button> with
+		// tabindex="-1" is still focusable and still had its aria-label. Chrome
+		// went on exposing it as role=button name="Enlarge image N of M" on
+		// every phone, which is the exact thing the rule above exists to
+		// prevent. `disabled` is the part that makes it unfocusable so the role
+		// can apply, and the label has to be OFF the element for the same
+		// reason — hence data-shot-label. Drop any one of them and the wrapper
+		// silently becomes an announced button again.
+		//
+		// Checked both directions against Chrome's AX tree, since a trackpad
+		// arriving mid-session has to flip this live: promoted gives
+		// role=button with the label, demoted removes the node entirely.
 		const syncPointerState = () => {
 			shots.forEach((shot) => {
-				shot.tabIndex = pointer.matches ? 0 : -1;
-				if (pointer.matches) shot.removeAttribute('role');
-				else shot.setAttribute('role', 'presentation');
+				if (pointer.matches) {
+					shot.disabled = false;
+					shot.removeAttribute('role');
+					shot.tabIndex = 0;
+					shot.setAttribute('aria-label', shot.dataset.shotLabel ?? '');
+				} else {
+					shot.disabled = true;
+					shot.setAttribute('role', 'presentation');
+					shot.tabIndex = -1;
+					shot.removeAttribute('aria-label');
+				}
 			});
 		};
 

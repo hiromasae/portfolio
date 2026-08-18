@@ -5032,6 +5032,14 @@ html.reveal-wait #projects::before {
 	.shot {
 		cursor: zoom-in;
 	}
+
+	/* ...but not before the module that makes it true has run. The button
+	   ships `disabled` and is promoted on a fine pointer (see [slug].astro),
+	   so :disabled is exactly the pre-JS window on a mouse device — the one
+	   moment a zoom-in cursor would promise a click that goes nowhere. */
+	.shot:disabled {
+		cursor: default;
+	}
 }
 
 /* The ring goes on the BUTTON, whose box is the image's exactly, so keyboard
