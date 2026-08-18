@@ -171,12 +171,24 @@ const { project, deferred = false } = Astro.props;
 		    border, radius and sunken bed are all on the div above, so the empty
 		    state is the frame itself rather than anything drawn to stand in for
 		    one. No "coming soon" plate — an unfilled frame in the grid reads as
-		    a project without a shot, which is what it is. */}
+		    a project without a shot, which is what it is.
+
+		    The alt is EMPTY ON PURPOSE. The whole card is one <a>, and a link's
+		    accessible name is everything inside it — the year, the <h3> and any
+		    alt, run together into one phrase. Setting the alt to the title
+		    therefore had every card say its title twice in a row ("2025, Shipyard,
+		    Shipyard, link"): five times down the home page, three down each project
+		    page's strip. An empty alt marks the cover decorative so it drops out of
+		    the name — NOT the same as dropping the attribute, which leaves some
+		    readers falling back to the filename. Nothing is lost either way: the
+		    alt was a copy of the heading above it, never a description of the shot.
+		    A real per-project description is the thing to write if one is ever
+		    wanted. */}
 		{
 			project.cover && (
 				<img
 					src={project.cover}
-					alt={project.title}
+					alt=""
 					loading="lazy"
 					decoding="async"
 					class="absolute inset-0 h-full w-full object-cover object-top"
