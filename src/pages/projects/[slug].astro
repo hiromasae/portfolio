@@ -600,36 +600,20 @@ const others = [
 	    since the strip sends you ONWARD to another project rather than back to
 	    the grid — plus the browser's Back button and the wordmark.
 
-	    ⚠ IT WAS ALSO THE ENTRY POINT TO THE WHOLE PROJECTS-LANDING PIPELINE,
-	    which is the part that isn't obvious from the markup that just left.
-	    That anchor carried `data-projects-link`, and it was the ONLY element on
-	    the site that did — the nav's own Projects link went on 08-01. So
-	    Nav.astro's handler for `a[data-projects-link]` now matches nothing, and
-	    everything downstream of it is unreachable rather than merely unused:
-	      · `sessionStorage['nav-projects']` has no writer, so `projectsIntent`
-	        is always null on arrival;
-	      · therefore `.projects-landing`, `landOnProjects()`, `reveal-hold-land`
-	        and `reveal-skip` never fire;
-	      · `goToProjects()` has no caller;
-	      · `nav-return` is still WRITTEN on every card click, but `returnY` is
-	        only read inside an `if (projectsIntent)`, so it is now write-only.
-	        As of the strip above it is written on THIS page too — the recorder
-	        selects `#project-list a[id^="project-"]` and there is now a
-	        #project-list here. Still harmless, still read by nobody; it means a
-	        strip click records this page's scroll position under the target's
-	        slug. If the pipeline is ever revived, that is a case it never had to
-	        handle before: "back to projects" from a project reached FROM a
-	        project would restore a Y measured on the wrong page. The fix would
-	        be to scope the recorder to the home page, not to drop it.
-	    None of that was deleted — the ask was the button, and unpicking a
-	    cross-page scroll-restore system is its own change with its own risks.
-	    Read the notes in Nav.astro before either reviving or removing it; the
-	    machinery is intact and correct, it simply has nothing to start it.
-
-	    `.btn-quiet` in global.css is likewise orphaned — the removed link was
-	    its only consumer, and the strip did NOT take it back up (the cards are
-	    ProjectCards, which have their own hover). Same reasoning: left standing,
-	    flagged there. */}
+	    ⚠ IT WAS ALSO THE ENTRY POINT TO THE WHOLE PROJECTS-LANDING PIPELINE:
+	    that anchor carried `data-projects-link`, and it was the last element
+	    on the site that did — the nav's own Projects link went on 08-01. With
+	    nothing left to bind to, everything downstream was unreachable rather
+	    than merely unused (Nav.astro's click handler, `goToProjects()`, the
+	    `nav-projects` intent and its `.projects-landing` curtain,
+	    `landOnProjects()`, the `nav-return` scroll recorder, and the
+	    reveal-hold-land / reveal-skip classes), so it was all removed on
+	    2026-08-18 — see that commit, not this file, to revive it. One thing
+	    the old machinery never handled, if it ever is revived: the strip
+	    above means a card click can now happen ON A PROJECT PAGE, so a scroll
+	    recorder has to be scoped to the home page (or keyed by origin as well
+	    as slug) — otherwise it records this page's scrollY under the target
+	    project's slug, a Y measured on a page you would never restore to. */}
 	<footer class="mx-auto max-w-[960px] px-5 py-10 text-xs text-[var(--ink-soft)]">
 		<span>© 2026 Hiro Eernisse</span>
 	</footer>

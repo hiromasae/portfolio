@@ -1317,17 +1317,6 @@ html {
 	scrollbar-color: rgba(128, 128, 128, 0.55) transparent;
 }
 
-/* While a cross-page projects landing is being positioned (Nav.astro's inline
-   script sets this class when an intent is pending, and removes it right after
-   the landing scroll runs at 'interactive'), keep the content invisible: first
-   paint can beat that scroll, which would flash the top of the page for a
-   frame before snapping down to the target card. Hidden until positioned, the
-   page reveals already resting on the card. */
-html.projects-landing main,
-html.projects-landing footer {
-	visibility: hidden;
-}
-
 /* ── Scrollbar ──
    Native scrollbars can't be transitioned — even custom ::-webkit-scrollbar
    pseudo-elements ignore CSS transitions — so a theme-dependent scrollbar would
@@ -4683,8 +4672,8 @@ html.nav-intro-draw.nav-intro-go .theme-fill-rect {
    still a cascade.
 
    The cascade starts only after whatever entrance the bar itself is playing,
-   via --hold and the persistent reveal-* classes Nav.astro's inline script
-   sets pre-paint:
+   via --hold and the persistent reveal-hold-draw class Nav.astro's inline
+   script sets pre-paint:
 
    reveal-hold-draw   the load intro is coming, and it OVERLAPS rather than
                       finishing first: the draw's choreography runs long
@@ -4695,25 +4684,12 @@ html.nav-intro-draw.nav-intro-go .theme-fill-rect {
                       the final draw finishes over the arriving cards.
                       Waiting the intro out instead reads as a stall.
 
-   reveal-hold-land   the Projects nav link — a landing on the TOP of the
-                      list. No entrance to wait out (an internal navigation
-                      gets none), so this is just a short beat to clear the
-                      'interactive' landing scroll before the same cascade a
-                      fresh home load plays.
-
-   Keep these values in step with the load-intro delays above and Nav.astro's
-   cleanup timer. An internal navigation with no landing intent takes neither
-   class and the cascade plays at once — the bar is already there.
-
-   reveal-skip (a projects landing resting on a specific card mid-list — Back
-   to projects) reveals everything at rest: no entrance above the target. */
+   Keep this value in step with the load-intro delays above and Nav.astro's
+   cleanup timer. An internal navigation takes no class at all and the
+   cascade plays at once — the bar is already there. */
 html.reveal-hold-draw {
 	--hold: 600ms;
 }
-html.reveal-hold-land {
-	--hold: 150ms;
-}
-
 main {
 	/* The reveal's leftward start offset would otherwise poke a transient
 	   horizontal scrollbar; clip it without creating a scroll container. */
@@ -4724,11 +4700,6 @@ main {
 	opacity: 0;
 	animation: reveal 0.8s cubic-bezier(0.22, 0.68, 0, 1) both;
 	animation-delay: calc(var(--hold, 0ms) + var(--base, 0ms) + var(--i, 0) * 150ms);
-}
-
-html.reveal-skip .reveal {
-	opacity: 1;
-	animation: none;
 }
 
 @keyframes reveal {
@@ -4780,8 +4751,7 @@ html.reveal-skip .reveal {
    cascade settles (~550ms) on an internal navigation — the same beat by
    coincidence, a nice one. It moved 1240 → 940 → 790 with the bar; the
    pair keep their 240ms stagger wherever they go. It pauses under
-   reveal-wait with the rest of the choreography and sits at rest on
-   reveal-skip landings, same as .reveal.
+   reveal-wait with the rest of the choreography, same as .reveal.
 
    THE FINALE IS PAGE-LEVEL ONLY. The about card's .card-rule dividers joined
    it for a few hours on 2026-08-06 and were pulled back out the same day
@@ -4812,10 +4782,6 @@ html.nav-intro-draw.nav-intro-go #site-nav::after {
 html.reveal-wait #projects::before {
 	animation-play-state: paused;
 }
-html.reveal-skip #projects::before {
-	animation: none;
-}
-
 @keyframes rule-grow {
 	from {
 		transform: scaleX(0);

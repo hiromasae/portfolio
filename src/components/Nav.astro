@@ -481,7 +481,6 @@ const onHome = path === '/';
 <script is:inline>
 	// ── Arrival choreography ──
 	// Everything that must happen pre-paint:
-	//   - the projects-landing intent (position the page before first paint)
 	//   - the load intro: the bar's entrance, whose compositor-side keyframes
 	//     (global.css) start at 'interactive' — readyState 'interactive' fires
 	//     before module scripts evaluate, so the intro can't be starved by the
@@ -498,7 +497,6 @@ const onHome = path === '/';
 	(function () {
 		var nav = document.getElementById('site-nav');
 		if (!nav) return;
-		var onHome = nav.dataset.home === 'true';
 		var root = document.documentElement;
 		var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -509,54 +507,6 @@ const onHome = path === '/';
 				sessionStorage.setItem('nav-from', String(Date.now()));
 			} catch (e) {}
 		});
-
-		// A pending "show projects" intent — set when a projects link is clicked on
-		// another page. The flag holds '1' for the top of the list or a project
-		// slug for a specific card. Handled here, not in the module script, so the
-		// scroll to the projects view runs at 'interactive' — before any module
-		// script, and before first paint in practice — and the page opens already
-		// resting on the target instead of visibly jumping to it.
-		var projectsIntent = null;
-		if (onHome) {
-			try {
-				projectsIntent = sessionStorage.getItem('nav-projects');
-				sessionStorage.removeItem('nav-projects');
-			} catch (e) {}
-		}
-		// An exact return position — recorded (as "slug:y") by the module script
-		// when a project card is opened from the list — so "Back to projects"
-		// restores the very scroll position the visitor left, not just the card
-		// aligned under the nav. Honored only when the intent names the same
-		// project the position was recorded for (a detail page reached some other
-		// way falls back to the card alignment), and consumed on use so a stale
-		// entry can't hijack a later landing.
-		//
-		// ⚠ 2026-08-10: DORMANT. "Back to projects" was removed, and it was the
-		// only thing that ever set an intent — so the guard below is never true
-		// and returnY never leaves null. The recorder still writes 'nav-return'
-		// on every card click, which means the entry now accumulates and is
-		// consumed by nobody. Harmless (one short sessionStorage key, overwritten
-		// each click, dies with the tab) and left in place so the feature is one
-		// anchor away from working. Full context at the data-projects-link
-		// handler in the module script below.
-		var returnY = null;
-		if (projectsIntent && projectsIntent !== '1') {
-			try {
-				var ret = sessionStorage.getItem('nav-return');
-				if (ret) {
-					var retSep = ret.indexOf(':');
-					if (ret.slice(0, retSep) === projectsIntent) {
-						returnY = Math.max(0, +ret.slice(retSep + 1) || 0);
-						sessionStorage.removeItem('nav-return');
-					}
-				}
-			} catch (e) {}
-		}
-		// Curtain for the landing (see global.css): first paint can beat both the
-		// 'interactive' scroll below and the browser's own fragment scroll, which
-		// would flash the top of the page for a frame before snapping down to the
-		// card. Content stays hidden until positioned; arrive() always lifts it.
-		if (projectsIntent) document.documentElement.classList.add('projects-landing');
 
 		// Did we arrive from another page of the site? The age cap means returning
 		// to a stale tab (e.g. from an external site much later) reads as a fresh
@@ -572,9 +522,8 @@ const onHome = path === '/';
 		// Only for arrivals that AREN'T an internal navigation — clicking through
 		// the site shouldn't re-introduce the bar on every page — EXCEPT a reload,
 		// which also stamps the clock on its way out (pagehide fires) but should
-		// still get the entrance. First visits and external arrivals qualify. A
-		// projects landing skips it: that arrival opens mid-list, where an
-		// entrance above the target is beside the point. The class goes on
+		// still get the entrance. First visits and external arrivals qualify.
+		// The class goes on
 		// pre-paint so first paint holds the bar hidden at the animation's first
 		// frame (the holds in global.css); runLoadIntro releases it at
 		// 'interactive'.
@@ -591,10 +540,8 @@ const onHome = path === '/';
 		// minute ago would read as the site forgetting them. Those take the
 		// internal-navigation form: bar at rest, cascade at once, the projects
 		// rule still closing it (its --hold+1240ms delay needs no class). The
-		// stamp is written only when the ceremony actually PLAYS — a visitor
-		// whose first arrival is a projects landing (which skips the intro)
-		// still gets the full entrance on their first plain load.
-		// sessionStorage, like nav-from/nav-return: per tab, dies with it.
+		// stamp is written only when the ceremony actually PLAYS.
+		// sessionStorage, like nav-from: per tab, dies with it.
 		// ("Every arrival" was the 2026-08-02 call; it was made when the whole
 		// intro ran ~1.35s.)
 		var navType = '';
@@ -606,7 +553,7 @@ const onHome = path === '/';
 		try {
 			introSeen = !!sessionStorage.getItem('nav-introed');
 		} catch (e) {}
-		var hardArrival = !projectsIntent && (!internal || navType === 'reload');
+		var hardArrival = !internal || navType === 'reload';
 		var loadIntro = !reduce && hardArrival && (!introSeen || navType === 'reload');
 		// The short form: a repeat hard arrival — no bar entrance, but still a
 		// hard load, with everything that implies for the webfonts (see the
@@ -625,18 +572,10 @@ const onHome = path === '/';
 		// this load's arrival shape is decided. PERSISTENT classes on purpose, not
 		// the nav-intro-draw one: that is removed at cleanup, and an
 		// animation-delay that changes mid-flight restarts the animation.
-		//   reveal-hold-land: a landing on the TOP of the list, where the first
-		//     card sits under the bar exactly as on a fresh home load, so the
-		//     cascade plays; a short beat first clears the 'interactive' landing
-		//     scroll.
-		//   reveal-skip: a landing resting on a specific card mid-list (Back to
-		//     projects) — content reveals at rest.
 		//   reveal-hold-draw: a load intro is coming — overlap its choreography.
-		// An ordinary internal navigation takes none of them: the bar is already
+		// An ordinary internal navigation takes neither class: the bar is already
 		// there, so the cascade plays at once.
-		if (projectsIntent === '1') root.classList.add('reveal-hold-land');
-		else if (projectsIntent) root.classList.add('reveal-skip');
-		else if (loadIntro) {
+		if (loadIntro) {
 			root.classList.add('reveal-hold-draw');
 			// The bar and the content enter as one choreography, so they wait on
 			// the type as one too — see whenTypeSettled below. The cascade is
@@ -657,31 +596,7 @@ const onHome = path === '/';
 			root.classList.add('reveal-wait');
 		}
 
-		if (!projectsIntent && !loadIntro && !shortForm) return;
-
-		// Land on the projects view: the exact remembered position when we have
-		// one, otherwise the intended card (or the top of the list) ~12px under
-		// the bar (a one-shot copy of goToProjects in the module script below —
-		// keep the two in step). For a card, the browser's native fragment scroll
-		// has already positioned the page pre-paint (the link navigates to
-		// /#project-<slug>); this settles the final position and drops the hash
-		// off the URL. 'instant' overrides the stylesheet's `scroll-behavior:
-		// smooth`; a landing must not glide.
-		var landOnProjects = function () {
-			if (returnY !== null) {
-				window.scrollTo({ top: returnY, behavior: 'instant' });
-			} else {
-				var el =
-					(projectsIntent !== '1' && document.getElementById('project-' + projectsIntent)) ||
-					document.getElementById('project-list');
-				if (el) {
-					var y = el.getBoundingClientRect().top + window.scrollY - nav.offsetHeight - 12;
-					window.scrollTo({ top: Math.max(y, 0), behavior: 'instant' });
-				}
-			}
-			if (location.hash) history.replaceState(null, '', '/');
-		};
-
+		if (!loadIntro && !shortForm) return;
 		// Don't start the entrance on type that's about to change under it.
 		// The wordmark wipes by clipping a PERCENTAGE of its own box, so a
 		// webfont swap mid-wipe re-resolves the clip against a new box AND
@@ -781,13 +696,6 @@ const onHome = path === '/';
 		// 'interactive' means main and the cards exist and layout is measurable;
 		// it fires before module scripts evaluate.
 		var arrive = function () {
-			if (projectsIntent) {
-				try {
-					landOnProjects();
-				} finally {
-					root.classList.remove('projects-landing');
-				}
-			}
 			if (loadIntro) runLoadIntro();
 			else if (shortForm)
 				whenTypeSettled(function () {
@@ -876,86 +784,6 @@ const onHome = path === '/';
 	if (nav) {
 		const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-		// ── "Projects" → projects section ──
-		// The projects list is the top of the home page, sitting directly under
-		// the bar. A plain #projects anchor lands the first card under the sticky
-		// bar; instead we scroll to the spot where it sits just beneath it.
-		// Cross-page, a sessionStorage flag carries the intent so the home page
-		// lands there directly (see the inline script's `projectsIntent`).
-		const PROJECTS_FLAG = 'nav-projects';
-
-		// The y that rests `el` ~12px under the bar (mirrored by the inline
-		// script's `landOnProjects` — keep the two in step).
-		const compactTargetY = (el) => {
-			const top = el.getBoundingClientRect().top + window.scrollY - nav.offsetHeight;
-			return Math.max(top - 12, 0);
-		};
-
-		// Scroll to the projects view — a specific card when `slug` names one
-		// (Back-to-projects returns you to the card you came from), otherwise the
-		// top of the list.
-		const goToProjects = (smooth, slug) => {
-			const target =
-				(slug && document.getElementById(`project-${slug}`)) ||
-				document.getElementById('project-list');
-			if (!target) return;
-			// 'instant', not 'auto': the stylesheet's `scroll-behavior: smooth`
-			// turns 'auto' into a glide, and the landing snap must not animate.
-			window.scrollTo({
-				top: compactTargetY(target),
-				behavior: smooth && !reduceMotion ? 'smooth' : 'instant',
-			});
-		};
-
-		// Intercept every projects link (nav "Projects", "Back to projects"). On
-		// home we scroll in place. From elsewhere we stash the intent — '1' for the
-		// top of the list, or a slug for a specific card — and navigate. A slug
-		// intent keeps the card's #fragment on the URL: the browser's native
-		// fragment scroll positions the page *during parsing*, before first paint,
-		// so the landing opens on the card with no visible jump (the inline
-		// script's landOnProjects then settles the exact position — a remembered
-		// return spot when one exists — and cleans the hash).
-		// The list intent stays a clean "/" — its target sits so near the top that
-		// the browser's own #projects jump gets clamped and fights the collapse.
-		//
-		// ⚠ 2026-08-10: THIS SELECTOR MATCHES NOTHING. The comment above says
-		// "every projects link (nav 'Projects', 'Back to projects')" and both are
-		// now gone — the nav's went on 08-01, and Hiro removed the project pages'
-		// back button today. This handler is the ONLY writer of PROJECTS_FLAG, so
-		// with no element to bind to, `projectsIntent` in the inline script is
-		// permanently null and everything it gates is unreachable: the
-		// .projects-landing hold, landOnProjects(), reveal-hold-land,
-		// reveal-skip, the returnY restore, and goToProjects() itself (this is
-		// its only caller). The card-click recorder below still writes
-		// 'nav-return' faithfully; nothing reads it any more.
-		//
-		// Deliberately NOT deleted. The machinery is correct and was expensive to
-		// get right — it is one `data-projects-link` on one anchor away from
-		// working again, and that is a far better state to leave it in than
-		// half-unpicked. If it is being retired for good, the removal is this
-		// block, goToProjects, compactTargetY, PROJECTS_FLAG, the card recorder,
-		// and the whole projectsIntent branch of the inline script — as one
-		// change, not piecemeal. See the footer note in pages/projects/[slug].astro.
-		//
-		// The "More projects" strip added to the project pages later the same day
-		// did NOT revive this: its cards are ProjectCards linking straight to
-		// /projects/<slug>, so none of them carries the attribute. It did give the
-		// recorder below a second page to fire on — see its note.
-		document.querySelectorAll('a[data-projects-link]').forEach((link) => {
-			link.addEventListener('click', (e) => {
-				if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-				e.preventDefault();
-				const slug = link.dataset.projectSlug;
-				if (nav.dataset.home === 'true') {
-					history.replaceState(null, '', '/');
-					goToProjects(true, slug);
-				} else {
-					try { sessionStorage.setItem(PROJECTS_FLAG, slug || '1'); } catch (err) {}
-					window.location.href = slug ? `/#project-${slug}` : '/';
-				}
-			});
-		});
-
 		// ── Wordmark → top of the page ──
 		// On home the wordmark's href="/" points at the page we're already on, so
 		// letting it navigate reloads the projects list to show it again. The
@@ -967,37 +795,10 @@ const onHome = path === '/';
 			if (nav.dataset.home !== 'true') return;
 			if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
 			e.preventDefault();
-			// Drop any card fragment left on the URL, same as the Projects link.
+			// Drop any card fragment a bookmark or shared URL left behind.
 			if (location.hash) history.replaceState(null, '', '/');
 			// 'instant' overrides the stylesheet's `scroll-behavior: smooth`.
 			window.scrollTo({ top: 0, behavior: reduceMotion ? 'instant' : 'smooth' });
-		});
-
-		// Opening a project from the list records the exact scroll position it was
-		// opened from (as "slug:y"), so that project's "Back to projects" restores
-		// the very spot the visitor left — not just the card aligned under the nav
-		// (see the inline script's `returnY`). Keyed by slug: a detail page reached
-		// any other way ignores another card's entry.
-		//
-		// ⚠ 2026-08-10: NOT JUST THE HOME PAGE ANY MORE. The project pages grew a
-		// "More projects" strip built on the same grid, so `#project-list` — and
-		// therefore this selector — now matches on two routes. Nothing breaks:
-		// `returnY` is only read when `projectsIntent` is set, and nothing has set
-		// that since the back button went, so this is write-only either way. But
-		// it is a behaviour change waiting to surface if the pipeline is ever
-		// revived, because a strip click records THIS page's scrollY under the
-		// TARGET project's slug — a Y measured on a page you'd never be restoring
-		// to. Scope this to the home page (or key the entry by origin as well as
-		// slug) before switching any of it back on.
-		document.querySelectorAll('#project-list a[id^="project-"]').forEach((card) => {
-			card.addEventListener('click', () => {
-				try {
-					sessionStorage.setItem(
-						'nav-return',
-						`${card.id.slice('project-'.length)}:${Math.round(window.scrollY)}`
-					);
-				} catch (err) {}
-			});
 		});
 	}
 

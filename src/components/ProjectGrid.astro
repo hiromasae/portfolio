@@ -18,9 +18,8 @@ import type { Project } from '../data/projects';
    "MUST STAY FIRST" invariant below can actually be enforced.
 
    ⚠ ONE PER PAGE. The id is hard-coded because every CSS hook keys off it —
-   #project-list is the panel's containing block and offsetParent, the
-   :has(:active) press clock hangs on it, and Nav.astro's scroll recorder
-   selects `#project-list a[id^="project-"]`. Two on a page would give the
+   #project-list is the panel's containing block and offsetParent, and the
+   :has(:active) press clock hangs on it. Two on a page would give the
    second one no panel (the script binds getElementById) and duplicate element
    ids. If a page ever needs two grids, this has to take the id as a prop and
    the CSS has to become a class first. */
@@ -234,7 +233,7 @@ const columnClass = columns === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2';
     The hash guard: a link to a card that happens to sit past the initial run
     (#project-shipyard) would otherwise land on a display:none element and
     scroll nowhere. Nothing on the site writes such a link today — the nav's
-    per-card landing has been dormant since 2026-08-10, see Nav.astro — but a
+    per-card landing was removed on 2026-08-18, see Nav.astro — but a
     visitor's bookmark or a shared URL is outside our control, and the whole
     feature is one line cheaper to make correct than to explain. When it fires,
     the page opens EXPANDED, so the label has to open as "Show less" — and it
