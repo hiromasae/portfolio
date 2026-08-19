@@ -1,43 +1,40 @@
-# Astro Starter Kit: Minimal
+# portfolio
+
+The personal site of Hiro Eernisse, a design engineer in the San Francisco Bay
+Area. It is a small static site: a home page with a grid of work, an about page,
+and one case-study page per project, generated at build time from
+`src/data/projects.ts`.
+
+## Running it
 
 ```sh
-npm create astro@latest -- --template minimal
+npm install
+npm run dev      # http://localhost:4321
+npm run build    # static output to dist/
+npm run preview  # serve the build locally
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Node 22.12 or newer is required.
 
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
+## Layout
 
 ```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+src/
+├── data/projects.ts   # the projects, and the source of the /projects/* routes
+├── pages/             # index, about, and the [slug] case-study template
+├── components/        # nav, project grid, and the pieces the pages compose
+├── layouts/           # the shared document shell
+├── assets/            # case-study images and the self-hosted variable font
+└── styles/            # global CSS and the type/colour scale
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## Why Astro
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
-
-Any static assets, like images, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+The site is a document, not an application, and Astro is the framework that
+takes that literally. Pages are authored as HTML and rendered to static files at
+build time, so no UI framework runtime is shipped to the browser — the only
+JavaScript on a page is the handful of inline scripts the site actually asks
+for, mostly theme handling in the nav. Routing a project detail page per entry
+in a data file is a dozen lines of `getStaticPaths`, and the font pipeline and
+Tailwind both plug into the same config. The result is a site that loads as fast
+as flat HTML, because that is what it is.
