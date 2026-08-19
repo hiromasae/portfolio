@@ -12,6 +12,20 @@ const {
 	title = 'Hiro Eernisse — Design Engineer',
 	description = 'Portfolio of Hiro Eernisse, a design engineer in the SF Bay Area — product UI, design systems, and the work behind them.',
 } = Astro.props;
+
+// Every page canonicalises to ITSELF, absolute, off `site` in
+// astro.config.mjs. Both halves matter and for different reasons: the URL has
+// to be absolute because og:url and rel=canonical are the two tags a relative
+// path is simply invalid in — a crawler resolves them against nothing — and it
+// has to be self-referencing because the alternative, pointing every page at
+// the home page, tells the index the project pages don't exist.
+//
+// Astro.url.pathname, not a hand-passed prop: this layout wraps every route,
+// including the [slug] project pages, and a prop would be one more thing each
+// page has to remember to get right. Derived once here and used by the
+// canonical link, og:url, and nothing else — if a third consumer appears it
+// still reads this, not its own new URL().
+const canonical = new URL(Astro.url.pathname, Astro.site);
 ---
 
 <!doctype html>
@@ -107,6 +121,47 @@ const {
 		<meta name="generator" content={Astro.generator} />
 		<meta name="description" content={description} />
 		<title>{title}</title>
+		{/* ── The shared card (2026-08-18) ──
+		    Everything below is driven by the SAME two props as <title> and the
+		    description above, deliberately: a page that has bothered to write a
+		    good title has already written the card's headline, and letting the
+		    two drift is how a site ends up posting one thing to a search result
+		    and another to a chat window. There is no separate ogTitle prop for
+		    that reason — if a page ever genuinely needs to say something
+		    different when shared, add it then and let this fall back to title,
+		    rather than carrying an unused knob now. */}
+		<link rel="canonical" href={canonical} />
+		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content="Hiro Eernisse" />
+		<meta property="og:url" content={canonical} />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		{/* NO og:image, and that is a decision rather than an omission.
+		    legacy/og-image.png is still in the repo and was tempting — it is
+		    the right dimensions and it is already there — but it is a
+		    screenshot of the PREVIOUS site: navy gradient and an orange pill
+		    button where this one is paper and green, set in a face this site
+		    doesn't use, over a headline ("Recent CS grad designing at the speed
+		    of AI", "Subframe. Claude. No handoff required.") that appears
+		    nowhere in src/ any more. It even carries the browser scrollbar down
+		    its right edge. Shipping it would put a picture of a site that no
+		    longer exists at the top of every link to this one, and a card that
+		    LOOKS wrong is worse than a card that is merely plain — the reader
+		    trusts the image over the text and arrives expecting the other site.
+		    Title and description alone still beat a bare URL, which is what
+		    every link to this site rendered as until today.
+		    If a real card image is ever made: drop it in public/, point
+		    og:image at `new URL('/og.png', Astro.site)` — absolute, same reason
+		    as canonical — add og:image:width/height and an og:image:alt, and
+		    move the twitter:card below up to summary_large_image. */}
+		{/* summary, NOT summary_large_image, precisely BECAUSE there is no
+		    image: the large-image card is a frame built around a picture, and
+		    asking for one without supplying it is how you get the stretched
+		    blank panel with the text crushed underneath. summary degrades to a
+		    clean text card. Twitter reads the og: tags above for title,
+		    description and url, so those aren't repeated here — only the two
+		    things it has no Open Graph equivalent for. */}
+		<meta name="twitter:card" content="summary" />
 	</head>
 	<body>
 		<slot />

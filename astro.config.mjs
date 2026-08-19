@@ -5,6 +5,18 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
+  // The production origin, and the ONLY place it is written down. Everything
+  // absolute in the <head> — canonical, og:url, and og:image if one is ever
+  // added — is derived from this through Astro.site in Layout.astro, so moving
+  // the site to another domain is this one line and nothing else. Added
+  // 2026-08-18 with the social card: og:url and canonical are meaningless
+  // relative, and `new URL(path, Astro.site)` throws at build time without it,
+  // so the config and those tags land together or not at all.
+  //
+  // https, and no trailing path. The canonical a crawler is handed has to be
+  // the URL a visitor actually ends up on — naming the http:// form on a site
+  // that redirects to https just books a redirect on every crawl.
+  site: 'https://hiroeern.com',
   // ── Type ── Recursive, SELF-HOSTED (2026-08-16). It used to come off the
   // Google Fonts CDN as a plain <link rel=stylesheet>, which put a two-hop
   // chain in front of the site's only face on EVERY page load: connect to
