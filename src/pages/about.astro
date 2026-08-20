@@ -271,7 +271,13 @@ const tools = [
 				    decorative and aria-hidden, or it reads out as "waving hand" in
 				    the middle of a Japanese greeting. */}
 				<h1 class="mb-8 text-3xl [font-weight:var(--weight-emph)] tracking-tight text-[var(--ink-heading)]">
-					はじめまして。<span aria-hidden="true" class="greeting-wave"><Icon name="wave" /></span>
+					{/* lang="ja" (2026-08-18): the document is lang="en", so without this a
+					    screen reader reads these five kana with an English voice — the first
+					    thing on the page, and unintelligible. The span wraps the RUN, not the
+					    heading: the wave beside it is aria-hidden and the h1 carries nothing
+					    else, but tagging the heading would claim the whole line is Japanese
+					    and would be wrong the moment anything English joins it. */}
+					<span lang="ja">はじめまして。</span><span aria-hidden="true" class="greeting-wave"><Icon name="wave" /></span>
 				</h1>
 				{/* text-sm (16.625px), down from base (19px) on 08-03 — Hiro's ask,
 				    applied to the body copy only. The two h2s and the greeting stay
