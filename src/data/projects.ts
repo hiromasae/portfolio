@@ -269,8 +269,11 @@ export const projects: Project[] = [
 		   re-shot narrower.
 
 		   All four are ~2530 wide, the 2x the 920px render wants; the same figure
-		   migaki records. Both a .png and a .webp are committed for each, matching
-		   every other project here, and the .webp is what the site loads. */
+		   migaki records. One file per shot is committed, in the format the entry
+		   below names — these four are .webp; stacksmith and shipyard are .png.
+		   The .png twin that used to sit beside every .webp is gone: nothing
+		   referenced them and they were 14 MB of an 18 MB build. Re-shoot and
+		   you commit the one file, not the pair. */
 		cover: '/images/ejs0.webp',
 		images: [
 			{ src: '/images/ejs1.webp', w: 2532, h: 1322, caption: 'The site as it is today' },
