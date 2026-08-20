@@ -1,0 +1,79 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+---
+
+{/* ── The 404 (2026-08-18) ──
+    There wasn't one, so a mistyped or rotted URL fell through to whatever the
+    host draws — a page with no bar, no theme, no type, and no way back into the
+    site except the browser's own controls. On a portfolio the likeliest visitor
+    to hit this is someone following a stale link to a project from a CV or a
+    message, which is the worst possible moment to hand them a host's default.
+
+    IT IS THE HERO'S SHELL, deliberately, not a layout of its own: same
+    max-w-[960px]/px-5 main, same centred block, same reveal cascade, same
+    footer, same one .btn. A 404 that looks like the site is the whole point —
+    it says "you are still here, the address was wrong" rather than "something
+    broke". Everything below is a value this file borrows; nothing here is a new
+    decision except the words.
+
+    Astro emits this to dist/404.html on a static build; Netlify, Vercel and
+    Cloudflare Pages all serve that automatically for an unmatched path. No
+    config needed, but note it IS convention rather than a guarantee — a host
+    that wants an explicit rule needs one. */}
+<Layout
+	title="Not found — Hiro Eernisse"
+	description="That page doesn't exist. The rest of the portfolio is one link away."
+>
+	<Nav />
+
+	<main class="mx-auto max-w-[960px] px-5">
+		{/* --i: 0, one block, matching the home hero's single entry. The cascade
+		    machinery is shared, so this needs no hold or base of its own. */}
+		<section class="reveal pt-28 pb-32 text-center sm:pt-32 sm:pb-36" style="--i: 0">
+			{/* The page's h1, and the site's only heading that is an apology. Set at
+			    the hero's own size and ink rather than a page-title scale: this is
+			    one sentence on an otherwise empty page, so it does not need to
+			    out-rank anything, and matching the hero keeps the two entrances
+			    identical. */}
+			<h1 class="mx-auto max-w-[var(--measure)] text-lg leading-relaxed text-[var(--ink-hero)]">
+				That page doesn't exist.
+			</h1>
+			{/* --ink-soft, a step back from the line above: the h1 says what
+			    happened and this says what to do, which is the quieter half. Capped
+			    at --measure with the heading so the two share a left and right
+			    edge. */}
+			<p class="mx-auto mt-3 max-w-[var(--measure)] text-sm leading-relaxed text-[var(--ink-soft)]">
+				The link may be out of date, or the address may have a typo in it.
+			</p>
+			{/* The site's one real button, pointed home — the same control the hero
+			    uses for /about, with the same arrow drawn at rest for the same
+			    reason (it distinguishes a button that navigates from one that acts).
+			    Home rather than /projects: the projects list IS the home page. */}
+			<p class="mt-6">
+				<a href="/" class="btn">
+					Back to the work
+					<svg
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						aria-hidden="true"
+						class="inline-block h-[0.85rem] w-[0.85rem]"
+					>
+						<line x1="4" y1="12" x2="19" y2="12"></line>
+						<polyline points="12 5 19 12 12 19"></polyline>
+					</svg>
+				</a>
+			</p>
+		</section>
+	</main>
+
+	{/* The site's one footer, a fourth time — see the note in [slug].astro for
+	    why all routes end the same way. */}
+	<footer class="mx-auto max-w-[960px] px-5 py-10 text-xs text-[var(--ink-soft)]">
+		<span>© 2026 Hiro Eernisse</span>
+	</footer>
+</Layout>
