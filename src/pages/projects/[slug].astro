@@ -353,19 +353,22 @@ const others = [
 			    border, radius and bed still belong to the <img>, so the rendered
 			    page is pixel-identical to what it was before the wrapper existed.
 
-			    The aria-label names the POSITION ("image 2 of 5") rather than
-			    repeating the alt text underneath it, which the button already
-			    exposes; a screen reader reaching this hears the alt, then what the
-			    control does with it.
+			    The label names the POSITION ("image 2 of 5") rather than repeating
+			    the alt text underneath it, which the button already exposes; a
+			    screen reader reaching this hears the alt, then what the control
+			    does with it. It rides in data-shot-label rather than in an
+			    aria-label because the resting state has to carry no ARIA at all —
+			    see the note on the button itself for why.
 
 			    ⚠ THE BUTTON IS ONLY A BUTTON ON A POINTER DEVICE (2026-08-14,
 			    Hiro: mobile shouldn't have any zooming in or out, since you can
 			    zoom with your fingers on the page directly). The markup is static
 			    and identical everywhere, so the script downstairs is what decides:
-			    on a coarse pointer it takes the tab stop and the button role back
-			    off these and never opens anything. Read that block before treating
-			    this element as unconditionally interactive — it is markup for the
-			    case where a cursor exists.
+			    it ships DISABLED and presentational and promotes to a real button
+			    only where a fine pointer exists, so on a coarse one the element
+			    stays exactly as it arrived and never opens anything. Read that
+			    block before treating this element as unconditionally interactive —
+			    it is markup for the case where a cursor exists.
 
 			    ── The <figure> wrapper and the caption (merged in from the caption
 			    branch, 2026-08-14) ──
@@ -728,7 +731,7 @@ const others = [
 		// The <img> keeps its alt on both sides; role presentation applies to
 		// the wrapper alone, not to its contents.
 		//
-		// ⚠ ALL FOUR ATTRIBUTES MOVE TOGETHER, and the pair that looks
+		// ⚠ ALL THREE ATTRIBUTES MOVE TOGETHER, and the pair that looks
 		// redundant is not (2026-08-18). This previously toggled tabIndex and
 		// role only, which did NOTHING: ARIA's presentational-roles conflict
 		// resolution ignores role="presentation" on an element that is
@@ -741,6 +744,15 @@ const others = [
 		// reason — hence data-shot-label. Drop any one of them and the wrapper
 		// silently becomes an announced button again.
 		//
+		// tabIndex is NOT the fourth member of that set and was dropped from it
+		// (2026-08-18). `disabled` already decides focusability both ways — a
+		// disabled <button> is unfocusable no matter its tabindex, and an
+		// enabled one is focusable without being given tabindex="0" — so the
+		// toggle only ever restated what the line above it had settled. Worse,
+		// it was the half that looked like it was doing the work: this is the
+		// attribute the broken version leaned on, and leaving it in kept that
+		// reading alive. Don't add it back to "make the demotion explicit".
+		//
 		// Checked both directions against Chrome's AX tree, since a trackpad
 		// arriving mid-session has to flip this live: promoted gives
 		// role=button with the label, demoted removes the node entirely.
@@ -749,12 +761,10 @@ const others = [
 				if (pointer.matches) {
 					shot.disabled = false;
 					shot.removeAttribute('role');
-					shot.tabIndex = 0;
 					shot.setAttribute('aria-label', shot.dataset.shotLabel ?? '');
 				} else {
 					shot.disabled = true;
 					shot.setAttribute('role', 'presentation');
-					shot.tabIndex = -1;
 					shot.removeAttribute('aria-label');
 				}
 			});
