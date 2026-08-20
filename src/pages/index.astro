@@ -73,9 +73,21 @@ import { projects } from '../data/projects';
 			    would pass at 300 and keep the lighter drawing. Dark was never the
 			    problem (Lc 93.5, wants 20px at w300); this is a light-theme-only
 			    margin, and it moves with --ink-hero. */}
-			<p class="mx-auto max-w-[var(--measure)] text-lg leading-relaxed text-[var(--ink-hero)]">
+			{/* An <h1>, not a <p> (2026-08-18). The home page had NO h1 at all and its
+			    only headings were the five card <h3>s — so a screen reader arriving at
+			    the site's front door got no document heading and a jump straight to
+			    level 3. This line is the page's statement of what the work is, which is
+			    what an h1 is for; the projects list gets the h2 below it.
+
+			    THE TAG CHANGE IS VISUALLY FREE and that is why it was available: every
+			    size and weight here comes from an explicit class, and Tailwind's
+			    preflight sets h1..h6 { font-size: inherit; font-weight: inherit } — so
+			    the rendered line is byte-identical to the <p> it replaces. Nothing in
+			    the notes above about --ink-hero, --measure or the w300 APCA margin is
+			    affected; they were all about the type, and the type did not move. */}
+			<h1 class="mx-auto max-w-[var(--measure)] text-lg leading-relaxed text-[var(--ink-hero)]">
 				Design engineering, with good sense and taste.
-			</p>
+			</h1>
 			{/* The page's only route to /about, so it's the site's one real button.
 			    mt-6 rather than the old link's mt-4 — a control needs more air off
 			    the line above it than a word set in the same size did.
@@ -127,6 +139,20 @@ import { projects } from '../data/projects';
 		    belongs to the section it introduces rather than floating between two
 		    equal gaps. */}
 		<section id="projects" class="scroll-mt-20 pt-12 pb-16 sm:pt-14">
+			{/* Visually hidden, and the heading tree is the whole reason it exists
+			    (2026-08-18). The cards are <h3> — correct for a card inside a named
+			    section, wrong as the first heading under an h1 — so the level this
+			    supplies is what makes them correct rather than a skipped level. It is
+			    hidden rather than drawn because the section is already introduced by
+			    the rule above it (#projects::before): the page indexes itself with a
+			    hairline for a sighted reader, and this is that hairline's counterpart
+			    for a reader who cannot see it. Drawing it would add a title the design
+			    deliberately does without.
+
+			    OUTSIDE the .reveal, which sits on #project-list — same reason the rule
+			    is: page-level structure is not part of the content cascade. sr-only is
+			    Tailwind's own utility, so this needs nothing in global.css. */}
+			<h2 class="sr-only">Projects</h2>
 			{/* The grid, the travelling hover panel and the script that drives it
 			    all moved into ProjectGrid.astro on 2026-08-10, when the project
 			    pages grew a "More projects" strip and needed the same three things.

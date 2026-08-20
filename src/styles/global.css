@@ -1308,6 +1308,7 @@
 html {
 	/* Bump the base scale so nav + content read larger overall (16px → 19px) */
 	font-size: 118.75%;
+	/* Gated below — see the reduced-motion rule under this block. */
 	scroll-behavior: smooth;
 	/* Always reserve the scrollbar gutter so short pages (e.g. About) don't
 	   shift horizontally relative to long, scrollable ones (e.g. Home). */
@@ -1315,6 +1316,27 @@ html {
 	/* Firefox: a fixed translucent thumb (see note on the WebKit rules below). */
 	scrollbar-width: thin;
 	scrollbar-color: rgba(128, 128, 128, 0.55) transparent;
+}
+
+/* ── The smooth scroll is a MOTION and has to answer the setting (2026-08-18) ──
+   The JS scroll paths were already careful — the wordmark's click handler and
+   goToProjects both branch on prefers-reduced-motion and pass 'instant' — but
+   the declaration above is global, so every scroll the BROWSER drives still
+   glided: a #fragment arrival, the scroll that follows focus, and the .focus()
+   ProjectGrid hands the first revealed card on expand. Those are the paths no
+   handler of ours is standing in front of, which is exactly why the property
+   itself has to be gated rather than each caller.
+
+   `auto`, not `unset`: auto IS the initial value and says so at the point of
+   reading, where unset would have to be resolved back to it.
+
+   This is the one motion in the file that was not already gated; the other
+   fourteen blocks cover transitions and keyframes. If a third scroll caller
+   appears, it needs no branch of its own — this covers it. */
+@media (prefers-reduced-motion: reduce) {
+	html {
+		scroll-behavior: auto;
+	}
 }
 
 /* ── Scrollbar ──
