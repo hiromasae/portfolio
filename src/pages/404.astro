@@ -17,10 +17,23 @@ import Nav from '../components/Nav.astro';
     broke". Everything below is a value this file borrows; nothing here is a new
     decision except the words.
 
-    Astro emits this to dist/404.html on a static build; Netlify, Vercel and
-    Cloudflare Pages all serve that automatically for an unmatched path. No
-    config needed, but note it IS convention rather than a guarantee — a host
-    that wants an explicit rule needs one. */}
+    ⚠ THIS PAGE DOES NOT SERVE ITSELF ON OUR HOST. Astro emits it to
+    dist/404.html, and the PaaS hosts (Netlify, Vercel, Cloudflare Pages) pick
+    that up by convention with no configuration — which is what an earlier
+    version of this note claimed, and it is wrong here. The site runs on S3
+    behind CloudFront, where an unmatched path returns the origin's own error
+    and this file is never reached unless CloudFront is explicitly told to
+    reach for it.
+
+    Two pieces of infrastructure make it work, both described under
+    "Deploying" in the README:
+      · a Custom Error Response mapping 403 and 404 to /404.html, and RETURNING
+        404 — not 200. A soft 404 gets the page indexed, which is the one thing
+        the status code exists to prevent.
+      · a CloudFront Function resolving directory indexes, without which every
+        route but the home page 404s and this page is all anyone ever sees.
+    Neither lives in this repo, so neither is verified by a build. If this page
+    ever starts appearing on valid URLs, the function is the thing to check. */}
 <Layout
 	title="Not found — Hiro Eernisse"
 	description="That page doesn't exist. The rest of the portfolio is one link away."
