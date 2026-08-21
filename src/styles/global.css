@@ -793,10 +793,13 @@
 	   0deg puts --paper at the top of the viewport, exactly where the bar sits,
 	   so the two matched for free — and that coincidence was written down here
 	   as a reason the direction could not change.
-	   It can now. #site-nav paints --ground-grad itself, at the same `fixed`
-	   attachment, so it samples the same coordinates instead of matching by
-	   luck (see the note there). That is what allowed light to reverse on
-	   2026-08-05. Neither theme's direction is pinned by the bar any more.
+	   It can now. #site-nav paints --ground-grad itself against the same
+	   VIEWPORT coordinates, so it samples the same ramp instead of matching by
+	   luck (see the note there — as of 2026-08-21 it reaches those coordinates
+	   by sizing rather than by `fixed` attachment, for repaint reasons that
+	   have their own paragraph; the coordinates themselves are unchanged).
+	   That is what allowed light to reverse on 2026-08-05. Neither theme's
+	   direction is pinned by the bar any more.
 
 	   ── Banding ──
 	   ~4.5 levels spread over a viewport height, and the dark theme has no dither:
@@ -1466,11 +1469,47 @@ body {
    of every page. Sampling instead of matching removes the constraint outright —
    the ground can now be shaded in any direction, in either theme, without the
    bar needing a blur, a veil, or translucency.
-   Keep the layer ORDER and the per-layer attachment in step with the body rule:
-   grain on top and scrolling, gradient beneath it and pinned. */
+   Keep the layer ORDER in step with the body rule: grain on top, gradient
+   beneath it. The ATTACHMENT no longer matches, and the block below is why.
+
+   ── The bar samples the viewport WITHOUT `background-attachment: fixed` ──
+   2026-08-21 (Hiro: a "glitchy bar" — a torn, half-painted strip — appearing
+   at the bar's bottom edge on every theme toggle, Chrome and Arc).
+
+   The paint above is right and none of it changes; what changed is how the
+   viewport anchoring is obtained. `fixed` was the obvious way to ask for it,
+   and it put this element into Chromium's fixed-background invalidation path,
+   whose dirty rect is computed against the VIEWPORT grid. The bar's box is
+   not on that grid: it measures 70.28125px tall, so its bottom edge falls
+   mid-device-pixel, and that last fractional row is the one place on the page
+   where two independently-repainted backgrounds — this one and the body's —
+   share a pixel. Flip the theme and both must repaint it; the fixed path
+   rounds this element's share of it away, so the row keeps a blend of the
+   theme you just left until something else happens to dirty it. That stale
+   row across the full width of an opaque sticky bar is the torn strip. It is
+   a repaint bug, not a paint bug, which is why it never appears in a
+   screenshot — a capture forces the full re-raster that hides it.
+
+   THE ANCHORING IS REPRODUCED BY SIZING INSTEAD, and it is exact rather than
+   close. The bar is `sticky` at top: 0 AND it is the first thing in the body,
+   so its box top coincides with the viewport top at every scroll position —
+   measured 0 at rest and 0 at scrollTop 500. A viewport-anchored gradient is
+   therefore indistinguishable from a box-anchored one sized to the viewport's
+   height, which is all `100% 100vh` at the default `0 0` says. --ground-grad
+   is a 0deg gradient, so only the vertical figure does any work and the width
+   is along for the ride; the bar reads the top ~70px of a 100vh ramp exactly
+   as the body's fixed copy does. With the attachment gone the box takes the
+   ordinary invalidation path, which covers its own fractional edge.
+
+   Do NOT restore `fixed` here to "match the body rule". The two now agree by
+   arithmetic instead of by keyword, and the keyword is what tore. If the body
+   ever needs the same treatment — it also carries a known iOS Safari
+   degradation from the same property, noted at its rule — the replacement
+   named there is a position: fixed pseudo-element at z-index -1, not this. */
 #site-nav {
 	background-image: var(--grain), var(--ground-grad);
-	background-attachment: scroll, fixed;
+	background-attachment: scroll;
+	background-size: auto, 100% 100vh;
 }
 
 /* The bar is sticky, full stop (2026-08-06). A "Sticky bar" switch in the
