@@ -1607,6 +1607,58 @@ body {
    (08-05), needed an explicit !important carve-out for exactly this reason
    because it moved on a transition. Keyframes are the cheaper answer. */
 
+/* ── The bar's height is ROUNDED, and the theme swap is why (2026-08-22) ──
+   Hiro: a "glitchy bar" — a torn, half-painted strip — across the bottom edge
+   of the bar on every theme toggle, in Chrome and Arc.
+
+   The bar's natural height is not a whole pixel. It is
+   2 x --nav-pad-y + the 2.9rem button box, which at the 19px root lands on
+   7.6 + 7.6 + 55.09375 = 70.28125 here and 1.9 + 1.9 + 55.09375 = 58.875 at
+   the phone breakpoint (each term snapped to 1/64px first). So the bar's
+   bottom edge SPLITS a device pixel, and that one row is drawn as a blend:
+   part the bar's paper, part the page's ground showing under it.
+
+   That blend is the bug. Flip the theme and both halves of the row have to be
+   redrawn — but they are not redrawn on the same clock. A flat colour is laid
+   down as a quad that fills the fractional box exactly and changes in the same
+   frame; a GRADIENT has to be rasterised, and raster is asynchronous and
+   tiled. So for a frame or several the row carries the new colour on one side
+   and the old on the other, in whichever tiles have not landed yet — a strip
+   at the bar's edge, torn along its length. Nothing else on the page shows it
+   because nowhere else does an opaque box end on a half pixel over a gradient.
+
+   Narrowed by elimination, on the machine that sees it: removing the ground
+   gradient from BOTH the bar and the page is clean; removing it from either
+   one alone still tears (so one rasterised side is enough); removing the grain
+   instead still tears (so it is the gradient, not the tile); removing the
+   hairline still tears (so it is not the rule). Forcing the height to a whole
+   pixel is clean, which is this rule.
+
+   round() rather than a literal: 70px is only the truth of this breakpoint at
+   this root font size, and the phone bar is 58.875. The expression is the
+   height's own arithmetic, so it tracks --nav-pad-y, the breakpoint and the
+   reader's font size instead of freezing one number — and if the row's box
+   ever stops being 2.9rem, or #site-nav takes padding of its own (it has none
+   today; the padding lives on .nav-pad), this is the line that has to move
+   with it. Rounding to NEAREST, so the bar can lose up to half a pixel rather
+   than always gain one; the 0.28125px the desktop bar gives up here is
+   overflow, not a clip — #site-nav does not scroll and .nav-pad simply hangs
+   that far past it. The BAR renders pixel-identically to what it did before,
+   in both themes at both breakpoints; what does move is everything under it,
+   by that same 0.28125px up on desktop and 0.125px down on the phone, as one
+   rigid offset — document height unchanged, nothing reflowed or rewrapped.
+   That is the same trade the hairlines took when they stopped being borders
+   ("the projects section starts a pixel higher. Nothing is measured off
+   either number" — the two-hairlines block), and it is why this rounds the
+   height rather than compensating with a negative margin: the compensation
+   would buy back a sub-pixel nobody can see at the cost of tucking the first
+   content element under the bar's edge.
+   A browser without round() drops the declaration and gets the old auto
+   height, which is the behaviour this replaces rather than a broken bar. */
+#site-nav {
+	height: round(calc(2 * var(--nav-pad-y) + 2.9rem), 1px);
+}
+
 /* ── Nav geometry ──
    The bar has ONE state. Both its type and its buttons are authored at full
    size and SCALED DOWN into it — the wordmark at --nav-logo-scale, the
