@@ -390,7 +390,7 @@ const others = [
 			    the caption a gap of its own to be tighter than — the one inside the
 			    figure has to stay well under that 5. */}
 			{
-				figures.map(({ src, w, h, caption }, i) => (
+				figures.map(({ src, w, h, caption, alt }, i) => (
 					<figure>
 						{caption && <figcaption class={captionClass}>{caption}</figcaption>}
 						{/* ── SHIPS INERT, PROMOTED BY SCRIPT (2026-08-18) ──
@@ -438,11 +438,18 @@ const others = [
 
 							    Don't drop either attribute to "let CSS handle it" —
 							    CSS is handling it, and this is what it needs. */}
+							{/* alt, then caption, then the number — see the `alt`
+							    field's note in projects.ts for why those are three
+							    different things and not one. The numbered form is
+							    the floor, not the default: it now means a shot was
+							    given neither, which for a picture worth showing is
+							    a bug rather than a state. Every shot on the site
+							    reaches this with one of the first two set. */}
 							<img
 								src={src}
 								width={w}
 								height={h}
-								alt={caption ? `${project.title} — ${caption}` : `${project.title} — image ${i + 1}`}
+								alt={`${project.title} — ${alt ?? caption ?? `image ${i + 1}`}`}
 								loading={i === 0 ? 'eager' : 'lazy'}
 								class="w-full rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface)]"
 							/>

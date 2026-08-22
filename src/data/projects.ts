@@ -62,10 +62,45 @@ export interface ProjectImage {
 	    example of it rather than an exception to it. Don't restore them for
 	    symmetry with the pair; the pair is not a set the rest has to match.
 
-	    An uncaptioned image also falls back to `— image N` for its alt text,
-	    which is worth nothing to a screen reader. That alone is reason enough
-	    not to leave a shot unlabelled when it has anything to say. */
+	    An uncaptioned image used to fall back to `— image N` for its alt text,
+	    which is worth nothing to a screen reader. That is what `alt` below now
+	    answers — a shot can describe itself without saying anything on screen,
+	    so this field stays free to be the design decision it is. */
 	caption?: string;
+	/** The shot's DESCRIPTION for a screen reader, when the picture has more to
+	    say than the caption does — or when it deliberately says nothing on
+	    screen at all (2026-08-22).
+
+	    This exists because the two audiences want different things and the old
+	    code made them one string. The detail page derived alt from `caption`
+	    alone, so the ten shots that carry no caption — every suma and
+	    stacksmith one, shipyard's, and EJS's last two — announced themselves as
+	    "Commercialization Plan Diagrams — image 3". That is the filename read
+	    aloud. Meanwhile the rule above (captions only where the ROLE is
+	    unclear) is a decision about the VISIBLE page, made twice on purpose and
+	    reversed once; the fix for the alt text could not be to overturn it and
+	    caption everything, because a caption that only names the page it is a
+	    picture of is exactly what 2026-08-15 took back out.
+
+	    So: `caption` is what the sighted reader needs in order to place a shot
+	    in the argument. `alt` is what a reader who cannot see it needs in order
+	    to know what is in it. Resolution order on the detail page is
+	    `alt ?? caption ?? \`image ${i + 1}\``, all three prefixed with the
+	    project title — so setting one is enough, and the numbered fallback is
+	    now only reachable by a shot that has been given neither.
+
+	    Describe the CONTENT, not the fact that it is a screenshot ("The All
+	    Hackathons browse page — a grid of hackathon cards…", not "Screenshot of
+	    Shipyard"). The title prefix already establishes whose product it is,
+	    and "image"/"screenshot" is what the surrounding markup says. Length is
+	    free here — nothing renders it — but a sentence is usually the ceiling
+	    before it stops being useful.
+
+	    ⚠ A shot with a caption does NOT need one of these. Where the caption
+	    already describes the picture, it IS the alt text and duplicating it
+	    here just risks the two drifting. migaki's four are the case in point:
+	    "Without migaki" / "With migaki" carry the whole point of the pair. */
+	alt?: string;
 }
 
 export interface Project {
@@ -270,16 +305,32 @@ export const projects: Project[] = [
 
 		   All four are ~2530 wide, the 2x the 920px render wants; the same figure
 		   migaki records. One file per shot is committed, in the format the entry
-		   below names — these four are .webp; stacksmith and shipyard are .png.
-		   The .png twin that used to sit beside every .webp is gone: nothing
-		   referenced them and they were 14 MB of an 18 MB build. Re-shoot and
-		   you commit the one file, not the pair. */
+		   below names. The .png twin that used to sit beside every .webp is gone:
+		   nothing referenced them and they were 14 MB of an 18 MB build.
+		   Re-shoot and you commit the one file, not the pair.
+
+		   EVERY shot on the site is .webp as of 2026-08-22 — stacksmith's three
+		   and shipyard's one were the last PNGs, and converting them at q82 took
+		   1.8 MB down to 322 KB with no visible change at the size they render.
+		   shipyard's alone was 1.0 MB, a quarter of the whole build for one
+		   picture. Encode a new shot the same way (`cwebp -q 82 -m 6`) rather
+		   than committing what the screenshot tool handed you. */
 		cover: '/images/ejs0.webp',
 		images: [
 			{ src: '/images/ejs1.webp', w: 2532, h: 1322, caption: 'The site as it is today' },
 			{ src: '/images/ejs0.webp', w: 2530, h: 1332, caption: 'The same page, rebuilt' },
-			{ src: '/images/ejs2.webp', w: 2528, h: 1386 },
-			{ src: '/images/ejs3.webp', w: 2532, h: 1386 },
+			{
+				src: '/images/ejs2.webp',
+				w: 2528,
+				h: 1386,
+				alt: 'The rebuilt Support page — Stack Overflow and GitHub Issues offered as two cards, above a green "Ready to build?" banner',
+			},
+			{
+				src: '/images/ejs3.webp',
+				w: 2532,
+				h: 1386,
+				alt: 'The rebuilt Documentation page — install and import steps in copyable code blocks, beside an "On this page" table of contents',
+			},
 		],
 		/* ⚠ THIS GOES TO THE SITE AS IT IS TODAY — the OLD page, the one the
 		   first screenshot is of, not the redesign. The redesign is not deployed
@@ -304,11 +355,26 @@ export const projects: Project[] = [
 			'There are a lot of AI tools now, but most directories still feel like long lists with no real context. Stacksmith was my attempt to make that easier to sort through by showing what tools fit different roles, where they overlap, and how they might work together in an actual stack.',
 		work:
 			"I built the browsing around roles and use cases instead of categories, so you start from the job you're trying to do rather than a list you have to read end to end. Comparison views let you put stacks side by side, and mapping how the tools connect puts the overlaps and gaps on the page instead of leaving them for you to work out. The visual system came last, mostly to keep that density readable.",
-		cover: '/images/stacksmith1.png',
+		cover: '/images/stacksmith1.webp',
 		images: [
-			{ src: '/images/stacksmith1.png', w: 1920, h: 981 },
-			{ src: '/images/stacksmith2.png', w: 1920, h: 981 },
-			{ src: '/images/stacksmith4.png', w: 1920, h: 981 },
+			{
+				src: '/images/stacksmith1.webp',
+				w: 1920,
+				h: 981,
+				alt: 'The browse page — role tabs (Designers, Developers, Marketers, Founders, Researchers) over a grid of stack cards, each listing the tools it combines',
+			},
+			{
+				src: '/images/stacksmith2.webp',
+				w: 1920,
+				h: 981,
+				alt: 'One stack opened up — the Growth Engine Content Stack broken into numbered workflow phases, each naming the tool that handles it and the output it hands to the next',
+			},
+			{
+				src: '/images/stacksmith4.webp',
+				w: 1920,
+				h: 981,
+				alt: 'My Saved Stacks — 24 bookmarked stacks in the same card grid, with category and sort controls above it',
+			},
 		],
 		link: 'https://app.subframe.com/a4820e3a0486/design/e6b3b72d-a1bb-41d8-95b6-dfe778ef8e78/share',
 	},
@@ -326,10 +392,30 @@ export const projects: Project[] = [
 			'I drew the user flows for the SumaAdmin platform, the architecture visuals that went into the review materials, and the supporting graphics around risk and process. Most of the work was deciding what to leave out: each diagram carries one idea, so a reviewer can follow the platform end to end without needing the engineering context underneath it. The set gave the team one consistent way to explain the product to people outside it.',
 		cover: '/images/suma1.webp',
 		images: [
-			{ src: '/images/suma1.webp', w: 1100, h: 790 },
-			{ src: '/images/suma2.webp', w: 1069, h: 780 },
-			{ src: '/images/suma3.webp', w: 1068, h: 758 },
-			{ src: '/images/suma4.webp', w: 1068, h: 758 },
+			{
+				src: '/images/suma1.webp',
+				w: 1100,
+				h: 790,
+				alt: 'Three SumaAdmin screens — a license dashboard, a course list, and a completed course record — each paired with a note on what it lets a worker or administrator do',
+			},
+			{
+				src: '/images/suma2.webp',
+				w: 1069,
+				h: 780,
+				alt: 'A comparison table setting Suma against Licentium, Mocingbird, Relias and a paper-based system across eight criteria, from compliance support to record ownership',
+			},
+			{
+				src: '/images/suma3.webp',
+				w: 1068,
+				h: 758,
+				alt: 'The platform from both sides — View A, a care worker\'s renewal progress against the units they still owe; View B, the facility manager\'s dashboard of expiring licenses',
+			},
+			{
+				src: '/images/suma4.webp',
+				w: 1068,
+				h: 758,
+				alt: 'A risk table — five commercialization risks, each with a description, a high, medium or low priority, and the strategies for mitigating it',
+			},
 		],
 		link: 'https://www.yoursuma.com/',
 	},
@@ -345,8 +431,15 @@ export const projects: Project[] = [
 			'A lot of project platforms feel more focused on submission rules than the work itself. Shipyard was meant to feel lighter and more current, with a cleaner way for teams to show what they built and for other people to browse through projects.',
 		work:
 			'I led the product UI decisions with the dev team, working inside their loop instead of handing off finished screens. The main showcase and the discovery flows were the two pieces I owned end to end, and both went through several rounds as the scope of the product moved. Keeping the layouts loose enough to absorb that meant the later changes landed as adjustments rather than redesigns.',
-		cover: '/images/shipyard.png',
-		images: [{ src: '/images/shipyard.png', w: 2530, h: 1390 }],
+		cover: '/images/shipyard.webp',
+		images: [
+			{
+				src: '/images/shipyard.webp',
+				w: 2530,
+				h: 1390,
+				alt: 'The All Hackathons browse page — a grid of event cards, each with its artwork, host, dates, participant count and whether it is open or ended',
+			},
+		],
 		link: 'https://shipyardhq.tech/',
 	},
 ];
