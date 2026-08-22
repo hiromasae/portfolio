@@ -41,9 +41,15 @@ mismatch ships silently.
 
 ```sh
 npm run build
-aws s3 sync dist/ s3://<bucket> --delete
+aws s3 sync dist/ s3://<bucket> --delete --exclude '.DS_Store' --exclude '*/.DS_Store'
 aws cloudfront create-invalidation --distribution-id <id> --paths '/*'
 ```
+
+The `.DS_Store` excludes are belt-and-braces. The build already strips them
+(see `stripDsStore` in `astro.config.mjs`, which explains why they got there),
+so a `dist/` built by `npm run build` has none to exclude — but `aws s3 sync`
+uploads dotfiles like any other file, and a stale `dist/` from before that hook
+existed would carry them straight to a public URL.
 
 ### 1. Directory indexes — required
 

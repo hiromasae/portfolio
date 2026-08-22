@@ -1,7 +1,47 @@
 // @ts-check
+import { readdir, rm } from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import { defineConfig, fontProviders } from 'astro/config';
 
 import tailwindcss from '@tailwindcss/vite';
+
+/* ── Keep .DS_Store out of the build (2026-08-22) ──
+   Astro copies public/ into dist/ verbatim, and macOS writes a .DS_Store into
+   any folder Finder so much as looks at — so public/.DS_Store and
+   public/images/.DS_Store were being built into dist/ and, from there, synced
+   to the bucket by `aws s3 sync`, which uploads dotfiles like anything else.
+   They were publicly readable on the origin; a .DS_Store is a directory
+   listing, so it names files whether or not anything links to them.
+
+   Deleting the two that existed is not the fix. .gitignore already covered
+   them, which is exactly why they went unnoticed for so long — they never
+   appeared in a diff, and they come BACK the next time anyone opens public/ in
+   Finder. An --exclude on the sync command is not the fix either: it only
+   holds for as long as everyone deploying types the documented command (the
+   README's now does, as a second line of defence).
+
+   So the build strips them. It is the one step every deploy goes through no
+   matter how the files get uploaded afterwards, which makes it the only place
+   the guarantee actually sticks. Cheap, too — one recursive readdir of a
+   directory that was just written. */
+const stripDsStore = {
+  name: 'strip-ds-store',
+  hooks: {
+    /** @type {(opts: { dir: URL, logger: { info: (msg: string) => void } }) => Promise<void>} */
+    'astro:build:done': async ({ dir, logger }) => {
+      const root = fileURLToPath(dir);
+      const entries = await readdir(root, { recursive: true });
+      const junk = entries.filter((entry) => path.basename(entry) === '.DS_Store');
+      await Promise.all(junk.map((entry) => rm(path.join(root, entry), { force: true })));
+      // Silent on the happy path — a clean build shouldn't have to say so.
+      if (junk.length > 0) {
+        logger.info(`stripped ${junk.length} .DS_Store file(s) from the build output`);
+      }
+    },
+  },
+};
 
 // https://astro.build/config
 export default defineConfig({
@@ -128,6 +168,7 @@ export default defineConfig({
       },
     },
   ],
+  integrations: [stripDsStore],
   vite: {
     plugins: [tailwindcss()]
   }
