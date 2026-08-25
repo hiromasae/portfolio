@@ -128,6 +128,26 @@ export default defineConfig({
       },
     },
   ],
+  // ── Dev host ── The IP form, NOT `localhost`, and only so the URL this
+  // prints is safe to click. Cmd+clicking a `localhost` URL inside the Claude
+  // Code TUI opens the page TWICE (2026-08-23): Claude Code carries its own
+  // dev-server-aware browser opener, and for that host form it fires alongside
+  // the terminal's OSC 8 open, so one click becomes two tabs — two real loads
+  // ~470ms apart, confirmed in this dev server's own request log. The same URL
+  // written 127.0.0.1 opens once, and so does `localhost` clicked in a plain
+  // iTerm2 tab or handed to `open`, which is what rules out the terminal, macOS
+  // and Astro and leaves the host string as the whole trigger.
+  //
+  // It costs nothing to state. Astro's default here is `false`, which already
+  // means loopback-only — this pins the same reachability to one address rather
+  // than opening anything up, and the binding was IPv4/IPv6-split under the
+  // default anyway (`localhost` resolved to ::1, where 127.0.0.1 wasn't
+  // listening at all). Anyone needing the server on the network still passes
+  // `--host` on the command line, which overrides this.
+  //
+  // A Claude Code fix upstream makes this line pointless, not wrong; drop it
+  // once a `localhost` link opens a single tab again.
+  server: { host: '127.0.0.1' },
   vite: {
     plugins: [tailwindcss()]
   }
