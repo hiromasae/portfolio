@@ -886,7 +886,7 @@
 
 	/* Theme glyph fill rest: the ink half sits right of center in light
 	   (translateX(0)), left in dark (-9px) — see .theme-fill-rect. A var so
-	   the load intro's sweep keyframes can target rest in either theme. */
+	   the click sweep's keyframes can target rest in either theme. */
 	--theme-fill-x: 0px;
 
 	/* The site's default easing. It was cut for the nav's collapse/expand
@@ -899,26 +899,22 @@
 
 	/* ── Motion duration scale ──
 	   Every repeated timing rides one of these tokens; only genuinely one-off
-	   ceremonial timings (the load intro's stagger delays, About's 0.8s reveal)
-	   stay local to their rules.
+	   ceremonial timings (the content cascade's 150ms stagger, About's 0.8s
+	   reveal) stay local to their rules.
 	   --dur-tap: instant feedback — hover/press color changes on buttons, the
 	     nav links (unified here: they previously rode Tailwind's 150ms default).
 	   --dur-gesture: the standard wipe/slide gesture — underlines, pills,
 	     the card arrow, the theme sweep.
-	   --dur-nav: the bar's own beat — now only the wordmark's wipe in the load
-	     intro, which is longer than a --dur-gesture wipe because it's the
-	     widest thing on the bar. It was the collapse/expand tween's duration,
-	     shared by the rAF tween, the cross-page keyframes and the content
-	     hold; all three are gone.
 	   --dur-card: the project card's hover pair — zoom (ProjectCard.astro's
 	     duration-[var(--dur-card)]) and title underline, kept equal so the two
 	     read as one gesture.
-	   --dur-draw: the load intro's icon stroke-draw. */
+
+	   --dur-nav (260ms, the bar's own beat) and --dur-draw (420ms, the icon
+	   stroke-draw) came out with the nav's load intro on 2026-09-01 — the bar
+	   no longer has an entrance, and nothing else was spending either. */
 	--dur-tap: 120ms;
 	--dur-gesture: 200ms;
-	--dur-nav: 260ms;
 	--dur-card: 300ms;
-	--dur-draw: 420ms;
 
 	/* ── The travelling slider ──
 	   The nav's hover label, moving between the contact icons, is the only thing on
@@ -1517,9 +1513,11 @@ body {
    so the bar is 70px rather than 71 and the projects section starts a pixel
    higher. Nothing is measured off either number.
 
-   Both ENTER by growing centre-out at the tail of the page's load choreography
-   — see the hairlines' entrance block after the content reveal rules before
-   adding any transform here; scaleX is spoken for during the intro. */
+   ONLY THE PROJECTS RULE ENTERS, growing centre-out at the tail of the page's
+   load choreography — see the hairline's entrance block after the content
+   reveal rules before adding any transform to it; scaleX is spoken for there.
+   The bar's line has no entrance of its own: it grew in with the nav's load
+   intro until 2026-09-01 and now paints at rest with the rest of the bar. */
 #projects {
 	position: relative;
 }
@@ -4554,179 +4552,6 @@ body {
 	opacity: 0.55;
 }
 
-/* ── Load intro: the bar's entrance on a hard load ──
-   Played only on arrivals that aren't an internal navigation — a reload, a
-   first visit, an external referrer (gated in Nav.astro; clicking through the
-   site gets no entrance, so the bar isn't re-introduced on every page).
-
-   The wordmark wipes in left→right with the contact pill's clip-path grammar,
-   then the icons stroke-draw their outlines (each shape's measured length
-   rides in --len, so one dash animation draws every one of them edge-to-edge
-   over the same duration; see the dash-hold comment below for why true units,
-   not pathLength), and finally the theme toggle draws its circle and sweeps
-   its ink into the resting half — the same rightward sweep a click plays, one
-   pattern-period (18 units) of travel ending exactly on --theme-fill-x. (For
-   a day, 08-05 → 08-06, this finale was a settings gear stroking in without
-   a sweep; the sweep came back with the glyph.) As the content cascade lands
-   (1150ms) the bar's bottom hairline grows in from its centre — the
-   hairlines' entrance block below the reveal rules — taking the intro's
-   choreography to ~2350ms; Nav.astro's cleanup timer sits just past that.
-
-   The sweep's tail (1000→1200ms) now OVERLAPS the hairline's start by 50ms,
-   where the gear's silent finale ended clear of it at ~1020. That is the
-   intro's own rule, not a miss — tails overlap here rather than queue — and
-   the hairline still finishes last, which is what makes it the close. The
-   1150 was derived from where the grid lands, so it is the sweep that yields
-   if these ever fight: move its 1000ms delay, not the bar's.
-
-   This is the flourish the EXPANDED masthead used to get; the compact bar had
-   a shorter variant where the buttons wiped in like the type rather than
-   drawing (nav-intro-wipe, ~780ms against this one's ~1350ms). With the
-   masthead gone the bar played the draw at every arrival — Hiro's call
-   (2026-08-02) when the two variants collapsed into one — until 2026-08-06,
-   when the ceremony (grown to ~2.8s with the hairline finale) was gated: an
-   explicit RELOAD always replays it, a stale same-tab return takes the
-   internal-navigation form, once per tab-session otherwise. The gate and its
-   reasoning live at the loadIntro decision in Nav.astro.
-
-   The class is added PRE-PAINT by Nav.astro's inline script: the rules
-   without .nav-intro-go are static hidden holds equal to each animation's
-   first frame, so first paint shows nothing of the bar and the 'go' handoff
-   (added at 'interactive') is invisible. Cleanup removes both classes on a
-   timer just past the last animation; every 'to' frame equals the natural
-   rest state, so that handoff is invisible too. Reduced motion never adds the
-   classes — the bar just paints at rest. */
-html.nav-intro-draw #site-nav .nav-logo,
-html.nav-intro-draw #contact-toggle {
-	clip-path: inset(0 100% 0 0);
-}
-/* The draw variant's dash setup lives ONLY in two transient places — this
-   pre-go hold and the nav-load-stroke keyframes (backwards fill, no
-   forwards) — never in a rule that outlives the animation. The moment each
-   icon's draw ends its dash vanishes and the browser re-renders it as a
-   plain stroke: closed paths get their seam join welded (dashed rendering
-   caps the seam instead) and any pathLength rounding sliver at the tail
-   fills in — AT THAT ICON'S OWN FINISH, where the shape is complete and the
-   switch is invisible. Holding the dash until the global cleanup instead
-   makes every icon visibly "complete itself" in unison at the very end.
-
-   All dash math runs in TRUE user units against each shape's measured
-   length (--len, set inline in Icon.astro / on the toggle circle) — NOT
-   pathLength normalization: Chrome ignores pathLength for dash rendering,
-   so normalized values run in true units anyway, making short strokes pop
-   in instantly and long ones finish early ("jump to completion").
-
-   Not the obvious offset = length either — a dash ending exactly at a
-   path's start still paints its square CAP, dotting every icon while
-   hidden. Offset --len + 1 puts the dash entirely off-path: truly
-   invisible, and the first unit of the draw spends itself reaching the
-   path.
-
-   Every calc() below multiplies through *1px: Chrome's stroke-dash CSS
-   grammar takes bare numbers (legacy SVG form) but NOT calc() results that
-   are unitless numbers — those go invalid at computed-value time, which
-   silently collapses the keyframes' from-offset to 0 and kills the whole
-   draw. px lengths ARE user units for SVG, so the numbers are identical. */
-html.nav-intro-draw:not(.nav-intro-go) #contact-group .btn-icon svg :is(path, rect),
-html.nav-intro-draw:not(.nav-intro-go) .theme-toggle svg > circle {
-	stroke-dasharray: calc(var(--len) * 1px) calc(var(--len) * 2px);
-	stroke-dashoffset: calc((var(--len) + 1) * 1px);
-}
-/* Closed shapes (the rects, Twitter's silhouette, the toggle circle) draw
-   with BUTT caps for the intro's duration: while dashed, the seam start
-   wears a cap, and a square cap overhangs the path end by a full unit —
-   most visibly as an extended beak on Twitter that "clips off" when the
-   drawn seam wraps shut. Butt keeps the seam flush all along, so the weld
-   changes nothing. Open shapes keep their square caps (their dashed and
-   undashed ends are capped alike, so they never had the problem) — and once
-   a closed path is undashed it has no caps at all, so this rule holding
-   until cleanup is inert. */
-html.nav-intro-draw .icon-email rect,
-html.nav-intro-draw .icon-linkedin rect,
-html.nav-intro-draw .icon-twitter path,
-html.nav-intro-draw .theme-toggle svg > circle {
-	stroke-linecap: butt;
-}
-html.nav-intro-draw .theme-fill-rect {
-	/* A pattern-period-and-change left of rest: both rects sit fully off-circle
-	   behind the clip, so the fill is simply absent until the sweep carries it
-	   in. 20, not the period's exact 18: at -18 (light theme) the lead rect's
-	   right edge lands exactly ON the clip's left tangent (x = 3), and Chrome's
-	   clip rasterization leaks the edge's antialiasing as a faint full-height
-	   bar at the clip bounds — the extra 2 units keep the edge clear of it.
-	   (Rest's tangent-touching twin never shows the leak: the circle's own
-	   stroke paints over that column.) */
-	transform: translateX(calc(var(--theme-fill-x) - 20px));
-}
-
-html.nav-intro-draw.nav-intro-go #site-nav .nav-logo {
-	animation: nav-load-wipe var(--dur-nav) var(--nav-ease) both;
-}
-/* The bar's second word, wiping in on the wordmark's own gesture 240ms behind
-   it — where the four icons used to start stroke-drawing, so the beat is the
-   one the rest of the sequence was timed against (2026-08-15).
-
-   THE WHOLE BUTTON, label and caret together, not .btn-quiet__label: the clip
-   is the bar's entrance and the caret is part of what arrives. Wiping the
-   label alone would leave the caret standing on its own for 240ms, announcing
-   a menu whose name hasn't appeared yet. (This used to have a second reason —
-   the label's own background-size underline owned that box's animation — which
-   stopped being true on 2026-08-15 when the underline became a
-   text-decoration. The first reason was always the real one and still holds.)
-
-   That the type wipes rather than draws is also what the icon row's removal
-   cost this sequence: there is no stroked artwork left in the middle of the
-   bar, so the draw is now the toggle's alone at 600ms. It reads as a shorter
-   ceremony with the same shape — wipe, wipe, draw, sweep, rule — rather than
-   as a missing movement. */
-html.nav-intro-draw.nav-intro-go #contact-toggle {
-	animation: nav-load-wipe var(--dur-nav) var(--nav-ease) 240ms both;
-}
-html.nav-intro-draw.nav-intro-go #contact-group .btn-icon svg :is(path, rect) {
-	animation: nav-load-stroke var(--dur-draw) var(--nav-ease)
-		calc(240ms + var(--nav-icon-i, 0) * 90ms) backwards;
-}
-html.nav-intro-draw.nav-intro-go .theme-toggle svg > circle {
-	animation: nav-load-stroke var(--dur-draw) var(--nav-ease) 600ms backwards;
-}
-html.nav-intro-draw.nav-intro-go .theme-fill-rect {
-	animation: nav-load-sweep var(--dur-gesture) var(--nav-ease) 1000ms both;
-}
-
-@keyframes nav-load-wipe {
-	from {
-		clip-path: inset(0 100% 0 0);
-	}
-	to {
-		clip-path: inset(0 0 0 0);
-	}
-}
-@keyframes nav-load-stroke {
-	/* dasharray rides IN the keyframes so it exists only while the animation
-	   does — on end the stroke reverts to undashed in the same frame. At
-	   offset 0 the dash spans [0, --len], which (lengths rounded up) covers
-	   the whole path and wraps closed seams shut. */
-	from {
-		stroke-dasharray: calc(var(--len) * 1px) calc(var(--len) * 2px);
-		stroke-dashoffset: calc((var(--len) + 1) * 1px);
-	}
-	to {
-		stroke-dasharray: calc(var(--len) * 1px) calc(var(--len) * 2px);
-		stroke-dashoffset: 0px;
-	}
-}
-@keyframes nav-load-sweep {
-	/* from == the pre-go hold above (-20px, see the leak note there), so the
-	   'go' handoff stays invisible; 'to' is rest, so the cleanup handoff is
-	   too. The two extra units of travel are imperceptible at this duration. */
-	from {
-		transform: translateX(calc(var(--theme-fill-x) - 20px));
-	}
-	to {
-		transform: translateX(var(--theme-fill-x));
-	}
-}
-
 /* ── Content reveal: the page's entrance under the bar ──
    Left-to-right entrance in the site's horizontal motion language: each
    .reveal element fades and slides in from the left in --i order (× 150ms),
@@ -4745,25 +4570,17 @@ html.nav-intro-draw.nav-intro-go .theme-fill-rect {
    about and project pages still count a few blocks, and two entries is
    still a cascade.
 
-   The cascade starts only after whatever entrance the bar itself is playing,
-   via --hold and the persistent reveal-hold-draw class Nav.astro's inline
-   script sets pre-paint:
-
-   reveal-hold-draw   the load intro is coming, and it OVERLAPS rather than
-                      finishing first: the draw's choreography runs long
-                      (icon draws to ~1020ms), so the content enters when
-                      the theme toggle, the intro's LAST glyph, starts
-                      drawing its circle (its 600ms delay above) — the type
-                      is long landed, the contact draws are mid-flight, and
-                      the final draw finishes over the arriving cards.
-                      Waiting the intro out instead reads as a stall.
-
-   Keep this value in step with the load-intro delays above and Nav.astro's
-   cleanup timer. An internal navigation takes no class at all and the
-   cascade plays at once — the bar is already there. */
-html.reveal-hold-draw {
-	--hold: 600ms;
-}
+   THE BAR TAKES NO ENTRANCE (2026-09-01, Hiro): this cascade is the whole
+   arrival now. The nav used to introduce itself first — wordmark wipe,
+   contact draws, the toggle's circle and sweep — and the content was held
+   behind it by a --hold offset (600ms, the beat the toggle started drawing
+   on) so the two overlapped as one choreography. With the bar simply
+   painting at rest there is nothing to wait for and no offset left to tune:
+   every arrival plays the cascade from 0ms, the shape an internal
+   navigation always had. The only remaining hold is reveal-wait (below,
+   and its critical-hide twin in Layout.astro), which pauses the cascade on
+   a hard load until the webfonts settle so nothing slides in wearing the
+   fallback face. */
 main {
 	/* The reveal's leftward start offset would otherwise poke a transient
 	   horizontal scrollbar; clip it without creating a scroll container. */
@@ -4773,7 +4590,7 @@ main {
 .reveal {
 	opacity: 0;
 	animation: reveal 0.8s cubic-bezier(0.22, 0.68, 0, 1) both;
-	animation-delay: calc(var(--hold, 0ms) + var(--base, 0ms) + var(--i, 0) * 150ms);
+	animation-delay: calc(var(--base, 0ms) + var(--i, 0) * 150ms);
 }
 
 @keyframes reveal {
@@ -4794,64 +4611,41 @@ main {
 	}
 }
 
-/* ── The hairlines' entrance: the page's last strokes (2026-08-05, Hiro) ──
-   The index's two dividers draw themselves LAST, each growing from its centre
-   outward — the page assembles content-first and the rules arrive to index
-   what has landed: the bar's line first, the projects rule a beat behind.
-   Both run the reveal's curve at half-again its clock (1.2s against 0.8s) —
-   same family as the cascade, but unhurried where the content is eager: the
-   close of the choreography, not two more entries in it.
+/* ── The hairline's entrance: the page's last stroke (2026-08-05, Hiro) ──
+   The index's projects rule draws itself LAST, growing from its centre
+   outward — the page assembles content-first and the rule arrives to index
+   what has landed. It runs the reveal's curve at half-again its clock (1.2s
+   against 0.8s) — same family as the cascade, but unhurried where the
+   content is eager: the close of the choreography, not one more entry in it.
 
-   The bar's line is part of the BAR's entrance, so it rides the load intro's
-   classes and an internal navigation — where the bar is already seated —
-   never replays it. Held at scaleX(0) pre-go, then growing at 1150ms — the
-   frame the grid (--i 1, starts 750ms on a hard load, curve front-loads)
-   finishes landing. NO dead beat: the delay walked down through three cuts
-   on 2026-08-06 (1600 — the ~100ms beat it was tuned for against the old
-   per-card cascade turned into a ~450ms stall when the cascade collapsed
-   to two blocks; 1300 — the original beat restored, still "a tad long",
-   Hiro; 1150 — lands-with-the-landing). What survives of "slower and a
-   little after everything loads in" is only the FLOOR: never start the
-   lines before the toggle's circle draw ends (~1020ms) — the first cut at that
-   handoff read as part of the pile-in rather than a close. Derivation if
-   the cascade's shape changes again: start AT the last landing, floor at
-   the intro's last glyph. Keep this delay and Nav.astro's cleanup timer
-   in step.
+   IT USED TO BE TWO LINES: the bar's bottom hairline grew first (1150ms) and
+   this one followed 240ms behind. The bar's line was part of the BAR's
+   entrance, so it went with the load intro on 2026-09-01 and the nav's edge
+   now simply paints at rest. What was a stagger between two rules is a
+   single closing stroke.
 
-   The projects rule is CONTENT — it plays on internal navigations exactly as
-   the cascade does — so its delay rides --hold like every .reveal element:
-   --hold + 790ms lands it 240ms after the bar's line on a hard load (the
-   intro's own first-icon beat) and ~240ms after the two-block no-intro
-   cascade settles (~550ms) on an internal navigation — the same beat by
-   coincidence, a nice one. It moved 1240 → 940 → 790 with the bar; the
-   pair keep their 240ms stagger wherever they go. It pauses under
-   reveal-wait with the rest of the choreography, same as .reveal.
+   790ms: it lands ~240ms after the two-block cascade settles (~550ms) — the
+   beat the pair used to keep between them, now measured against the content
+   alone. It moved 1240 → 940 → 790 while the bar's line still led it, and
+   the derivation is unchanged: start just past the last landing. It pauses
+   under reveal-wait with the rest of the choreography, same as .reveal.
 
    THE FINALE IS PAGE-LEVEL ONLY. The about card's .card-rule dividers joined
    it for a few hours on 2026-08-06 and were pulled back out the same day
    (Hiro): they sit ON A CARD that enters as one object, and internal
    dividers arriving on their own clock read as the card assembling itself
    after it had already arrived. Anything inside a .reveal enters with its
-   reveal; only structure that indexes the PAGE — the bar's edge, the
-   projects rule — earns a line in the finale. The .card-rule block has the
-   full note.
+   reveal; only structure that indexes the PAGE — the projects rule — earns
+   a line in the finale. The .card-rule block has the full note.
 
    scaleX rather than a clip-path inset: the gradient compresses while it
    grows, so the line lengthens with its end-fades intact — a short rule
    becoming a long one, not a long rule being uncovered. transform-origin's
    default centre IS the centre-out. `backwards` fill, not `both`: the 'to'
-   frame equals rest, so each pseudo returns to plain static rendering the
-   frame its animation ends (and the intro classes can be removed later
-   without a pop). */
-html.nav-intro-draw:not(.nav-intro-go) #site-nav::after {
-	transform: scaleX(0);
-}
-html.nav-intro-draw.nav-intro-go #site-nav::after {
-	animation: rule-grow 1.2s cubic-bezier(0.22, 0.68, 0, 1) 1150ms backwards;
-}
+   frame equals rest, so the pseudo returns to plain static rendering the
+   frame its animation ends. */
 #projects::before {
-	animation: rule-grow 1.2s cubic-bezier(0.22, 0.68, 0, 1)
-		calc(var(--hold, 0ms) + 790ms) backwards;
+	animation: rule-grow 1.2s cubic-bezier(0.22, 0.68, 0, 1) 790ms backwards;
 }
 html.reveal-wait #projects::before {
 	animation-play-state: paused;
@@ -4869,8 +4663,6 @@ html.reveal-wait #projects::before {
 	#projects::before {
 		animation: none;
 	}
-	/* The bar's line needs no entry: reduced motion never adds the intro
-	   classes, so its hold and animation simply never apply. */
 }
 
 /* SVG size is fixed now; only the hover/press gesture transitions. Scoped to
