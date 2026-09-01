@@ -86,26 +86,38 @@
 				background-clip: padding-box;
 			}
 
-			/* ── The name, set as a wordmark rather than as a caption ──
-			   This slot used to read "Hiro Eernisse — Design Engineer" in
-			   --ink-soft: a byline, styled like the site's muted tier. In green
-			   it stops being metadata about the card and becomes the second half
-			   of the masthead — the mark's initials on the left, spelled out on
-			   the right, both in --dye-name.
+			/* ── The masthead reads out in full ──
+			   The bar's left slot held "HE" — the site's own wordmark, initials
+			   since 2026-08-02. Spelled out with the descriptor attached it stops
+			   being a mark and becomes a masthead: on a card seen once, by
+			   someone who does not yet know the initials, two letters identify
+			   nobody. The site can use "HE" because a visitor is already there.
 
-			   The descriptor goes with the colour, and has to. "Design Engineer"
-			   in the site's one accent would be the green claiming a job title
-			   rather than a name, and --dye-name is the site's identity colour —
-			   it is spent on the mark and nowhere else (see the dye block in
-			   global.css). The line beside the card in a feed already reads
-			   "Hiro Eernisse — Design Engineer" anyway, so nothing is lost.
+			   OVERRIDES .mark rather than editing it in _card.css — card A still
+			   opens on the initials, and that is right for A: the hero sentence
+			   is already carrying the message, so the mark only has to sign it.
 
-			   Weight 500, one notch under the mark's 600: same voice, quieter,
-			   so the two ends of the bar don't compete for the same rank. */
-			.mark-full {
-				font-size: 26px;
-				font-weight: 500;
+			   34px, not the mark's 46. The string went from two characters to
+			   thirty-one, and holding the old size would have run it a third of
+			   the way across the bar and made the identity line out-shout the
+			   work below it, which is the one thing this card exists to show. */
+			.mark {
+				font-size: 34px;
+				font-weight: 600;
 				letter-spacing: -0.02em;
+				color: var(--dye-name);
+			}
+
+			/* The initials keep the right-hand slot, where the spelled-out name
+			   sat until the masthead took the words. Two green objects, but they
+			   are not the same object twice — one names, one signs, and the bar
+			   is bookended by the identity the way the site's nav is anchored by
+			   it. Sized under the masthead deliberately: the mark is the echo
+			   here, not the lead. */
+			.mark-right {
+				font-size: 30px;
+				font-weight: 600;
+				letter-spacing: -0.025em;
 				color: var(--dye-name);
 			}
 
@@ -122,8 +134,8 @@
 	<body>
 		<div class="card">
 			<div class="bar">
-				<span class="mark">HE</span>
-				<span class="mark-full">Hiro Eernisse</span>
+				<span class="mark">Hiro Eernisse — Design Engineer</span>
+				<span class="mark-right" hidden>HE</span>
 			</div>
 			<div class="rule"></div>
 			<div class="grid">
