@@ -188,8 +188,10 @@ const columnClass = columns === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2';
 			<span class="btn-quiet__label">Show more</span>
 			{/* The hero's arrow turned a quarter: same 24-unit box, same line +
 			    polyline, pointing at what it will reveal instead of where it
-			    will take you. Sized to .contact-caret's 0.85rem, the bar's
-			    figure for a glyph beside 0.875rem text.
+			    will take you. 0.85rem, the site's figure for a glyph beside
+			    0.875rem text — it was the bar's caret's size, and since that
+			    caret went with the Contact dropdown (2026-09-01) the rule in
+			    global.css that sizes THIS arrow is where the figure now lives.
 			    It is drawn pointing DOWN in both states and turned over by CSS
 			    when the grid is open — see the rotate rule in global.css for why
 			    a rotation rather than a second set of points. That turn is the

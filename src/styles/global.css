@@ -1787,42 +1787,33 @@ body {
 	     · the floor is the HIT BOXES, not the ink. The two regions met with
 	       1.3px to spare at 14.25px.
 	   The full derivation is in git at the commit that removed this. */
-	/* The bar's vertical padding. A TOKEN as of 2026-08-17, and only because it
-	   has a second reader: .contact-menu's `top` has to add this back to clear
-	   the hairline, and that rule's note has said since it was written that "the
-	   two move together or the panel starts overlapping the rule" — which was a
-	   convention held by a comment, and the phone pass below is exactly the kind
-	   of change that breaks one. Now it is arithmetic. The value's own argument
-	   is at the .nav-pad rule below; this line is only where it lives. */
+	/* The bar's vertical padding. Became a TOKEN on 2026-08-17 because it had a
+	   second reader — the contact panel's `top` had to add it back to clear the
+	   hairline, and "the two move together or the panel overlaps the rule" was a
+	   convention held by a comment rather than by arithmetic. The panel is gone
+	   (2026-09-01) and that reader with it, so this is once again spent in one
+	   place. It stays a token anyway: the phone block below overrides it, and a
+	   value that moves under a media query reads better named than inlined at
+	   both ends. The value's own argument is at the .nav-pad rule below; this
+	   line is only where it lives. */
 	--nav-pad-y: 0.4rem;
-	/* ── What the caret costs the word, halved ──
-	   2026-08-17, Hiro: "make it so that the text is centred". The trigger was
-	   centred on the bar earlier the same day and its BOX landed dead on the
-	   axis — measured 0.00px — but the box is [label][gap][caret] and the
-	   caret hangs off one end only, so the word itself sat 11.87px left of
-	   centre and the bar read as leaning. Centring the box is not centring the
-	   thing anybody looks at.
+	/* ── REMOVED 2026-09-01 with the trigger it corrected: --nav-trigger-optical
+	   ── What the caret costs the word, halved ──
+	   The trigger was centred on the bar and its BOX landed dead on the axis —
+	   measured 0.00px — but the box was [label][gap][caret] and the caret hung
+	   off one end only, so the word itself sat 11.87px left of centre and the
+	   bar read as leaning. Centring the box is not centring the thing anybody
+	   looks at, so half of what stood to the right of the label was added back
+	   as a margin: (0.4rem + 0.85rem) / 2 = 11.875px.
 
-	   This is the same correction, and the same argument, as the unequal
-	   paddings on .nav-inner: the two sides are not equal and that is what
-	   makes them look equal. There, the toggle's glyph sits inside its box and
-	   the padding subtracts the difference; here the caret sits beside the
-	   word and this adds it back.
-
-	   (0.4rem + 0.85rem) / 2 = 0.625rem = 11.875px, which is half of what
-	   stands to the right of the label — .btn-quiet's `gap` plus
-	   .contact-caret's `width`. Written from both sources rather than as
-	   11.875px so it follows either of them; NEITHER IS A TOKEN, so if this
-	   ever drifts, those two rules are where to look. It is spent twice and in
-	   opposite directions — see #contact-menu-wrap, which moves right by it so
-	   the word lands on the axis, and .contact-menu, which takes it back off so
-	   the PANEL stays on the axis rather than following the button. Both read
-	   this, so they cannot disagree.
-
-	   Scoped by consequence rather than by media query: the only consumer that
-	   renders below 640 is the trigger, and at 640 and up its wrap is
-	   display: none. Nothing here needs to know that. */
-	--nav-trigger-optical: calc((0.4rem + 0.85rem) / 2);
+	   KEPT AS A NOTE because the trap outlives the token and the icon row does
+	   not have it. Four icons are symmetric about their own centre, so centring
+	   their box centres their ink; the moment anything ASYMMETRIC is centred on
+	   this bar — a word with a caret, a label with a badge, an icon with a
+	   count — its box landing on the axis is not the same as it looking centred,
+	   and the correction is half of whatever hangs off the one end. It is the
+	   same argument the unequal paddings on .nav-inner make, and that rule is
+	   still live if a worked example is wanted. */
 }
 
 /* ── The phone bar: what the menu settled ──
@@ -1839,19 +1830,60 @@ body {
    and both were the same move: find 30px somewhere in a row that wanted 30px
    more than it had.
 
-   The contacts became a menu instead (2026-08-15 — the block in Nav.astro has
-   that argument, which is about NAMING and not about width), and then the menu
-   became the MOBILE surface only, which is what finally settled this. Below
-   640px the bar holds three drawn things — the wordmark, the word "Contact"
-   with its caret, and the toggle — measured at 320 with everything at its
-   authored value and the ends on the column: ~113px of content into 261.5px of
-   room. The six-thing arithmetic above now belongs to widths of 640 and up,
-   where 261.5px of room is 592.5 and none of it was ever tight.
+   The contacts became a menu instead (2026-08-15 — the block in Nav.astro had
+   that argument, which was about NAMING and not about width), and then the menu
+   became the MOBILE surface only, which is what settled this for a fortnight.
+   Below 640px the bar held three drawn things — the wordmark, the word
+   "Contact" with its caret, and the toggle — ~113px of content into 261.5px of
+   room, and the six-thing arithmetic belonged to widths of 640 and up where
+   none of it was ever tight.
 
-   So both accommodations are gone rather than re-tuned: --nav-inset is flat at
-   the column's gutter, and --nav-icon-gap is back to a flat 0.8rem because the
-   row it spaces no longer exists at any width that cannot afford it. The
-   crowding was never solved by finding 30px. It was solved by not asking a
+   ── 2026-09-01: THE SIX THINGS ARE BACK, AND THEY FIT ──
+   The menu is gone at every width (see the surface note further down) and the
+   icon row is the phone's contact surface, so this block is once again spacing
+   a 320px bar that holds a wordmark, four icons and a toggle. That is the exact
+   arithmetic the paragraph above says overlapped — and re-measured, it does not.
+   At 320, at the flat gap, the drawn glyphs cleared by 14.0px on the wordmark's
+   side and 12.9px on the toggle's, and the hit regions by 9.0px and 4.1px —
+   tight at the toggle end, which is what the ramp below is for, but nothing
+   overlapping and no tap landing on the wrong control at any width from 320 up
+   (checked with elementFromPoint at every button's centre, which is how the
+   08-14 fault was found).
+
+   What changed in between was not this block. It was the 08-17 centring pass:
+   the contact cluster and the toggle are both out of flow now, the toggle takes
+   margin-left: auto, and .nav-inner's paddings are deliberately unequal so both
+   DRAWN edges land on the column. The 08-14 measurements were taken against a
+   row where all six things sat in flow on one rhythm. Which is the phone essay's
+   own closing line, arriving a second time: fit was never this bar's real
+   problem, and the pass that fixed the reading fixed the arithmetic too.
+
+   ONE OF THE TWO ACCOMMODATIONS COMES BACK, and it is the one this block's own
+   advice nominated. --nav-inset stays flat at the column's gutter — those ends
+   are the page's own alignment and Hiro asked for them explicitly. But
+   --nav-icon-gap was returned to a flat 0.8rem on the argument that "the row it
+   spaces no longer exists at any width that cannot afford it", and that premise
+   has just expired: the row exists at 320 again. So the 0.5rem ramp is below,
+   and it is worth 5.7px of clearance at each end of the row for reasons that
+   compound — a tighter gap shrinks the DRAWN cluster (the close-ranks pitch is
+   cut against this token) and the HIT REGIONS with it (the ::after is half the
+   gap on every side, so neighbouring icons still tile exactly).
+
+   WHY IT IS NEEDED AT ALL, since 4.1px is a positive number: the tightest pair
+   in the bar is Twitter's hit region against the toggle's, and 4.1px is the
+   figure for a phone. Read in a desktop browser — where scrollbar-gutter:
+   stable costs 11px and which is the pessimistic reference every 320
+   measurement in this file is taken in — the same bar has 309px to spend and
+   those two regions OVERLAP by 1.4px. One control's tap landing on its
+   neighbour is the fault this file has fixed twice before (the group's
+   oversized box on 08-14, the toggle wrap's dead ground on 08-17), and it is
+   not worth shipping for the sake of a flat token. With the ramp both reference
+   widths clear with room: 11.6px at 320 and 6.1px at 309, against 4.1px and
+   −1.4px without it. The width at which those two regions first touch moves
+   from 312px to 297px — below any viewport this site is going to be read in,
+   which is the point of knowing the number.
+
+   The crowding was never solved by finding 30px. It was solved by not asking a
    320px window to hold six things.
 
    WHAT TO DO IF THIS EVER GETS TIGHT AGAIN, in the order the evidence supports:
@@ -1916,11 +1948,13 @@ body {
    320px window to hold six things, and the emptiness by putting the one thing
    that matters where the eye already is.
 
-   ── Why this is a max-width block when the surface switch above is not ──
-   The contact-surface rule is mobile-first because the mobile surface is the
-   one that has to survive a media query that never resolves — a browser that
-   understands nothing must still get the menu, or the site loses every contact
-   link it has. Nothing here has that property. These are deviations from
+   ── Why this is a max-width block ──
+   It used to be answering a mobile-first surface switch above it, which was
+   written that way so a browser that resolved no media query at all still got
+   the menu rather than nothing. That concern died with the switch: there is one
+   surface now, the markup's own `flex` draws it, and no query has to resolve for
+   the contact links to exist. What is left is the plain reason. These are
+   deviations from
    values that are authored, argued and measured for the wide bar, and writing
    them as the base would mean restating the desktop numbers as overrides and
    moving two of the longest comments in this file away from the values they
@@ -1958,16 +1992,41 @@ body {
 
 		   What it costs is the bar's vertical air, 23.3px → 17.6px from glyph
 		   ink to the bar's edge. That figure is a threshold elsewhere in this
-		   file — it is what --nav-icon-gap was tuned against — so it moving is
-		   not free. But --nav-icon-gap spaces the icon row, which does not
-		   exist at this width, and the other rule that read this number
-		   (--nav-toggle-gap) has since been retired. Nothing else reads it.
+		   file — it is what --nav-icon-gap was tuned against — and when this
+		   landed the note here said the point was moot because the icon row did
+		   not exist at this width. IT DOES AGAIN (2026-09-01), so the coupling
+		   is live and was re-measured rather than re-assumed: the icons' hit
+		   regions run 46.4px tall at the flat gap and 42.7px at the ramp below,
+		   against a 59.0px bar, so they sit wholly inside it with 6.3px to spare
+		   at the worst of the two. The bar is short and the buttons are not
+		   touching the hairline; if this token is ever cut further, that is the
+		   number that runs out first.
 
-		   Spent through the token rather than by overriding .nav-pad, so
-		   .contact-menu's `top` follows it down and the panel keeps clearing
-		   the hairline by the same 0.5rem it always has. That coupling is the
-		   whole reason the token exists. */
+		   Spent through the token rather than by overriding .nav-pad. That was
+		   originally so the contact panel's `top` followed it down and kept
+		   clearing the hairline; the panel is gone, and the token stays because
+		   a value that moves under a media query is better named than inlined. */
 		--nav-pad-y: 0.1rem;
+		/* ── The cluster's gap, ramped (2026-09-01) ──
+		   0.5rem, from the flat 0.8rem — the same value the 08-14 pass used, and
+		   back for the same reason it went away: the row it spaces exists at this
+		   width again. The essay above has the full argument and the measurements;
+		   the short version is that the tightest pair in the bar (Twitter's hit
+		   region against the toggle's) overlapped by 1.4px at the 309px desktop
+		   reference, and this clears it by 4.3px there and 9.8px on a 320px phone.
+
+		   RETUNE ONLY HERE. Three rules are cut against this token and all three
+		   are expressions, so they follow on their own: the close-ranks translate
+		   (the drawn cluster contracts), the icons' ::after (half the gap each
+		   side, so neighbours still tile exactly rather than gaining or losing a
+		   seam), and the group's own `gap`. Setting any of them by eye is what
+		   writing it as an expression exists to prevent.
+
+		   What it costs is target size: the icons' hit regions go 46.4px → 42.7px
+		   square. That is still well over WCAG 2.2's 24px floor and within a
+		   pixel and a half of the 44 the toggle beside them is written to, which
+		   is the number this bar answers to — see .theme-toggle::after. */
+		--nav-icon-gap: 0.5rem;
 	}
 }
 
@@ -2130,8 +2189,9 @@ body {
 
    The bar's other latching states were fixed the same day and the same way —
    .btn-quiet (the Contact trigger, the other thing Hiro reported), .btn-icon
-   (the theme toggle: the one remaining control in the mobile bar that a tap
-   doesn't navigate away from) and .contact-row. The toggle's hover LABEL is
+   (the theme toggle, and since 2026-09-01 the four contact icons beside it) and
+   .contact-row. Two of those four surfaces have since been removed with the
+   dropdown; the pattern is what matters. The toggle's hover LABEL is
    JavaScript, so it carries the same gate in Nav.astro rather than here. Every
    hover-only affordance added to this bar from now on wants this treatment;
    the test for whether it needs it is not "is it in the mobile bar" but "does
@@ -3163,13 +3223,22 @@ body {
 	   Same reasoning, almost word for word, as .project-card__title's when it
 	   made this move first.
 
-	   ⚠ THE PADDING'S REMOVAL HAS KNOCK-ONS ELSEWHERE, because two other rules
-	   existed only to correct for it: .contact-caret and .btn-quiet__arrow each
-	   carried a matching 3px so the flex items had equal boxes, and
-	   .contact-trigger added 3px of margin-top to both to re-centre the ink
-	   `align-items: center` had lifted. All four are gone with it. If any one
-	   of them is restored on its own the trigger will sit 1.5px off the bar's
-	   axis again — see the block that measured it. */
+	   ⚠ THE PADDING'S REMOVAL HAD KNOCK-ONS, because other rules existed only to
+	   correct for it: .contact-caret and .btn-quiet__arrow each carried a
+	   matching 3px so the two flex items had equal boxes, and .contact-trigger
+	   added 3px of margin-top to both to re-centre the ink `align-items: center`
+	   had lifted. All of them are gone — the last two with the Contact dropdown
+	   on 2026-09-01 — and .btn-quiet__arrow in the projects grid is the only
+	   consumer of this family left.
+
+	   THE TRAP IS STILL LIVE AND IS EASY TO RE-ENTER, so the measurement is kept
+	   here rather than with the deleted rules: ANY padding added to one of these
+	   flex items and not the other re-creates it. `align-items: center` centres
+	   the BOXES, empty clearance and all, so the ink inside them lifts by half of
+	   whatever was reserved — measured at 1.32px on the trigger's word, against a
+	   theme toggle beside it sitting at exactly 0.00. The symptom is a control
+	   that looks a pixel high; the cause is never where it shows. Measure against
+	   a glyph with no reservation of its own. */
 	text-decoration-line: underline;
 	/* The site's line weight, and the same 2px the band drew. */
 	text-decoration-thickness: 2px;
@@ -3282,9 +3351,12 @@ body {
    above to lose to. Only `rotate`, sizing and the reduced-motion copy below are
    left, and none of them collide with the base. */
 
-/* The glyph's box, matched to .contact-caret's — the bar's figure for a mark
-   standing beside 0.875rem text. The width/height attributes in the markup are
-   the pre-CSS fallback; this is what actually sizes it.
+/* The glyph's box: 0.85rem, the site's figure for a mark standing beside
+   0.875rem text. It was matched to .contact-caret's, and THIS IS NOW THE ONLY
+   PLACE THAT FIGURE IS WRITTEN DOWN — the bar's caret went with the Contact
+   dropdown on 2026-09-01, so a future glyph beside UI text should be matched to
+   this rule rather than to a deleted one. The width/height attributes in the
+   markup are the pre-CSS fallback; this is what actually sizes it.
    `rotate` is declared at rest so the turn below has something to animate FROM;
    a rotation appearing out of nothing has no start value and would snap. */
 .btn-quiet--down .btn-quiet__arrow {
@@ -3308,12 +3380,12 @@ body {
    way it will now travel.
 
    ROTATION, not a second SVG, and not a flipped polyline: this is a disclosure,
-   and a disclosure's affordance is its STATE rather than a direction of travel
-   — the same argument .contact-caret makes for the bar's caret, which is the
-   only other rotating thing on the site. Note that block reserves rotation
-   within the BAR; this is the projects grid, and it is the second control on
-   the site whose whole job is open-vs-shut, so it earns the same device rather
-   than borrowing one.
+   and a disclosure's affordance is its STATE rather than a direction of travel.
+   The argument was shared with .contact-caret, the bar's caret, which made it
+   first and reserved rotation within the BAR — that caret was removed with the
+   Contact dropdown on 2026-09-01, so this is now the ONLY rotating thing on the
+   site and the reservation it respected has no other claimant. The argument is
+   unchanged and stands on its own: this control's whole job is open-vs-shut.
 
    ROTATION IS ALL THIS STATE CHANGES, and since 2026-08-16 that is the only
    thing the glyph does at all. The state used to get a hover nudge for free
@@ -3417,8 +3489,10 @@ body {
    36.4px target, which clears WCAG 2.2's 24px but sits under both platform
    guidelines — Apple asks 44, Android 48 — and it is the one control on this
    site whose target is exactly the ink it draws. Everything else in the bar is
-   already over: the trigger's region is 45.1px (its own ::after), the panel's
-   rows 43.7px, the contact icons ~41px plus the gap-closing overspill.
+   already over: the contact icons run 42.6px square below 640 and 46.4px above
+   it, since their ::after is cut against --nav-icon-gap and that token ramps.
+   (The two surfaces this roster used to also name — the Contact trigger at
+   45.1px and its panel's rows at 43.7px — were removed on 2026-09-01.)
 
    44, not 48. It is the number the trigger beside it was built to, and two
    neighbouring controls that answer to different guidelines would need
@@ -3440,28 +3514,44 @@ body {
    other by 1.3px, and reaching 3.8px left would have put them 2.5px into each
    other — two controls sharing a tap, on the only two controls a phone has.
    It was paid for by widening --nav-toggle-gap, and then the trigger was
-   centred on the bar (2026-08-17) and the whole question dissolved: they are
-   ~90px apart, that token is retired, and this button now has empty bar on
-   its left at every width and the column's gutter on its right. Worth knowing
-   that the coupling existed, because anything that moves a control back
-   alongside this one inherits it.
+   centred on the bar (2026-08-17) and the question dissolved: ~90px apart, that
+   token retired, empty bar to the left.
+
+   ⚠ IT HAS A NEIGHBOUR AGAIN (2026-09-01). The icon row is the contact surface
+   at every width, so Twitter's hit region is what now stands to this button's
+   left — which is precisely the inheritance the paragraph above warns about,
+   collected two weeks later. It was measured rather than assumed: at 320 the two
+   regions clear by 11.6px, and at the 309px desktop reference by 6.1px, because
+   --nav-icon-gap ramps down below 640 and pulls the row in from both ends. Those
+   figures already include this rule's 3.8px reach. See the phone-bar essay for
+   the ramp and what it is worth; the pair first touches at 297px.
 
    Unconditional rather than scoped to the phone: a coarse pointer is not a
-   width, the surface line at 640 is a proxy for POINTER and a poor one (its
-   own note says so), and an invisible region 3.8px past a glyph costs a mouse
-   nothing. The touch case is the argument; every case is the rule. */
+   width, any width line standing in for one is a poor proxy, and an invisible
+   region 3.8px past a glyph costs a mouse nothing. The touch case is the
+   argument; every case is the rule. (The 640px surface line this used to name
+   as the poor proxy is gone — it was one, and it is the reason its own note
+   gave for never testing pointer with a media query.) */
 .theme-toggle::after {
 	content: '';
 	position: absolute;
 	inset: calc((2.9rem * var(--nav-icon-scale) - 44px) / 2 / var(--nav-icon-scale));
 }
 
-/* Guarded — see the nav-logo block above. The four contact icons are already out
-   of reach of a finger (#contact-group is display: none below 640px), but the
-   THEME TOGGLE wears this class at every width, and a tap on it changes the
-   theme without leaving the page — so the glyph used to stay at full ink
-   afterwards, reading as permanently half-pressed. Not what Hiro reported, and
-   the same bug: it was next in line. */
+/* Guarded — see the nav-logo block above. The argument used to be that only the
+   THEME TOGGLE needed it, because the four contact icons were display: none
+   below 640px and so out of reach of a finger; the toggle wears this class at
+   every width, and a tap on it changes the theme WITHOUT LEAVING THE PAGE, so
+   the glyph stayed at full ink afterwards and read as permanently half-pressed.
+
+   That premise expired on 2026-09-01: the icons are the contact surface at every
+   width now, and a finger can reach all five of these buttons. The guard covers
+   them for free and is why nothing had to be added here — a touch browser
+   synthesises mouseenter on tap and withholds mouseleave until the next one, so
+   an unguarded :hover strands ink under whatever was last tapped. The contacts
+   are the milder case (a tap navigates away, so the stranded state leaves with
+   the page) and the toggle is still the sharp one, but the rule is now load-
+   bearing for both rather than for one. */
 @media (hover: hover) {
 	.btn-icon:hover {
 		color: var(--ink);
@@ -4050,170 +4140,17 @@ body {
 
 
 
-/* ── The Contact trigger ──
-   2026-08-15. .btn-quiet supplies everything a borderless text control on this
-   site already is — 0.875rem, --weight-ui, --ink-soft resting on --ink, the
-   2px focus ring — and had been styling nothing since "Back to projects" was
-   removed on 08-10. Its own note says the next borderless text link on the
-   site wants exactly it. This is that link, so what follows is only the
-   difference, not a second definition.
+/* ── The Contact trigger stood here (2026-08-15 → 2026-09-01) ──
+   A .btn-quiet reading "Contact" with a caret that rotated 180° while open. It
+   is gone with the panel it opened; see the surface note below for why.
 
-   ⚠ 2026-08-15: THE WIPE OVERRIDE IS GONE, and so is the wipe. This block used
-   to flip `background-position` to left bottom, because .btn-quiet's band ran
-   right-to-left toward a BACK link's arrow and this control's caret is on the
-   right. The family now draws the site's shared text-decoration underline — a
-   colour fade with no direction to flip — so there is nothing left to override.
-   See .btn-quiet__label for the change and what it cost. The trigger takes the
-   new gesture unmodified, which is the point of it. */
-
-/* ── The word sat 1.32px HIGH, and the underline was why — FIXED AT SOURCE ──
-   2026-08-15, Hiro: the trigger doesn't look centred against the rest of the
-   bar. Measured, it wasn't: the ink of "Contact" centred 1.32px above the bar's
-   axis and the caret 1.23px above it, while the theme toggle's glyph beside them
-   sat at exactly 0.00.
-
-   Not a typographic subtlety — a box error, and the underline caused it.
-   .btn-quiet__label reserved 3px of padding BELOW the text so the wipe cleared
-   the descenders, and .contact-caret carried a matching 3px so the two flex
-   items had equal boxes. `align-items: center` then centred those boxes, empty
-   clearance and all, lifting everything drawn inside them by half of it. The
-   toggle had no such reservation, so it alone was honest, and standing next to
-   it is what made the error visible.
-
-   The correction WAS the same 3px added back at the top as margin. Both halves
-   are gone now, hours apart: the underline stopped being a background band the
-   same day (see .btn-quiet__label), a text-decoration is drawn by the text and
-   reserves no box at all, and with nothing lifting the ink there is nothing to
-   push back down. A margin-top here now would be the 1.32px error with its sign
-   flipped.
-
-   Kept as a note rather than deleted because the measurement is the useful
-   part and the trap is easy to re-enter: ANY padding added to one of these flex
-   items and not the other reintroduces it, and `align-items: center` will hide
-   the cause while showing the symptom. Measure against the theme toggle's
-   glyph — it is the honest one in the row. */
-
-/* ── The word is 20px tall; the target must not be ──
-   Measured: the trigger's drawn box is 88 × 20.4px, because a 0.875rem line at
-   line-height 1 is all it is. That is UNDER WCAG 2.2's 24px floor on the short
-   axis, and this control replaced four 44px-tall icon buttons — on a phone it
-   is now the only way to any of Hiro's contacts, so it is the last thing in the
-   bar that may be hard to hit.
-
-   A pseudo rather than padding, which is the same choice .btn-icon's hit boxes
-   made and for a related reason: padding would grow the button's box, and the
-   box is what the focus ring outlines and what the bar's flex row centres. The
-   ring stays on the word — a 45px-tall outline around a 20px word reads as a
-   mistake — while the hit region reaches a thumb.
-
-   ── The 45.1px above was true for about four hours (corrected 2026-08-17) ──
-   It read "0.65rem each way: 20.4 + 2 × 12.35 = 45.1px, past the 44 the
-   platform guidelines ask for", and the arithmetic was right when it was
-   written. The 20.4 was not: .btn-quiet__label reserved 3px of padding below
-   the text for the wipe, the wipe was removed LATER THE SAME DAY (see the
-   centring note above, which records the padding going with it), and the box
-   became 16.6px. Nobody re-ran this sum. The region has been 41.3px ever
-   since — over WCAG 2.2's 24 but under the 44 this comment claimed to have
-   cleared, on the control that is a phone's only route to any contact.
-
-   Caught by the toggle's pass (2026-08-17), which set out to raise a 36.4px
-   target and found its neighbour 3px short on the same axis.
-
-   So the inset is an EXPRESSION now, for the same reason the toggle's is: it
-   asks for 44px and derives the overspill, rather than naming a length that
-   was correct against one measurement of a box that then changed underneath
-   it. 0.875rem is .btn-quiet's font-size at line-height 1, which is the whole
-   of this box's height — if that ever stops being true, this breaks loudly
-   instead of drifting quietly. Resolves to −13.69px, region 44.0px.
-
-   Horizontally 0.35rem is forgiveness only; the word is already 88px wide.
-   The original note said the region "cannot collide with anything ... by a
-   wide margin at every width" — briefly untrue on 2026-08-17, when the toggle
-   grew its own 44px region reaching back toward this one and the two cleared
-   by 4.9px, and true again by the end of the same day: this button is centred
-   on the bar now and its nearest neighbour is ~90px away. */
-.contact-trigger {
-	position: relative;
-}
-.contact-trigger::after {
-	content: '';
-	position: absolute;
-	inset-block: calc((0.875rem - 44px) / 2);
-	inset-inline: -0.35rem;
-}
-
-/* The caret ROTATES rather than nudging. When this was written .btn-quiet's
-   arrow still slid along the axis it pointed down, which says "go this way",
-   and this one says "there is more here" — a disclosure's affordance is its
-   state, not a direction of travel. (That slide is gone as of 2026-08-16, so
-   the contrast is now with an arrow that does not move at all; the argument for
-   rotating rather than sliding is unchanged, and this stayed put.) It is the
-   only rotating thing in the bar, and that is the right number: rotation is how
-   this control tells you it is open, so nothing else may borrow it. On
-   --dur-gesture/--nav-ease, the bar's own travel pair.
-
-   The trigger never took the family's hover nudge (no .btn-quiet__arrow here) —
-   a caret that both slides and turns is two answers to one question. */
-.contact-caret {
-	width: 0.85rem;
-	height: 0.85rem;
-	display: block;
-	/* NO padding-bottom. It used to carry 3px to match .btn-quiet__label's, so
-	   the two flex items had equal boxes; the label's went with the wipe on
-	   2026-08-15 and this went with it. See the centring note above — the pair
-	   has to stay matched, and matched at zero is the version with no error in
-	   it. */
-	transition: transform var(--dur-gesture) var(--nav-ease);
-}
-#contact-toggle[aria-expanded='true'] .contact-caret {
-	transform: rotate(180deg);
-}
-
-/* ── The OPEN state ──
-   2026-08-15, Hiro. Until now `aria-expanded="true"` moved exactly one thing: a
-   13px caret rotating. Everything else about the control was identical open and
-   shut, which on this control is worse than it sounds — the trigger EXISTS only
-   below 640px, where hover never fires and :focus-visible needs a keyboard, so
-   the word had no state at all on the one device it was built for. A disclosure
-   that is a phone's only route to any of Hiro's contacts should look live while
-   its panel is standing open.
-
-   Nothing new is drawn for it. The underline was already here and had never run
-   on a phone, because it was spoken for by :hover alone. Handing it to the open
-   state puts it in front of the visitors who own this control: it draws in as
-   the panel opens, retracts as it closes, and the caret's rotation becomes a
-   confirmation instead of the entire signal.
-
-   ── THIS STATE KEEPS ITS OWN CLOCK, and that is the one thing here the
-   2026-08-15 underline rewrite did not change ──
-   The gesture became instant-in/--dur-pop-out-out everywhere else that day, to
-   match the wordmark and the card headings (see .btn-quiet__label). An instant
-   line would be wrong HERE, because this state is not a hover: it is the panel
-   opening, and the line has always arrived WITH the plate rather than ahead of
-   it. So the duration is restated on this rule as --dur-pop-in — the panel's
-   own contact-pop clock — where before it inherited a --dur-card wipe that
-   happened to land within a frame of it. Same result, now on purpose.
-   What it does lose is the wipe's SHAPE: the line used to draw itself across
-   the word as the plate rose, and it now fades up whole. That is the cost of
-   the site having one underline instead of two; the arrival beat is preserved,
-   the drawing is not.
-
-   ID + attribute outranks .btn-quiet:hover, which is what holds the word inked
-   after a pointer wanders off an open menu. On a desktop window narrow enough
-   to show this control, open and hovered therefore look alike — correct for a
-   disclosure, and not worth a third colour to distinguish. */
-#contact-toggle[aria-expanded='true'] {
-	color: var(--ink);
-}
-#contact-toggle[aria-expanded='true'] .btn-quiet__label {
-	text-decoration-color: currentColor;
-	transition: text-decoration-color var(--dur-pop-in) var(--nav-ease);
-}
-@media (prefers-reduced-motion: reduce) {
-	.contact-caret {
-		transition: none;
-	}
-}
+   ONE MEASUREMENT FROM IT IS STILL LIVE, and it is the reason this stub is
+   here rather than a silent deletion: the trigger's drawn box was 88 × 20.4px,
+   because a 0.875rem line at line-height 1 is all a word is. That is under WCAG
+   2.2's 24px floor on the short axis, so it wore an ::after that opened the
+   region to 44px — and .theme-toggle::after, one rule up, is written to the
+   same 44 for the same reason and says so. Any future text control in this bar
+   inherits that problem the moment it is drawn; a word is not a target. */
 
 /* ── margin-left: auto, at every width now (2026-08-17) ──
    This carried a calc — --nav-toggle-gap less the whole distance between the
@@ -4257,302 +4194,60 @@ body {
 	pointer-events: auto;
 }
 
-/* ── Which contact surface, and where the line falls ──
-   2026-08-15, Hiro: the dropdown should only be for mobile. Both surfaces are
-   in the markup (see the note in Nav.astro) and this is the only thing that
-   chooses between them.
+/* ── One contact surface, at every width (2026-09-01, Hiro) ──
+   #contact-group has no display rule here any more, which is the whole change:
+   the markup's `flex` stands at every width and the icon row is what the bar
+   shows from 320 up.
 
-   MOBILE-FIRST, so the menu is the default and the icon row is the override.
-   That ordering is deliberate: the menu is the surface that works with no
-   hover, no width and no pointer, so it is what a browser gets when the
-   media query never resolves. The row is the enhancement.
+   WHAT WAS HERE, AND WHY IT WENT. From 2026-08-15 this was a mobile-first
+   switch — the Contact dropdown below 640px, the icon row at 640 and up — and
+   its argument was NAMING, not fit: the label that names each glyph is
+   hover-only, so on a phone the four marks were unlabeled and unlabelable. Its
+   own note conceded the row "measures comfortably from ~360 up", so width was
+   never what put the menu there.
 
-   640px, which is Tailwind's `sm` — the one breakpoint this project already
-   uses (about.astro and [slug].astro carry sm: utilities), so the bar divides
-   where the rest of the site divides rather than inventing a second line for
-   maintainers to remember. In px because that is what Tailwind's own sm is,
-   and media-query lengths resolve against the initial font size regardless of
-   this file's 19px root.
+   Hiro's call, and the reason it holds: the naming gap was never an
+   ACCESSIBILITY gap. Every icon carries an aria-label, so a screen reader has
+   always read these four as words at every width; what the dropdown bought was
+   recognition for a SIGHTED touch user, and the four marks are email, GitHub,
+   LinkedIn and X. That is a real but small gain, and it was being paid for by
+   putting the site's only contact links — there are none in a footer and none
+   on /about — behind a disclosure that announced itself as "Contact" and named
+   nothing else. One tap to reach any of them beats two taps to read a word the
+   glyph already says.
 
-   The number is not load-bearing for FIT — the icon row measures comfortably
-   from ~360 up (its own gaps beat the cluster's at 1.93× there), so this could
-   sit lower. It sits at 640 because the argument is POINTER, not width: below
-   this line the visitor is overwhelmingly on a phone, and the icons' names
-   live in a hover label a phone cannot reach. A width query is a proxy for
-   that and a coarse one; `(hover: none)` is the honest test and was rejected
-   anyway — a desktop browser at a narrow window would then get the icon row
-   with the labels intact but nowhere near enough room, which is the worse
-   failure of the two.
+   What it costs is the row's own known weakness below 769px, unchanged and now
+   spanning more widths: no pill, so nothing names a glyph on hover, because
+   there is no hover to name it with. A tap navigates. That is the trade.
 
-   display: none, not visibility or a class: it takes the hidden surface out of
-   layout AND out of the accessibility tree, so only one set of contact links
-   is ever exposed and only one can ever be focused. Both scripts still run
-   against their own hidden elements and simply never fire — nothing hidden
-   here gets a hover, a focus or a click. */
-#contact-group {
-	display: none;
-}
-@media (min-width: 640px) {
-	#contact-menu-wrap {
-		display: none;
-	}
-	#contact-group {
-		display: flex;
-	}
-	/* The toggle's `margin-left: auto` used to be restated here, because below
-	   this line it carried a --nav-toggle-gap correction instead and this was
-	   the only width where it could simply go to the end. Both surfaces are
-	   now out of flow and centred — the icon row as it always was, the trigger
-	   since 2026-08-17 — so the toggle is the only thing after the wordmark at
-	   EVERY width and the base rule already says so. Nothing to override. */
-}
+   THE GEOMETRY IS NOT FREE, and the phone block above is where it is paid —
+   six drawn things are back in a 320px bar for the first time since 08-14, and
+   the accommodations that block retired have come back with the row that
+   needed them. Read it before touching --nav-icon-gap or --nav-inset. */
 
-/* ── The optical shift: the WORD on the axis, not the box ──
-   2026-08-17. Nav.astro centres this wrap with left-1/2 + -translate-x-1/2,
-   which lands the button's box dead on the bar's centre. This moves it right
-   by half of what stands to the right of the label, so the LABEL lands there
-   instead — see --nav-trigger-optical for the measurement and the argument.
 
-   A margin rather than a second translate: `transform` on this box is already
-   spent on the -50% that does the centring, and adding to it would mean
-   restating that centring here every time this number changed. Margin composes
-   with `left` before the transform runs, so the two corrections stay in
-   separate channels and either can be read on its own.
+/* ── The contact panel and its rows lived here (removed 2026-09-01) ──
+   Card material — --surface, --line, bg-clip-padding, --radius, and the
+   project cards' hover shadow AT REST, on the reading that a floating layer is
+   the one place where lift is a state rather than feedback. It grew from its
+   top centre on --ease-pop, left on the hover pill's own shrink when the
+   trigger dismissed it and on a hard cut when anything else did, and its rows
+   were 2.3rem tall so a thumb had something to land on.
 
-   The caret does not move. It is annotation — it says "there is more here" —
-   and it is allowed to sit off-axis for the same reason the word is not: what
-   the eye centres on is the name of the control. */
-#contact-menu-wrap {
-	margin-left: var(--nav-trigger-optical);
-}
-
-/* ── The contact panel ──
-   Card material (--surface, --line, bg-clip-padding, --radius) wearing the
-   project cards' hover shadow AT REST — a floating layer is the one place
-   where lift is a state rather than feedback. That reading, and this rule's
-   shape, are the settings menu's (faf42e8, 08-05 → 08-06); the menu is gone
-   but the material decision was right and is reused rather than re-argued.
-
-   ── It is CENTRED on the window (2026-08-17, Hiro) ──
-   It used to hang on `right: var(--nav-inset)`, which resolved against
-   .nav-inner — which is why the wrap in Nav.astro is deliberately not
-   positioned — and put the panel's right edge exactly where the toggle's glyph
-   lands and where the column's own right edge is, the line the cards and the
-   copyright end on. That argument is still a good one and is recorded here
-   rather than deleted: a dropdown normally aligns to its trigger, the trigger
-   is not the bar's right end, and the page's edge was the stronger line on a
-   site whose whole bar had just been re-hung on that column.
-
-   What outranks it is that this panel is a PHONE surface and nothing else —
-   below 640px is the only place it renders — so it is not a dropdown hanging
-   off a toolbar, it is the one panel on a 320-to-430px screen. At that size
-   an edge-hung panel reads as pinned to a corner while the thing it belongs
-   to sits in the middle of the row, and the column edge it was landing on is
-   ~20px from the window's, which is not a line anyone reads as structure on a
-   phone. Centred, it is a sheet the whole screen agrees with. The cost is
-   real and is the one the old note was defending: the panel no longer points
-   at anything — not at its trigger, which it never did, and no longer at the
-   page's edge either. It is now positioned by the window alone.
-
-   ── It is centred on its WRAP, which is centred on the bar ──
-   Revised 2026-08-17, second pass. The first version centred this against
-   .nav-inner with `left: 0; right: 0` + `margin-inline: auto`, because the
-   wrap was in flow at the bar's right end and was deliberately not positioned.
-   The wrap is now absolutely centred itself (see Nav.astro), so it IS this
-   panel's containing block, and centring on it is centring on the bar. The
-   panel and the word it belongs to now arrive at the same axis by
-   construction rather than by two rules agreeing.
-
-   `translate: -50%`, the INDEPENDENT transform property — not
-   `transform: translateX(-50%)`. That distinction is the whole reason this
-   can be written as a translate at all: `transform` on this element is spoken
-   for twice over, since contact-pop scales it in and pill-pop-out scales it
-   out and both write the entire property, so a centring offset parked there
-   would be clobbered for the length of every open and every close and the
-   panel would jump sideways for exactly as long as it is moving. The
-   individual properties compose with `transform` instead of being overwritten
-   by it, and they apply first — so the panel is placed, then scaled about its
-   own centre-top. (`scale:` on .nav-left is the same tool for the same
-   reason.) Anything that moves this offset back onto `transform` has to move
-   it into every keyframe that touches this element.
-
-   top is the row's bottom plus the bar's own padding plus a 0.5rem gap, so the
-   panel clears the hairline rather than tucking under it. `100%` is the WRAP's
-   height, which is why that element is stretched to the row with inset-y-0 —
-   collapsed to the trigger's own 16.6px this would resolve ~20px short and
-   open the panel on top of the bar. It reads --nav-pad-y rather than restating
-   it, which is what lets the phone pass shorten the bar without dragging the
-   panel onto the rule (see that token).
-
-   z-index 60 for the reason the hover pill carries it: #site-nav::after is a
-   pseudo-element, so it paints after every child and would otherwise rule
-   straight across the panel's head. */
-.contact-menu {
-	position: absolute;
-	top: calc(100% + var(--nav-pad-y) + 0.5rem);
-	left: 50%;
-	/* The -50% centres this on its wrap. The second term takes back the
-	   optical shift that wrap carries (see #contact-menu-wrap above): the wrap
-	   moved right so the WORD would land on the bar's axis, and without this
-	   the panel would ride along and sit 11.875px right of it — which is the
-	   complaint that started this whole sequence, reintroduced by the fix for
-	   the next one. The word is on the axis and so is the panel; only the
-	   button's box and its caret are off it, and neither is a thing anyone
-	   measures by eye. */
-	translate: calc(-50% - var(--nav-trigger-optical));
-	z-index: 60;
-	min-width: 10.5rem;
-	padding: 0.25rem;
-	background: var(--surface);
-	background-clip: padding-box;
-	/* ── The light theme needs the edge; the dark theme never did ──
-	   2026-08-17. The material is the project cards' (--surface, --line,
-	   bg-clip-padding, their hover shadow at rest) and on the dark theme it
-	   works outright: #1a1b26 on #0c0e14 is a surface LIGHTER than its ground,
-	   so the panel separates on luminance and the border and shadow are only
-	   confirming it. On light it is #ffffff on #f9fbff — a 2% step — so the
-	   same rule was asking a 0.03-alpha shadow and a 0.22 hairline to carry the
-	   entire reading of "this is in front", and the panel came out looking like
-	   a patch of paper with four links on it rather than a sheet above one.
-
-	   So the two themes stop sharing this pair. Light takes --line-strong at
-	   rest, which is the same move the rule above already argues for the
-	   shadow: a floating layer is the one place where lift is a STATE and not
-	   feedback, so it wears the hover-strength border for the same reason it
-	   wears the hover-strength shadow. And the ambient shadow deepens and
-	   tightens — 0.15 → 0.26, spread pulled in — because on a near-white ground
-	   a wide faint shadow is invisible and a nearer darker one is the only
-	   thing that reads as a gap between two sheets.
-
-	   INK-TINTED, not black: 52 59 88 is --ink, the same tint --line carries
-	   and for the reason recorded there — a neutral black edge reads as a
-	   foreign material beside navy type on this ground, and a black shadow
-	   greys the paper under the panel instead of darkening it. */
-	border: 1px solid var(--line-strong);
-	border-radius: var(--radius);
-	box-shadow:
-		0 1px 2px rgba(52, 59, 88, 0.06),
-		0 14px 32px -14px rgba(52, 59, 88, 0.26);
-	/* Grows from the top centre — the edge it is now hung on, so the entrance
-	   states the panel's relationship to the screen the way the old 100% 0
-	   stated its relationship to the page's right edge. */
-	transform-origin: 50% 0;
-	animation: contact-pop var(--dur-pop-in) var(--ease-pop);
-}
-/* The pair the light theme needed help with, returned to what dark already had
-   right — see the block above. Scoped on the dark attribute rather than
-   :not(light) because :root carries the light palette as the BASE (there is no
-   [data-theme='light'] block to hang the other half on), so this file's themes
-   are always "the base, and dark". */
-:root[data-theme='dark'] .contact-menu {
-	border-color: var(--line);
-	box-shadow:
-		0 1px 1px rgba(0, 0, 0, 0.03),
-		0 10px 30px -16px rgba(0, 0, 0, 0.15);
-}
-@keyframes contact-pop {
-	from {
-		opacity: 0;
-		transform: scale(0.97);
-	}
-}
-/* The deliberate close — pressing the trigger again — leaves on the hover
-   pill's own shrink, borrowed whole so the bar's two disappearing surfaces
-   disappear identically. An outside click, Escape, or following a link keeps
-   the site's hard cut: Nav.astro only adds this class for the trigger path.
-   (Same split, and the same keyframes, as the settings menu's.) */
-.contact-menu.is-closing {
-	animation: pill-pop-out var(--dur-pop-out) var(--nav-ease) both;
-	pointer-events: none;
-}
-@media (prefers-reduced-motion: reduce) {
-	.contact-menu {
-		animation: none;
-	}
-}
-
-/* ── The rows ──
-   The thing the icon row could not do: every link is a WORD. The glyph stays
-   beside it — it is the same drawing the bar has always used, and it is what
-   makes the list scannable at a glance — but it is no longer carrying the
-   identification on its own, which on a touch device it could not do at all
-   (the label that named it was hover-only).
-
-   --ink-soft resting, --ink on hover/focus, exactly like .btn-icon and
-   .btn-quiet: quiet until the row is live. The tint behind the hovered row is
-   the one addition — a list needs to say WHICH row is live, where a lone
-   button only needs to say that it is. */
-.contact-row {
-	display: flex;
-	align-items: center;
-	gap: 0.55rem;
-	/* 2.3rem = 43.7px, against the 35.1px the padding and the 1.05rem glyph
-	   give on their own. These four links are the site's only contacts and a
-	   phone reaches them here or nowhere, so the row is sized as a touch target
-	   first and read as a list second — the same call --nav-icon-scale records
-	   making for the icon buttons this panel replaced. */
-	min-height: 2.3rem;
-	padding: 0.4rem 0.5rem;
-	border-radius: var(--radius);
-	color: var(--ink-soft);
-	text-decoration: none;
-	font-size: 0.875rem;
-	font-weight: var(--weight-ui);
-	line-height: 1;
-	transition:
-		color var(--dur-tap) ease,
-		background-color var(--dur-tap) ease;
-}
-/* Guarded — see the nav-logo block. This one is the least visible of the set,
-   because every row closes the panel on click and a closed panel can't show you
-   its stranded tint. It is guarded anyway: a tap that starts on a row and turns
-   into a scroll doesn't count as a click, so the panel stays open with the row
-   lit under a finger that has moved on — and "which row is live" is the exact
-   thing that tint is for, so a wrong one is worse here than a wrong colour
-   anywhere else in the bar. */
-.contact-row:focus-visible {
-	color: var(--ink);
-	background-color: var(--surface-sunken);
-}
-@media (hover: hover) {
-	.contact-row:hover {
-		color: var(--ink);
-		background-color: var(--surface-sunken);
-	}
-}
-.contact-row:focus-visible {
-	outline: 2px solid var(--focus-ring);
-	outline-offset: -2px;
-}
-/* 1.05rem is .btn-icon's own base glyph size — the nav's 1.9rem is the scaled
-   -down-button exception, not the norm, so a row of type takes the base. */
-.contact-row svg:first-child {
-	width: 1.05rem;
-	height: 1.05rem;
-	display: block;
-	flex: none;
-}
-.contact-row__label {
-	flex: 1;
-	/* The email row overwrites this word with "Copied!" and back (Nav.astro).
-	   Nothing may depend on its width: the panel is min-width'd and the row is
-	   flex, so the plate holds still while the word changes. */
-	white-space: nowrap;
-}
-/* The ↗ marks a link that takes you somewhere else — the language the hover
-   pill used. ALL FOUR ROWS WEAR IT as of 2026-08-15 (Hiro): it read as "opens a
-   tab" while email copied to the clipboard, and email hands off to a mail app
-   here, so the absence was marking the one row that leaves hardest as the only
-   one that doesn't. It no longer distinguishes between the rows — see the note
-   in Nav.astro for why that trade was taken. Dimmer than the label: it is an
-   annotation on the row, not a second thing to read. */
-.contact-row__ext {
-	width: 0.7rem;
-	height: 0.7rem;
-	display: block;
-	flex: none;
-	opacity: 0.55;
-}
+   Two things in it are worth knowing before anyone builds another floating
+   surface on this site, because both were learned the expensive way:
+     · THE TWO THEMES CANNOT SHARE THE BORDER AND SHADOW. Dark works outright
+       (#1a1b26 on #0c0e14 is a surface lighter than its ground, so it separates
+       on luminance and the edge only confirms it). Light is #ffffff on #f9fbff
+       — a 2% step — so the panel needs --line-strong at rest and a deeper,
+       tighter shadow, or it reads as a patch of paper rather than a sheet above
+       one. Both ink-tinted, never black: a neutral edge reads as a foreign
+       material beside navy type on this ground.
+     · IT HAD TO TAKE THE TRIGGER'S OPTICAL SHIFT BACK OFF. The wrap moved right
+       so the word landed on the bar's axis; without a matching correction here
+       the panel rode along and sat 11.875px off it.
+   The whole rule, both themes and the keyframes are at the commit before this
+   one. */
 
 /* ── Load intro: the bar's entrance on a hard load ──
    Played only on arrivals that aren't an internal navigation — a reload, a
@@ -4596,8 +4291,7 @@ body {
    timer just past the last animation; every 'to' frame equals the natural
    rest state, so that handoff is invisible too. Reduced motion never adds the
    classes — the bar just paints at rest. */
-html.nav-intro-draw #site-nav .nav-logo,
-html.nav-intro-draw #contact-toggle {
+html.nav-intro-draw #site-nav .nav-logo {
 	clip-path: inset(0 100% 0 0);
 }
 /* The draw variant's dash setup lives ONLY in two transient places — this
@@ -4662,26 +4356,23 @@ html.nav-intro-draw .theme-fill-rect {
 html.nav-intro-draw.nav-intro-go #site-nav .nav-logo {
 	animation: nav-load-wipe var(--dur-nav) var(--nav-ease) both;
 }
-/* The bar's second word, wiping in on the wordmark's own gesture 240ms behind
-   it — where the four icons used to start stroke-drawing, so the beat is the
-   one the rest of the sequence was timed against (2026-08-15).
+/* The four marks stroke-drawing at 240ms, each 90ms behind the last — and at
+   EVERY width as of 2026-09-01, where until now this fired only at 640 and up
+   because the row below that was display: none (an element with no box runs no
+   animation, so it simply never played).
 
-   THE WHOLE BUTTON, label and caret together, not .btn-quiet__label: the clip
-   is the bar's entrance and the caret is part of what arrives. Wiping the
-   label alone would leave the caret standing on its own for 240ms, announcing
-   a menu whose name hasn't appeared yet. (This used to have a second reason —
-   the label's own background-size underline owned that box's animation — which
-   stopped being true on 2026-08-15 when the underline became a
-   text-decoration. The first reason was always the real one and still holds.)
+   That restores the sequence's middle movement. From 2026-08-15 the Contact
+   trigger wiped in on this beat instead — the whole button, label and caret
+   together, so the caret never stood alone for 240ms announcing a menu whose
+   name had not arrived — and the note here recorded what that cost: with no
+   stroked artwork left in the middle of the bar the draw was the toggle's
+   alone, and the ceremony read as wipe, wipe, draw, sweep, rule. It is back to
+   wipe, draw ×4, draw, sweep, rule: one wordmark, four marks marching, then the
+   toggle's circle and its ink.
 
-   That the type wipes rather than draws is also what the icon row's removal
-   cost this sequence: there is no stroked artwork left in the middle of the
-   bar, so the draw is now the toggle's alone at 600ms. It reads as a shorter
-   ceremony with the same shape — wipe, wipe, draw, sweep, rule — rather than
-   as a missing movement. */
-html.nav-intro-draw.nav-intro-go #contact-toggle {
-	animation: nav-load-wipe var(--dur-nav) var(--nav-ease) 240ms both;
-}
+   The 240ms is unchanged through all of it, which is the point — the beat was
+   the icons' first, the trigger was fitted to it, and the icons have it back
+   without the rest of the sequence moving. */
 html.nav-intro-draw.nav-intro-go #contact-group .btn-icon svg :is(path, rect) {
 	animation: nav-load-stroke var(--dur-draw) var(--nav-ease)
 		calc(240ms + var(--nav-icon-i, 0) * 90ms) backwards;
@@ -4923,8 +4614,10 @@ html.reveal-wait #projects::before {
 	   as a family rather than separate tricks.
 
 	   Guarded on (hover: hover) as well (2026-08-15, see the nav-logo block).
-	   A phone never sees this row at all, so the case that needs it is a touch
-	   TABLET at 640 and up, where the icons are the contact surface: three of
+	   It was written when a phone never saw this row and the case that needed it
+	   was a touch TABLET at 640 and up; since 2026-09-01 the icons are the
+	   contact surface at every width, so the case is simply any touch device.
+	   The guard is unchanged and the reasoning below is what it was: three of
 	   them navigate away and clear themselves, but EMAIL copies to the clipboard
 	   and preventDefaults, so a tap used to leave that one glyph lifted 3px above
 	   its neighbours for as long as the visitor stayed on the page. A stranded

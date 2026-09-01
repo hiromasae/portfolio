@@ -90,36 +90,36 @@ const onHome = path === '/';
 				</a>
 			</div>
 
-		{/* ── Two contact surfaces, one per pointer ──
-		    2026-08-15, Hiro: the dropdown should only be for mobile. So both are
-		    in the markup and the breakpoint picks one — the icon row below 640px
-		    is `display: none`, the menu at 640 and up is. See the contact-surface
-		    block in global.css for the switch and why 640.
+		{/* ── ONE contact surface, at every width ──
+		    2026-09-01, Hiro: the buttons condensing into a dropdown that literally
+		    says "Contact" is not what this bar should do. So the four icons below
+		    are it, from 320px up, and the disclosure that stood between a phone
+		    and every contact link on the site is gone. See the stub further down
+		    for what was removed, and the surface note in global.css for the
+		    argument in full.
 
-		    The split is not a compromise, it is the two arguments landing in
-		    different places. The menu exists because the sliding label that names
-		    these icons is hover-only, so on a touch device four glyphs are
-		    unlabeled and unlabelable. A pointer has hover: the label names each
-		    icon on the way past, every link is one click, and the row costs no
-		    width the bar hasn't got. Give each pointer the surface its own
-		    argument produces.
+		    The short version, because it reverses a decision this file argued for
+		    at length two weeks ago: the menu was here for NAMING, since the
+		    sliding label that names these icons is hover-only and a touch device
+		    cannot reach it. That gap was real but narrower than it looked — every
+		    icon carries an aria-label, so a screen reader has always read these as
+		    words; what the panel bought was recognition for a sighted touch user
+		    of email, GitHub, LinkedIn and X. Set against one extra tap on the only
+		    contact links the site has, the glyphs win.
 
-		    What that costs is TWO of everything below — two sets of links in the
-		    DOM (only one ever exposed, since display: none is out of the
-		    accessibility tree), and two scripts in the block at the bottom. The
-		    duplication is the price of the split and is the first thing to
-		    re-examine if this ever feels heavy.
+		    What it refunds is the duplication the split called its own price: one
+		    set of links in the DOM instead of two, one script instead of two.
 
-		    THERE ARE TWO LINES HERE, AND THEY ARE NOT IN THE SAME PLACE. 640px
-		    picks the SURFACE (menu below, icons above). 769px picks the
-		    BEHAVIOUR: below it email hands off to the mail app and the icons wear
-		    no hover pill, above it email copies to the clipboard and the pills
-		    come back (Hiro, 2026-08-15: anything wider than tablet should have
-		    the hover pills, and email should copy there). The gap between the two
-		    is deliberate and is exactly one device — a tablet, which gets the
-		    icon row because it has the width for it, and a phone's answers
-		    because it has a phone's pointer.
-
+		    ── ONE LINE LEFT, AND IT IS 769px ──
+		    There used to be two, in different places: 640 picked the SURFACE and
+		    769 the BEHAVIOUR. Only the behaviour line survives, and it is in the
+		    script below rather than in CSS —
+		      below 769  email hands off to the mail app, and the icons wear no
+		                 hover pill. A phone's and a tablet's answer, now on every
+		                 width that isn't a desktop.
+		      769 and up the pills come back and email copies to the clipboard
+		                 (Hiro, 2026-08-15: anything wider than tablet should have
+		                 the hover pills, and email should copy there).
 		    Copying is the gesture this row's pill, its "Copied!" stamp and its
 		    whole fourteen-variant exploration were built for, and it is worth
 		    having where there is a cursor to read the confirmation and, often, no
@@ -127,11 +127,17 @@ const onHome = path === '/';
 		    is somewhere the visitor then has to paste FROM, and the mail app is
 		    one tap away.
 
+		    WHAT THE WIDTHS BELOW 769 NOW INHERIT is the row's known weakness —
+		    nothing names a glyph, because there is no hover to name it with. That
+		    is the trade this change makes, stated plainly; it is not a regression
+		    against the menu so much as the thing the menu was buying, no longer
+		    bought.
+
 		    Each state NAMES what it does, which is what keeps it honest: the
 		    icon's label reads "Copy email" where it copies and "Email" where it
 		    hands off — re-synced in the browser whenever the window crosses the
 		    line, since server-rendered markup cannot know which side it will land
-		    on — and the menu's row reads "Email". */}
+		    on. */}
 		{/* Centred on the bar itself (2026-08-02). The layout box is wider than
 		    what the cluster draws — the buttons are scaled down inside it — but
 		    both are centred on the same line, so the drawn icons land on the
@@ -224,161 +230,21 @@ const onHome = path === '/';
 			</span>
 		</div>
 
-		{/* ── Contact: one word, four links behind it ──
-		    2026-08-15, Hiro. This was a row of four icon links centred on the
-		    bar, with a shared label that slid between them naming the hovered
-		    one. What replaced it is a disclosure: the word, and a panel.
+		{/* ── The Contact dropdown stood here (2026-08-15 → 2026-09-01) ──
+		    A centred trigger reading "Contact" with a caret, and a panel of four
+		    named rows behind it; below 640px it was the bar's contact surface and
+		    the icon row above was display: none. WHY it went is in the block at
+		    the top of this file, beside the row that replaced it.
 
-		    The argument that moved it was NAMING, not tidiness. The sliding
-		    label was hover-only, so on a phone the four glyphs were unlabeled
-		    and unlabelable — a visitor had to recognise a bird and an "in"
-		    square to find LinkedIn. In the panel every link is a word. That the
-		    bar also stops being six elements in 320px is the second prize; see
-		    the phone block in global.css, which lost its reason to ramp.
+		    What went with it, listed so nobody hunts for a piece that is only
+		    half gone: the trigger and its rotating caret, the panel and both its
+		    themes' border/shadow pairs, the disclosure script (aria-expanded,
+		    Escape, outside-click, focus-out, per-row close), and the second set
+		    of four links in the DOM. The CSS side went in the same pass — see the
+		    two stubs in global.css, which keep the measurements worth keeping.
 
-		    What it costs is a tap: these four are the ONLY links to any of
-		    Hiro's contacts anywhere on the site — nothing in the footer, nothing
-		    on /about — so the site's whole conversion now sits behind a click.
-		    That was weighed and accepted. If it is ever reversed, git has the
-		    icon row and its slider whole at b887ca1; the note the removal turns
-		    on is that a trigger reading "Contact" NAMES ITSELF, which is exactly
-		    what the settings gear (removed 08-06, faf42e8) did not.
-
-		    ── CENTRED ON THE BAR (2026-08-17, Hiro) ──
-		    It rode `ml-auto` until now, which made it and the toggle the bar's
-		    right-hand group and left the wordmark alone in flow before them.
-		    Below 640 that put ~180px of nothing in the middle of the row and
-		    the bar read as two objects at opposite ends of a void. Out of flow
-		    and centred, the one control the phone bar exists for sits where
-		    the eye lands, the toggle takes the right end back, and the void
-		    is gone without inventing a link to fill it.
-
-		    This is EXACTLY #contact-group's treatment, one block up — the
-		    desktop icon cluster has been centred this way since 08-02, and
-		    both surfaces now hang on the same line. `left-1/2` resolves
-		    against .nav-inner's padding box, which is the full bar, so the
-		    trigger lands on the window's true centre and not on the content
-		    box's (those differ by 3.1px here — .nav-inner's paddings are
-		    deliberately unequal, see its rule). Flex centring would have found
-		    the second one and put this 3.1px off the cluster it replaces.
-
-		    ── inset-y-0, NOT top-1/2 + -translate-y-1/2 ──
-		    The icon cluster uses the translate pair; this one must not. The
-		    PANEL lives inside this wrap (the outside-click check in the script
-		    below is `contactWrap.contains(e.target)`, so it cannot be moved
-		    out), which means this box is the panel's containing block and
-		    `top: 100%` on the panel is THIS element's height. Stretched to the
-		    row, that is the row's height and the panel's offset arithmetic is
-		    unchanged — it still measures from the row's bottom, adds the bar's
-		    padding and clears the hairline. Collapsed to the trigger's 16.6px
-		    it would resolve ~20px short and the panel would open ON the bar.
-		    So the height here is load-bearing for a rule in another file; see
-		    the .contact-menu block in global.css. */}
-		<div id="contact-menu-wrap" class="absolute inset-y-0 left-1/2 flex -translate-x-1/2 items-center">
-			{/* .btn-quiet, revived. It has styled nothing since "Back to
-			    projects" came off (2026-08-10) and its note says the next
-			    borderless text link on the site wants exactly it — this is that
-			    link: same 0.875rem, same --weight-ui, same --ink-soft → --ink,
-			    same focus ring. The wipe direction is the one thing overridden
-			    (see .contact-trigger in global.css): that rule's underline
-			    travels right-to-left to arrive at an arrow on the LEFT, and this
-			    caret is on the right. */}
-			<button
-				id="contact-toggle"
-				type="button"
-				class="btn-quiet contact-trigger"
-				aria-expanded="false"
-				aria-controls="contact-menu"
-			>
-				<span class="btn-quiet__label">Contact</span>
-				{/* Rotates 180° while open — the affordance the caret exists for.
-				    Same drawing system as every other glyph in the bar: 24-unit
-				    box, 2px stroke, square cap. No --len: the load intro wipes
-				    this button as one box (label and caret together) rather than
-				    stroke-drawing it, so there is no dash math to keep in step. */}
-				<svg
-					class="contact-caret"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-					stroke-linecap="square"
-					stroke-linejoin="miter"
-					aria-hidden="true"
-				>
-					<path d="m5 9 7 7 7-7" />
-				</svg>
-			</button>
-
-			{/* `hidden` IS the closed state — the attribute, not a class, so the
-			    links are out of the tab order and off the accessibility tree
-			    while shut, and every re-open restarts the entrance animation for
-			    free (display flips do). Escape and an outside click close it;
-			    Escape returns focus to the button. Same contract the settings
-			    menu ran on, and its script is the one this was adapted from. */}
-			<div id="contact-menu" class="contact-menu" hidden>
-				{
-					contacts.map((c) => {
-						// The email row is a PLAIN mailto: link (2026-08-15, Hiro: tapping
-						// email should redirect the user to their default email app). It
-						// used to intercept the click and copy the address to the clipboard
-						// instead — the gesture the pill's whole "Copied!" apparatus was
-						// built for, and the reason this row carried a data-copy attribute.
-						// Handing off to the mail app is what a mailto: does by default, so
-						// the fix was to stop preventing it; every line of the copy path is
-						// gone rather than kept behind a flag.
-						//
-						// Worth knowing what that trades: on a desktop with no mail client
-						// configured, a mailto: can appear to do nothing, where copying
-						// always worked. b887ca1 has the copy path if it is ever wanted
-						// back as a secondary gesture (a long-press, or a second row) — but
-						// not as the primary, which is now the OS's job.
-						const isEmail = c.href.startsWith('mailto:');
-						return (
-							<a
-								class="contact-row"
-								href={c.href}
-								target={isEmail ? undefined : '_blank'}
-								rel="noopener"
-							>
-								<Icon name={c.icon} />
-								<span class="contact-row__label">{c.label}</span>
-								{/* ── All FOUR wear it now (2026-08-15, Hiro: the email
-								    button should have a new page icon as well since it
-								    does redirect the user) ──
-								    The mark used to mean "opens a TAB", which is why
-								    email — alone in copying to the clipboard — went
-								    without. Email hands off to a mail app on every
-								    surface that shows this panel, so the old reading
-								    made the one row that hands you to another
-								    APPLICATION the only one not marked as leaving.
-
-								    So the ↗ now means "this takes you somewhere else",
-								    and the honest consequence is that it no longer
-								    DISTINGUISHES between these four — it annotates the
-								    list rather than singling anything out. That is the
-								    trade: a promise every row keeps beats a
-								    distinction that was drawn on the wrong axis. */}
-								<svg
-									class="contact-row__ext"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="2"
-									stroke-linecap="square"
-									stroke-linejoin="miter"
-									aria-hidden="true"
-								>
-									<path d="M15 3h6v6" />
-									<path d="M10 14 21 3" />
-									<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-								</svg>
-							</a>
-						);
-					})
-				}
-			</div>
-		</div>
+		    b887ca1 has the panel as first built; the commit before this one has
+		    it with everything the split taught it. */}
 
 		{/* Light/dark toggle: the classic contrast glyph — a circle half ink,
 		    half paper, drawn at the contact icons' size and stroke. The filled
@@ -802,13 +668,19 @@ const onHome = path === '/';
 		});
 	}
 
-	// ── Sliding contact label (the DESKTOP surface) ──
+	// ── Sliding contact label (the DESKTOP gesture) ──
 	// Restored 2026-08-15 with the icon row it belongs to, after a few hours in
-	// which the menu was the only contact surface at every width. It runs
-	// unconditionally: below 640px #contact-group is display: none, so `group`
-	// still resolves but nothing it binds can ever fire — a hidden element gets
-	// no hover, no focus and no click. Guarding it on a matchMedia would buy
-	// nothing and would need re-running on resize.
+	// which the menu was the only contact surface at every width.
+	//
+	// It used to run unconditionally on the argument that below 640px the row was
+	// display: none, so `group` resolved but nothing it bound could ever fire —
+	// a hidden element gets no hover, no focus and no click. The row is visible at
+	// every width now (2026-09-01), so that is no longer what silences it BELOW
+	// 769: the `wide` check inside each handler is, and the hover bindings are
+	// additionally gated on the device having a pointer that can hover at all.
+	// Both were already here and neither needed changing — which is the useful
+	// part. Guarding the block itself on a matchMedia would still buy nothing and
+	// would still need re-running on resize.
 	//
 	// The measurer below carries the left: -9999px fix that the toggle's clone
 	// got the same day; at left: 0 an invisible ruler at the centre of the bar
@@ -838,9 +710,12 @@ const onHome = path === '/';
 		// hover pills, and email should copy there rather than redirect. So this
 		// row now spans two behaviours, not one:
 		//
-		//   640–768  the icons, bare. No pill, and email is a plain mailto: that
-		//            hands off to the mail app — a tablet's answer, on the
-		//            surface a tablet gets.
+		//   < 769    the icons, bare. No pill, and email is a plain mailto: that
+		//            hands off to the mail app. This read "640–768, a tablet's
+		//            answer on the surface a tablet gets" until 2026-09-01; with
+		//            the dropdown gone the same answer now serves every phone
+		//            too, which is what it always described — a coarse pointer
+		//            with no hover and a mail app one tap away.
 		//   769+     the pills come back and email copies to the clipboard. The
 		//            desktop gesture, with a cursor to read the confirmation.
 		//
@@ -1107,11 +982,14 @@ const onHome = path === '/';
 			// means dragging back out restores the pill mid-session with no
 			// resize plumbing of its own.
 			//
-			// What 640–768 loses is the naming, which is the icon row's known
-			// weakness and the reason the menu exists below 640. A peek like the
-			// toggle's would buy it back for a tablet; it isn't built because a
-			// tap there already navigates, so the word would be racing the
-			// navigation that made it unnecessary.
+			// What everything below 769 loses is the naming — the icon row's known
+			// weakness, and the reason the dropdown existed below 640 until
+			// 2026-09-01. It is now the trade the whole bar makes rather than one
+			// a tablet made alone. A peek like the toggle's would buy it back;
+			// it still isn't built, and the reason is unchanged and is not about
+			// width: a tap on one of these navigates, so the word would be racing
+			// the navigation that made it unnecessary. The toggle can peek
+			// because a tap on IT leaves you on the page.
 			if (canHoverPointer) {
 				icon.addEventListener('mouseenter', () => {
 					if (!wide.matches) return;
@@ -1217,107 +1095,30 @@ const onHome = path === '/';
 		});
 	}
 
-	// ── Contact menu (the MOBILE surface) ──
-	// A disclosure: the button says what it opens, the panel holds the links as
-	// words — which is the whole point of it, since the sliding label above
-	// cannot name anything without a hover. Below 640px this is the bar's
-	// contact surface and the icon row is display: none; above it, the reverse.
-	// Like that block, this one runs unconditionally and simply never fires on
-	// the width where its elements are hidden.
+	// ── The contact menu's script stood here (2026-08-15 → 2026-09-01) ──
+	// A disclosure driven by `hidden` as the closed state, aria-expanded on the
+	// trigger, Escape and outside-click dismissal, a focusin backstop for tabbing
+	// past the last row, and an exit that SPLIT BY GESTURE — pressing the trigger
+	// again got the hover pill's own shrink, while an outside click, Escape or
+	// following a link took the site's hard cut. It is gone with the panel; the
+	// markup note above has why.
 	//
-	// Adapted from the settings menu at faf42e8, which ran the same contract for
-	// a day: `hidden` as the closed state, aria-expanded on the trigger, Escape
-	// and outside-click dismissal, and an exit that SPLITS by gesture. What is
-	// deliberately NOT borrowed is menu semantics — no role="menu", no
-	// aria-haspopup, no arrow-key roving. These are four links, and a disclosure
-	// of links wants exactly the native Tab order it already has; claiming menu
-	// semantics would promise keyboard behaviour this doesn't implement.
-	const contactWrap = document.getElementById('contact-menu-wrap');
-	const contactToggle = document.getElementById('contact-toggle');
-	const contactMenu = document.getElementById('contact-menu');
-
-	if (contactWrap && contactToggle && contactMenu) {
-		const reduceMenu = window.matchMedia('(prefers-reduced-motion: reduce)');
-		const isOpen = () => contactToggle.getAttribute('aria-expanded') === 'true';
-
-		// Hide only once the exit animation has actually played (see .is-closing
-		// in global.css). Guarded on target, because the rows' own hover
-		// transitions bubble animationend through this element too.
-		const onCloseEnd = (e: AnimationEvent) => {
-			if (e.target !== contactMenu) return;
-			contactMenu.removeEventListener('animationend', onCloseEnd);
-			if (!contactMenu.classList.contains('is-closing')) return;
-			contactMenu.hidden = true;
-			contactMenu.classList.remove('is-closing');
-		};
-
-		// `pop` is the deliberate dismissal — pressing the trigger again — which
-		// gets the pill's own shrink. An outside click, Escape or a link taking
-		// you away is incidental, and takes the site's hard cut. That split is
-		// faf42e8's, kept verbatim: an intentional close is acknowledged, an
-		// accidental one just goes.
-		const setMenu = (open: boolean, pop = false) => {
-			contactToggle.setAttribute('aria-expanded', String(open));
-			if (open) {
-				contactMenu.classList.remove('is-closing');
-				contactMenu.hidden = false;
-				return;
-			}
-			if (pop && !reduceMenu.matches && !contactMenu.hidden) {
-				contactMenu.classList.add('is-closing');
-				contactMenu.addEventListener('animationend', onCloseEnd);
-			} else {
-				contactMenu.classList.remove('is-closing');
-				contactMenu.hidden = true;
-			}
-		};
-
-		contactToggle.addEventListener('click', () => setMenu(!isOpen(), true));
-
-		// pointerdown, not click: the panel must be gone before the thing under
-		// the pointer reacts, and a card's own click handler runs on click. The
-		// trigger is excluded so its click handler owns that case — otherwise the
-		// two fight and the menu closes and reopens in one press.
-		document.addEventListener('pointerdown', (e) => {
-			if (!isOpen()) return;
-			const t = e.target as Node;
-			if (contactMenu.contains(t) || contactToggle.contains(t)) return;
-			setMenu(false);
-		});
-
-		document.addEventListener('keydown', (e) => {
-			if (e.key !== 'Escape' || !isOpen()) return;
-			setMenu(false);
-			// Focus has to come home: it is sitting on a row that is about to
-			// leave the accessibility tree, and a keyboard visitor who lands back
-			// at the top of the document has been thrown out of the bar.
-			contactToggle.focus();
-		});
-
-		// Tabbing past the last row closes it. Without this the panel stays open
-		// behind a visitor who has already walked out of it, and the next Escape
-		// would yank focus back to a button they had left.
-		document.addEventListener('focusin', (e) => {
-			if (!isOpen()) return;
-			if (contactWrap.contains(e.target as Node)) return;
-			setMenu(false);
-		});
-
-		// EVERY row closes the panel, not just the ones that open a tab
-		// (2026-08-15). It was scoped to a[target="_blank"] while email stayed
-		// behind to show its "Copied!" — email hands off to a mail app now, so
-		// there is nothing left to stay open for, and a panel still standing
-		// over the page while the OS switches apps is the same leftover the
-		// external rows were closing to avoid.
-		//
-		// No preventDefault anywhere in here: the click closing the menu and the
-		// browser following the href are not in competition. The row's own
-		// navigation — new tab, or mail app — is the thing this control exists
-		// to cause.
-		contactMenu.querySelectorAll('.contact-row').forEach((link) => {
-			link.addEventListener('click', () => setMenu(false));
-		});
-	}
+	// THREE THINGS IN IT ARE WORTH KEEPING, because the next disclosure on this
+	// site will need all three and two of them are not obvious:
+	//   · Dismiss on POINTERDOWN, not click. The panel has to be gone before the
+	//     thing underneath reacts, and a card's own handler runs on click. The
+	//     trigger is excluded from that listener so its click handler owns the
+	//     toggle case — otherwise the two fight and the menu closes and reopens
+	//     in a single press.
+	//   · Escape must return focus to the trigger. Focus is sitting on a row that
+	//     is about to leave the accessibility tree, and a keyboard visitor
+	//     dumped back at the top of the document has been thrown out of the bar.
+	//   · NO MENU SEMANTICS. No role="menu", no aria-haspopup, no arrow-key
+	//     roving. These were four links, and a disclosure of links wants exactly
+	//     the native Tab order it already has; claiming menu semantics promises
+	//     keyboard behaviour that then has to be written.
+	// The working version is at the commit before this one, and at faf42e8 as the
+	// settings menu it was adapted from.
 
 	// ── Theme toggle label ──
 	// The pill wipes in showing the theme a click would switch TO, and a click
@@ -1328,10 +1129,12 @@ const onHome = path === '/';
 	// the gap between the row and this button would read as the toggle joining
 	// their cluster.
 	//
-	// The twinning holds at every width even though its sibling does not: below
-	// 640px the icon row is display: none and this is the bar's only pill, above
-	// it there are two. Nothing here needs to know which — a lone pill and a
-	// travelling one differ only in whether anything ever asks them to move.
+	// The twinning holds at every width, and since 2026-09-01 so does the sibling:
+	// the icon row is no longer display: none below 640, so there are two pills in
+	// the bar at every width — this one, and the travelling one. What changes at
+	// 769 is only whether the travelling one ever MOVES, since its hover is gated
+	// there. Nothing here needs to know any of that: a lone pill and a travelling
+	// one differ only in whether anything ever asks them to move.
 	const toggleWrap = document.getElementById('theme-toggle-wrap');
 	const togglePill = toggleWrap?.querySelector<HTMLElement>('.contact-slider');
 	const togglePillText = togglePill?.querySelector<HTMLElement>('.contact-slider-text');
@@ -1445,9 +1248,12 @@ const onHome = path === '/';
 		// global.css, at the nav-logo's underline). A touch browser synthesises
 		// mouseenter on tap and doesn't send the matching mouseleave until you
 		// tap something else, so this label — the only hover label a phone can
-		// still reach, now that the sliding one went behind display: none at
-		// 640 — popped open on every theme change and hung there naming the
-		// state you had just left.
+		// still reach — popped open on every theme change and hung there naming
+		// the state you had just left. (It was "the only hover label a phone can
+		// reach" because the sliding one sat behind display: none below 640 until
+		// 2026-09-01. The row is visible now, but its pill is still gated to 769
+		// and up, so this remains the only pill a phone ever sees and the bug this
+		// guards against is unchanged.)
 		//
 		// Read once, not per event: the media query answers a question about the
 		// device's primary pointer, and a device does not grow a mouse between
@@ -1515,8 +1321,10 @@ const onHome = path === '/';
 		// 2026-08-15, Hiro: tapping the toggle on a touchscreen should briefly
 		// show the pill, with the text transition. On a phone this label had gone
 		// silent — its mouseenter is bound only where the pointer can hover (see
-		// the binding above), and below 640px it is the bar's only pill, so the
-		// most animated object in the nav was one a phone never saw.
+		// the binding above), and it is the only pill a phone ever sees (the
+		// contact row's is gated to 769 and up, before 2026-09-01 by being hidden
+		// outright and since then by `wide`), so the most animated object in the
+		// nav was one a phone never saw.
 		//
 		// It hangs off POINTERDOWN rather than click, and that is the whole trick:
 		// at pointerdown the theme has not flipped yet, so placePill() puts the
