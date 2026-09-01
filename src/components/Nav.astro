@@ -91,10 +91,26 @@ const onHome = path === '/';
 
 				    The aria-label stays, and now says only what the mark cannot: it is
 				    here for the DESTINATION ("— home"), which is the one thing a home
-				    link's own text never tells you. */}
+				    link's own text never tells you.
+
+				    font-medium (500), a notch down from the semibold it wore until
+				    2026-09-01 (Hiro: slightly lighter) — and a notch is what the name
+				    could afford that the monogram could not, since thirteen characters
+				    carry presence by length where two had to carry it by stroke.
+
+				    PINNED here rather than taken from --weight-emph, on the weight
+				    scale's own instruction: those tokens run one notch heavier on the
+				    light theme because dark ink on a light ground draws thinner, and the
+				    scale's note (global.css, the :root copy) excludes this mark BY NAME
+				    — it is --dye-name, not ink on paper, so it does not want that
+				    compensation and holds one number on both themes.
+
+				    The width does not move with the weight: Recursive's advances are
+				    duplexed across wght, measured identical at 300 through 700, so none
+				    of the geometry above or in the phone block was re-cut for this. */}
 				<a
 					href="/"
-					class="nav-logo text-[2.5rem] font-semibold tracking-tight text-[var(--dye-name)]"
+					class="nav-logo text-[2.5rem] font-medium tracking-tight text-[var(--dye-name)]"
 					aria-label="Hiro Eernisse — home"
 				>
 					Hiro Eernisse

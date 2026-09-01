@@ -2024,11 +2024,19 @@ body {
 	     55.10   the toggle's full-size 2.9rem box
 	     17.48   .nav-inner's right padding
 	   = 181.4 spoken for, leaving 138.6 for the mark. The name sets 6.24px of
-	   width per px of font-size at this weight and tracking (297px authored at
-	   2.5rem = 47.5px), so this draws 124.6px and leaves 14.0px between its last
-	   glyph and the trigger's box. Measured, not derived — the ratio is what the
-	   browser reports for this string in Recursive semibold, and it moves if the
-	   face, the weight or the tracking does.
+	   width per px of font-size at this tracking (297px authored at 2.5rem =
+	   47.5px), so this draws 124.6px and leaves 14.0px between its last glyph and
+	   the trigger's box. Measured, not derived — the ratio is what the browser
+	   reports for this string in this face, and it moves if the face or the
+	   tracking does.
+
+	   NOT if the WEIGHT does, which is worth knowing before anyone reaches for
+	   this column after a weight change: Recursive's advance widths are duplexed
+	   across wght. Measured on this string at 300/400/500/600/700 — 124.59px at
+	   every one of them, to the hundredth. So the mark got a notch lighter on
+	   2026-09-01 (600 → 500, in the markup beside its size) and not one number
+	   here moved. Re-run the column for a new face or new tracking; a weight is
+	   free.
 
 	   THE FLOOR IS THAT GAP, NOT AN OVERFLOW. Nothing here can push the row off
 	   the window: the trigger rides `ml-auto`, so the slack is what the auto
