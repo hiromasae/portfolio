@@ -60,15 +60,23 @@
 
 			   90px → 64px with the years gone (2026-09-01, Hiro): the reserve is
 			   two title lines and nothing else now, so it tracks the title's own
-			   line-height rather than carrying a dead 26px where the numeral was. */
+			   line-height rather than carrying a dead 26px where the numeral was.
+			   → 59px when the title stepped 26px → 24px the same day. THIS VALUE
+			   IS DERIVED, not chosen: it is 2 × font-size × line-height, and if
+			   either moves again it has to be recomputed or the one-line card
+			   floats its frame off the row's baseline again. */
 			.meta {
 				display: flex;
 				flex-direction: column;
-				min-height: 64px;
+				min-height: 59px;
 			}
 
+			/* 24px, down from 26 (2026-09-01, Hiro). The wrap is unchanged — EJS
+			   still takes one line, migaki and Stacksmith still take two — which
+			   is what makes this a safe step: 22 would pull Stacksmith back onto
+			   one line and break the row's shared baseline. */
 			.title {
-				font-size: 26px;
+				font-size: 24px;
 				font-weight: 400;
 				line-height: 1.22;
 				letter-spacing: -0.02em;
@@ -101,9 +109,17 @@
 			   thirty-one, and holding the old size would have run it a third of
 			   the way across the bar and made the identity line out-shout the
 			   work below it, which is the one thing this card exists to show. */
+			/* Weight 500, down from 600 (2026-09-01, Hiro). Not an arbitrary notch:
+			   500 is --weight-emph in the dark theme, so the masthead now sits on
+			   the site's own top tier instead of a step above every weight the
+			   site uses. 600 was inherited from .nav-logo's font-semibold, and
+			   that weight was doing a job here it doesn't have to — two letters
+			   need the extra stroke to read as a mark, a thirty-one character
+			   line does not, and at 34px the heavier cut was closing up the
+			   counters in the descriptor. */
 			.mark {
 				font-size: 34px;
-				font-weight: 600;
+				font-weight: 500;
 				letter-spacing: -0.02em;
 				color: var(--dye-name);
 			}
@@ -113,10 +129,15 @@
 			   are not the same object twice — one names, one signs, and the bar
 			   is bookended by the identity the way the site's nav is anchored by
 			   it. Sized under the masthead deliberately: the mark is the echo
-			   here, not the lead. */
+			   here, not the lead.
+
+			   Follows the masthead to 500. Left at 600 it would have been the
+			   HEAVIER of the two green objects while being the smaller and less
+			   important one — the echo out-drawing the thing it echoes. The rule
+			   is that these two move together; only their size ranks them. */
 			.mark-right {
 				font-size: 30px;
-				font-weight: 600;
+				font-weight: 500;
 				letter-spacing: -0.025em;
 				color: var(--dye-name);
 			}
