@@ -1,0 +1,95 @@
+/* Shared shell for the OG card mockups. Everything here is lifted from the
+   site's own tokens (global.css, dark theme) rather than re-picked by eye —
+   the card has to look like the site it links to, and the fastest way to fail
+   that is to eyeball a "close enough" navy. */
+@font-face {
+	font-family: 'Recursive';
+	src: url('../../src/assets/fonts/Recursive-latin.woff2') format('woff2');
+	font-weight: 300 700;
+	font-style: normal;
+	font-display: block;
+}
+
+:root {
+	/* dark theme, verbatim from global.css */
+	--paper: #0c0e14;
+	--ink: #c0caf5;
+	--ink-soft: #8f9bc7;
+	--ink-hero: #e4e9fc;
+	--ink-title: #2ac3de;
+	--surface-sunken: #1f2335;
+	--dye-name: #9ece6a;
+	--line: rgba(192, 202, 245, 0.12);
+	--line-soft: rgba(192, 202, 245, 0.11);
+	--radius: 2px;
+	--rule: linear-gradient(
+		90deg,
+		transparent 0%,
+		color-mix(in srgb, var(--line-soft) 45%, transparent) 6%,
+		var(--line-soft) 16%,
+		var(--line-soft) 84%,
+		color-mix(in srgb, var(--line-soft) 45%, transparent) 94%,
+		transparent 100%
+	);
+}
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+body {
+	width: 1200px;
+	height: 630px;
+	background: var(--paper);
+	font-family: 'Recursive', system-ui, sans-serif;
+	color: var(--ink);
+	overflow: hidden;
+	-webkit-font-smoothing: antialiased;
+	/* No --grain: the dark theme sets it to none, and a noise overlay on a
+	   card that gets recompressed by every chat client is noise twice over. */
+}
+
+.card {
+	width: 1200px;
+	height: 630px;
+	display: flex;
+	flex-direction: column;
+}
+
+/* ── The nav echo ──
+   The home page opens with the wordmark over a full-bleed hairline — that rule
+   is the underside of the nav bar, and it is the first thing the site draws.
+   Reproducing it is what makes this read as THIS site rather than as a generic
+   dark card with green text on it. Full-bleed, like the nav's own; the
+   in-column rule is a different device (see #projects::before in global.css). */
+.bar {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	padding: 52px 72px 28px;
+	flex: none;
+}
+
+.mark {
+	font-size: 46px;
+	font-weight: 600;
+	letter-spacing: -0.025em;
+	color: var(--dye-name);
+	line-height: 1;
+}
+
+.byline {
+	font-size: 21px;
+	font-weight: 400;
+	color: var(--ink-soft);
+	letter-spacing: -0.005em;
+}
+
+.rule {
+	height: 1px;
+	width: 100%;
+	background: var(--rule);
+	flex: none;
+}

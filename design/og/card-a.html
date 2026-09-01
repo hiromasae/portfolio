@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+	<head>
+		<meta charset="utf-8" />
+		<title>OG card A — type</title>
+		<link rel="stylesheet" href="_card.css" />
+		<style>
+			/* ── Card A: the sentence ──
+			   The home page's hero, cropped to the part that survives being 400px
+			   wide in a chat window. Same composition as the page (mark on the
+			   left over the bar's rule, statement centred below it), so it reads
+			   as the site's front door rather than as a poster about it. */
+			.stage {
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				padding: 0 72px 12px;
+			}
+
+			/* WEIGHT 400, not the site's 300, and this is the one place the card
+			   deliberately parts company with the page. A 1200px card is displayed
+			   at 400–500px in most feeds and recompressed on the way — hairline
+			   strokes are exactly what that pipeline eats, and w300 at display
+			   size is fragile before any of that happens. 400 is the floor that
+			   still draws the face's light, open character at this size. If this
+			   is ever re-cut for a 2x asset, 300 becomes available again. */
+			h1 {
+				/* 70, down from 76. At 76 the second line ran to within 115px of
+				   the card edge while the wordmark sits at 72 — the longer line
+				   was reaching PAST the margin the bar establishes, which reads as
+				   type straining against the frame rather than sitting in it. */
+				font-size: 70px;
+				font-weight: 400;
+				line-height: 1.16;
+				/* Tightened because this is display type — the site's own rule is
+				   that tracking goes negative above ~32px and never below it. */
+				letter-spacing: -0.028em;
+				color: var(--ink-hero);
+				text-align: center;
+				text-wrap: balance;
+			}
+
+			/* The break is FORCED rather than left to the wrap. At this measure the
+			   natural break lands after "good", which splits the phrase the whole
+			   line is built on; the clause boundary after the comma is the one
+			   place the sentence actually wants to breathe. */
+			h1 .clause {
+				display: block;
+			}
+
+			.foot {
+				margin-top: 44px;
+				font-size: 22px;
+				font-weight: 400;
+				color: var(--ink-soft);
+				letter-spacing: -0.005em;
+				text-align: center;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="card">
+			<div class="bar">
+				<span class="mark">HE</span>
+			</div>
+			<div class="rule"></div>
+			<div class="stage">
+				<h1>
+					<span class="clause">Design engineering,</span>
+					<span class="clause">with good sense and taste.</span>
+				</h1>
+				<p class="foot">Hiro Eernisse — Design Engineer</p>
+			</div>
+		</div>
+	</body>
+</html>

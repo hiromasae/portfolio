@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+	<head>
+		<meta charset="utf-8" />
+		<title>OG card B — work</title>
+		<link rel="stylesheet" href="_card.css" />
+		<style>
+			/* ── Card B: the work ──
+			   Same nav echo as A, then the projects grid instead of the hero. The
+			   argument for this one is that the title text sitting beside the card
+			   in a feed ALREADY says "Hiro Eernisse — Design Engineer": a card
+			   that repeats the words earns nothing, and a card that shows three
+			   pieces of work says the one thing the text can't.
+
+			   The card idiom is ProjectCard.astro's, not a new one — metadata
+			   above the image, 16/9 frame, 2px radius, --line border on a
+			   --surface-sunken bed. Straight-on and unrotated: an angled
+			   perspective deck hides the very screenshots it is showing off. */
+			.grid {
+				flex: 1;
+				display: grid;
+				grid-template-columns: repeat(3, 1fr);
+				gap: 28px;
+				align-content: center;
+				padding: 0 72px 8px;
+			}
+
+			.proj {
+				display: flex;
+				flex-direction: column;
+				/* The real card runs gap-4 (1rem at a 19px root ≈ 16px) between the
+				   metadata block and the frame. Held here so the rhythm matches. */
+				gap: 17px;
+				min-width: 0;
+			}
+
+			/* HEIGHT RESERVED FOR TWO TITLE LINES, always. On the site this block
+			   is free-height and that is correct there — the grid's rows are far
+			   apart and each card is read on its own. Packed into a 1200×630 card
+			   the three sit shoulder to shoulder and get read as ONE row, so a
+			   one-line title (EJS) floated its frame ~30px above its neighbours'
+			   and the row lost its baseline. Reserving the taller of the two cases
+			   puts every frame on one line; the shorter title just leaves air
+			   under it, which nobody reads as a gap. */
+			.meta {
+				display: flex;
+				flex-direction: column;
+				gap: 4px;
+				min-height: 90px;
+			}
+
+			/* Body ink, deliberately — the card's year is NOT --ink-num. On a card
+			   whose title already carries the cyan, a second accent puts two of
+			   them in a four-line block and the orange wins the entrance. Same
+			   reasoning as the note in ProjectCard.astro. */
+			.year {
+				font-size: 22px;
+				font-weight: 400;
+				color: var(--ink);
+				line-height: 1;
+			}
+
+			.title {
+				font-size: 26px;
+				font-weight: 400;
+				line-height: 1.22;
+				letter-spacing: -0.02em;
+				color: var(--ink-title);
+			}
+
+			.frame {
+				position: relative;
+				width: 100%;
+				aspect-ratio: 16 / 9;
+				overflow: hidden;
+				border-radius: var(--radius);
+				border: 1px solid var(--line);
+				background: var(--surface-sunken);
+				background-clip: padding-box;
+			}
+
+			.frame img {
+				position: absolute;
+				inset: 0;
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+				object-position: top;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="card">
+			<div class="bar">
+				<span class="mark">HE</span>
+				<span class="byline">Hiro Eernisse — Design Engineer</span>
+			</div>
+			<div class="rule"></div>
+			<div class="grid">
+				<div class="proj">
+					<div class="meta">
+						<span class="year">2026</span>
+						<span class="title">migaki: Design Sense for Coding Agents</span>
+					</div>
+					<div class="frame">
+						<img src="../../public/images/migaki0.webp" alt="" />
+					</div>
+				</div>
+				<div class="proj">
+					<div class="meta">
+						<span class="year">2026</span>
+						<span class="title">EJS: Landing Page Facelift</span>
+					</div>
+					<div class="frame">
+						<img src="../../public/images/ejs0.webp" alt="" />
+					</div>
+				</div>
+				<div class="proj">
+					<div class="meta">
+						<span class="year">2026</span>
+						<span class="title">Stacksmith: AI Tool Stack Discovery</span>
+					</div>
+					<div class="frame">
+						<img src="../../public/images/stacksmith1.png" alt="" />
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
