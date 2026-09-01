@@ -136,10 +136,10 @@ const tools = [
 			    the page BEING there — which is the right note for a card that is
 			    now the entire content of the page.
 
-			    --i: 0 with no --base, so it lands on the bar's --hold exactly. The
-			    figure follows at --i: 1 — the standard 150ms stagger, matched to
-			    the home page's hero→grid beat; see the note there for how a
-			    bespoke 450ms gap fell out of step with the hairline finale. */}
+			    --i: 0 with no --base, so it opens the cascade at 0ms. The figure
+			    follows at --i: 1 — the standard 150ms stagger, matched to the
+			    home page's hero→grid beat; see the note there for how a bespoke
+			    450ms gap fell out of step with the hairline finale. */}
 			{/* ── NO CARD BELOW sm (Hiro, 2026-08-15) ── Every card class below is
 			    gated behind sm:, so on a phone this is plain prose sitting on the
 			    page ground and the card materialises at 640px.
@@ -333,9 +333,9 @@ const tools = [
 				    .interest-mark just states the size it was always going to be.
 
 				    SVG since 2026-08-04, on Hiro's ask, replacing 🥁👾🎬🥾 — see the
-				    block in Icon.astro for what the emoji couldn't do, why each one
-				    redraws its OWN emoji rather than a neighbouring idea, and why
-				    none of them carry --len. A hue each, from --mark-*; the values,
+				    block in Icon.astro for what the emoji couldn't do and why each
+				    one redraws its OWN emoji rather than a neighbouring idea. A
+				    hue each, from --mark-*; the values,
 				    their ratios, and how this squares with the page declining the
 				    accent on its headings are all at .interest-mark in global.css.
 
@@ -532,13 +532,13 @@ const tools = [
 			    hero). It was a hand-set --base before: 180ms (in flight before
 			    the old five-element cascade's later pieces had started), then
 			    450ms against the card-as-one-object — which read right on its
-			    own, but priced the page out of the hairline finale: the bar's
-			    line fires at 1150ms, the frame BOTH index blocks have landed,
-			    and a 450ms base pushed the figure's landing to ~1450ms, so the
-			    close started mid-arrival here. On the shared stagger the two
-			    pages' cascades land together and one finale delay is right for
-			    both — keep this on the standard beat; a bespoke gap needs a
-			    bespoke finale delay to go with it. */}
+			    own, but priced the page out of the hairline finale: the closing
+			    rule fires the frame BOTH index blocks have landed, and a 450ms
+			    base pushed the figure's landing well past it, so the close
+			    started mid-arrival here. On the shared stagger the two pages'
+			    cascades land together and one finale delay is right for both —
+			    keep this on the standard beat; a bespoke gap needs a bespoke
+			    finale delay to go with it. */}
 			<figure class="reveal w-full max-w-[16rem] sm:max-w-[20rem] lg:w-[16rem] lg:max-w-none lg:shrink-0" style="--i: 1">
 				<img
 					src="/images/me.webp"
