@@ -12,17 +12,32 @@
 			   that repeats the words earns nothing, and a card that shows three
 			   pieces of work says the one thing the text can't.
 
-			   The card idiom is ProjectCard.astro's, not a new one — metadata
-			   above the image, 16/9 frame, 2px radius, --line border on a
+			   The card idiom is ProjectCard.astro's, not a new one — title above
+			   the image, 16/9 frame, 2px radius, --line border on a
 			   --surface-sunken bed. Straight-on and unrotated: an angled
-			   perspective deck hides the very screenshots it is showing off. */
+			   perspective deck hides the very screenshots it is showing off.
+
+			   THE YEARS ARE GONE (2026-09-01, Hiro). They earn their line on the
+			   site, where the grid is a body of work you scan chronologically.
+			   They earn nothing here: all three read 2026, so the column repeated
+			   one number three times and told the reader only that the work is
+			   recent — which the card has no room to spend a line on. The title
+			   is what a stranger is deciding on. */
 			.grid {
 				flex: 1;
 				display: grid;
 				grid-template-columns: repeat(3, 1fr);
 				gap: 28px;
 				align-content: center;
-				padding: 0 72px 8px;
+				/* Bottom padding is an OPTICAL CENTRING SHIM, not a gap anyone
+				   sees. True-centred, the block measured 116px of air above the
+				   titles and 119px below the frames — even, and even reads as
+				   low, because the masthead loads the top of the card and the eye
+				   splits the difference above centre. 28px of bottom padding
+				   lifts the block ~10px, which is the correction. It grew from
+				   8px when the years came out: a shorter block sits in more air,
+				   so it needed more of a lift, not the same one. */
+				padding: 0 72px 28px;
 			}
 
 			.proj {
@@ -41,23 +56,15 @@
 			   one-line title (EJS) floated its frame ~30px above its neighbours'
 			   and the row lost its baseline. Reserving the taller of the two cases
 			   puts every frame on one line; the shorter title just leaves air
-			   under it, which nobody reads as a gap. */
+			   under it, which nobody reads as a gap.
+
+			   90px → 64px with the years gone (2026-09-01, Hiro): the reserve is
+			   two title lines and nothing else now, so it tracks the title's own
+			   line-height rather than carrying a dead 26px where the numeral was. */
 			.meta {
 				display: flex;
 				flex-direction: column;
-				gap: 4px;
-				min-height: 90px;
-			}
-
-			/* Body ink, deliberately — the card's year is NOT --ink-num. On a card
-			   whose title already carries the cyan, a second accent puts two of
-			   them in a four-line block and the orange wins the entrance. Same
-			   reasoning as the note in ProjectCard.astro. */
-			.year {
-				font-size: 22px;
-				font-weight: 400;
-				color: var(--ink);
-				line-height: 1;
+				min-height: 64px;
 			}
 
 			.title {
@@ -79,6 +86,29 @@
 				background-clip: padding-box;
 			}
 
+			/* ── The name, set as a wordmark rather than as a caption ──
+			   This slot used to read "Hiro Eernisse — Design Engineer" in
+			   --ink-soft: a byline, styled like the site's muted tier. In green
+			   it stops being metadata about the card and becomes the second half
+			   of the masthead — the mark's initials on the left, spelled out on
+			   the right, both in --dye-name.
+
+			   The descriptor goes with the colour, and has to. "Design Engineer"
+			   in the site's one accent would be the green claiming a job title
+			   rather than a name, and --dye-name is the site's identity colour —
+			   it is spent on the mark and nowhere else (see the dye block in
+			   global.css). The line beside the card in a feed already reads
+			   "Hiro Eernisse — Design Engineer" anyway, so nothing is lost.
+
+			   Weight 500, one notch under the mark's 600: same voice, quieter,
+			   so the two ends of the bar don't compete for the same rank. */
+			.mark-full {
+				font-size: 26px;
+				font-weight: 500;
+				letter-spacing: -0.02em;
+				color: var(--dye-name);
+			}
+
 			.frame img {
 				position: absolute;
 				inset: 0;
@@ -93,13 +123,12 @@
 		<div class="card">
 			<div class="bar">
 				<span class="mark">HE</span>
-				<span class="byline">Hiro Eernisse — Design Engineer</span>
+				<span class="mark-full">Hiro Eernisse</span>
 			</div>
 			<div class="rule"></div>
 			<div class="grid">
 				<div class="proj">
 					<div class="meta">
-						<span class="year">2026</span>
 						<span class="title">migaki: Design Sense for Coding Agents</span>
 					</div>
 					<div class="frame">
@@ -108,7 +137,6 @@
 				</div>
 				<div class="proj">
 					<div class="meta">
-						<span class="year">2026</span>
 						<span class="title">EJS: Landing Page Facelift</span>
 					</div>
 					<div class="frame">
@@ -117,7 +145,6 @@
 				</div>
 				<div class="proj">
 					<div class="meta">
-						<span class="year">2026</span>
 						<span class="title">Stacksmith: AI Tool Stack Discovery</span>
 					</div>
 					<div class="frame">
