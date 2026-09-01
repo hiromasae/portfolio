@@ -168,27 +168,33 @@ import { projects } from '../data/projects';
 			    the finale block in global.css, and the Props note in the component
 			    for why the caller owns this rather than the grid.
 
-			    initial={4} (2026-08-15, Hiro: only show four project cards
-			    initially with a load more button). FOUR IS THE GRID, not a
-			    round number: the home page runs two columns from sm up, so four
-			    is exactly two full rows and the collapsed state has no short
-			    row in it — the list reads as complete until you notice the
-			    control under it, which is the difference between a page that
-			    holds something back and one that looks like it ran out. Below
-			    sm every card is its own row and the figure is just a count.
+			    NO `initial` (2026-09-01, Hiro). This grid deferred everything
+			    past the fourth card behind a Show more from 2026-08-15 until
+			    today, when the count made the case against it: there are five
+			    projects, so the control hid exactly ONE, and a disclosure that
+			    conceals a single card is a gesture rather than a service. The
+			    page is two blocks tall either way; what it actually bought was
+			    one grid row, against every visitor who left the button unpressed
+			    seeing four fifths of the work. A portfolio errs the other way.
 
-			    Keep it a MULTIPLE OF THE COLUMN COUNT if either ever changes;
-			    the project page's strip runs three columns and would want 3 or
-			    6, though it passes no `initial` at all today. The remainder is
-			    the part that is allowed to be short: there is one project past
-			    the four right now, and a lone card in the revealed row is fine
-			    — by then the visitor has asked to see the rest.
+			    THE TIDY 2×2 IS THE REAL THING GIVEN UP, and it was the old note's
+			    whole argument: four is exactly two full rows, so the collapsed
+			    state had no short row in it. Five leaves a lone card closing the
+			    list. That reads as the list ending — which is what it is — and
+			    it is not the orphan-in-a-three-up-row that /projects/[slug]
+			    fixed by changing its count (see the strip note there); a trailing
+			    single at the BOTTOM of a two-column run has nothing after it to
+			    look ragged against.
 
-			    Everything else about the feature lives in ProjectGrid.astro
-			    and global.css. What stays a decision of THIS page is only the
-			    number, and that the home page is the page that defers at all —
-			    /projects/[slug]'s strip shows its whole (already short) set. */}
-			<ProjectGrid projects={projects} initial={4} class="reveal" style="--i: 1" />
+			    The prop and the machinery behind it are untouched in
+			    ProjectGrid.astro, and omitting it is what the strip already does,
+			    so both consumers now ask for the same thing. Pass a number again
+			    when the list is long enough that deferring is an editorial call
+			    rather than a flourish — somewhere past eight or ten — and keep it
+			    a MULTIPLE OF THE COLUMN COUNT: two columns here wants 4 or 6, the
+			    strip's three wants 3 or 6, so the collapsed state keeps that no
+			    short row property this page just spent. */}
+			<ProjectGrid projects={projects} class="reveal" style="--i: 1" />
 		</section>
 	</main>
 
