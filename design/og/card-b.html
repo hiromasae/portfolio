@@ -61,22 +61,32 @@
 			   90px → 64px with the years gone (2026-09-01, Hiro): the reserve is
 			   two title lines and nothing else now, so it tracks the title's own
 			   line-height rather than carrying a dead 26px where the numeral was.
-			   → 59px when the title stepped 26px → 24px the same day. THIS VALUE
-			   IS DERIVED, not chosen: it is 2 × font-size × line-height, and if
-			   either moves again it has to be recomputed or the one-line card
-			   floats its frame off the row's baseline again. */
+			   → 59px at a 24px title, → 54px at 22px. THIS VALUE IS DERIVED, not
+			   chosen: it is 2 × font-size × line-height, and it has to be
+			   recomputed whenever either moves. Too SMALL and a two-line title
+			   overflows it, which puts that card's frame below its neighbours';
+			   too large and every frame sits lower than it needs to. */
 			.meta {
 				display: flex;
 				flex-direction: column;
-				min-height: 59px;
+				min-height: 54px;
 			}
 
-			/* 24px, down from 26 (2026-09-01, Hiro). The wrap is unchanged — EJS
-			   still takes one line, migaki and Stacksmith still take two — which
-			   is what makes this a safe step: 22 would pull Stacksmith back onto
-			   one line and break the row's shared baseline. */
+			/* 26 → 24 → 22px (2026-09-01, Hiro, twice).
+			   A NOTE ON THE 24px STEP RETRACTS ITS OWN REASONING: it claimed 22
+			   was unavailable because it would pull Stacksmith onto one line and
+			   take the frames off their shared baseline. The second half does not
+			   follow from the first. .meta carries a min-height, so every card is
+			   that tall whether its title wraps to one line or two — the reserve
+			   is the mechanism that makes the wrap not matter, which was the point
+			   of adding it. Nothing about the row's baseline constrains this size.
+			   The real floor is legibility at feed width, and it is lower than 22.
+
+			   The one wrap that WOULD break alignment is a third line, since that
+			   exceeds the reserve rather than sitting inside it — and shrinking
+			   the type moves away from that, never toward it. */
 			.title {
-				font-size: 24px;
+				font-size: 22px;
 				font-weight: 400;
 				line-height: 1.22;
 				letter-spacing: -0.02em;
@@ -116,10 +126,22 @@
 			   that weight was doing a job here it doesn't have to — two letters
 			   need the extra stroke to read as a mark, a thirty-one character
 			   line does not, and at 34px the heavier cut was closing up the
-			   counters in the descriptor. */
+			   counters in the descriptor.
+
+			   600 → 500 → 400, and each step lands on a token rather than a notch:
+			   400 is --weight-ui in the dark theme. It is now the same weight as
+			   the project titles below it, which is fine and arguably the point —
+			   the masthead is ranked by SIZE and COLOUR (34px, --dye-name) and no
+			   longer leans on stroke to outrank the work.
+
+			   300 (--weight-body) is the next token down and is the floor worth
+			   knowing about: this asset is recompressed at feed width, and the
+			   dark theme's own body weight is already the lightest thing the
+			   site draws. Below 400 the green starts to thin against the paper
+			   at 440px rather than simply looking lighter. */
 			.mark {
 				font-size: 34px;
-				font-weight: 500;
+				font-weight: 400;
 				letter-spacing: -0.02em;
 				color: var(--dye-name);
 			}
@@ -137,7 +159,7 @@
 			   is that these two move together; only their size ranks them. */
 			.mark-right {
 				font-size: 30px;
-				font-weight: 500;
+				font-weight: 400;
 				letter-spacing: -0.025em;
 				color: var(--dye-name);
 			}
