@@ -174,15 +174,16 @@ const onHome = path === '/';
 				contacts.map((c, i) => {
 					const isEmail = c.href.startsWith('mailto:');
 					const hoverLabel = isEmail ? 'Copy email' : c.label;
-					// --nav-icon-i is markup order, which the load intro's draw stagger
-					// marches along; --nav-icon-c is the same position as a signed offset
-					// from the cluster's centre, in box-and-gap pitches, which is what the
-					// close-ranks translate in global.css needs.
+					// --nav-icon-c is the button's position as a signed offset from the
+					// cluster's centre, in box-and-gap pitches, which is what the
+					// close-ranks translate in global.css needs. (Markup order rode
+					// alongside it as --nav-icon-i until 2026-09-01, when the load
+					// intro's draw stagger — its only consumer — was removed.)
 					return (
 						<a
 							href={c.href}
 							class="btn-icon"
-							style={`--nav-icon-i: ${i}; --nav-icon-c: ${i - (contacts.length - 1) / 2}`}
+							style={`--nav-icon-c: ${i - (contacts.length - 1) / 2}`}
 							aria-label={hoverLabel}
 							data-label={hoverLabel}
 							data-copy={isEmail ? c.href.replace('mailto:', '') : undefined}
@@ -331,9 +332,7 @@ const onHome = path === '/';
 				<span class="btn-quiet__label">Contact</span>
 				{/* Rotates 180° while open — the affordance the caret exists for.
 				    Same drawing system as every other glyph in the bar: 24-unit
-				    box, 2px stroke, square cap. No --len: the load intro wipes
-				    this button as one box (label and caret together) rather than
-				    stroke-drawing it, so there is no dash math to keep in step. */}
+				    box, 2px stroke, square cap. */}
 				<svg
 					class="contact-caret"
 					viewBox="0 0 24 24"
@@ -479,9 +478,7 @@ const onHome = path === '/';
 							<circle cx="12" cy="12" r="9" />
 						</clipPath>
 					</defs>
-					{/* --len: measured circumference for the load intro's circle draw —
-					    same true-unit dash scheme as the contact icons (Icon.astro). */}
-					<circle cx="12" cy="12" r="9" style="--len: 56.25" />
+					<circle cx="12" cy="12" r="9" />
 					<g clip-path="url(#theme-fill-clip)">
 						<rect class="theme-fill-rect" x="12" y="2" width="9" height="20" fill="currentColor" stroke="none" />
 						{/* The twin, exactly one period (18) left: off-circle at rest
@@ -518,20 +515,30 @@ const onHome = path === '/';
 
 <script is:inline>
 	// ── Arrival choreography ──
-	// Everything that must happen pre-paint:
-	//   - the load intro: the bar's entrance, whose compositor-side keyframes
-	//     (global.css) start at 'interactive' — readyState 'interactive' fires
-	//     before module scripts evaluate, so the intro can't be starved by the
-	//     module chain (in dev, the Vite client) on a slow round trip
-	//   - the reveal-* classes the content cascade keys off
+	// One job left, and it must happen pre-paint: decide whether this load's
+	// content cascade (the .reveal rules in global.css) waits for the webfonts
+	// before it plays — the reveal-wait class, whose critical-hide twin lives
+	// in Layout.astro's head.
 	//
-	// Until 2026-08-02 it also owned the "q model": the bar's geometry was a
+	// THE BAR NO LONGER INTRODUCES ITSELF (2026-09-01, Hiro). It used to own a
+	// load intro here: wordmark wipe, contact icons stroke-drawing, the theme
+	// toggle's circle and ink sweep, closing on the bar's hairline growing
+	// centre-out — ~2.35s of ceremony, gated to first-visit-per-tab plus any
+	// explicit reload, released at readyState 'interactive' so the module
+	// chain couldn't starve it, and cleaned up on a timer past its last
+	// keyframe. All of it is gone: the bar paints at rest on every arrival and
+	// the pages' cascades are the whole entrance. The intro's CSS (the
+	// nav-intro-draw/-go holds and the nav-load-* keyframes), its --len dash
+	// plumbing on the icons, and the --hold offset the cascade used to sit
+	// behind went with it; see the content-reveal block in global.css.
+	//
+	// Before 2026-08-02 this also owned the "q model": the bar's geometry was a
 	// progress value tweened between an expanded masthead and the compact bar,
 	// triggered by the scroll crossing the top of the home page and handed
 	// across MPA navigations through sessionStorage so the two pages' bars
-	// joined up. The masthead is gone. All that survives of the handoff is the
-	// internal-navigation flag below, which still decides whether the bar
-	// introduces itself on arrival.
+	// joined up. The masthead is gone. What survives of that handoff is the
+	// internal-navigation flag below — now only telling a hard load from a
+	// click-through, which is all the font wait needs to know.
 	(function () {
 		var nav = document.getElementById('site-nav');
 		if (!nav) return;
@@ -548,7 +555,8 @@ const onHome = path === '/';
 
 		// Did we arrive from another page of the site? The age cap means returning
 		// to a stale tab (e.g. from an external site much later) reads as a fresh
-		// arrival and gets the entrance.
+		// arrival — where the font cache is the thing least likely to still be
+		// warm in this document.
 		var internal = false;
 		try {
 			var stamp = sessionStorage.getItem('nav-from');
@@ -556,106 +564,50 @@ const onHome = path === '/';
 			if (stamp) internal = Date.now() - +stamp < 10000;
 		} catch (e) {}
 
-		// ── Load intro: the bar's entrance ──
-		// Only for arrivals that AREN'T an internal navigation — clicking through
-		// the site shouldn't re-introduce the bar on every page — EXCEPT a reload,
-		// which also stamps the clock on its way out (pagehide fires) but should
-		// still get the entrance. First visits and external arrivals qualify.
-		// The class goes on
-		// pre-paint so first paint holds the bar hidden at the animation's first
-		// frame (the holds in global.css); runLoadIntro releases it at
-		// 'interactive'.
+		// ── Does the cascade wait for type? ──
+		// Only on a HARD load — a first visit, an external arrival, or a
+		// reload, which bypasses the font cache. A click-through the site has
+		// the face warm and the bar already seated, so its cascade plays at
+		// once. (A reload stamps the clock on its way out too, so it reads as
+		// internal here; navType corrects for it.)
 		//
-		// ONCE PER TAB-SESSION — EXCEPT AN EXPLICIT RELOAD (2026-08-06, Hiro,
-		// both calls the same day: the gate landed first, then "I should be
-		// able to see it on reload"). The full ceremony runs ~2.8s since the
-		// hairline finale joined it, and it earns that on a first meeting; but
-		// a reload is a deliberate act — "show me again" — and it is also how
-		// this site's own author checks the entrance, so it always replays.
-		// What the session stamp actually shortens is the one remaining hard
-		// arrival: a same-tab return from an external site after the nav-from
-		// stamp has gone stale (>10s), where re-greeting someone who left a
-		// minute ago would read as the site forgetting them. Those take the
-		// internal-navigation form: bar at rest, cascade at once, the projects
-		// rule still closing it (its --hold+1240ms delay needs no class). The
-		// stamp is written only when the ceremony actually PLAYS.
-		// sessionStorage, like nav-from: per tab, dies with it.
-		// ("Every arrival" was the 2026-08-02 call; it was made when the whole
-		// intro ran ~1.35s.)
+		// The wait exists because content used to slide in wearing the
+		// fallback face and snap to Recursive when it landed (Hiro,
+		// 2026-08-06). Reduced motion has no cascade to protect.
 		var navType = '';
 		try {
 			var navEntry = performance.getEntriesByType('navigation')[0];
 			if (navEntry) navType = navEntry.type;
 		} catch (e) {}
-		var introSeen = false;
-		try {
-			introSeen = !!sessionStorage.getItem('nav-introed');
-		} catch (e) {}
 		var hardArrival = !internal || navType === 'reload';
-		var loadIntro = !reduce && hardArrival && (!introSeen || navType === 'reload');
-		// The short form: a repeat hard arrival — no bar entrance, but still a
-		// hard load, with everything that implies for the webfonts (see the
-		// reveal-wait note below).
-		var shortForm = !reduce && !loadIntro && hardArrival;
-		if (loadIntro) {
-			root.classList.add('nav-intro-draw');
-			try {
-				sessionStorage.setItem('nav-introed', '1');
-			} catch (e) {}
-		}
+		var waitForType = !reduce && hardArrival;
 
-		// ── Content reveal coordination ──
-		// The pages' .reveal cascades (global.css) start after whatever entrance
-		// the bar is playing, keyed off classes captured here — pre-paint, where
-		// this load's arrival shape is decided. PERSISTENT classes on purpose, not
-		// the nav-intro-draw one: that is removed at cleanup, and an
-		// animation-delay that changes mid-flight restarts the animation.
-		//   reveal-hold-draw: a load intro is coming — overlap its choreography.
-		// An ordinary internal navigation takes neither class: the bar is already
-		// there, so the cascade plays at once.
-		if (loadIntro) {
-			root.classList.add('reveal-hold-draw');
-			// The bar and the content enter as one choreography, so they wait on
-			// the type as one too — see whenTypeSettled below. The cascade is
-			// PAUSED (rule in Layout.astro's critical block) rather than given a
-			// bigger --hold: the hold is tuned against the intro's fixed delays, so
-			// pausing shifts the whole sequence intact, where rewriting
-			// animation-delay mid-flight would restart it.
-			root.classList.add('reveal-wait');
-		} else if (shortForm) {
-			// The short form is still a HARD load — and a hard reload bypasses
-			// the font cache — so the type problem the ceremony waits out (the
-			// whenTypeSettled note below) hits the cascade here too: content
-			// slid in wearing the fallback face and snapped to Recursive when
-			// it landed (Hiro, 2026-08-06, the day after the session gate made
-			// this path reachable by reload). Same cure, same insurance: pause
-			// until type settles; a warm cache resolves fonts.ready in the
-			// same tick and costs the common repeat nothing.
-			root.classList.add('reveal-wait');
-		}
-
-		if (!loadIntro && !shortForm) return;
+		// PAUSED, not re-delayed: pausing catches the delay phase too, which is
+		// where this always lands, and it shifts the cascade intact where
+		// rewriting animation-delay mid-flight would restart it. A warm cache
+		// resolves the font promises in the same tick and costs the common
+		// repeat nothing.
+		if (!waitForType) return;
+		root.classList.add('reveal-wait');
 		// Don't start the entrance on type that's about to change under it.
-		// The wordmark wipes by clipping a PERCENTAGE of its own box, so a
-		// webfont swap mid-wipe re-resolves the clip against a new box AND
-		// re-sets the glyphs inside it, in one frame. Measured 07-29 (dev, warm):
-		// Satoshi landed ~250ms into the draw and snapped the wordmark 435px →
-		// 348px, throwing the reveal edge ~83px backwards mid-motion. Only the
-		// left of the bar moves — the icons are SVG, immune to font metrics —
-		// which is exactly how it reads. Frame pacing was clean throughout
-		// (16.7ms median, no gap over 25ms), so this is a layout jump and not
-		// jank: nothing about how the animation is driven can fix it, only what
-		// it runs on top of.
+		// Every .reveal block slides in carrying its own text, so a webfont swap
+		// mid-cascade re-sets the glyphs inside a box that is still moving —
+		// content arrives in the fallback face and snaps when Recursive lands.
+		// Measured 07-29 (dev, warm) on the bar's since-removed wordmark wipe,
+		// where the same swap moved a clip edge 83px mid-motion: frame pacing
+		// was clean throughout (16.7ms median, no gap over 25ms), so this is a
+		// layout jump and not jank — nothing about how the animation is driven
+		// can fix it, only what it runs on top of.
 		//
-		// Waiting costs nothing visible — the bar is held hidden pre-paint until
-		// 'go' either way, so this just lands the entrance a beat later on type
-		// that then holds still. The race is the insurance: a font request that
-		// stalls must not swallow the entrance, so at 1200ms it plays over the
-		// fallback exactly as it does today. That ceiling was set when the face
-		// came off a third-party CDN and is now generous — same-origin and
-		// preloaded, it arrives with the page — but generous is the right side
-		// to be wrong on for a timeout that only ever fires when something has
-		// already gone wrong.
+		// Waiting costs nothing visible — the cascade's first frame is blank
+		// either way (the critical hide in Layout.astro), so this just lands
+		// the entrance a beat later on type that then holds still. The race is
+		// the insurance: a font request that stalls must not swallow the
+		// entrance, so at 1200ms it plays over the fallback. That ceiling was
+		// set when the face came off a third-party CDN and is now generous —
+		// same-origin and preloaded, it arrives with the page — but generous is
+		// the right side to be wrong on for a timeout that only ever fires when
+		// something has already gone wrong.
 		//
 		// fonts.load(), NOT fonts.ready alone (2026-08-06). ready resolves
 		// when nothing is *currently* loading — and at 'interactive' the woff2
@@ -713,32 +665,14 @@ const onHome = path === '/';
 			}
 		};
 
-		// Release the intro's animations (the class was added pre-paint above;
-		// global.css holds everything at first-frame until .nav-intro-go).
-		// Cleanup is a plain timer just past the last fixed CSS delay+duration —
-		// every 'to' frame equals rest, so removing the classes mid-forwards-fill
-		// is invisible. A scroll during the intro is fine: the wipe and draws ride
-		// clip-path and dash channels, which nothing else on the bar touches.
-		var runLoadIntro = function () {
-			whenTypeSettled(function () {
-				// Both clocks start in the same frame, which is the point of the
-				// pause — the cascade's hold is measured from the intro's start.
-				root.classList.add('nav-intro-go');
-				root.classList.remove('reveal-wait');
-				window.setTimeout(function () {
-					root.classList.remove('nav-intro-draw', 'nav-intro-go');
-				}, 2450);
-			});
-		};
-
 		// 'interactive' means main and the cards exist and layout is measurable;
-		// it fires before module scripts evaluate.
+		// it fires before module scripts evaluate — so the release can't be
+		// starved by the module chain (in dev, the Vite client) on a slow round
+		// trip, which is why this doesn't wait on 'load'.
 		var arrive = function () {
-			if (loadIntro) runLoadIntro();
-			else if (shortForm)
-				whenTypeSettled(function () {
-					root.classList.remove('reveal-wait');
-				});
+			whenTypeSettled(function () {
+				root.classList.remove('reveal-wait');
+			});
 		};
 		if (document.readyState !== 'loading') {
 			arrive();
