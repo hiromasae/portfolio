@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+	<head>
+		<meta charset="utf-8" />
+		<title>OG card C — the name</title>
+		<link rel="stylesheet" href="_card.css" />
+		<style>
+			/* ── Card C: the name, at poster scale ──
+			   B was an inventory: it listed the work and let three screenshots
+			   carry the card, and at feed width the screenshots are the part that
+			   dies. This drops the inventory entirely.
+
+			   THE CARD DOES NOT HAVE TO CARRY INFORMATION, and that is the whole
+			   licence for this. Every unfurl draws the og:title and og:description
+			   immediately beside the image — "Hiro Eernisse — Design Engineer",
+			   then the full sentence about the work. A card that repeats them in
+			   pixels spends its one visual moment saying what the text already
+			   says. What the text CANNOT do is be recognisable at a glance, and
+			   that is what this is for.
+
+			   SCALE IS THE DESIGN DECISION. The difference between minimal with
+			   presence and minimal that looks unfinished is almost always size:
+			   a name set at 130px reads as a deliberate poster, the same name at
+			   40px reads as a label someone forgot to finish. There is nothing
+			   else on the card to hide behind, so the type has to commit. */
+
+			.stage {
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				padding: 0 80px;
+			}
+
+			/* WEIGHT 300 — the dark theme's --weight-body, and the lightest thing
+			   the site draws anywhere. It is safe HERE and nowhere else on these
+			   cards for one reason: stroke weight scales with size. At 34px the
+			   masthead needed 400 to survive the downscale; at 130px a w300 stem
+			   is still thick enough to take the recompression without thinning.
+			   Big type is where light weights actually belong — it is small light
+			   type that breaks, which is the trap slop.md flags in the other
+			   direction. */
+			.name {
+				font-size: 130px;
+				font-weight: 300;
+				line-height: 1;
+				/* Display tracking. Negative below ~32px would hurt legibility;
+				   at 130px it is what stops the letters reading as loose. */
+				letter-spacing: -0.035em;
+				color: var(--dye-name);
+			}
+
+			/* ── v1: the name, centred, nothing else ── */
+			body.v1 .stage { align-items: center; text-align: center; }
+			body.v1 .role { display: none; }
+			body.v1 .bar, body.v1 .rule { display: none; }
+
+			/* ── v2: centred, with the descriptor under it ──
+			   One small muted line under the name. It costs almost nothing and it
+			   buys a second rank — with a single object on the card there is no
+			   hierarchy to read, and no hierarchy is a large part of what reads as
+			   unfinished. Set in --ink-soft, NOT the green: the accent is the
+			   identity colour and it is spent on the name. Letterspaced OPEN,
+			   which is the one place this card inverts its own rule — at 24px
+			   tracking goes positive, and the openness is what makes a small line
+			   under a huge one read as deliberate rather than as leftovers. */
+			body.v2 .stage { align-items: center; text-align: center; }
+			body.v2 .name { font-size: 118px; }
+			body.v2 .bar, body.v2 .rule { display: none; }
+			body.v2 .role {
+				margin-top: 30px;
+				font-size: 24px;
+				font-weight: 400;
+				letter-spacing: 0.14em;
+				text-transform: uppercase;
+				color: var(--ink-soft);
+			}
+
+			/* ── v3: editorial — the rule up top, the name sitting low ──
+			   The centred lockups are symmetrical, and symmetry is the safe
+			   arrangement: it reads as composed but it does not read as ART
+			   DIRECTED. This one puts the descriptor small at the top left under
+			   the site's own hairline, then drops the name to the bottom of the
+			   card on the same left edge — the way a poster or a book cover is
+			   set, where the weight goes low and the space above it is the point.
+
+			   The asymmetry is doing the work the third element would otherwise
+			   have to do, which is why this stays the emptiest of the three and
+			   still looks the most designed. */
+			body.v3 .stage {
+				align-items: flex-start;
+				justify-content: flex-end;
+				padding: 0 80px 68px;
+			}
+			body.v3 .bar { padding: 44px 80px 22px; }
+			body.v3 .role {
+				display: none;
+			}
+			body.v3 .kicker {
+				font-size: 23px;
+				font-weight: 400;
+				letter-spacing: 0.14em;
+				text-transform: uppercase;
+				color: var(--ink-soft);
+			}
+			body.v1 .kicker, body.v2 .kicker { display: none; }
+		</style>
+	</head>
+	<body class="v3">
+		<div class="card">
+			<div class="bar">
+				<span class="kicker">Design Engineer</span>
+			</div>
+			<div class="rule"></div>
+			<div class="stage">
+				<span class="name">Hiro Eernisse</span>
+				<span class="role">Design Engineer</span>
+			</div>
+		</div>
+	</body>
+</html>
