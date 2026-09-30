@@ -1,0 +1,151 @@
+<!doctype html>
+<!--
+  The social card's ARTWORK. Rendered to public/og.png by render-og.mjs, which
+  is also the only thing that ever opens this file — it is not served, not
+  imported, and not part of the Astro build.
+
+  IT DEFINES NO COLOURS. Every value below comes through a CSS variable that
+  render-og.mjs lifts out of src/styles/global.css's :root[data-theme="dark"]
+  block at render time, so the card is painted in the site's own tokens rather
+  than in a copy of them. That is the whole reason this is a rendered HTML file
+  and not a PNG somebody exported once: legacy/og-image.png is what a card
+  looks like a year after the site moved on, and a card that LOOKS wrong is
+  worse than no card at all. Re-run the script after any token change.
+
+  Dark, because dark is the site's default (data-theme is stamped dark in the
+  markup in Layout.astro) — the card should look like the page the reader is
+  about to land on.
+-->
+<html><head><meta charset="utf-8">
+<style>
+	/* The site's own face, the same file Astro self-hosts and preloads — see
+	   the `fonts` block in astro.config.mjs for the axis pinning this relies
+	   on. Static on MONO/CASL/slnt/CRSV, variable on wght alone, so setting
+	   font-weight is the whole story. `block` rather than `swap`: a headless
+	   render has no user waiting, and a swap would risk screenshotting the
+	   fallback. */
+	@font-face {
+		font-family: 'Recursive';
+		src: url('../src/assets/fonts/Recursive-latin.woff2') format('woff2');
+		font-weight: 300 700;
+		font-style: normal;
+		font-display: block;
+	}
+
+	* { margin: 0; padding: 0; box-sizing: border-box; }
+
+	/* 1200×630, the size every scraper documents and the one og:image:width
+	   and og:image:height in Layout.astro name. Rendered at deviceScaleFactor
+	   1 — feeds display a card at roughly 500–600 CSS px, so 1200 is already
+	   about 2× on the surface that matters and a 2400px file would only cost
+	   bytes. */
+	body {
+		width: 1200px;
+		height: 630px;
+		overflow: hidden;
+		font-family: 'Recursive', 'Segoe UI', system-ui, sans-serif;
+		display: flex;
+		flex-direction: column;
+
+		/* The page ground: flat --paper, which is what the site's is as of
+		   2026-09-13. It was a gradient rebuilt from --ground-tint and
+		   --ground-lift — not copied, injected from the stylesheet so it moved
+		   when the site's did — and both tokens went with the effect (see the
+		   ground-shading note in global.css). The card follows the page, so it
+		   goes flat too; render-og.mjs's TOKENS list lost the same two names.
+		   (No --grain layer either way: dark sets --grain: none, deliberately.) */
+		background-color: var(--paper);
+		color: var(--ink);
+		-webkit-font-smoothing: antialiased;
+	}
+
+	/* ── The masthead ──
+	   The mark and the rule beneath it, which is the site's front door: a
+	   visitor who clicks this card lands on exactly this lockup. The monogram
+	   wears --dye-name like Nav.astro's does — the one piece of type on the
+	   site that is a mark rather than reading matter. */
+	.bar { display: flex; align-items: center; padding: 42px 72px 38px; }
+	.bar span {
+		font-size: 44px;
+		font-weight: 600;
+		letter-spacing: -0.025em;
+		line-height: 1;
+		color: var(--dye-name);
+	}
+
+	/* The nav's bottom edge, drawn off the same gradient shape as --rule in
+	   global.css — faded at both ends so it reads as a device rather than a
+	   box edge.
+
+	   THE ALPHA IS LIFTED, and that is the card's one deliberate departure
+	   from a token. --line-soft is rgba(--ink, 0.11), tuned for a screen at
+	   full size; a card is read at thumbnail scale through a re-compress,
+	   where 0.11 disappears and takes the masthead with it. 0.20 survives that
+	   and is still a hairline on the full-size image. Built as a mix of --ink
+	   rather than a fresh rgba() because --line-soft is itself --ink at an
+	   alpha, so this stays the site's line colour and only the alpha moves. */
+	.hair {
+		height: 1px;
+		width: 100%;
+		--line-card: color-mix(in srgb, var(--ink) 20%, transparent);
+		background: linear-gradient(
+			90deg,
+			transparent 0%,
+			color-mix(in srgb, var(--line-card) 45%, transparent) 6%,
+			var(--line-card) 16%,
+			var(--line-card) 84%,
+			color-mix(in srgb, var(--line-card) 45%, transparent) 94%,
+			transparent 100%
+		);
+	}
+
+	/* ── The statement ──
+	   The home page's <h1>, verbatim, and the card's one primary message. It
+	   wears --ink-hero for the same reason the page's does: this is the
+	   brightest text on the site because it is the opening statement.
+
+	   WEIGHT 400, where the page sets 300. The page's line is 21px on a screen
+	   the reader controls; this is 56px that will be downscaled and
+	   re-compressed, and thin display type is the first thing that pass eats.
+	   400 is the floor that survives it.
+
+	   The break after the comma is HARD, not a wrap. Left to itself the line
+	   breaks at "with good / sense and taste", splitting the phrase; the comma
+	   is where the sentence already pauses. Retype the <br> if the copy
+	   changes — and keep this line in step with the <h1> in src/pages/index.astro,
+	   which is the sentence's home. */
+	.body {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0 72px 34px;
+		text-align: center;
+	}
+	.body h1 {
+		font-size: 56px;
+		font-weight: 400;
+		line-height: 1.36;
+		letter-spacing: -0.015em;
+		color: var(--ink-hero);
+	}
+
+	/* The two things the image has to say that the sentence doesn't: whose
+	   site this is, and where it lives. Muted, because og:title carries the
+	   name already on every surface that renders one — this is for the crop
+	   where it doesn't. */
+	.foot {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		padding: 0 72px 44px;
+		font-size: 21px;
+		color: var(--ink-soft);
+	}
+</style></head>
+<body>
+	<div class="bar"><span>HE</span></div>
+	<div class="hair"></div>
+	<div class="body"><h1>Design engineering,<br>with good sense and taste.</h1></div>
+	<div class="foot"><span>Hiro Eernisse</span><span>hiroeern.com</span></div>
+</body></html>
