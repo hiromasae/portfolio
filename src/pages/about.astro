@@ -37,7 +37,7 @@ const tools = [
 ];
 ---
 
-<Layout title="About — Hiro Eernisse" description="About Hiro Eernisse, design engineer.">
+<Layout title="About — Hiro Eernisse" description="Hiro Eernisse, a design engineer in the San Francisco Bay Area with a computer science degree: background, experience and résumé.">
 	<Nav />
 
 	<main class="mx-auto max-w-[960px] px-5 py-12 sm:py-16">
@@ -304,13 +304,105 @@ const tools = [
 				    gone, and the failure it prevents is the one Hiro flagged: "Area."
 				    alone on line two. Without this, losing the margin means an orphan;
 				    with it, losing the margin means two balanced lines. */}
+				{/* ── A REAL BIO (2026-09-30) ── off the same hiring-panel read that
+				    rewrote the home hero: the page used to hold one line of who and one
+				    line about AI, and a reader deciding whether to get in touch left it
+				    knowing neither what Hiro had done nor where. Now: the same first
+				    sentence (unchanged on purpose — the px-5 arithmetic above is derived
+				    from it), then the degree and the way of working (the résumé's own
+				    summary, so the two documents agree), then the two most recent jobs
+				    and migaki, then availability, then the résumé itself. The Experience
+				    and Education sections below carry the dates; this prose doesn't.
+
+				    THE AI SENTENCE MOVED TO THE END of the card, as "How I Work". The
+				    review's point was that opening on it made the page about the tool
+				    rather than the person; as a closing note it reads as a working
+				    principle, which is what it always was. Don't bring it back up here.
+
+				    The résumé is a .btn-quiet--out, the borderless text link the
+				    detail page's link-out uses, and it carries the ↗ for the same
+				    reason: it leaves the page (target=_blank, a PDF). The label names
+				    the THING and its format, not an instruction — the same rule as
+				    linkLabel in projects.ts ("ejs.co", not "Visit the site"). The file
+				    is public/Hiro_Eernisse_Resume.pdf, a copy of the one
+				    ~/job-search/build.js renders; re-copy it after a rebuild there. */}
 				<div class="space-y-5 text-pretty text-sm leading-relaxed">
 					<p>I'm a Design Engineer based in the San Francisco Bay Area.</p>
 					<p>
-						I build with AI, but I make the decisions that matter myself. Taste, and knowing how a
-						person moves through a product, is still human work.
+						I have a computer science degree from San Francisco State, and I work from user need to
+						shipped interface. I build what I design, so a prototype is the real thing rather than a
+						picture of it.
+					</p>
+					<p>
+						Most recently I designed the product UI for Shipyard, a hackathon showcase and judging
+						platform. Before that I was a design engineer at Suma Solutions, building enrollment tools
+						for healthcare administrators. On the side I write migaki, an open source design skill for
+						coding agents.
+					</p>
+					<p>I'm open to full&#8209;time, contract and freelance work.</p>
+					<p>
+						<a href="/Hiro_Eernisse_Resume.pdf" target="_blank" rel="noopener" class="btn-quiet btn-quiet--out">
+							<span class="btn-quiet__label">Résumé (PDF)</span>
+							<svg
+								class="btn-quiet__arrow"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								aria-hidden="true"
+								width="14"
+								height="14"
+							>
+								<line x1="5" y1="19" x2="19" y2="5"></line>
+								<polyline points="9 5 19 5 19 15"></polyline>
+							</svg>
+						</a>
 					</p>
 				</div>
+
+				{/* ── Experience + Education (2026-09-30) ── the facts the prose above
+				    alludes to, with dates, from the résumé. Reverse chronological by
+				    start date. Each entry is the org as an h3 (the card-title weight —
+				    the one place this codebase already sets a bold h3 in a list), a
+				    dateline in the detail page's idiom (`dates · role`, soft ink, the
+				    year in tabular figures), and ONE clause of what the work was. One,
+				    not a bullet list: the résumé link above is where the bullets live,
+				    and a second copy of them here would be the thing that goes stale.
+				    Same .card-rule + heading as the sections that follow, so the card
+				    reads as one ruled column rather than two kinds of section. */}
+				<section class="card-rule mt-10 pt-[40px]">
+					<h2 class="text-xl [font-weight:var(--weight-emph)] tracking-tight text-[var(--ink-heading)]">Experience</h2>
+					<ul class="mt-4 space-y-5 text-sm leading-relaxed">
+						<li>
+							<h3 class="[font-weight:var(--weight-emph)] text-[var(--ink-heading)]">Shipyard</h3>
+							<p class="text-xs text-[var(--ink-soft)]"><span class="tabular-nums">Dec 2025 – Feb 2026</span> · UI/UX Designer</p>
+							<p class="mt-1 text-pretty">Product UI for a live hackathon showcase and judging platform, across twelve events.</p>
+						</li>
+						<li>
+							<h3 class="[font-weight:var(--weight-emph)] text-[var(--ink-heading)]">ACM@SFSU</h3>
+							<p class="text-xs text-[var(--ink-soft)]"><span class="tabular-nums">Apr – Dec 2025</span> · Design Chair</p>
+							<p class="mt-1 text-pretty">The chapter's visual identity, as its sole designer, left as documented templates for the next chair.</p>
+						</li>
+						<li>
+							<h3 class="[font-weight:var(--weight-emph)] text-[var(--ink-heading)]">Suma Solutions</h3>
+							<p class="text-xs text-[var(--ink-soft)]"><span class="tabular-nums">Jan – Sep 2025</span> · Design Engineer</p>
+							<p class="mt-1 text-pretty">Enrollment tools for healthcare administrators, designed and built in React, plus the diagrams for a government review.</p>
+						</li>
+					</ul>
+				</section>
+
+				<section class="card-rule mt-10 pt-[40px]">
+					<h2 class="text-xl [font-weight:var(--weight-emph)] tracking-tight text-[var(--ink-heading)]">Education</h2>
+					<ul class="mt-4 space-y-5 text-sm leading-relaxed">
+						<li>
+							<h3 class="[font-weight:var(--weight-emph)] text-[var(--ink-heading)]">San Francisco State University</h3>
+							<p class="text-xs text-[var(--ink-soft)]"><span class="tabular-nums">2025</span> · B.S., Computer Science</p>
+							<p class="mt-1 text-pretty">Design Officer for SF Hacks: prototyped the landing page and designed its animations.</p>
+						</li>
+					</ul>
+				</section>
 
 				{/* Started as the bio's closing line — "Outside of work, I play heavy
 				    metal drums and hike," a sentence doing a list's job at the end
@@ -496,6 +588,20 @@ const tools = [
 							</li>
 						))}
 					</ul>
+				</section>
+
+				{/* ── How I Work (2026-09-30) ── the sentence that used to be the
+				    page's second line, moved to the end of the card as a working note.
+				    See the bio block for why it came down here; the words are the ones
+				    Hiro wrote, unchanged. Last on purpose: it is the one section that
+				    is about method rather than fact, and a note reads as a note only
+				    after the facts. */}
+				<section class="card-rule mt-10 pt-[40px]">
+					<h2 class="text-xl [font-weight:var(--weight-emph)] tracking-tight text-[var(--ink-heading)]">How I Work</h2>
+					<p class="mt-4 text-pretty text-sm leading-relaxed">
+						I build with AI, but I make the decisions that matter myself. Taste, and knowing how a
+						person moves through a product, is still human work.
+					</p>
 				</section>
 			</div>
 			{/* Fixed 16rem at lg so the flex-1 column above resolves to a known
