@@ -68,9 +68,9 @@ export interface ProjectImage {
 	caption?: string;
 }
 
-/** Where the work stands. Rendered on the detail page's status line
-    (2026-09-30, off the feedback that every page should say this outright),
-    so it is a fact about the OUTCOME, not the work's genre: "Open source" is
+/** Where the work stands. Rendered on the detail page's dateline after the
+    company (2026-09-30, off the feedback that every page should say this
+    outright), so it is a fact about the OUTCOME, not the work's genre: "Open source" is
     a status here because for that kind of project publishing the repo IS
     shipping it. Keep the set closed — a fifth value wants a reason, and the
     page has no styling per value to update, so the cost is only vocabulary. */
@@ -79,21 +79,25 @@ export type ProjectStatus = 'Shipped' | 'Concept' | 'Proposed' | 'Open source';
 export interface Project {
 	slug: string;
 	title: string;
-	/** Rendered on the detail page beside the year (2026-09-30). For
-	    self-initiated work write who it was for or under, not what kind of
-	    work it was — "Open source" used to sit here for migaki and ejs and is
-	    now the STATUS of both, so the dateline would have said it twice. */
+	/** Rendered on the detail page's dateline between the year and the status
+	    (2026-09-30). For self-initiated work write who it was for or under,
+	    not what kind of work it was — "Open source" used to sit here for
+	    migaki and ejs and is now the STATUS of both, so the dateline would
+	    have said it twice. */
 	company: string;
 	year: string;
-	/** Rendered on the detail page's status line, after the status
-	    (2026-09-30). Don't repeat the status as a tag — migaki and ejs each
-	    carried 'Open Source' here and it came off when the status arrived. */
+	/** NOT RENDERED. Off the detail page since 07-29, and back for a few
+	    hours on 09-30 before coming off again with `role` — the header note
+	    in [slug].astro has the reason. Don't repeat the status as a tag:
+	    migaki and ejs each carried 'Open Source' here and it went when the
+	    status arrived. Kept because they're real facts that are a nuisance to
+	    re-gather; delete if still unused later. */
 	tags: string[];
-	/** One-line "what I did". Rendered on the detail page under the title
-	    (2026-09-30); it came off the cards 2026-08-02 and the cards still use
-	    only year, title and cover. Write it as one sentence — it renders as a
-	    single paragraph capped at --measure, and a second sentence would read
-	    as a third block of prose above the two below it. */
+	/** One-line "what I did". NOT RENDERED — off the cards 2026-08-02, and on
+	    the detail page under the title for a few hours on 09-30 before coming
+	    off again (see the header note there): on every project it is the work
+	    paragraph's first sentence in shorter form, so it cost a line to say
+	    what the prose says a screen later. Kept for the same reason as tags. */
 	role: string;
 	status: ProjectStatus;
 	blurb: string;

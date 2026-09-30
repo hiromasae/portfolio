@@ -73,8 +73,9 @@ const captionClass = 'mb-2.5 text-sm leading-relaxed';
    THE ORDER IS STILL projects.ts, ROTATED — never re-sorted. Same order the
    home grid uses, so the strip reads as that grid resumed from where you are
    rather than as a second, differently-sorted list. NOT sorted by year or
-   "relatedness": the tags are on the page again since 09-30 (the status
-   line), but any similarity metric over a handful of items is theatre. The one visible
+   "relatedness": the tags field isn't rendered anywhere (off since 07-29,
+   back for a few hours on 09-30, see the header note), and any similarity
+   metric over a handful of items is theatre. The one visible
    cost is the wrap point — on the last project the strip runs migaki, ejs,
    stacksmith, so the row reads out of list order once per cycle. That is the
    price of every project being reachable and it is worth it.
@@ -134,39 +135,33 @@ const others = [
 		    is now simply that the footer's does the job better — it returns you
 		    to the card you came from, at the scroll position you left it. */}
 
-		{/* ── 2026-09-30: COMPANY, ROLE, STATUS AND TAGS ARE BACK ──
-		    Off the feedback that every detail page should say these outright.
-		    From 07-29 (tags, company) and 08-02 (role) to now the header was the
-		    year and the title, on the argument that the company reads off the
-		    prose — it does, eventually, and a reader arriving from a card wants
-		    it before the prose. Four lines, in this order:
+		{/* ── 2026-09-30: THE DATELINE CARRIES COMPANY AND STATUS ──
+		    year · company · status, one --ink-soft line above the title. Off a
+		    review that asked for company, role, status and tags on every page;
+		    company had been off the header since 07-29 on the argument that it
+		    reads off the prose — it does, eventually, and a reader arriving from
+		    a card wants it before the prose. Status is the one word a reviewer
+		    is actually asking for: did this ship.
 
-		      year · company        the dateline it was, with the client on it
-		      title
-		      role                  one sentence, prose type, plain --ink
-		      status · tags         --ink-soft, the status leading
+		    ⚠ ROLE AND TAGS WERE RENDERED HERE FOR A FEW HOURS AND CAME OFF
+		    (Hiro, same day: "super busy", "cognitive overload"). The first cut
+		    was four lines — dateline, title, the role sentence in prose type, a
+		    status · tags line — and the block competed with the title instead
+		    of serving it. What made it heavy was not the line count alone but
+		    duplication: every project's role sentence is the first sentence of
+		    its work paragraph in shorter form, so a reader paid a line for a
+		    fact they get one screen later. And the tags sort nothing on a
+		    five-project site — "Product Design · UI/UX" is filler, and the one
+		    tag that carried information ("Open Source") had become the status.
+		    Both fields stay in projects.ts, unrendered, as they were before.
+		    If they are ever wanted back, the bar is that they say something the
+		    prose does not.
 
-		    NOTHING NEW IN THE PALETTE. The page still runs the about page's
-		    three values (see the note below): the role is the prose's own
-		    16.625px/--ink/--weight-body, so it reads as the first line of the
-		    reading rather than as a subtitle with a treatment; the dateline and
-		    the status line are the --ink-soft the year already had. No labels
-		    in front of any of it — "Role:", "Status:" — the site dropped its
+		    No labels in front of any of it — "Status:" — the site dropped its
 		    kickers on 07-29 and a key-value list is the same shape lying down.
-		    The order does the labelling: a company sits next to a year, a
-		    sentence under a title is what the author did, and the first word of
-		    the last line is the state of the work with its tags behind it.
-
-		    The status leads its line rather than joining the dateline because
-		    the dateline is about WHEN and FOR WHOM; the status is about the
-		    outcome, and it belongs with the tags, which are about the work. The
-		    role is capped at --measure like the prose so a long one wraps at
-		    the prose's width and not the nav's 960.
-
-		    The middots are text, not markup. A <ul> of inline <li> was the
-		    semantic move and was not taken: five words are not a list a screen
-		    reader needs announced as one, and the year/company pair is one
-		    phrase, not two items. If the tags grow past three, revisit.
+		    Position does the labelling: a word beside a year and a company is
+		    the state of that engagement. The middots are text, not markup: three
+		    words are one phrase, not a list a screen reader needs announced.
 
 		    ── 2026-08-10: THIS PAGE TAKES THE ABOUT PAGE'S SCALE AND PALETTE ──
 		    Hiro's ask, and it applies to the whole page, so read this note before
@@ -207,11 +202,9 @@ const others = [
 		    again; the honest next move at that point is dropping the h2 too. */}
 		<header class="reveal" style="--i: 0">
 			<p class="text-sm text-[var(--ink-soft)]">
-				<span class="tabular-nums">{project.year}</span> · {project.company}
+				<span class="tabular-nums">{project.year}</span> · {project.company} · {project.status}
 			</p>
 			<h1 class="mt-2 text-2xl [font-weight:var(--weight-emph)] tracking-tight text-[var(--ink-heading)]">{project.title}</h1>
-			<p class="mt-3 max-w-[var(--measure)] text-sm leading-relaxed">{project.role}</p>
-			<p class="mt-3 text-sm text-[var(--ink-soft)]">{[project.status, ...project.tags].join(' · ')}</p>
 		</header>
 
 		{/* Reading matter is capped at --measure (see global.css) — ~11 words a
