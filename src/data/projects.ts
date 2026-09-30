@@ -68,16 +68,34 @@ export interface ProjectImage {
 	caption?: string;
 }
 
+/** Where the work stands. Rendered on the detail page's status line
+    (2026-09-30, off the feedback that every page should say this outright),
+    so it is a fact about the OUTCOME, not the work's genre: "Open source" is
+    a status here because for that kind of project publishing the repo IS
+    shipping it. Keep the set closed — a fifth value wants a reason, and the
+    page has no styling per value to update, so the cost is only vocabulary. */
+export type ProjectStatus = 'Shipped' | 'Concept' | 'Proposed' | 'Open source';
+
 export interface Project {
 	slug: string;
 	title: string;
+	/** Rendered on the detail page beside the year (2026-09-30). For
+	    self-initiated work write who it was for or under, not what kind of
+	    work it was — "Open source" used to sit here for migaki and ejs and is
+	    now the STATUS of both, so the dateline would have said it twice. */
 	company: string;
 	year: string;
+	/** Rendered on the detail page's status line, after the status
+	    (2026-09-30). Don't repeat the status as a tag — migaki and ejs each
+	    carried 'Open Source' here and it came off when the status arrived. */
 	tags: string[];
-	/** One-line "what I did". No longer rendered — it came off the cards
-	    2026-08-02, leaving the year alone above the title. Kept for the same
-	    reason as the fields below. */
+	/** One-line "what I did". Rendered on the detail page under the title
+	    (2026-09-30); it came off the cards 2026-08-02 and the cards still use
+	    only year, title and cover. Write it as one sentence — it renders as a
+	    single paragraph capped at --measure, and a second sentence would read
+	    as a third block of prose above the two below it. */
 	role: string;
+	status: ProjectStatus;
 	blurb: string;
 	problem: string;
 	/** The "Work" paragraph — what I did and what it changed. Prose, not a
@@ -104,29 +122,24 @@ export interface Project {
 	    from a project the moment it has real images — a placeholder that
 	    outlives its shoot is worse than no frame at all. */
 	placeholders?: number;
-	/** `tags`, `company` and `role` are not rendered anywhere (tags/company
-	    dropped from the detail page 2026-07-29, role from the cards 2026-08-02;
-	    the cards now use only year, title and cover). Kept because they're real
-	    facts that are a nuisance to re-gather — delete them if they're still
-	    unused later.
-
-	    `link` was in that list until 2026-08-16 and no longer is — see below. */
+	/** The link out. Rendered on every detail page that has one (2026-09-30);
+	    from 08-16 until then it rendered only where `linkLabel` was also set,
+	    which left three of five URLs unpublished — that gate is gone, see
+	    `linkLabel`. Omit the field to publish no link. */
 	link?: string;
-	/** The link's VISIBLE TEXT, and also the switch that renders it at all: the
-	    detail page draws the link only where this is set, so a project can hold
-	    a `link` without publishing one. That is why this exists instead of the
-	    page deriving a label from the URL — deriving one would have put a link
-	    on all five pages at once, and the ask (2026-08-16, Hiro) was migaki and
-	    ejs.co specifically. The other three keep their URLs unrendered, exactly
-	    as they were; giving one a label is all it takes to publish it.
+	/** The link's VISIBLE TEXT, optional. Without it the page shows the URL's
+	    host with any leading "www." dropped — "yoursuma.com",
+	    "shipyardhq.tech" — so a bare `link` still renders (2026-09-30, off the
+	    feedback that it didn't). Set this only where the host is the wrong
+	    thing to say: migaki's names the repo, because the host alone would be
+	    "github.com" and the page has already said it is open source, so the
+	    useful thing left to say is WHICH repo.
 
-	    ⚠ THIS REVERSES PART OF 2026-07-29, which took the "Visit" button off the
-	    detail page along with the tags. What went then was a BOXED .btn — the
-	    only piece of enclosed chrome on a borderless page (see .btn-quiet's note
-	    in global.css, which records that as the reason). What is back is the
-	    borderless text link that note reserves for "the next borderless text
-	    link on the site". So this is not the Visit button returning; don't
-	    re-litigate it as one.
+	    ⚠ FROM 2026-08-16 TO 09-30 THIS WAS ALSO THE SWITCH that decided whether
+	    a link rendered at all — the ask then was migaki and ejs specifically,
+	    and deriving a label would have published all five at once. That is
+	    exactly what the 09-30 feedback asked for, so the gate came off; don't
+	    put it back by reading an absent label as "unpublished".
 
 	    Write the DESTINATION, not an instruction — "ejs.co", not "Visit the
 	    site". The ↗ already says a link leaves the site, so the words are free
@@ -141,7 +154,8 @@ export interface Project {
 	    inside main's px-5. That is ~1.5px of headroom, so this label is
 	    effectively AT the limit and a longer one would overflow. Anything past
 	    ~27 characters wants a shorter form (drop the owner, or name the host)
-	    rather than a fix in the CSS. */
+	    rather than a fix in the CSS. The derived host is subject to the same
+	    ceiling — "app.subframe.com" is the longest one today at 16. */
 	linkLabel?: string;
 }
 
@@ -149,10 +163,11 @@ export const projects: Project[] = [
 	{
 		slug: 'migaki',
 		title: 'migaki: Design Sense for Coding Agents',
-		company: 'Open source',
+		company: 'Independent',
 		year: '2026',
-		tags: ['Open Source', 'AI', 'Design Systems'],
+		tags: ['AI', 'Design Systems'],
 		role: 'Wrote the skill, its three-file structure, and the weekly refresh loop.',
+		status: 'Open source',
 		blurb: 'An open source design skill that gives any AI coding agent a working visual sense.',
 		problem:
 			'A coding agent will build almost anything you describe, but left to its own defaults it keeps landing on the same look. Write the fix down once and the document starts aging the day you save it. migaki (磨き, "to polish") is a design skill that tries to solve both halves of that at once: a visual sense an agent can actually apply, that does not decay into a period piece.',
@@ -237,10 +252,13 @@ export const projects: Project[] = [
 	{
 		slug: 'ejs',
 		title: 'EJS: Landing Page Facelift',
-		company: 'Open source',
+		company: 'EJS',
 		year: '2026',
-		tags: ['Open Source', 'Landing Page', 'UI/UX'],
+		tags: ['Landing Page', 'UI/UX'],
 		role: 'Redesigned the marketing site: hero, support page, and docs.',
+		/* Proposed, not Open source: the redesign is not deployed — see the
+		   link's note below, which is the same fact seen from the other side. */
+		status: 'Proposed',
 		blurb: 'A redesign of the EJS landing page, so the library says what it does up front.',
 		problem:
 			"ejs.co has looked more or less the same for years. There's a wordmark, a four-word tagline, and a lot of olive green. What it never gets around to is what EJS actually does, or why you would pick it over the alternatives. The only thing promoted above the fold is a different project. The Jake banner sits above EJS's own logo. Twenty million people install this library every week and the page tells them almost nothing about it.",
@@ -299,6 +317,7 @@ export const projects: Project[] = [
 		year: '2026',
 		tags: ['Product Design', 'UI/UX'],
 		role: 'Designed and built the browsing flows, comparison views, and overall visual system.',
+		status: 'Concept',
 		blurb: 'A concept for browsing and comparing AI tools in a way that feels more useful than a giant list.',
 		problem:
 			'There are a lot of AI tools now, but most directories still feel like long lists with no real context. Stacksmith was my attempt to make that easier to sort through by showing what tools fit different roles, where they overlap, and how they might work together in an actual stack.',
@@ -319,6 +338,7 @@ export const projects: Project[] = [
 		year: '2025',
 		tags: ['Diagrams', 'Healthcare', 'UX'],
 		role: 'Drew the user flows and architecture visuals for a non-technical review audience.',
+		status: 'Shipped',
 		blurb: 'Diagrams for a healthcare compliance product made to be clear enough for non-technical reviewers.',
 		problem:
 			'Suma needed a clearer way to explain how its platform worked during a commercialization review. The audience was not deeply technical, so the challenge was turning a pretty complex healthcare product into diagrams that were easy to follow and still accurate.',
@@ -340,6 +360,7 @@ export const projects: Project[] = [
 		year: '2025',
 		tags: ['Product Design', 'UI/UX'],
 		role: 'Shipped product UI with the dev team, from the main showcase to the discovery flows.',
+		status: 'Shipped',
 		blurb: 'A lighter project showcase platform shaped in close collaboration with the dev team.',
 		problem:
 			'A lot of project platforms feel more focused on submission rules than the work itself. Shipyard was meant to feel lighter and more current, with a cleaner way for teams to show what they built and for other people to browse through projects.',

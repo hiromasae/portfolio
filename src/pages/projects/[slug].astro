@@ -20,6 +20,17 @@ const { project } = Astro.props;
    arrays, and why the string form had to go. */
 const figures = project.images;
 
+/* The link-out's text: the written label where there is one, else the URL's
+   host with a leading "www." dropped (2026-09-30, off the feedback that a bare
+   link didn't render at all). Host, not the full URL — stacksmith's link is a
+   Subframe share path ~90 characters long and .btn-quiet cannot wrap (see the
+   field's note in projects.ts for the ~27-character ceiling); the host is the
+   part a reader decides on anyway. `new URL` throws on a malformed link, which
+   is the right failure — at build time, on the entry that is wrong. */
+const linkLabel =
+	project.linkLabel ??
+	(project.link ? new URL(project.link).hostname.replace(/^www\./, '') : undefined);
+
 /* The caption's type is the prose's, exactly (2026-08-14, Hiro's ask): the same
    text-sm / leading-relaxed the two paragraphs above carry, with no colour and
    no weight of its own, so it inherits --ink and --weight-body the same way they
@@ -62,8 +73,8 @@ const captionClass = 'mb-2.5 text-sm leading-relaxed';
    THE ORDER IS STILL projects.ts, ROTATED — never re-sorted. Same order the
    home grid uses, so the strip reads as that grid resumed from where you are
    rather than as a second, differently-sorted list. NOT sorted by year or
-   "relatedness": the tags field hasn't been rendered anywhere since 07-29, and
-   any similarity metric over a handful of items is theatre. The one visible
+   "relatedness": the tags are on the page again since 09-30 (the status
+   line), but any similarity metric over a handful of items is theatre. The one visible
    cost is the wrap point — on the last project the strip runs migaki, ejs,
    stacksmith, so the row reads out of list order once per cycle. That is the
    price of every project being reachable and it is worth it.
@@ -123,9 +134,39 @@ const others = [
 		    is now simply that the footer's does the job better — it returns you
 		    to the card you came from, at the scroll position you left it. */}
 
-		{/* Dateline is the year alone — the company already reads off the prose
-		    below, and tags/Visit were dropped from this page (both still live in
-		    projects.ts).
+		{/* ── 2026-09-30: COMPANY, ROLE, STATUS AND TAGS ARE BACK ──
+		    Off the feedback that every detail page should say these outright.
+		    From 07-29 (tags, company) and 08-02 (role) to now the header was the
+		    year and the title, on the argument that the company reads off the
+		    prose — it does, eventually, and a reader arriving from a card wants
+		    it before the prose. Four lines, in this order:
+
+		      year · company        the dateline it was, with the client on it
+		      title
+		      role                  one sentence, prose type, plain --ink
+		      status · tags         --ink-soft, the status leading
+
+		    NOTHING NEW IN THE PALETTE. The page still runs the about page's
+		    three values (see the note below): the role is the prose's own
+		    16.625px/--ink/--weight-body, so it reads as the first line of the
+		    reading rather than as a subtitle with a treatment; the dateline and
+		    the status line are the --ink-soft the year already had. No labels
+		    in front of any of it — "Role:", "Status:" — the site dropped its
+		    kickers on 07-29 and a key-value list is the same shape lying down.
+		    The order does the labelling: a company sits next to a year, a
+		    sentence under a title is what the author did, and the first word of
+		    the last line is the state of the work with its tags behind it.
+
+		    The status leads its line rather than joining the dateline because
+		    the dateline is about WHEN and FOR WHOM; the status is about the
+		    outcome, and it belongs with the tags, which are about the work. The
+		    role is capped at --measure like the prose so a long one wraps at
+		    the prose's width and not the nav's 960.
+
+		    The middots are text, not markup. A <ul> of inline <li> was the
+		    semantic move and was not taken: five words are not a list a screen
+		    reader needs announced as one, and the year/company pair is one
+		    phrase, not two items. If the tags grow past three, revisit.
 
 		    ── 2026-08-10: THIS PAGE TAKES THE ABOUT PAGE'S SCALE AND PALETTE ──
 		    Hiro's ask, and it applies to the whole page, so read this note before
@@ -165,8 +206,12 @@ const others = [
 		    have flattened that and is the step to avoid if "smaller" comes up
 		    again; the honest next move at that point is dropping the h2 too. */}
 		<header class="reveal" style="--i: 0">
-			<p class="text-sm tabular-nums text-[var(--ink-soft)]">{project.year}</p>
+			<p class="text-sm text-[var(--ink-soft)]">
+				<span class="tabular-nums">{project.year}</span> · {project.company}
+			</p>
 			<h1 class="mt-2 text-2xl [font-weight:var(--weight-emph)] tracking-tight text-[var(--ink-heading)]">{project.title}</h1>
+			<p class="mt-3 max-w-[var(--measure)] text-sm leading-relaxed">{project.role}</p>
+			<p class="mt-3 text-sm text-[var(--ink-soft)]">{[project.status, ...project.tags].join(' · ')}</p>
 		</header>
 
 		{/* Reading matter is capped at --measure (see global.css) — ~11 words a
@@ -234,14 +279,14 @@ const others = [
 			<p class="mt-6 text-sm leading-relaxed">{project.work}</p>
 
 			{/* ── The link out (2026-08-16, Hiro: add links to migaki and ejs.co on
-			    the respective project pages) ──
-			    ⚠ It renders off `linkLabel`, NOT off `link`. Four of the five
-			    projects carry a URL and only two carry a label, so a `project.link
-			    && …` guard here would publish links on three pages nobody asked
-			    about — see the field's note in projects.ts for the whole argument.
-			    The `link &&` half of the condition below is a type guard, not a
-			    second switch; a label without a URL is a data error, and this
-			    renders nothing rather than an <a> with no href.
+			    the respective project pages; 2026-09-30: on every page with a URL) ──
+			    It renders off `link`. Until 09-30 it rendered off `linkLabel`,
+			    which kept three of the five URLs unpublished by design — the
+			    08-16 ask named two pages — and the 09-30 feedback is that a bare
+			    link should still render. So the label is now derived where none
+			    is written (see `linkLabel` in the frontmatter, and the field's
+			    note in projects.ts for what to write when the host is the wrong
+			    word). To publish no link, omit the URL; there is no other switch.
 
 			    ── WHY .btn-quiet, and why this is not the Visit button returning ──
 			    That style has been ORPHANED since 08-10, when the back-to-projects
@@ -308,10 +353,10 @@ const others = [
 			    .btn-quiet is inline-flex; margin on an atomic inline works but
 			    lands in a line box, and the div keeps the gap the plain 38px this
 			    note claims. */}
-			{project.linkLabel && project.link && (
+			{project.link && (
 				<div class="mt-8">
 					<a href={project.link} target="_blank" rel="noopener" class="btn-quiet btn-quiet--out">
-						<span class="btn-quiet__label">{project.linkLabel}</span>
+						<span class="btn-quiet__label">{linkLabel}</span>
 						<svg
 							class="btn-quiet__arrow"
 							viewBox="0 0 24 24"
