@@ -163,6 +163,12 @@ const others = [
 		    the state of that engagement. The middots are text, not markup: three
 		    words are one phrase, not a list a screen reader needs announced.
 
+		    COMPANY IS OPTIONAL (2026-10-03, Hiro: "Independent · Open source is
+		    redundant"). A self-initiated project has no one it was for, and the
+		    word that filled the slot said what the status already says. The
+		    middot goes with it, so the line is two words instead of three — not
+		    an empty slot between two dots. Year and status always render.
+
 		    ── 2026-08-10: THIS PAGE TAKES THE ABOUT PAGE'S SCALE AND PALETTE ──
 		    Hiro's ask, and it applies to the whole page, so read this note before
 		    changing any size or colour below. The project page had been running
@@ -202,7 +208,7 @@ const others = [
 		    again; the honest next move at that point is dropping the h2 too. */}
 		<header class="reveal" style="--i: 0">
 			<p class="text-sm text-[var(--ink-soft)]">
-				<span class="tabular-nums">{project.year}</span> · {project.company} · {project.status}
+				<span class="tabular-nums">{project.year}</span>{project.company && ` · ${project.company}`} · {project.status}
 			</p>
 			<h1 class="mt-2 text-2xl [font-weight:var(--weight-emph)] tracking-tight text-[var(--ink-heading)]">{project.title}</h1>
 		</header>
@@ -398,15 +404,15 @@ const others = [
 			    aria-label because the resting state has to carry no ARIA at all —
 			    see the note on the button itself for why.
 
-			    ⚠ THE BUTTON IS ONLY A BUTTON ON A POINTER DEVICE (2026-08-14,
-			    Hiro: mobile shouldn't have any zooming in or out, since you can
-			    zoom with your fingers on the page directly). The markup is static
-			    and identical everywhere, so the script downstairs is what decides:
-			    it ships DISABLED and presentational and promotes to a real button
-			    only where a fine pointer exists, so on a coarse one the element
-			    stays exactly as it arrived and never opens anything. Read that
-			    block before treating this element as unconditionally interactive —
-			    it is markup for the case where a cursor exists.
+			    THE BUTTON IS A BUTTON ON EVERY DEVICE (2026-10-03, Hiro: "add
+			    lightbox for when tapped"). From 08-14 it was promoted only where a
+			    fine pointer existed — a phone was to pinch-zoom the page instead —
+			    and on 09-30 a reader reported the screenshots illegible there all
+			    the same. A sideways-scrolling figure was tried for a day and taken
+			    out ("it should not horizontally scroll"); the lightbox is the
+			    answer on touch too. The markup still ships INERT (see the button's
+			    own note) and the script promotes it once it runs; what the device
+			    changes is how the open modal behaves, not whether a tap opens it.
 
 			    ── The <figure> wrapper and the caption (merged in from the caption
 			    branch, 2026-08-14) ──
@@ -449,7 +455,8 @@ const others = [
 						    the module is deferred, so shipping a live button means
 						    a touch screen reader announces one control per figure
 						    that does nothing until it lands. Absent-then-appearing beats
-						    present-and-lying. See syncPointerState below. */}
+						    present-and-lying. The script promotes every one of them
+						    in a single pass the moment it runs. */}
 						<button
 							type="button"
 							class="shot"
@@ -686,20 +693,24 @@ const others = [
 	    fourth screenshot would be identical to the first three, and a single
 	    element means a single place for the dismissal handler to live.
 
-	    ── IT CLOSES WHEREVER YOU CLICK, AND THERE IS NO CLOSE BUTTON
-	    (2026-08-14, Hiro, revising the same day's first version) ──
-	    The zoom cursor is the entire control surface: zoom-in over a shot on the
-	    page, zoom-out over every pixel of the open modal, image included. The
-	    gesture reverses itself, so the thing that opened it closes it.
+	    ── ON A POINTER, IT CLOSES WHEREVER YOU CLICK; ON TOUCH, THE PICTURE
+	    IS EXEMPT AND A CLOSE CHIP COMES BACK (2026-08-14, revised 2026-10-03) ──
+	    With a cursor the zoom cursor is the entire control surface: zoom-in over
+	    a shot on the page, zoom-out over every pixel of the open modal, image
+	    included. The gesture reverses itself, so the thing that opened it closes
+	    it, and there is no chip — a cursor already says "this puts it back" on
+	    every pixel, and a button would be a second answer to that question.
 
-	    It shipped with an X chip fixed in the top-right corner for a few hours.
-	    What the chip was actually for was TOUCH — a cursor cannot be an
-	    affordance where there is no cursor — and the answer to that turned out
-	    to be that touch has no business here at all: a phone pinch-zooms the
-	    page itself, far better than any modal would. So the feature is now
-	    gated to pointer devices (see the script), and once mobile is out of
-	    scope the chip has nobody left to serve. The cost, accepted knowingly:
-	    clicking a screenshot to point at something in it closes it.
+	    On touch none of that exists. The chip that shipped for a few hours on
+	    08-14 was always FOR touch — a cursor cannot be an affordance where there
+	    is no cursor — and it went only because touch itself was scoped out that
+	    day on the argument that a phone pinch-zooms the page. That argument
+	    failed a real reader (09-30), so touch is back in and the chip with it,
+	    touch-only (.lightbox__close in global.css). The picture is not a dismiss
+	    target there: it is the thing being panned, and a tap landing between
+	    two pans must not throw the viewer out. Scrim and chip close; the image
+	    does not. The pointer side keeps its accepted cost — clicking a
+	    screenshot to point at something in it closes it.
 
 	    A NATIVE <dialog> opened with showModal(), which is doing more work here
 	    than it looks. Four behaviours come free and are NOT reimplemented below,
@@ -723,14 +734,27 @@ const others = [
 	    the viewport: "outside" has to be outside the dialog's own box for the
 	    browser to count it.
 
-	    THE DIALOG IS THE ONLY FOCUSABLE THING IN HERE now that the close button
-	    is gone — showModal() focuses the dialog element itself, the aria-label
-	    below is what a screen reader announces on arrival, and Esc is the way
-	    out without a pointer. */}
+	    FOCUS ON ARRIVAL: showModal() focuses the first focusable descendant,
+	    which on touch is the chip and on a pointer device — where the chip is
+	    display: none and so unfocusable — the dialog element itself. Either
+	    way the aria-label below is what a screen reader announces, and Esc is
+	    the way out without a pointer; on Android the back gesture is the same
+	    close request. */}
 	<dialog id="lightbox" class="lightbox" closedby="any" aria-label="Enlarged screenshot">
 		{/* src and alt are both set by the script — empty here so the page never
 		    fetches a second copy of a screenshot nobody has asked to enlarge. */}
 		<img class="lightbox__img" alt="" />
+		{/* Touch-only, hidden by CSS everywhere a cursor exists — see the note
+		    above and .lightbox__close. AFTER the image so it paints over it
+		    without a z-index; it is fixed to the viewport, so it stays put while
+		    the picture pans underneath. The glyph is the site's stroke idiom
+		    (2px, round caps), same as the link-out arrow above. */}
+		<button type="button" class="lightbox__close" aria-label="Close">
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" width="16" height="16">
+				<line x1="6" y1="6" x2="18" y2="18"></line>
+				<line x1="18" y1="6" x2="6" y2="18"></line>
+			</svg>
+		</button>
 	</dialog>
 </Layout>
 
@@ -739,81 +763,42 @@ const others = [
 	const full = dialog?.querySelector<HTMLImageElement>('.lightbox__img');
 
 	if (dialog && full) {
-		// ── The whole feature is gated on there being a POINTER ──
-		// (2026-08-14, Hiro: mobile shouldn't have any zooming in or out, since
-		// you can zoom with your fingers on the page directly.) A phone already
-		// has a better version of this gesture than any modal could offer — it
-		// pinch-zooms the real page, in place, at whatever magnification the
-		// reader wants, with no state to get out of. Opening a fixed-size copy
-		// of the same picture on top of it is strictly worse.
+		// ── Every device gets the lightbox (2026-10-03, Hiro) ──
+		// From 08-14 to 10-03 the whole feature was gated on the query below: a
+		// phone was to pinch-zoom the page instead, and the buttons stayed inert
+		// there. A reader found the screenshots illegible on a phone all the
+		// same, a sideways-scrolling figure was tried for a day and taken out
+		// ("it should not horizontally scroll"), and the lightbox is the answer
+		// on touch too. The query is still read, but it now decides HOW the open
+		// modal dismisses, not whether a tap opens it.
 		//
 		// `(hover: hover) and (pointer: fine)` is the pair, not either alone:
 		// hover alone lets in a stylus, and pointer alone lets in a TV remote.
-		// Both together mean a mouse or a trackpad, which is exactly the device
-		// class where a cursor can carry the affordance.
-		//
-		// A LIVE QUERY, read inside each handler rather than branched on once at
-		// startup: an iPad that gets a trackpad attached mid-session flips this
-		// from false to true, and a laptop user who picks the screen up flips it
-		// back. Reading it per event means the feature simply follows the device
-		// rather than being decided by whatever was true when the page loaded.
+		// Both together mean a mouse or a trackpad — the device class where a
+		// cursor can carry the affordance the pointer-side dismissal relies on.
+		// Read live, inside the handler rather than branched on at startup, so
+		// an iPad that gains a trackpad mid-session simply follows the device.
 		const pointer = matchMedia('(hover: hover) and (pointer: fine)');
 
 		const shots = document.querySelectorAll<HTMLButtonElement>('[data-shot]');
 
-		// The markup ships a <button> unconditionally (it has to — the page is
-		// static), but it ships it INERT: disabled, role="presentation", no
-		// label. So this promotes on a fine pointer rather than demoting on a
-		// coarse one, and the coarse state is simply the one the HTML already
-		// arrived in — nothing to wait for, nothing announced in the meantime.
-		// The <img> keeps its alt on both sides; role presentation applies to
-		// the wrapper alone, not to its contents.
+		// The markup ships every <button> INERT — disabled, role="presentation",
+		// label parked in data-shot-label — because the module is deferred and a
+		// touch screen reader would otherwise announce one control per figure
+		// that does nothing until it lands. Promotion is one pass, every device.
 		//
-		// ⚠ ALL THREE ATTRIBUTES MOVE TOGETHER, and the pair that looks
-		// redundant is not (2026-08-18). This previously toggled tabIndex and
-		// role only, which did NOTHING: ARIA's presentational-roles conflict
-		// resolution ignores role="presentation" on an element that is
-		// focusable or carries a global ARIA attribute, and a <button> with
-		// tabindex="-1" is still focusable and still had its aria-label. Chrome
-		// went on exposing it as role=button name="Enlarge image N of M" on
-		// every phone, which is the exact thing the rule above exists to
-		// prevent. `disabled` is the part that makes it unfocusable so the role
-		// can apply, and the label has to be OFF the element for the same
-		// reason — hence data-shot-label. Drop any one of them and the wrapper
-		// silently becomes an announced button again.
-		//
-		// tabIndex is NOT the fourth member of that set and was dropped from it
-		// (2026-08-18). `disabled` already decides focusability both ways — a
-		// disabled <button> is unfocusable no matter its tabindex, and an
-		// enabled one is focusable without being given tabindex="0" — so the
-		// toggle only ever restated what the line above it had settled. Worse,
-		// it was the half that looked like it was doing the work: this is the
-		// attribute the broken version leaned on, and leaving it in kept that
-		// reading alive. Don't add it back to "make the demotion explicit".
-		//
-		// Checked both directions against Chrome's AX tree, since a trackpad
-		// arriving mid-session has to flip this live: promoted gives
-		// role=button with the label, demoted removes the node entirely.
-		const syncPointerState = () => {
-			shots.forEach((shot) => {
-				if (pointer.matches) {
-					shot.disabled = false;
-					shot.removeAttribute('role');
-					shot.setAttribute('aria-label', shot.dataset.shotLabel ?? '');
-				} else {
-					shot.disabled = true;
-					shot.setAttribute('role', 'presentation');
-					shot.removeAttribute('aria-label');
-				}
-			});
-		};
-
-		syncPointerState();
-		pointer.addEventListener('change', syncPointerState);
-
+		// ⚠ ALL THREE ATTRIBUTES MOVE TOGETHER (2026-08-18). ARIA's
+		// presentational-roles conflict resolution ignores role="presentation"
+		// on a focusable element or one carrying a global ARIA attribute, so
+		// the resting state needs `disabled` AND the label off the element for
+		// the role to apply at all; promotion reverses all three. tabIndex is
+		// not a fourth member — `disabled` decides focusability both ways.
 		shots.forEach((shot) => {
+			shot.disabled = false;
+			shot.removeAttribute('role');
+			shot.setAttribute('aria-label', shot.dataset.shotLabel ?? '');
+
 			shot.addEventListener('click', () => {
-				if (!pointer.matches) return;
 				const img = shot.querySelector('img');
 				if (!img) return;
 				// currentSrc, not src: it is the file the browser actually chose and
@@ -824,24 +809,35 @@ const others = [
 				full.src = img.currentSrc || img.src;
 				full.alt = img.alt;
 				dialog.showModal();
+				// On touch the dialog is a scroll container (see global.css) and a
+				// closed dialog KEEPS its scroll offset — reopened on the next shot
+				// it would come up panned to wherever the last one was left, with
+				// the picture's start off-screen and the scrim band under the
+				// picture instead of beside it. Start every open at the origin.
+				// A no-op on a pointer device, where nothing overflows.
+				dialog.scrollTo(0, 0);
 			});
 		});
 
-		// A click ANYWHERE in the modal closes it — scrim or picture, no target
-		// check, which is the whole of the dismissal now. The zoom-out cursor
-		// runs over the same area (see .lightbox in global.css), so the pointer
-		// is never over a pixel that promises something this doesn't do.
+		// ── Dismissal ──
+		// On a pointer device a click ANYWHERE closes it — scrim or picture, no
+		// target check — because the zoom-out cursor runs over the whole modal
+		// and promises exactly that (see .lightbox in global.css). On touch the
+		// picture is EXEMPT: there is no cursor to make that promise, the image
+		// is the thing being panned, and a tap landing between two pans must not
+		// throw the viewer out. The scrim around it and the close chip (touch
+		// only, .lightbox__close) close, as does the platform's own close
+		// request — Esc, and the back gesture on Android. A pan never reaches
+		// here: a touch scroll cancels the click.
 		//
-		// ⚠ THIS USED TO BE FOUR TIMES LONGER, and the deleted version was not
-		// wrong — it is worth knowing what it was solving before writing it
-		// again. It tracked pointerdown and pointerup separately and required
-		// both ends of the press to land on the scrim, because a `click` reports
-		// the nearest common ancestor of press and release: a drag starting on
-		// the image and ending on the scrim was indistinguishable from a scrim
-		// click, and closed the picture you were dragging on. That mattered only
-		// while the image was NOT a dismiss target. Now that everything is one,
-		// there are no two cases left to tell apart, and the guard would be
-		// machinery for a distinction the design no longer draws.
-		dialog.addEventListener('click', () => dialog.close());
+		// ⚠ An older version tracked pointerdown and pointerup separately so a
+		// drag that started on the image and ended on the scrim didn't count as
+		// a scrim click. That mattered only while the image was NOT a dismiss
+		// target on a pointer device, which it has been since 08-14. Don't bring
+		// it back for the touch exemption — a tap is a click on ONE target.
+		dialog.addEventListener('click', (e) => {
+			if (!pointer.matches && e.target === full) return;
+			dialog.close();
+		});
 	}
 </script>
