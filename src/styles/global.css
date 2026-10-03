@@ -4879,13 +4879,7 @@ html.reveal-wait #projects::before {
    to paint a chip for it: a phone pinch-zooms the page itself, in place, at
    any magnification, with no state to escape. The script gates the behaviour
    on the same media query this file gates the cursor on — change one and the
-   other has to move with it.
-
-   ⚠ 2026-09-30: touch is still out, but it is no longer left with nothing.
-   A reader reported the screenshots illegible on a phone (a 7x reduction),
-   and the answer was not to bring the modal back but to hold the image at a
-   legible width and let the figure scroll sideways — .shot-scroller, just
-   below, gated on this query's negation. */
+   other has to move with it. */
 .shot {
 	display: block;
 	width: 100%;
@@ -4921,66 +4915,6 @@ html.reveal-wait #projects::before {
 .shot:focus-visible {
 	outline: 2px solid var(--focus-ring);
 	outline-offset: 3px;
-}
-
-/* ── The touch counterpart: the figure scrolls sideways (2026-09-30) ──
-   A reader's feedback: "turn the lightbox on for touch, or serve the diagrams
-   at a width that is legible on a phone". Hiro chose the second. A 2,530px
-   screenshot in a 340px column is a 7x reduction, and 14px UI text in it lands
-   under 4px. So where the lightbox is off, the image is HELD at a minimum
-   width and its wrapper scrolls on the x axis: the reader pans the picture
-   instead of pinch-zooming the page. The pinch still works — nothing here
-   touches the viewport — it just isn't the only way to read a label any more.
-
-   THE GATE IS THE LIGHTBOX'S, NEGATED. Every device gets exactly one of the
-   two: a cursor gets zoom-in and a modal, everything else gets this. Don't
-   swap it for a width breakpoint — a mouse user in a narrow window keeps the
-   modal and needs no scroller, and a touch tablet wide enough for the slot
-   sees nothing change either way: a min-width the slot already clears has no
-   effect, and an overflow container with nothing overflowing doesn't scroll.
-   The bleed below is invisible there for the same reason. A tablet a little
-   narrower than the slot (an iPad portrait at 820 loses ~140px) does scroll,
-   by that little — accepted, so the rule stays one rule.
-
-   --shot-min IS THE DESKTOP SLOT: 960px minus <main>'s px-5 on each side, so
-   912.5px at the 19px root. The rule that number states is "a phone never
-   shows a screenshot smaller than a desktop does" — the one legibility bar
-   the site has already accepted, rather than a second one invented for
-   phones. It is the single knob here. Going bigger buys larger text at the
-   cost of height (migaki's 0.73-ratio shots are 669px tall at this width,
-   about a phone viewport already) and more panning per picture.
-
-   THE BLEED: the wrapper eats the column's gutter with a negative margin and
-   gives it back as padding, so at rest the image still starts on the column's
-   left edge, and when it is wider than the screen its right edge is cut by
-   the VIEWPORT, not by an inset box. The cut-off is the affordance — a cut at
-   the gutter reads as a frame, a cut at the screen edge reads as "more".
-   Scrolled to the end, the image stops at the right gutter: a scroll
-   container's inline-end padding counts as scrollable overflow in every
-   browser this file already leans on for @starting-style and closedby. The
-   1.25rem is <main>'s px-5 and has to stay equal to it — a bleed wider than
-   the gutter would shift the image at rest on every touch device.
-
-   overflow-y hidden is not decoration: with x alone, y computes to auto, and
-   a classic (non-overlay) scrollbar on a coarse-pointer desktop takes its
-   height out of the box, overflows the image by that much and grows a second
-   scrollbar. It would also clip the focus ring's 3px offset, but there is no
-   ring to clip: .shot is disabled on exactly these devices. overscroll-
-   behavior stops a pan that runs off the end of the image from chaining into
-   the page. */
-@media not ((hover: hover) and (pointer: fine)) {
-	.shot-scroller {
-		--shot-min: calc(960px - 2 * 1.25rem);
-		overflow-x: auto;
-		overflow-y: hidden;
-		overscroll-behavior-x: contain;
-		margin-inline: -1.25rem;
-		padding-inline: 1.25rem;
-	}
-
-	.shot {
-		min-width: var(--shot-min);
-	}
 }
 
 /* ── The dialog SHRINK-WRAPS the image ──
@@ -5084,12 +5018,7 @@ html.reveal-wait #projects::before {
 
    ⚠ IF TOUCH EVER COMES BACK, this comes back with it. Bringing the lightbox
    to a touchscreen without a visible control would leave a full-screen image
-   and no announced way to close it. The two decisions are one decision.
-
-   2026-09-30: touch got .shot-scroller instead — a sideways-scrolling figure
-   at the desktop's width — so this stays retired. If the lightbox is ever
-   brought to a touchscreen after all, the scroller is what it REPLACES, not
-   something to layer it on top of. */
+   and no announced way to close it. The two decisions are one decision. */
 
 /* ── The entrance ──
    Fade the scrim, and let the image arrive from a hair under full size. Both

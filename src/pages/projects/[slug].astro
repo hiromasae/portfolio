@@ -410,9 +410,7 @@ const others = [
 
 			    ── The <figure> wrapper and the caption (merged in from the caption
 			    branch, 2026-08-14) ──
-			    figure > figcaption + button > img (a .shot-scroller div now sits
-			    between caption and button — its own note is below), and that
-			    caption-outside-the-button NESTING IS THE WHOLE
+			    figure > figcaption + button > img, and that NESTING IS THE WHOLE
 			    RESOLUTION. The caption sits outside the button on purpose: inside,
 			    it would join the button's hit area — so clicking a label would open
 			    a lightbox — and it would be swallowed by the control's accessible
@@ -452,60 +450,41 @@ const others = [
 						    a touch screen reader announces one control per figure
 						    that does nothing until it lands. Absent-then-appearing beats
 						    present-and-lying. See syncPointerState below. */}
-						{/* ── ON TOUCH, THE FIGURE SCROLLS SIDEWAYS (2026-09-30, off a
-						    reader's feedback: "turn the lightbox on for touch, or serve
-						    the diagrams at a width that is legible on a phone") ──
-						    Hiro chose the second. The lightbox stays a pointer feature
-						    (see the script), and this wrapper is the touch counterpart:
-						    where the lightbox is off, .shot is held at a minimum width
-						    and this div is the box it overflows, scrolling on the x axis
-						    only. The width, the gate and the argument for both live on
-						    .shot-scroller in global.css.
+						<button
+							type="button"
+							class="shot"
+							data-shot
+							data-shot-label={`Enlarge image ${i + 1} of ${figures.length}`}
+							role="presentation"
+							disabled
+						>
+							{/* ── width/height are NOT the render size (2026-08-17) ──
+							    They are the file's own pixels, and the only thing the
+							    browser takes from them here is the ratio: preflight's
+							    height:auto still decides the height and w-full still
+							    decides the width, so these change nothing you can see
+							    on a loaded page. What they change is the page BEFORE
+							    it loads — with no ratio, height:auto is zero, and
+							    this section laid out as a stack of slivers that
+							    snapped to ~2,300px as the files arrived, walking the
+							    link-out, More projects and the footer down the page.
 
-						    A WRAPPER, not overflow on the button or on the figure. The
-						    figure would carry the caption along on the scroll, and the
-						    button is disabled on exactly the devices this applies to — a
-						    scroll container that is also an inert control is two things
-						    in one box. The div is a plain block the width of the button,
-						    so on a pointer device, where the rule never applies, the
-						    rendered page is pixel-identical to before it existed. */}
-						<div class="shot-scroller">
-							<button
-								type="button"
-								class="shot"
-								data-shot
-								data-shot-label={`Enlarge image ${i + 1} of ${figures.length}`}
-								role="presentation"
-								disabled
-							>
-								{/* ── width/height are NOT the render size (2026-08-17) ──
-								    They are the file's own pixels, and the only thing the
-								    browser takes from them here is the ratio: preflight's
-								    height:auto still decides the height and w-full still
-								    decides the width, so these change nothing you can see
-								    on a loaded page. What they change is the page BEFORE
-								    it loads — with no ratio, height:auto is zero, and
-								    this section laid out as a stack of slivers that
-								    snapped to ~2,300px as the files arrived, walking the
-								    link-out, More projects and the footer down the page.
+							    They are also what makes the lazy below real: while
+							    every box was 0px tall they all sat at the top of the
+							    document, inside the viewport, so nothing was ever
+							    deferred and the browser pulled all four at once.
 
-								    They are also what makes the lazy below real: while
-								    every box was 0px tall they all sat at the top of the
-								    document, inside the viewport, so nothing was ever
-								    deferred and the browser pulled all four at once.
-
-								    Don't drop either attribute to "let CSS handle it" —
-								    CSS is handling it, and this is what it needs. */}
-								<img
-									src={src}
-									width={w}
-									height={h}
-									alt={caption ? `${project.title} — ${caption}` : `${project.title} — image ${i + 1}`}
-									loading={i === 0 ? 'eager' : 'lazy'}
-									class="w-full rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface)]"
-								/>
-							</button>
-						</div>
+							    Don't drop either attribute to "let CSS handle it" —
+							    CSS is handling it, and this is what it needs. */}
+							<img
+								src={src}
+								width={w}
+								height={h}
+								alt={caption ? `${project.title} — ${caption}` : `${project.title} — image ${i + 1}`}
+								loading={i === 0 ? 'eager' : 'lazy'}
+								class="w-full rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface)]"
+							/>
+						</button>
 					</figure>
 				))
 			}
@@ -767,12 +746,6 @@ const others = [
 		// pinch-zooms the real page, in place, at whatever magnification the
 		// reader wants, with no state to get out of. Opening a fixed-size copy
 		// of the same picture on top of it is strictly worse.
-		//
-		// 2026-09-30: a reader found the screenshots illegible on a phone all
-		// the same, and the fix stayed on the page rather than in here — where
-		// this gate is false the figure now scrolls sideways at a legible width
-		// (.shot-scroller in global.css). Same query, negated, so every device
-		// has exactly one of the two.
 		//
 		// `(hover: hover) and (pointer: fine)` is the pair, not either alone:
 		// hover alone lets in a stylus, and pointer alone lets in a TV remote.
