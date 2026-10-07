@@ -46,51 +46,107 @@ import { projects } from '../data/projects';
 		    "one entrance on the hero, everything else static" — and collapsed:
 		    elements inside a block enter WITH it, same rule the hairline finale
 		    already enforces for the card dividers. */}
-		<section class="reveal pt-28 pb-32 text-center sm:pt-32 sm:pb-36" style="--i: 0">
-			{/* Still capped at --measure so a wide viewport can't run the line out
-			    past a readable length; mx-auto centres the box the cap creates. */}
-			{/* --ink-hero, a step PAST the body ink away from the paper (2026-08-03,
-			    Hiro: this line and the button should contrast more, closer to
-			    white). It briefly went the other way, to --ink-soft, on a reading
-			    of "lighter" as quieter — wrong, and the correction is worth
-			    keeping: in the dark theme this line already sat near the top of
-			    the range, so "lighter" could only have meant brighter.
-			    This makes the sentence the highest-contrast text on the site,
-			    ahead of body ink. That is the point — it is the page's opening
-			    statement and the only thing above the rule — but it does mean the
-			    hero now out-contrasts the wordmark, so if the mark ever needs to
-			    lead again, it is this token it has to answer to. See --ink-hero in
-			    global.css for why the two themes are proportional rather than
-			    inverse. */}
-			{/* Inherits the body's 300. It briefly carried font-normal: the
-			    2026-08-04 APCA audit put this line 0.125px under the floor in the
-			    LIGHT theme (Lc 88.5 wants ≥21.5px at w300; it is 21.375px), so 400
-			    was the minimum that cleared. Hiro asked for it lighter the same
-			    day, knowing that, so 300 stands and this is a deliberate miss, not
-			    an oversight — don't "fix" it back to 400 on sight.
-			    Worth knowing if it ever gets revisited: the shortfall is 0.125px,
-			    so SIZE clears it as easily as weight — text-[1.15rem] (21.85px)
-			    would pass at 300 and keep the lighter drawing. Dark was never the
-			    problem (Lc 93.5, wants 20px at w300); this is a light-theme-only
-			    margin, and it moves with --ink-hero. */}
-			{/* An <h1>, not a <p> (2026-08-18). The home page had NO h1 at all and its
-			    only headings were the five card <h3>s — so a screen reader arriving at
-			    the site's front door got no document heading and a jump straight to
-			    level 3. This line is the page's statement of what the work is, which is
-			    what an h1 is for; the projects list gets the h2 below it.
+		<section class="reveal pt-28 pb-32 text-left sm:pt-32 sm:pb-36" style="--i: 0">
+			{/* REWRITTEN 2026-09-30 off a hiring-panel read of the site: the old hero
+			    was one centred slogan ("Design engineering, with good sense and
+			    taste.") over a button, with Hiro's name appearing nowhere on the home
+			    page except that button's label and the footer. A recruiter skimming
+			    needs name, role, place and what you want inside the first screen, and
+			    at 1440×900 the work started below the fold. Hiro chose (from three
+			    shapes): left-aligned, name leads, Design Engineer as the title,
+			    availability stated as open to any arrangement, slogan dropped from
+			    the hero. The slogan still lives in the OG card (scripts/og-card.html)
+			    and the og:image:alt in Layout.astro, which describe that image and
+			    stay accurate.
 
-			    THE TAG CHANGE IS VISUALLY FREE and that is why it was available: every
-			    size and weight here comes from an explicit class, and Tailwind's
-			    preflight sets h1..h6 { font-size: inherit; font-weight: inherit } — so
-			    the rendered line is byte-identical to the <p> it replaces. Nothing in
-			    the notes above about --ink-hero, --measure or the w300 APCA margin is
-			    affected; they were all about the type, and the type did not move. */}
-			<h1 class="mx-auto max-w-[var(--measure)] text-lg leading-relaxed text-[var(--ink-hero)]">
-				Design engineering, with good sense and taste.
+			    PADDING IS THE OLD HERO'S, pt-28/pb-32 (sm 32/36), on purpose. The
+			    first cut of this rewrite halved it (pt-14/pb-16) to pull the first
+			    row of covers into a 900px window, and Hiro pulled it straight back
+			    the same day: the block lost its impact with the air gone. Offered a
+			    bigger name with partial air instead, they chose same sizes, full air —
+			    so the first row starts just under the fold at 1440×900 and the hero
+			    floats the way the slogan did. Don't re-cut the padding for the fold
+			    argument without re-reading this; it was made and lost.
+
+			    Spacing inside is one rhythm (Hiro, same pass, from three offered):
+			    name and role tight as one unit (mt-2), then the SAME gap (mt-6)
+			    before the paragraph and before the button, three beats.
+
+			    HISTORY worth keeping from the old line, since the tokens outlive it:
+			    --ink-hero was a step PAST body ink, brighter than the wordmark, made
+			    for that sentence (2026-08-03); it is still the button's --btn-bg, so
+			    it stays. The line ran at w300 and sat 0.125px under the APCA floor in
+			    the light theme, a deliberate miss Hiro chose (2026-08-04) — moot now,
+			    the heading below is --ink-heading at --weight-emph. */}
+			{/* The name is the h1 (the page had no h1 until 2026-08-18; see that
+			    note's point about screen readers landing on card h3s). Same classes
+			    as the about page's greeting h1 — the site has one heading idiom and
+			    this is it, not a display size invented for the front door. */}
+			{/* Two-up on sm+ (2026-09-30, third pass, Hiro: "add room for a profile
+			    image"): text column left, portrait right, top-aligned, the about
+			    page's arrangement brought forward. Chosen over a small avatar beside
+			    or above the name. The photo is a PLACEHOLDER box until Hiro picks an
+			    image — the detail page's empty-shot idiom (surface-sunken, --line,
+			    bg-clip-padding), at 4:5 like the about page's portrait.
+
+			    The photo's width is load-bearing for the prose: the shell's content
+			    box is ~913px, the prose line below is ~650px and must not wrap, so
+			    photo + gap has to stay under ~263px. The square takes its side from
+			    the text column's height (~225px), and the gap is gap-6 (28.5px),
+			    not gap-8 — with gap-8 the slack was ~1px. Measured at the 960 shell:
+			    column ~660, line 649. Below sm the two stack, text first, photo
+			    under the button. */}
+			<div class="flex flex-col gap-10 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+			<div class="min-w-0 flex-1">
+			<h1 class="text-3xl [font-weight:var(--weight-emph)] tracking-tight text-[var(--ink-heading)]">
+				Hiro Eernisse
 			</h1>
+			{/* Role over place, two lines by a <br> (Hiro, 2026-09-30, after one
+			    pass with them on a single comma-joined line), in body ink a size up
+			    from prose so it reads as the heading's subtitle rather than the
+			    paragraph's first line. No full stops: these are labels under a name,
+			    not sentences. Not an eyebrow: sentence case, no tracking, BELOW the
+			    name.
+
+			    leading-snug, NOT the prose's relaxed (2026-09-30, second pass): at
+			    1.625 the gap between the two lines was nearly half the gap between
+			    beats, and the name+role unit fell apart. Snug closes the pair up so
+			    the hero's three beats (name+role, prose, button) read as three. */}
+			<p class="mt-2 text-pretty text-base leading-snug text-[var(--ink)]">
+				Design Engineer<br />
+				San Francisco Bay Area
+			</p>
+			{/* The site's prose setting (text-sm / leading-relaxed), so this and the
+			    about page's paragraphs are the same object. NO width cap of its own
+			    (2026-09-30, third pass): it ran at max-w-[20rem] for an hour so it
+			    wrapped to two near-equal lines under the short name/role lines, and
+			    Hiro called the result too compact — the sentence is to run as ONE
+			    line wherever it fits. The text column's width (see the flex row
+			    above) is what bounds it now, and that column is sized so this copy
+			    (~650px) clears it at the 960 shell with the photo beside it. A
+			    longer sentence, or a wider photo, wraps it; re-measure before
+			    changing either. "full-time" keeps a NON-BREAKING hyphen (&#8209;)
+			    so that when it does wrap (phones, mid widths) "full-" never hangs
+			    at a line end.
+
+			    COPY (2026-09-30, fifth pass, Hiro's pick from three): "Product UI and
+			    design systems. Open to full-time and freelance work." It replaced
+			    "I design and build product UI. Open to full-time, contract and
+			    freelance work." for two reasons at once — that one repeated the
+			    "Design Engineer" line above it, and at ~650px its full stop ended
+			    38px from the photo, so the text read as pressing on the image. The
+			    new line is ~68 characters and leaves ~100px clear. "contract" was
+			    dropped deliberately; freelance covers it and the word cost the fit.
+			    Fragment style, no "I", to match the role and place lines. Two
+			    sentences, what the work is and that Hiro is looking, run together
+			    on one line (Hiro's call after a pass with them <br>-split; the split
+			    moved to the role/place line above instead). */}
+			<p class="mt-6 text-pretty text-sm leading-relaxed">
+				Product UI and design systems. Open to full&#8209;time and freelance work.
+			</p>
 			{/* The page's only route to /about, so it's the site's one real button.
-			    mt-6 rather than the old link's mt-4 — a control needs more air off
-			    the line above it than a word set in the same size did.
+			    Label shortened from "About Hiro Eernisse" — the name is the h1 two
+			    lines up now, and repeating it in the button read as a form letter.
 
 			    The arrow is DRAWN AT REST and doesn't animate, unlike the project
 			    cards' (which appear on hover). Different job: on a card the arrow
@@ -102,7 +158,7 @@ import { projects } from '../data/projects';
 			    needs no margin of its own. */}
 			<p class="mt-6">
 				<a href="/about" class="btn">
-					About Hiro Eernisse
+					About
 					<svg
 						viewBox="0 0 24 24"
 						fill="none"
@@ -118,6 +174,25 @@ import { projects } from '../data/projects';
 					</svg>
 				</a>
 			</p>
+			</div>
+			{/* SQUARE (2026-09-30, fourth pass, Hiro: "the image should be a
+			    square"), 12rem a side on sm+ — and 12rem = 228px is NOT arbitrary:
+			    it is the text column's measured height (name 43 + 9.5 + role pair
+			    48 + 28.5 + prose 27 + 28.5 + button 40), so the square's top sits on
+			    the name's and its bottom on the button's. The 4:5 it replaced
+			    overhung the text by ~36px. IF THE COPY CHANGES HEIGHT (a wrapped
+			    prose line, a third role line) THIS NUMBER IS WRONG — re-measure.
+
+			    Tried first: sm:w-auto + sm:self-stretch, letting aspect-ratio derive
+			    the width from the stretched height so it could never drift. It
+			    collapsed to 2px wide — a flex item's main size is resolved before
+			    the stretched cross size is definite, so the ratio has nothing to
+			    work from. Don't re-try it. Below sm the side is 11rem. */}
+			<div
+				class="aspect-square w-[11rem] shrink-0 rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface-sunken)] bg-clip-padding sm:w-[12rem]"
+				aria-hidden="true"
+			></div>
+			</div>
 		</section>
 
 		{/* Projects */}
