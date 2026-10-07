@@ -324,8 +324,14 @@ const tools = [
 				    reason: it leaves the page (target=_blank, a PDF). The label names
 				    the THING and its format, not an instruction — the same rule as
 				    linkLabel in projects.ts ("ejs.co", not "Visit the site"). The file
-				    is public/Hiro_Eernisse_Resume.pdf, a copy of the one
-				    ~/job-search/build.js renders; re-copy it after a rebuild there. */}
+				    is public/Hiro_Eernisse_Resume.pdf, a copy of the PORTFOLIO
+				    variant in ~/job-search, not the default sheet (2026-10-07, Hiro):
+				    `RESUME_JSON=resumes/portfolio.json node build.js`, then copy
+				    out/resume-portfolio.pdf here. The variant differs in two ways
+				    and both are deliberate: no phone number, since anyone can
+				    download this copy, and "Design Engineer" in the title and
+				    summary to match this page, where the sheet sent with
+				    applications says Product Designer. */}
 				<div class="space-y-5 text-pretty text-sm leading-relaxed">
 					<p>I'm a Design Engineer based in the San Francisco Bay Area.</p>
 					<p>
