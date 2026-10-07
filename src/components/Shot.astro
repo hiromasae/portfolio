@@ -1,0 +1,84 @@
+---
+/* One detail-page screenshot: figure > figcaption + button > img. Lifted out
+   of [slug].astro on 2026-10-07 when the sectioned case studies arrived and
+   the same markup had to render from two places. The argument for the
+   nesting, the caption-above-image call and the inert-until-promoted button
+   all live in the long note above the short-form map in [slug].astro; this
+   file carries only the notes that ride on the attributes themselves. The
+   rendered output is unchanged from before the split. */
+import type { ProjectImage } from '../data/projects';
+
+interface Props extends ProjectImage {
+	/** 1-based position in the page's whole run of shots — sections included
+	    — so the lightbox label and the alt fallback count the page, not the
+	    section. */
+	index: number;
+	total: number;
+	/** The project title, which leads every alt. */
+	title: string;
+}
+
+const { src, w, h, caption, index, total, title } = Astro.props;
+
+/* Same rule as the paragraphs the caption sits under: text-sm / leading-relaxed,
+   no colour and no weight of its own. See `captionClass` in [slug].astro for
+   why it is NOT the about page's quieter figcaption — these are the labels a
+   before/after turns on, not asides. Margin is bottom because the caption sits
+   above its image. */
+const captionClass = 'mb-2.5 text-sm leading-relaxed';
+---
+
+<figure>
+	{caption && <figcaption class={captionClass}>{caption}</figcaption>}
+	{/* ── SHIPS INERT, PROMOTED BY SCRIPT (2026-08-18) ──
+	    disabled + role="presentation" + NO aria-label is the resting state,
+	    and all three are load-bearing. ARIA's presentational-roles conflict
+	    resolution drops the role if the element is FOCUSABLE or carries a
+	    global ARIA attribute, and a <button> is inherently focusable — so
+	    role="presentation" alone is silently ignored (verified against
+	    Chrome's AX tree: it stayed role=button, named). `disabled` is what
+	    makes it genuinely unfocusable and lets the role finally apply; the
+	    label lives in data-* until the script has a device that can use it.
+	    The <img> keeps its alt throughout — the role applies to the wrapper
+	    alone, not its subtree.
+
+	    Inert is also the RIGHT DEFAULT for the pre-JS window: the module is
+	    deferred, so shipping a live button means a touch screen reader
+	    announces one control per figure that does nothing until it lands.
+	    Absent-then-appearing beats present-and-lying. See syncPointerState in
+	    [slug].astro. */}
+	<button
+		type="button"
+		class="shot"
+		data-shot
+		data-shot-label={`Enlarge image ${index} of ${total}`}
+		role="presentation"
+		disabled
+	>
+		{/* ── width/height are NOT the render size (2026-08-17) ──
+		    They are the file's own pixels, and the only thing the browser takes
+		    from them here is the ratio: preflight's height:auto still decides
+		    the height and w-full still decides the width, so these change
+		    nothing you can see on a loaded page. What they change is the page
+		    BEFORE it loads — with no ratio, height:auto is zero, and the shots
+		    laid out as a stack of slivers that snapped to ~2,300px as the
+		    files arrived, walking the link-out, More projects and the footer
+		    down the page.
+
+		    They are also what makes the lazy below real: while every box was
+		    0px tall they all sat at the top of the document, inside the
+		    viewport, so nothing was ever deferred and the browser pulled all
+		    four at once.
+
+		    Don't drop either attribute to "let CSS handle it" — CSS is
+		    handling it, and this is what it needs. */}
+		<img
+			src={src}
+			width={w}
+			height={h}
+			alt={caption ? `${title} — ${caption}` : `${title} — image ${index}`}
+			loading={index === 1 ? 'eager' : 'lazy'}
+			class="w-full rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface)]"
+		/>
+	</button>
+</figure>

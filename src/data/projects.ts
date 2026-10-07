@@ -68,6 +68,28 @@ export interface ProjectImage {
 	caption?: string;
 }
 
+/** One section of a long-form case study (2026-10-07, off the feedback that
+    two studies should go to full depth: context and constraints, what was
+    tried and rejected, the decision and why, what happened after, what I'd do
+    differently — six to ten short sections, an image each).
+
+    A section is a heading, one paragraph, and its images. `images` is a LIST
+    rather than a single shot for exactly one reason: the before/after pairs.
+    migaki's "without/with" and EJS's "old/rebuilt" are the strongest evidence
+    on their pages, and a comparison only works with both halves in view (see
+    the long notes on the `images` field of each project below). A pair has to
+    live inside one section or it stops being a pair. Most sections carry one;
+    an empty list is legal for a closing section that has nothing to show.
+
+    `body` is one paragraph. The feedback said SHORT sections, and the heading
+    is doing the work a topic sentence would otherwise do — if a section
+    wants two paragraphs it probably wants to be two sections. */
+export interface ProjectSection {
+	heading: string;
+	body: string;
+	images: ProjectImage[];
+}
+
 /** Where the work stands. Rendered on the detail page's dateline after the
     company (2026-09-30, off the feedback that every page should say this
     outright), so it is a fact about the OUTCOME, not the work's genre: "Open source" is
@@ -120,6 +142,13 @@ export interface Project {
 	    someone adds a picture. An uncaptioned shot is `{ src, w, h }` with no
 	    caption key — barely longer, and it can't be under-specified. */
 	images: ProjectImage[];
+	/** The long-form study. When set, the detail page renders THESE in place
+	    of `problem`, `work` and `images` — those three keep feeding the card,
+	    the meta description and any page that isn't sectioned, so a project
+	    carries both and they must agree. Two projects have one (migaki, ejs);
+	    the other three stay on the short form on purpose — "three strong beat
+	    five thin" was the whole of the feedback. */
+	sections?: ProjectSection[];
 	/** Number of empty frames to stand in for screenshots that don't exist yet.
 	    Only read when `images` is empty, and only by the detail page; an empty
 	    `cover` leaves the card's own frame blank the same way. Delete the field
@@ -245,6 +274,92 @@ export const projects: Project[] = [
 				caption: 'What it proposed for the first page',
 			},
 		],
+		/* ── The long-form study (2026-10-07, draft) ──
+		   Eight sections in the feedback's order: context, tried and rejected,
+		   the decision, what happened after, what I'd do differently. Facts
+		   are from the repo's history (orphan root 2026-08-05; the server era
+		   survives only on GitHub as PRs #1/#2) and the two open PRs.
+
+		   The without/with pair stays in ONE section (the first) for the reason
+		   the images note above gives at length. migaki0, the cover, now also
+		   appears in the body — the "three files" section has no better
+		   picture than the three files, and this is the same exception EJS
+		   already makes with its hero. migaki3 and migaki4 ride together in
+		   the propose-don't-impose section because one is the run and the
+		   other is what the run handed back.
+
+		   migaki5-8 are GitHub screenshots, dark, logged out (so they carry
+		   the Sign in / Sign up chrome — re-shoot signed in if that grates).
+		   5 = the PR list, 6 = commit 28faa86's diff, 7 = SOURCES.md, 8 = PR #3.
+
+		   ⚠ ASK HIRO before this ships — things the repos don't say:
+		   - §2: WHY the server era and the JS rewrite were abandoned. The
+		     commit only says "deliberately smaller"; the paragraph infers it.
+		   - §5: was the 2026-08-11 routing test the same prompt as the
+		     without/with pair above?
+		   - §7: did the 2026-09-12 run go as a scheduled routine or by hand,
+		     and why PR #3 and #4 are still open. "All sixteen went in" is
+		     the owner review on the PR, not a merge.
+		   - Any external users; the repo shows none and the text claims none. */
+		sections: [
+			{
+				heading: 'Every agent lands on the same look',
+				body: 'A coding agent will build almost anything you describe, and left to its defaults it keeps arriving at the same page: the same gradient, the same card grid, the same three adjectives. Write the correction down and it starts aging the day you save it, because what reads as fresh now is exactly what the next training run absorbs. migaki (磨き, to polish) started as an attempt at both halves at once: a visual sense an agent can actually apply, that does not decay into last year’s style guide.',
+				images: [
+					{ src: '/images/migaki1.webp', w: 2530, h: 1854, caption: 'Without migaki' },
+					{ src: '/images/migaki2.webp', w: 2530, h: 1844, caption: 'With migaki' },
+				],
+			},
+			{
+				heading: 'Two restarts before the shape stuck',
+				body: 'The first version was a TypeScript MCP server with a Railway deploy and a CI research pipeline: forty tests, a daily research action, an API key to keep alive. The second was a JavaScript rewrite of the same idea. Both were thrown away from an empty tree. What survived was the part that had never needed a runtime, three markdown files. No server, no build step, no dependencies. The deliverable is the text, and anything that can read a skill file gets the whole thing.',
+				images: [
+					{
+						src: '/images/migaki5.webp',
+						w: 2530,
+						h: 1581,
+						caption: 'The repo’s four pull requests: two from the server era, two from the one that stuck',
+					},
+				],
+			},
+			{
+				heading: 'Three files and a router',
+				body: 'SKILL.md is a router, not a container: it says which file to open and nothing else. core.md holds sixteen perceptual principles in four tiers, the part of visual judgement that does not move, with one rule for conflicts (the lower tier wins) and a three-question test at the end. slop.md catalogues what reads as generated or dated, edge.md what reads as excellent right now. The whole plugin is about five hundred lines, and keeping it there is written into the repo as a rule.',
+				images: [{ src: '/images/migaki0.webp', w: 2462, h: 1438, caption: 'core.md, slop.md and edge.md' }],
+			},
+			{
+				heading: 'A flag, not a ban',
+				body: 'The hardest call was what the skill is allowed to do with its opinions. It builds the thing, then hands back the taste decisions it made as a list, each one accepted or rejected in a word: propose, don’t impose. Every slop entry carries a still-right case, because a pattern is a flag and not a ban. The wording keeps sense and taste apart, sense being grounded in fact and taste in preference, and a user’s own instruction outranks all of it.',
+				images: [
+					{ src: '/images/migaki3.webp', w: 2528, h: 1312, caption: 'The skill running' },
+					{ src: '/images/migaki4.webp', w: 2528, h: 1376, caption: 'The decisions it handed back' },
+				],
+			},
+			{
+				heading: 'The adjective that produced beige',
+				body: 'In a routing test, an entry asking for a slight warm cast produced an eleven-point beige, and a Tiempos-class serif produced Palatino. The words were right and the result was wrong, because nothing bounded them. The fix was a number: a warm neutral holds to about four points of RGB spread, and a display serif needs a licensed webfont or the pattern is skipped. That failure became the entry gate for everything added since. An entry has to name a value a reader could check.',
+				images: [
+					{ src: '/images/migaki6.webp', w: 2530, h: 1933, caption: 'The commit that bounded both entries' },
+				],
+			},
+			{
+				heading: 'Weekly became monthly',
+				body: 'The catalogues were meant to rewrite themselves weekly. They do it monthly now: taste does not move weekly, and a faster loop mostly produced noise and re-check churn. Where the loop is allowed to look is written down and short. Shipped product surfaces and versioned design decisions qualify; Dribbble, trend roundups, AI-written blogs and awards sites are excluded by name. An empty run is a valid result, and it is preferred to padding.',
+				images: [
+					{ src: '/images/migaki7.webp', w: 2530, h: 1933, caption: 'Where the research loop may look' },
+				],
+			},
+			{
+				heading: 'The first run',
+				body: 'The first real research pass produced sixteen proposals: twelve sharpenings of existing entries, two new ones, two corrections, each citing CSS from a shipped product. One finding was uncomfortable. The hairline-border entry had bounded opacity at eight to twelve percent, and the most common shipped value turned out to be five. The catalogue had been excluding the thing it was describing. All sixteen went in.',
+				images: [{ src: '/images/migaki8.webp', w: 2530, h: 1757, caption: 'The research pull request' }],
+			},
+			{
+				heading: 'What I would do differently',
+				body: 'Put length pressure in from the start. Fourteen sharpenings added fifty-six lines and nothing capped the result, which is how a corpus that was supposed to improve without growing grew by fourteen percent. Entries are capped at eight lines now, and three accepted ones still break it. The other lesson is older. Two restarts is the cost of starting with the infrastructure instead of the text.',
+				images: [],
+			},
+		],
 		/* The repo, which for this project is the product: migaki ships as three
 		   markdown files and a plugin manifest, so there is no site to send
 		   anyone to and the source is the whole of it. Labelled with the full
@@ -302,6 +417,82 @@ export const projects: Project[] = [
 			{ src: '/images/ejs0.webp', w: 2530, h: 1332, caption: 'The same page, rebuilt' },
 			{ src: '/images/ejs2.webp', w: 2528, h: 1386 },
 			{ src: '/images/ejs3.webp', w: 2532, h: 1386 },
+		],
+		/* ── The long-form study (2026-10-07, draft) ──
+		   Eight sections. Facts are the redesign branch's history in
+		   ~/ejs-site (73 commits ahead of upstream) and PR #22 on mde/ejs-site.
+		   The before/after pair is split across sections 1 and 3 here, which
+		   the images note above forbids for the short form — it holds because
+		   the section between them is the old site too (the features band),
+		   so the reader is still on the "before" when the hero arrives.
+
+		   ejs4-8 are new (2026-10-07): 4 = the old features band, from the
+		   gitignored screenshots in ~/ejs-site; 5 = four compare-history frames
+		   (e9e9693, 31d321f, 87e7fe4, 674f45d) in a 2x2 with transparent gaps,
+		   shorter frames padded rather than cropped so each shape is whole;
+		   6 = the security notice cropped from the old about section and the
+		   redesign's, side by side; 7 = /docs/ served locally from the
+		   committed build, light theme to match ejs0; 8 = PR #22 on GitHub,
+		   dark, logged out. The old-site notice in 6 is NOT the crimson-ring
+		   version the paragraph describes — that one was never shot — so the
+		   caption says what the picture is, not what the text is about.
+
+		   ⚠ ASK HIRO before this ships:
+		   - §2: the brief. The repo has no written one; the constraints are
+		     read off CLAUDE.md and the PR body. The relationship to mde (the
+		     maintainer, same surname) is not on the page and maybe should be.
+		   - §5: who said the notice "looked like a system error", and why the
+		     accordion came out after a day (the commit only says "lighter").
+		   - §7: whether mde has seen PR #22, and whether "unreviewed" belongs
+		     on a portfolio page at all. "As of this writing" dates fast.
+		   - §3: where 20M+ / 7.7k come from, and as of when. */
+		sections: [
+			{
+				heading: 'A page that never said what EJS does',
+				body: 'ejs.co has looked the same for years: a wordmark, a four-word tagline, a lot of olive green. The only thing promoted above the fold is a different project, a Jake banner above EJS’s own logo, and the page never gets around to what the library does or why you would pick it over the alternatives. Twenty million people install it every week, and the first screen tells them almost nothing.',
+				images: [{ src: '/images/ejs1.webp', w: 2532, h: 1322, caption: 'The site as it is today' }],
+			},
+			{
+				heading: 'Static HTML, one file, and the green stays',
+				body: 'The site is a 2015 Bootstrap template with the documentation inlined into its one page, served as static files. The brief was to keep it that way: no build tooling, no framework, minimal JavaScript, one index.html with its CSS in a single style block. The olive green and the crimson were inherited too. They are what people recognise, so the question was never whether to keep them, only how much of the canvas they get.',
+				images: [
+					{ src: '/images/ejs4.webp', w: 2530, h: 757, caption: 'The old features band: the green as the whole canvas' },
+				],
+			},
+			{
+				heading: 'Say it, then show the install',
+				body: 'The new first screen is a plain statement, generate HTML with plain JS, with the install command under it in a chip you can copy, and the three numbers that make the case on their own: 20M+ weekly downloads, 7.7k stars, zero dependencies. A side-by-side code card was tried there first and cut; an install pill and a button row gave way to the stats. The green runs as a band behind this one screen instead of behind everything.',
+				images: [{ src: '/images/ejs0.webp', w: 2530, h: 1332, caption: 'The same page, rebuilt' }],
+			},
+			{
+				heading: 'The compare section, four times',
+				body: 'The one section that argues for EJS over the alternatives went through four shapes. Tabs that switched between Handlebars, Pug and Mustache hid the comparison behind a click. A side-by-side grid with a glowing EJS card put it on the table but gave it no weight. Peers in a row above a full-width answer card read as a hierarchy. The version that stayed stacks the three peers on the left and sets EJS on the right, with the checklist under the code, where it is evidence rather than copy.',
+				images: [
+					{ src: '/images/ejs5.webp', w: 2530, h: 1890, caption: 'Tabs, grid, row over answer, two columns' },
+				],
+			},
+			{
+				heading: 'What came out again',
+				body: 'A scroll-reveal animation went in and came out two weeks later: fade-up-on-scroll reads as template filler, and it was the only animation on the page. A mobile accordion for the About cards lasted a day before simpler, tighter cards replaced it. The security notice had a crimson ring and an exclamation mark, and the feedback was that it looked like a system error, so it is a plain note now. A last copy pass stripped the writing tells: the doubled rules of three, every “every other”.',
+				images: [
+					{ src: '/images/ejs6.webp', w: 2530, h: 1023, caption: 'The security notice, old site and redesign' },
+				],
+			},
+			{
+				heading: 'Docs: nine pages to one',
+				body: 'The docs are the one exception to no-build. They are generated with Astro and committed as static output, so hosting stays plain files. Nine per-topic pages were folded into one, with the old URLs kept as redirects. Search was removed, since one page does not need it, and the left sidebar went with it. What stayed is the on-this-page rail, scrollbar visible, so the reference is something you can move around in.',
+				images: [{ src: '/images/ejs7.webp', w: 2530, h: 1757, caption: 'The documentation page' }],
+			},
+			{
+				heading: 'Open, mergeable, unreviewed',
+				body: 'The branch took the maintainer’s v6 updates in September and the pull request went up on the sixteenth: seventy-three commits, the landing page, the docs move, and twenty-two thousand lines of legacy assets removed. As of this writing it is open, mergeable and has no reviews, and ejs.co still serves the 2015 site. The link at the end of this page goes to the live site, which is the before half of the comparison above.',
+				images: [{ src: '/images/ejs8.webp', w: 2530, h: 1581, caption: 'Pull request #22' }],
+			},
+			{
+				heading: 'What I would do differently',
+				body: 'Pin the build. The committed docs were generated with one Astro version and patched by hand when the local one drifted, which is the kind of problem a lockfile exists to prevent. Keep the decision log going: it stops in late May with entries marked rationale unconfirmed, and the reasons for the later cuts live only in commit messages. And put the work in front of the maintainer earlier than a seventy-three-commit pull request.',
+				images: [],
+			},
 		],
 		/* ⚠ THIS GOES TO THE SITE AS IT IS TODAY — the OLD page, the one the
 		   first screenshot is of, not the redesign. The redesign is not deployed

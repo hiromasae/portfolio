@@ -1,0 +1,32 @@
+---
+/* The detail page's link out: .btn-quiet--out with the ↗. Lifted out of
+   [slug].astro on 2026-10-07 so the short form and the sectioned case studies
+   render the same control from one place. Everything about WHY it looks like
+   this — the quiet family, the cyan, the arrow's 5→19 span — is in the long
+   note at its short-form call site in [slug].astro; nothing here is decided
+   independently of that note. */
+interface Props {
+	href: string;
+	label: string | undefined;
+}
+const { href, label } = Astro.props;
+---
+
+<a href={href} target="_blank" rel="noopener" class="btn-quiet btn-quiet--out">
+	<span class="btn-quiet__label">{label}</span>
+	<svg
+		class="btn-quiet__arrow"
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+		aria-hidden="true"
+		width="14"
+		height="14"
+	>
+		<line x1="5" y1="19" x2="19" y2="5"></line>
+		<polyline points="9 5 19 5 19 15"></polyline>
+	</svg>
+</a>
