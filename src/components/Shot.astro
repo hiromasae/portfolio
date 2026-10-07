@@ -38,15 +38,16 @@ const captionClass = 'mb-2.5 text-sm leading-relaxed';
 	    role="presentation" alone is silently ignored (verified against
 	    Chrome's AX tree: it stayed role=button, named). `disabled` is what
 	    makes it genuinely unfocusable and lets the role finally apply; the
-	    label lives in data-* until the script has a device that can use it.
+	    label lives in data-* until the script runs.
 	    The <img> keeps its alt throughout — the role applies to the wrapper
 	    alone, not its subtree.
 
 	    Inert is also the RIGHT DEFAULT for the pre-JS window: the module is
 	    deferred, so shipping a live button means a touch screen reader
 	    announces one control per figure that does nothing until it lands.
-	    Absent-then-appearing beats present-and-lying. See syncPointerState in
-	    [slug].astro. */}
+	    Absent-then-appearing beats present-and-lying. The script in
+	    [slug].astro promotes every one of them in a single pass the moment it
+	    runs, on every device since 2026-10-03. */}
 	<button
 		type="button"
 		class="shot"

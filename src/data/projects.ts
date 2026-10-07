@@ -105,8 +105,14 @@ export interface Project {
 	    (2026-09-30). For self-initiated work write who it was for or under,
 	    not what kind of work it was — "Open source" used to sit here for
 	    migaki and ejs and is now the STATUS of both, so the dateline would
-	    have said it twice. */
-	company: string;
+	    have said it twice.
+
+	    OPTIONAL since 2026-10-03 (Hiro: "Independent · Open source is
+	    redundant"). "Independent" was the filler that took Open source's old
+	    seat on migaki, and it says nothing the status doesn't. Leave it OUT
+	    for self-initiated work rather than inventing an owner; the dateline
+	    drops the slot and its middot. */
+	company?: string;
 	year: string;
 	/** NOT RENDERED. Off the detail page since 07-29, and back for a few
 	    hours on 09-30 before coming off again with `role` — the header note
@@ -196,7 +202,6 @@ export const projects: Project[] = [
 	{
 		slug: 'migaki',
 		title: 'migaki: Design Sense for Coding Agents',
-		company: 'Independent',
 		year: '2026',
 		tags: ['AI', 'Design Systems'],
 		role: 'Wrote the skill, its three-file structure, and the weekly refresh loop.',

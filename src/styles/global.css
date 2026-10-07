@@ -4901,13 +4901,16 @@ html.reveal-wait #projects::before {
    its own idiom, and the pair says "this opens bigger" / "this puts it back"
    more precisely than anything that could be painted here.
 
-   ⚠ WHICH IS WHY THE FEATURE DOES NOT EXIST ON TOUCH (2026-08-14, Hiro). An
-   affordance made entirely of cursors is nothing at all on a device with no
-   cursor, and the honest conclusion was to drop the feature there rather than
-   to paint a chip for it: a phone pinch-zooms the page itself, in place, at
-   any magnification, with no state to escape. The script gates the behaviour
-   on the same media query this file gates the cursor on — change one and the
-   other has to move with it. */
+   ON TOUCH THE CURSOR IS NOTHING, AND THE FEATURE STILL EXISTS (2026-10-03).
+   From 08-14 it didn't: an affordance made entirely of cursors is nothing on
+   a device with no cursor, and the honest conclusion then was to drop the
+   feature there — a phone pinch-zooms the page itself. A reader found the
+   screenshots illegible on a phone regardless (09-30), a sideways-scrolling
+   figure was tried for a day and taken out, and the lightbox now opens on
+   tap too. What touch gets instead of cursors is a different OPEN state —
+   the viewer fills the screen, the picture pans, and a close chip comes back
+   — see the touch block after ::backdrop. The script no longer gates the
+   open on this query; it reads it to decide how the modal dismisses. */
 .shot {
 	display: block;
 	width: 100%;
@@ -4928,8 +4931,8 @@ html.reveal-wait #projects::before {
 	}
 
 	/* ...but not before the module that makes it true has run. The button
-	   ships `disabled` and is promoted on a fine pointer (see [slug].astro),
-	   so :disabled is exactly the pre-JS window on a mouse device — the one
+	   ships `disabled` and is promoted by the script (see [slug].astro), so
+	   :disabled is exactly the pre-JS window on a mouse device — the one
 	   moment a zoom-in cursor would promise a click that goes nowhere. */
 	.shot:disabled {
 		cursor: default;
@@ -5030,23 +5033,103 @@ html.reveal-wait #projects::before {
 	background: rgba(6, 7, 11, 0.86);
 }
 
-/* ── There is no close button ── (2026-08-14, Hiro)
-   A chip lived here for a few hours: 2.3rem, fixed to the viewport's top-right
-   corner, --surface over a --line-strong border so it stayed legible on top of
-   an arbitrary screenshot. It is recorded rather than merely deleted because
-   the argument for it was sound and would otherwise be rediscovered — a cursor
-   is not an affordance on a touchscreen, and the chip was the only visible way
-   out.
+/* ── TOUCH: THE VIEWER FILLS THE SCREEN, THE PICTURE PANS, AND THE CLOSE
+   CHIP IS BACK (2026-10-03, Hiro: "add lightbox for when tapped") ──
+   On a pointer device the dialog shrink-wraps a picture that is simply
+   bigger than the one on the page (the rules above). On a phone that is no
+   enlargement at all — 92vw is the width the page already gave it — so the
+   open state is different in kind: the dialog takes the whole viewport and
+   becomes a scroll container, and the image is HELD at a legible width
+   inside it and panned. The scrim survives only as the 1.25rem frame around
+   the picture (the site's own gutter), which is also the one band of pure
+   backdrop left to tap.
 
-   What retired it was not "cleaner": it was scoping the whole feature to
-   pointer devices, which left the chip serving a case that no longer reaches
-   it. On a device with a cursor the modal is one continuous dismiss target
-   wearing a zoom-out cursor, so a button would be a second answer to a
-   question already answered everywhere on the screen.
+   THE GATE IS THE CURSOR QUERY, NEGATED. Every device gets exactly one of
+   the two open states: a cursor gets the shrink-wrapped picture and its
+   zoom-out, everything else gets this. Don't swap it for a width breakpoint
+   — a mouse user in a narrow window still has a cursor to close with, and a
+   touch tablet wide enough to fit the picture sees no overflow and so no
+   panning, just a filled viewport. Both states share the same markup, the
+   same transitions and the same script; the script reads the same query to
+   exempt the picture from tap-to-close here (see [slug].astro).
 
-   ⚠ IF TOUCH EVER COMES BACK, this comes back with it. Bringing the lightbox
-   to a touchscreen without a visible control would leave a full-screen image
-   and no announced way to close it. The two decisions are one decision. */
+   --lightbox-min IS THE DESKTOP SLOT: 960px minus <main>'s px-5 on each side,
+   912.5px at the 19px root. The rule that number states is "a phone never
+   shows a screenshot smaller than a desktop does" — the one legibility bar
+   the site has already accepted, rather than a second one invented for
+   phones. Single knob. Bigger buys larger text at the cost of more panning,
+   and the migaki shots (0.73 ratio) are 669px tall at this width — already a
+   phone viewport, so vertical panning begins just past it. The ceiling rule
+   above still holds in spirit: every file is wider than this, so nothing is
+   blown up past its own pixels at 1x (a DPR-3 phone upsamples slightly, as
+   the in-page render already does).
+
+   `margin: auto` on a flex item, not place-items on the container, is what
+   centres a picture SMALLER than the viewport without cutting off the start
+   of one that is larger — centring via the container pushes the overflow
+   out past the scrollable edge on both sides, and the left half of a wide
+   image becomes unreachable. display is set on [open] only: a bare
+   `.lightbox { display: flex }` would out-specify the UA's
+   `dialog:not([open]) { display: none }` and leave the closed dialog
+   visible. overscroll-behavior stops a pan that runs off the picture from
+   chaining into the inert page behind it.
+
+   THE CHIP. 2.3rem (43.7px) — Apple's 44 to the pixel, the same floor the
+   nav toggle's hit box answers to. --surface over a --line-strong border so
+   it stays legible on top of an arbitrary screenshot, in both themes;
+   `position: fixed` inside the dialog resolves against the viewport (no
+   ancestor transforms — the entrance scales the IMAGE, see below), so it
+   stays put while the picture scrolls underneath. Hidden everywhere a cursor
+   exists, which is a real decision and not an oversight: on a pointer device
+   the whole modal is one dismiss target wearing a zoom-out cursor, and a
+   button there is a second answer to an already-answered question
+   (2026-08-14's argument, still standing on its own side of the query).
+   Inset by max(0.75rem, safe-area) so it clears a notch in landscape. */
+.lightbox__close {
+	display: none;
+}
+
+@media not ((hover: hover) and (pointer: fine)) {
+	.lightbox {
+		--lightbox-min: calc(960px - 2 * 1.25rem);
+		width: 100dvw;
+		height: 100dvh;
+		padding: 1.25rem;
+		overflow: auto;
+		overscroll-behavior: contain;
+	}
+
+	.lightbox[open] {
+		display: flex;
+	}
+
+	.lightbox__img {
+		margin: auto;
+		max-width: none;
+		max-height: none;
+		width: max(100%, var(--lightbox-min));
+	}
+
+	.lightbox__close {
+		position: fixed;
+		top: max(0.75rem, env(safe-area-inset-top));
+		right: max(0.75rem, env(safe-area-inset-right));
+		display: grid;
+		place-items: center;
+		width: 2.3rem;
+		height: 2.3rem;
+		padding: 0;
+		border: 1px solid var(--line-strong);
+		border-radius: 999px;
+		background: var(--surface);
+		color: var(--ink);
+	}
+
+	.lightbox__close:focus-visible {
+		outline: 2px solid var(--focus-ring);
+		outline-offset: 2px;
+	}
+}
 
 /* ── The entrance ──
    Fade the scrim, and let the image arrive from a hair under full size. Both
@@ -5084,11 +5167,11 @@ html.reveal-wait #projects::before {
 	}
 }
 
-/* Scale on the IMAGE. It sat here originally because the dialog also held the
-   close chip — fixed to the viewport, and scaling the dialog would have
-   dragged the chip's rendered position with it. With the chip gone the dialog
-   shrink-wraps nothing but this image, so the two are now the same box and the
-   choice is free; it stays on the image because that is where the picture is.
+/* Scale on the IMAGE, and that is load-bearing again (2026-10-03). The
+   dialog holds the touch close chip, fixed to the viewport — a transform on
+   the dialog would make it the chip's containing block and drag the chip's
+   rendered position with the scale. Between 08-14 and 10-03 the chip was
+   gone and this was a free choice; it is not one now. Keep the scale here.
 
    --pill-press's 0.94 is far too much travel for something this size — a
    near-full-viewport image scaling 6% reads as a zoom rather than an
