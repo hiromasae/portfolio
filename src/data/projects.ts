@@ -128,6 +128,16 @@ export interface Project {
 	    what the prose says a screen later. Kept for the same reason as tags. */
 	role: string;
 	status: ProjectStatus;
+	/** A card on the home grid (true) or a row in its Earlier work list
+	    (false). 2026-10-07, Hiro, off the feedback that "three strong beat
+	    five thin": migaki and EJS became full studies, Stacksmith stays a
+	    card, Suma and Shipyard dropped to the list. Their detail pages are
+	    unchanged and still in every project page's More projects strip, so
+	    nothing is unpublished; this decides prominence on the home page
+	    only. The grid runs three across, so three featured fills one row;
+	    a fourth would start a short row, which is the thing to re-decide.
+	    Required rather than optional so every entry states its answer. */
+	featured: boolean;
 	blurb: string;
 	problem: string;
 	/** The "Work" paragraph — what I did and what it changed. Prose, not a
@@ -206,6 +216,7 @@ export const projects: Project[] = [
 		tags: ['AI', 'Design Systems'],
 		role: 'Wrote the skill, its three-file structure, and the weekly refresh loop.',
 		status: 'Open source',
+		featured: true,
 		blurb: 'An open source design skill that gives any AI coding agent a working visual sense.',
 		problem:
 			'A coding agent will build almost anything you describe, but left to its own defaults it keeps landing on the same look. Write the fix down once and the document starts aging the day you save it. migaki (磨き, "to polish") is a design skill that tries to solve both halves of that at once: a visual sense an agent can actually apply, that does not decay into a period piece.',
@@ -383,6 +394,7 @@ export const projects: Project[] = [
 		/* Proposed, not Open source: the redesign is not deployed — see the
 		   link's note below, which is the same fact seen from the other side. */
 		status: 'Proposed',
+		featured: true,
 		blurb: 'A redesign of the EJS landing page, so the library says what it does up front.',
 		problem:
 			"ejs.co has looked more or less the same for years. There's a wordmark, a four-word tagline, and a lot of olive green. What it never gets around to is what EJS actually does, or why you would pick it over the alternatives. The only thing promoted above the fold is a different project. The Jake banner sits above EJS's own logo. Twenty million people install this library every week and the page tells them almost nothing about it.",
@@ -518,6 +530,7 @@ export const projects: Project[] = [
 		tags: ['Product Design', 'UI/UX'],
 		role: 'Designed and built the browsing flows, comparison views, and overall visual system.',
 		status: 'Concept',
+		featured: true,
 		blurb: 'A concept for browsing and comparing AI tools in a way that feels more useful than a giant list.',
 		problem:
 			'There are a lot of AI tools now, but most directories still feel like long lists with no real context. Stacksmith was my attempt to make that easier to sort through by showing what tools fit different roles, where they overlap, and how they might work together in an actual stack.',
@@ -539,6 +552,7 @@ export const projects: Project[] = [
 		tags: ['Diagrams', 'Healthcare', 'UX'],
 		role: 'Drew the user flows and architecture visuals for a non-technical review audience.',
 		status: 'Shipped',
+		featured: false,
 		blurb: 'Diagrams for a healthcare compliance product made to be clear enough for non-technical reviewers.',
 		problem:
 			'Suma needed a clearer way to explain how its platform worked during a commercialization review. The audience was not deeply technical, so the challenge was turning a pretty complex healthcare product into diagrams that were easy to follow and still accurate.',
@@ -561,6 +575,7 @@ export const projects: Project[] = [
 		tags: ['Product Design', 'UI/UX'],
 		role: 'Shipped product UI with the dev team, from the main showcase to the discovery flows.',
 		status: 'Shipped',
+		featured: false,
 		blurb: 'A lighter project showcase platform shaped in close collaboration with the dev team.',
 		problem:
 			'A lot of project platforms feel more focused on submission rules than the work itself. Shipyard was meant to feel lighter and more current, with a cleaner way for teams to show what they built and for other people to browse through projects.',

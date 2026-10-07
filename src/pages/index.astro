@@ -3,6 +3,11 @@ import Layout from '../layouts/Layout.astro';
 import Nav from '../components/Nav.astro';
 import ProjectGrid from '../components/ProjectGrid.astro';
 import { projects } from '../data/projects';
+
+/* Cards for the featured three, a plain list for the rest (2026-10-07; see
+   `featured` in projects.ts). Both keep projects.ts order. */
+const featured = projects.filter((project) => project.featured);
+const earlier = projects.filter((project) => !project.featured);
 ---
 
 <Layout>
@@ -243,27 +248,78 @@ import { projects } from '../data/projects';
 			    the finale block in global.css, and the Props note in the component
 			    for why the caller owns this rather than the grid.
 
-			    initial={4} (2026-08-15, Hiro: only show four project cards
-			    initially with a load more button). FOUR IS THE GRID, not a
-			    round number: the home page runs two columns from sm up, so four
-			    is exactly two full rows and the collapsed state has no short
-			    row in it — the list reads as complete until you notice the
-			    control under it, which is the difference between a page that
-			    holds something back and one that looks like it ran out. Below
-			    sm every card is its own row and the figure is just a count.
+			    THREE ACROSS, NO LOAD MORE (2026-10-07, Hiro, choosing from three
+			    layouts). The grid shows only the featured projects now, and three in
+			    a two-column grid left Stacksmith alone on a second row. Three
+			    columns is the grid the detail pages' More projects strip already
+			    runs, measured there (see ProjectGrid.astro), so this is a second
+			    consumer of a settled shape, not a new one. The cards are smaller,
+			    about 290px, which the two deep studies can afford: the page they
+			    lead to is where they get their room.
 
-			    Keep it a MULTIPLE OF THE COLUMN COUNT if either ever changes;
-			    the project page's strip runs three columns and would want 3 or
-			    6, though it passes no `initial` at all today. The remainder is
-			    the part that is allowed to be short: there is one project past
-			    the four right now, and a lone card in the revealed row is fine
-			    — by then the visitor has asked to see the rest.
+			    The 2026-08-15 `initial={4}` load-more is gone with it. It deferred
+			    whatever ran past two full rows, and with three cards nothing does;
+			    the component's own guard would have rendered no button anyway, so
+			    dropping the prop removes a number that no longer describes the page.
+			    ProjectGrid keeps the feature for any caller that wants it. */}
+			<ProjectGrid projects={featured} columns={3} class="reveal" style="--i: 1" />
+			{/* ── Earlier work (2026-10-07, Hiro: demote Suma and Shipyard to a
+			    text list) ──
+			    The projects that are no longer cards. A visible h3 under the
+			    section's sr-only h2, set like the detail page's "More projects"
+			    heading one step down (text-lg against text-xl): same weight, ink and
+			    tracking. Sentence case, no kicker label above it.
 
-			    Everything else about the feature lives in ProjectGrid.astro
-			    and global.css. What stays a decision of THIS page is only the
-			    number, and that the home page is the page that defers at all —
-			    /projects/[slug]'s strip shows its whole (already short) set. */}
-			<ProjectGrid projects={projects} initial={4} class="reveal" style="--i: 1" />
+			    Each row is a .btn-quiet link, the borderless family the detail
+			    page's link-out and the projects toggle already use, so the list
+			    adds no new control. --ink-soft at rest, which is the family's own
+			    colour and the right register for work the page has chosen to
+			    rank below the cards. The arrow is a plain right arrow, drawn like
+			    the hero button's, because these stay on the site; the ↗ means
+			    leaving it. The dateline beside each is the detail page's
+			    year · company, so a reader can place the work without opening it.
+			    It stacks under the title below sm and sits beside it from sm up:
+			    on a phone a long title pushed only ITS dateline to a second line,
+			    so rows disagreed with each other; stacking all of them settles it.
+
+			    Same reveal beat as the grid (--i 1), not a third: the home page's
+			    hairline finale is timed to the frame the grid lands, and a third
+			    beat would push the content past it. */}
+			{earlier.length > 0 && (
+				<div class="reveal mt-16" style="--i: 1">
+					<h3 class="text-lg [font-weight:var(--weight-emph)] tracking-tight text-[var(--ink-heading)]">
+						Earlier work
+					</h3>
+					<ul class="mt-4 space-y-3 sm:space-y-2">
+						{earlier.map((project) => (
+							<li class="flex flex-col sm:flex-row sm:items-baseline sm:gap-x-3">
+								<a href={`/projects/${project.slug}/`} class="btn-quiet">
+									<span class="btn-quiet__label">{project.title}</span>
+									<svg
+										class="btn-quiet__arrow"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="2"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										aria-hidden="true"
+										width="14"
+										height="14"
+									>
+										<line x1="4" y1="12" x2="19" y2="12"></line>
+										<polyline points="12 5 19 12 12 19"></polyline>
+									</svg>
+								</a>
+								<span class="text-xs text-[var(--ink-soft)]">
+									<span class="tabular-nums">{project.year}</span>
+									{project.company && ` · ${project.company}`}
+								</span>
+							</li>
+						))}
+					</ul>
+				</div>
+			)}
 		</section>
 	</main>
 
