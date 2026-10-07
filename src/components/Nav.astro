@@ -848,17 +848,47 @@ const onHome = path === '/';
 		const isExternal = (icon: HTMLElement) =>
 			icon.getAttribute('target') === '_blank' || icon.dataset.handoff === 'true';
 
-		// Drop any in-flight stamp and return the label to a clean, visible resting
-		// state (used before every direct repositioning).
+		// Drop any in-flight stamp OR swap and return the label to a clean,
+		// visible resting state (used before every direct repositioning). The
+		// sequence bump is what cancels a swap timer that has been armed but not
+		// fired — see place().
+		let swapSeq = 0;
 		const resetText = () => {
+			swapSeq++;
 			pillStamp.style.transition = 'none';
 			pillStamp.style.transform = 'none';
 			pillStamp.style.opacity = '1';
 		};
 
+		// ── The word changes in the middle of the slide ──
+		// 2026-09-13 (Hiro: make the hover text have transition animations). The
+		// pill has always travelled between the icons as one object, but the label
+		// inside it was rewritten on the first frame of that travel — so the one
+		// thing that actually differed between two icons was the one thing that
+		// hard-cut. It now leaves and returns on the vertical while the plate
+		// carries on sideways underneath it; the gesture, its axis and the
+		// derivation of these numbers are at @keyframes pill-label-swap.
+		//
+		// 0.192 is where --ease-slide puts the plate at the halfway point between
+		// the two icons. The keyframes hold the label at opacity 0 from 15% to 30%
+		// — 39–78ms of a 260ms slide — so this timer lands in the middle of a
+		// window rather than on a point, and a late one still can't be seen.
+		// Read from the token rather than hard-coded, so a retimed --dur-slide
+		// moves the swap with the slide it is cut against.
+		const slideMs =
+			parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--dur-slide')) ||
+			260;
+		const SWAP_AT = slideMs * 0.192;
+
 		// Position + size the pill under `icon`, showing `text`. Links that open
 		// in a new tab also get the trailing ↗ arrow.
-		const place = (icon: HTMLElement, text: string) => {
+		//
+		// `slide` says this is an icon-to-icon move, i.e. the pill is already up
+		// and travelling — the only case the swap belongs to. An ENTRANCE places
+		// the pill with the transition suppressed and the pop then plays it in
+		// from 80%, so a word rolling inside that would be a second arrival
+		// competing with the first.
+		const place = (icon: HTMLElement, text: string, slide = false) => {
 			const gRect = group.getBoundingClientRect();
 			const iRect = icon.getBoundingClientRect();
 			const centerX = iRect.left - gRect.left + iRect.width / 2;
@@ -866,8 +896,38 @@ const onHome = path === '/';
 			resetText();
 			measurerText.textContent = text;
 			measurer.classList.toggle('is-external', external);
-			pillText.textContent = text;
-			pill.classList.toggle('is-external', external);
+			// Nothing to sell if nothing changes. Two icons never share a label, but
+			// a re-place under the SAME one does happen — a focusin landing where
+			// the pointer already is, say — and blinking the word out and back to
+			// say "still Email" is worse than standing still.
+			const changes =
+				text !== pillText.textContent ||
+				external !== pill.classList.contains('is-external');
+			if (slide && changes && !reduce) {
+				// Retrigger from frame zero: remove, reflow, re-add, exactly as the
+				// pop does. A slide begun before the last swap finished has to start
+				// its own, or the word would be caught mid-travel by the next icon.
+				pill.classList.remove('is-swapping');
+				void pill.offsetWidth;
+				pill.classList.add('is-swapping');
+				const seq = ++swapSeq;
+				// The ↗ rides the same timer as the text. It differs between icons
+				// (three link out, email hands off), and a mark appearing beside a
+				// word that is still on screen is the same hard cut this replaces.
+				window.setTimeout(() => {
+					if (seq !== swapSeq) return;
+					pillText.textContent = text;
+					pill.classList.toggle('is-external', external);
+				}, SWAP_AT);
+			} else {
+				pill.classList.remove('is-swapping');
+				pillText.textContent = text;
+				pill.classList.toggle('is-external', external);
+			}
+			// Written now rather than with the word: the plate is the thing that is
+			// travelling, and it resizes toward the new label's measurement across
+			// the whole slide. The blind window above sits over the fastest part of
+			// that, so nothing is seen being squeezed.
 			pill.style.width = `${measurer.offsetWidth}px`;
 			pill.style.transform = `translateX(${centerX}px) translateX(-50%)`;
 		};
@@ -937,6 +997,13 @@ const onHome = path === '/';
 		// confirmation holds until unhover now, so that caller is gone and the
 		// flag with it.)
 		const stampText = (text: string) => {
+			// Supersede an in-flight swap: a click within a slide of landing (260ms)
+			// would otherwise leave the roll's animation owning this box's opacity,
+			// and the blink below — an inline style — would never be seen. The bump
+			// also stops that slide's timer from stamping its own label over
+			// "Copied!" a few frames later.
+			swapSeq++;
+			pill.classList.remove('is-swapping');
 			// The width is deliberately NOT re-measured: the pill stays at the
 			// resting label's width so the plate never resizes under the swap.
 			// "Copied!" is the shorter word, so it simply sits centred in a
@@ -958,7 +1025,9 @@ const onHome = path === '/';
 
 		const showAt = (icon: HTMLElement, text = labelFor(icon)) => {
 			if (visible) {
-				place(icon, text); // already up: this is the slide, no entrance replay
+				// Already up: this is the slide, no entrance replay — and the one
+				// case whose label change is a swap rather than a rewrite.
+				place(icon, text, true);
 				return;
 			}
 			// Land in position with the slide suppressed — the pill still carries

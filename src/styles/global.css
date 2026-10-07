@@ -253,7 +253,7 @@
 
 	   THE RAISED SHEET GOES TO PURE WHITE because there is nowhere else above a
 	   0.988 ground, and white is the one value this file has already ruled
-	   admissible on exactly this argument — see the --ground-tint block, "white
+	   admissible on exactly this argument — see the ground-shading note below, "white
 	   is not a new colour here, it is the limit of the paper itself".
 
 	   THE CARD PLANE IS THE PRICE OF THE WHOLE MOVE, and it is worth stating in
@@ -277,6 +277,27 @@
 	   by taking this to white. */
 	--surface: #ffffff; /* cards, tags, nav buttons */
 	--surface-sunken: #e6e7ed; /* card image bed — enkia Tokyo Night Light's editor ground, verbatim */
+
+	/* ── The other theme's pair, for the toggle's hover label ──
+	   2026-09-13 (Hiro: make the light/dark toggle hover text the opposite colour
+	   of the current colour). The toggle's pill is the one surface on the site
+	   that paints in the theme it is OFFERING rather than the one it is in — it
+	   already says "Light mode" while dark is on, and now it looks like it too,
+	   so the label is a swatch of the click's result as well as its name. See
+	   the #theme-toggle-wrap .contact-slider-in rule.
+
+	   LITERAL HEXES, and they have to be: these are the other block's --ink and
+	   --surface-sunken, and a var() cannot reach across theme blocks — both
+	   blocks land on the same element, so a reference would resolve to whichever
+	   one won, which is the value this pair exists to be the opposite of. THE
+	   CONSEQUENCE IS THAT THEY ARE A COPY: move --ink or --surface-sunken in one
+	   theme and the OTHER theme's inverse pair here goes stale. There is no third
+	   place to derive them from, so this note is the alarm.
+
+	   Contrast comes free, because each pair is a pairing the other theme already
+	   ships on its own ground: dark's own #c0caf5 on #1f2335, 9.63:1 here. */
+	--ink-inverse: #c0caf5;
+	--surface-sunken-inverse: #1f2335;
 
 	/* ── The button is a SOLID INK CHIP, not a tinted surface ──
 	   2026-08-02, Hiro: the hero's About button should carry a light background
@@ -766,123 +787,36 @@
 	   call.) */
 	--grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.05'/%3E%3C/svg%3E");
 
-	/* ── The ground's shading ──
-	   2026-08-04 (Hiro): a very subtle gradient on the page ground. --paper sits
-	   at the HEAD of the viewport in both themes and only the FOOT moves — dark
-	   lifting toward --surface, light sinking toward --surface-sunken. See the
-	   --ground-tint block below for the full pair and for why the two amounts
-	   are deliberately unequal.
+	/* ── The ground's shading, REMOVED 2026-09-13 (Hiro: remove gradient from
+	   page bg) ──
+	   The page ground is a FLAT --paper again, in both themes. What stood here
+	   was --ground-tint / --ground-lift / --ground-grad: a bottom-up ramp from
+	   --paper at the head of the viewport to a fraction of the way toward a
+	   second plane at the foot (dark lifting toward --surface at 32%, light
+	   sinking toward --surface-sunken at 61%), painted `fixed` so it belonged to
+	   the window rather than to the document, and sampled by #site-nav at the
+	   same attachment so the sticky bar landed on the same coordinates as the
+	   page instead of matching by luck.
 
-	   NOT the full tint, in either theme. #1a1b26 against #0c0e14 is ~14 levels
-	   of red, and at full strength it reads as a distinct panel rather than as a
-	   shade (Hiro: it "contrasts pretty heavily against the original bg color"),
-	   so each theme takes a fraction of the way there. --ground-lift IS THE DIAL
-	   — the only number to touch if the effect wants more or less, and the
-	   gradient below should not need editing to retune it.
+	   c9858b0 has the tokens, the two consumers and the whole derivation — a
+	   month of it, and three arguments in there outlived the effect:
+	     · WHITE IS NOT A NEW COLOUR on this site, it is the limit of the paper
+	       itself. That is what let --surface go to #ffffff on 08-12, and it is
+	       cited from the three-planes block above, which is still live.
+	     · THE DIAL WAS SOLVED, NOT CHOSEN — the percentage was whatever fraction
+	       of the room below --paper produced a fixed ~0.036 OKLCH ramp, so it had
+	       to be re-solved every time either ground moved. If a ground shade ever
+	       comes back, carry the rule and not the number.
+	     · A LIGHT GROUND HIDES A GRADIENT THAT A DARK ONE DISPLAYS, which is why
+	       the two themes' amounts were unequal rather than mirrored — light
+	       carries --grain, whose speckle masks a shallow ramp.
+	   Banding was the effect's open risk throughout (~4.5 levels over a viewport,
+	   no dither in dark); removing it removes that too.
 
-	   Written as a mix of two THEME tokens rather than a hex, so one declaration
-	   serves both: each theme names its own --ground-tint and the same
-	   color-mix resolves against whichever --paper won. That works because :root
-	   and :root[data-theme="dark"] land on the same element, so the var()
-	   lookups here pick up whichever block won.
-
-	   ── The sticky bar, and why it is no longer a constraint ──
-	   HISTORY, because this used to dictate the direction: the bar repainted
-	   --paper FLAT, so a graded ground put a block across the top of the page
-	   that disagreed with everything behind it. Bottom-up was the way out —
-	   0deg puts --paper at the top of the viewport, exactly where the bar sits,
-	   so the two matched for free — and that coincidence was written down here
-	   as a reason the direction could not change.
-	   It can now. #site-nav paints --ground-grad itself, at the same `fixed`
-	   attachment, so it samples the same coordinates instead of matching by
-	   luck (see the note there). That is what allowed light to reverse on
-	   2026-08-05. Neither theme's direction is pinned by the bar any more.
-
-	   ── Banding ──
-	   ~4.5 levels spread over a viewport height, and the dark theme has no dither:
-	   --grain is deliberately `none` here, because on charcoal the grey speckle
-	   read as a haze lifting the black level (07-24). So the two levers if steps
-	   ever show are LOWERING --ground-lift or introducing a dark-specific tile
-	   far fainter than light's 0.05 — not simply switching --grain on, which is
-	   an effect that was already tried and rejected on this ground. */
-
-	/* ── The tint, and why light does NOT use --surface ──
-	   2026-08-04, Hiro: the gradient "looks good in dark mode, it's hardly
-	   noticeable in light". It was the same 45% in both, but the two themes do
-	   not have the same room to move in:
-	     dark   --paper #0c0e14 → --surface #1a1b26 is 14 levels, ΔL* 2.4
-	     light  --paper #e9eaee → --surface #f2f3f6 is  9 levels, ΔL* 1.4
-	   (light's figures are the 08-04 stack; both of those hexes have since
-	   moved — see the three-planes block above)
-	   So light was landing at little over half of dark's perceived step while
-	   nominally sharing its number — and light also carries the grain, whose
-	   speckle masks a shallow ramp that dark shows plainly.
-
-	   Light therefore lifts toward WHITE rather than toward --surface. That is
-	   a deliberate break from the palette-verbatim rule everywhere else in this
-	   file, and the justification is that white is not a new colour here — it
-	   is the limit of the paper itself, the one direction with headroom left
-	   above #e9eaee. Mixed at 60% it lands around #f6f7f8, so the paper's blue
-	   tint thins slightly at the foot but never leaves. ΔL* 4.0, comfortably
-	   ahead of dark's 2.4, which is the point: a light ground hides a gradient
-	   that a dark one displays.
-	   Dark keeps --surface and 45% untouched — Hiro likes it there.
-	   ⚠ SUPERSEDED the next day by the mirror arrangement below: light now SINKS
-	   and no longer travels toward white at all. Kept for the one argument that
-	   outlived it and got reused twice since — white counts as "the limit of the
-	   paper itself" rather than as a new colour, which is what let --surface go
-	   to #ffffff on 08-12. The 60% and the ΔL* 4.0 here are dead numbers. */
-	/* ── The two themes MIRROR each other off a shared head ──
-	   2026-08-05, final arrangement. --paper sits at the HEAD in both, and each
-	   theme travels away from it at the foot in whichever direction has room:
-	     dark   --paper at the head, LIFTING toward --surface at the foot
-	     light  --paper at the head, SINKING toward --surface-sunken at the foot
-	   So the top of the screen is the page's own colour in either theme and only
-	   the foot moves. That is why this is one tint plus one amount again rather
-	   than the separate foot/head pair it briefly was, when light ran the other
-	   way up.
-
-	   Light takes --surface-sunken (#e6e7ed, enkia Tokyo Night Light's editor
-	   ground), not --surface and not white. Two reasons, and the second is the
-	   one that settles it:
-	     · room — it sits below --paper, where --surface has almost none left
-	       above it now that the paper is near-white.
-	     · --surface IS the card and raised-panel colour, and since 08-12 it is
-	       pure white. A ground lifting toward white would land ON it, so the page
-	       would end up level with the surfaces that are supposed to sit on top of
-	       it and the elevation model would collapse at the bottom of the
-	       viewport. Sinking has no such ceiling to hit. This was already the
-	       argument at 08-05, when --surface was #f2f3f6 and the ground would have
-	       climbed PAST it; the near-white paper only sharpened it.
-
-	   The AMOUNTS are deliberately unequal, and this is not an oversight:
-	   light needs a bigger ΔL* than dark to read as equally present. It carries
-	   the grain, whose speckle masks a shallow ramp, and a light ground hides a
-	   gradient that a dark one displays. Matching the NUMBERS would leave light
-	   looking flat again, which is the complaint that produced this line in the
-	   first place.
-
-	   2026-08-12 THE DIAL IS SOLVED, NOT CHOSEN, and it moved twice in one day
-	   before landing back where it started. THE RULE IS THE TRAVEL: light's
-	   ramp is ~0.036 in OKLCH L, and this percentage is whatever fraction of
-	   the room below --paper produces it. Do not carry the number forward on
-	   its own — re-solve it whenever either ground moves.
-
-	   Worked twice that day, which is the useful illustration. The first lift
-	   (#e9eaee → #f7f8fc) left the sunken bed where it was, so the room fell
-	   0.061 → 0.051 and holding the travel needed 60% → 71%. The second
-	   ("even lighter", → #f9fbff) raised --paper again while the bed stayed at
-	   #e6e7ed, so the room grew back to 0.059 and the same travel now needs
-	   61%. The dial ended up within a point of its original value, having been
-	   nowhere near it in between — proof the percentage was never the thing
-	   being tuned. Dark's 32% is untouched; nothing about its stack moved. */
-	--ground-tint: var(--surface-sunken);
-	--ground-lift: 61%;
-	--ground-grad: linear-gradient(
-		0deg,
-		color-mix(in srgb, var(--ground-tint) var(--ground-lift), var(--paper)) 0%,
-		var(--paper) 100%
-	);
+	   The bar does NOT need the sampling arrangement any more: with the ground
+	   flat, #site-nav's own --paper agrees with the page for free, which is the
+	   coincidence the 08-05 work replaced. --grain stays on both — it is the
+	   paper's tooth, not part of the shading. */
 
 	/* Theme glyph fill rest: the ink half sits right of center in light
 	   (translateX(0)), left in dark (-9px) — see .theme-fill-rect. A var so
@@ -1145,6 +1079,27 @@
 	--surface: #1a1b26; /* night's own background, verbatim */
 	--surface-sunken: #1f2335; /* storm's bg_dark, verbatim */
 
+	/* ── The other theme's pair, for the toggle's hover label ──
+	   2026-09-13 (Hiro: make the light/dark toggle hover text the opposite colour
+	   of the current colour). The toggle's pill is the one surface on the site
+	   that paints in the theme it is OFFERING rather than the one it is in — it
+	   already says "Light mode" while dark is on, and now it looks like it too,
+	   so the label is a swatch of the click's result as well as its name. See
+	   the #theme-toggle-wrap .contact-slider-in rule.
+
+	   LITERAL HEXES, and they have to be: these are the other block's --ink and
+	   --surface-sunken, and a var() cannot reach across theme blocks — both
+	   blocks land on the same element, so a reference would resolve to whichever
+	   one won, which is the value this pair exists to be the opposite of. THE
+	   CONSEQUENCE IS THAT THEY ARE A COPY: move --ink or --surface-sunken in one
+	   theme and the OTHER theme's inverse pair here goes stale. There is no third
+	   place to derive them from, so this note is the alarm.
+
+	   Contrast comes free, because each pair is a pairing the other theme already
+	   ships on its own ground: light's own #343b58 on #e6e7ed, 7.57:1 here. */
+	--ink-inverse: #343b58;
+	--surface-sunken-inverse: #e6e7ed;
+
 	/* The inverted chip on the night ground — see the light block for the
 	   reasoning. This is the theme the ask was made against: a light background
 	   with dark text, literally. */
@@ -1213,16 +1168,6 @@
 	--btn-lit: 0.72;
 	--btn-shade: 0.2;
 
-	/* Dark keeps --paper at the HEAD and lifts toward --surface at the foot.
-	   See the light block for both directions written out and for why the two
-	   amounts are deliberately unequal.
-	   45% → 32% (2026-08-05, Hiro: slightly more subtle). That is ~4.5 levels
-	   across a viewport rather than ~6. Worth knowing before it goes lower:
-	   dark has no dither (--grain is `none` here), so the fewer levels this
-	   spans, the WIDER each 8-bit step gets — subtler is not automatically
-	   safer against banding, it just trades more bands for fatter ones. */
-	--ground-tint: var(--surface);
-	--ground-lift: 32%;
 
 	/* Tokyo Night's cyan, verbatim — 9.15:1 against --paper, 8.11:1 against
 	   --surface, both well clear of WCAG 1.4.11's 3:1 floor for non-text. Same
@@ -1368,28 +1313,20 @@ body {
 	   above it, each carrying the same tile (below): their tiles drift out
 	   of phase with the page's as you scroll, but random grain has no
 	   registration to break, so the joins are invisible. */
-	/* Two layers now (2026-08-04): the grain on top, the ground's lift beneath
-	   it. In dark --grain is `none`, which is a perfectly good empty layer, so
-	   this one declaration serves both themes. Order matters — the gradient has
-	   to sit UNDER the tooth, or the texture would be tinted by it rather than
-	   sitting on it. */
-	background-image: var(--grain), var(--ground-grad);
-	/* PER LAYER, and the pairing is the point.
-	   The grain keeps `scroll` so it still travels with the document — the note
-	   above is the reason, and it survives unchanged.
-	   The gradient is `fixed`, so its positioning area is the VIEWPORT rather
-	   than the body box. Without that it would size to the document, and a long
-	   route and a short one would get visibly different grounds — the projects
-	   list and a single project page would not match. Fixed also means the lift
-	   reads as a property of the window, holding still while the page moves past
-	   it, which is what an ambient ground should do.
-	   KNOWN DEGRADATION: iOS Safari has long ignored fixed attachment here and
-	   treats it as scroll. That falls back to a document-sized gradient — still
-	   subtle, still correct at the top where the bar meets it, just anchored to
-	   the page instead of the window. If that ever needs fixing properly, the
-	   replacement is a position: fixed pseudo-element at z-index -1, which the
-	   compositor handles without the per-frame repaint `fixed` costs. */
-	background-attachment: scroll, fixed;
+	/* ONE layer again (2026-09-13): the paper's tooth, on a flat --paper. The
+	   ground's gradient rode underneath it from 2026-08-04 until now, pinned to
+	   the viewport while this tile scrolled with the document — see the
+	   ground-shading note in the token block for what that was and why it went.
+	   In dark --grain is `none`, which is a perfectly good empty layer, so this
+	   one declaration still serves both themes. */
+	background-image: var(--grain);
+	/* `scroll`, so the tooth travels with the document — the note above is the
+	   reason and it is the only one left. The second, `fixed` layer went with the
+	   gradient, and with it the iOS Safari degradation that layer carried (that
+	   engine treats fixed attachment as scroll here, which sized the ramp to the
+	   document instead of the window). Nothing on the page is viewport-pinned
+	   paint any more. */
+	background-attachment: scroll;
 	color: var(--ink);
 	font-family: var(--font-sans);
 	/* ── The weight scale ──
@@ -1445,28 +1382,21 @@ body {
 
 /* The nav bar's own paper (bg-[var(--paper)] in the markup) grains too, or
    the sticky bar would read as a flat band on a textured page. */
-/* THE BAR PAINTS THE GROUND'S GRADIENT, not a flat --paper (2026-08-05).
-   It is opaque and sticky, so scrolled content passes under it — that part is
-   unchanged. What changed is that its fill is no longer a flat colour that
-   happens to match: it carries the same --ground-grad at the same `fixed`
-   attachment, and because fixed positions a background against the VIEWPORT
-   rather than the element, the bar's copy lands on exactly the same coordinates
-   as the page's. The two are the same paint, so there is no seam to hide,
-   wherever the gradient happens to sit at the top of the screen.
-
-   This is what let LIGHT reverse direction. Until now the bar matched by luck:
-   --paper sat at the head of the ramp in both themes, so a flat --paper fill
-   agreed with the ground for free, and that coincidence was load-bearing enough
-   to be written down as a reason bottom-up had to stay. Light's head is now
-   --surface-sunken, which would have put a visibly lighter band across the top
-   of every page. Sampling instead of matching removes the constraint outright —
-   the ground can now be shaded in any direction, in either theme, without the
-   bar needing a blur, a veil, or translucency.
-   Keep the layer ORDER and the per-layer attachment in step with the body rule:
-   grain on top and scrolling, gradient beneath it and pinned. */
+/* IT MATCHES BY BEING THE SAME COLOUR AGAIN (2026-09-13). The bar painted the
+   ground's gradient from 2026-08-05 — the same --ground-grad at the same
+   `fixed` attachment, so its copy landed on exactly the same viewport
+   coordinates as the page's and the two were one paint with no seam to hide.
+   That arrangement existed because light's ramp put --surface-sunken at the
+   head, which a flat --paper bar would have shown as a band across the top of
+   every page; sampling instead of matching is what let the ground be shaded in
+   any direction. With the ground flat there is nothing to sample, so the bar is
+   back to bg-[var(--paper)] from the markup plus the grain — and the agreement
+   is free rather than engineered. If a ground shade ever returns, this rule is
+   what has to come back with it; c9858b0 has it whole.
+   The bar is still opaque and sticky: scrolled content passes under it. */
 #site-nav {
-	background-image: var(--grain), var(--ground-grad);
-	background-attachment: scroll, fixed;
+	background-image: var(--grain);
+	background-attachment: scroll;
 }
 
 /* The bar is sticky, full stop (2026-08-06). A "Sticky bar" switch in the
@@ -3818,6 +3748,32 @@ body {
 	overflow: hidden;
 }
 
+/* ── The toggle's pill wears the OTHER theme ──
+   2026-09-13 (Hiro: make the light/dark toggle hover text the opposite colour
+   of the current colour). Scoped to this one consumer, like the roll below:
+   the contacts' slider names a LINK and belongs to the page it is on, while
+   this one names a STATE CHANGE and now shows it. Hovering the toggle in dark
+   puts a light chip with dark text under the glyph reading "Light mode" — the
+   word, the colours and the button's own half-filled circle all saying the
+   same thing before the click.
+
+   The pair comes from --ink-inverse / --surface-sunken-inverse, which are the
+   other block's real tokens written out; see the note beside them, including
+   why they cannot be var()s and what goes stale if a theme's ink moves.
+
+   NO TRANSITION, deliberately. On a click the theme flips and these two
+   invert on the same frame as every other colour on the page — which is the
+   right clock: the plate is reporting the state, and the state is already
+   different. The gesture that marks the change is the label's roll (the rule
+   further down), and a plate cross-fading under a rolling word would put two
+   different durations on one event. The one-frame `transition: none` freeze
+   in .theme-switching covers the flip anyway. */
+#theme-toggle-wrap .contact-slider-in {
+	background: var(--surface-sunken-inverse);
+	color: var(--ink-inverse);
+}
+
+
 /* The content box the stamp scales. Carries the flex row so the plate above
    keeps its own job (padding, fill, clip) and the stamp gets a box whose centre
    is the plate's centre — see the note in Nav.astro's markup.
@@ -3875,6 +3831,71 @@ body {
 	}
 }
 
+/* ── The label's swap, icon to icon ──
+   2026-09-13 (Hiro: make the hover text have transition animations). The pill
+   slides between the four icons as one object — that was always true — but the
+   WORD inside it hard-cut on the first frame of the slide, so the one part that
+   actually changes was the one part that didn't move. It leaves and returns
+   now, and the plate travels underneath it as before.
+
+   VERTICAL, and that is the whole reason this gesture is allowed to exist. The
+   pill's identity is travelling SIDEWAYS; a horizontal roll inside a box that
+   is moving horizontally is two messages in one channel, which is the argument
+   that kept the contacts' label from rolling in the first place (2026-08-03,
+   and the toggle's label rolls horizontally precisely because that pill never
+   travels). The vertical is free here, and the word crossing it reads as being
+   REPLACED rather than as going along for the ride. Direction follows the
+   toggle's: the old word leaves the way the new one arrives from, so both
+   halves travel downward, the same one-way reading the horizontal roll has.
+
+   THE TWO PERCENTAGES ARE CUT AGAINST THE SLIDE, exactly as the theme label's
+   are cut against the ink. --ease-slide is cubic-bezier(0.34, 1, 0.5, 1),
+   which reaches half its TRAVEL at t = 0.206 — that solves to x = 0.192, so
+   the plate crosses the midpoint between the two icons 50ms into a 260ms
+   slide. 15%/30% puts a 39ms window of opacity 0 (39-78ms) around it: the word
+   is absent for exactly the frames the pill is committing to the next icon, and
+   the swap timer in Nav.astro fires into the middle of that window with a frame
+   of slack either side. The ↗ is swapped in the same instant and for the same
+   reason — it appears and disappears between icons, and a mark popping in under
+   a visible word is the same hard cut this rule exists to remove.
+   Retiming --dur-slide keeps all of this true; changing --ease-slide does NOT,
+   since the 0.192 crossing is a property of that curve. Re-derive both numbers
+   if it ever moves. (It is the same coincidence the toggle's roll runs on:
+   --nav-ease crosses at 0.2, so the two gestures share their percentages
+   without sharing a curve.)
+
+   The plate's WIDTH transition is hidden by the same window — it is animating
+   toward the new label's measurement from frame zero, and the word it would
+   otherwise be squeezing is not on screen for the fastest part of it.
+
+   Runs on .contact-slider-stamp, the content box: it holds the label and the ↗
+   and moves them as one row. Not `both`-filled — the last keyframe IS the
+   resting state, so it hands back cleanly to the inline styles place() writes
+   (this is what lets a copy confirmation's blink follow it without a fight). */
+@keyframes pill-label-swap {
+	0% {
+		transform: translateY(0);
+		opacity: 1;
+	}
+	15% {
+		transform: translateY(60%);
+		opacity: 0;
+	}
+	30% {
+		transform: translateY(-60%);
+		opacity: 0;
+	}
+	100% {
+		transform: translateY(0);
+		opacity: 1;
+	}
+}
+/* Scoped to the contacts' slider, the only pill that travels: the toggle's twin
+   has one label per theme and changes it on a click, which is the roll's job. */
+#contact-group .contact-slider.is-swapping .contact-slider-stamp {
+	animation: pill-label-swap var(--dur-slide) var(--ease-slide);
+}
+
 /* Reduced motion: the pill snaps between icons (matching the underline, whose
    slide is declared inside a no-preference block — the pill's slide was never
    gated while it was 0.1s, short enough to pass for a snap, and lengthening it
@@ -3893,6 +3914,13 @@ body {
 	.contact-slider.is-out .contact-slider-in {
 		animation: none;
 		opacity: 0;
+	}
+	/* The word snaps with the plate. Nav.astro doesn't add .is-swapping under
+	   reduced motion at all (it writes the new label straight in, or the timer
+	   would hold the old one for 50ms with nothing on screen explaining why);
+	   this is the belt to that braces. */
+	#contact-group .contact-slider.is-swapping .contact-slider-stamp {
+		animation: none;
 	}
 }
 

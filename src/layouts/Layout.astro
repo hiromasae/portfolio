@@ -136,32 +136,48 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 		<meta property="og:url" content={canonical} />
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
-		{/* NO og:image, and that is a decision rather than an omission.
-		    legacy/og-image.png is still in the repo and was tempting — it is
-		    the right dimensions and it is already there — but it is a
-		    screenshot of the PREVIOUS site: navy gradient and an orange pill
-		    button where this one is paper and green, set in a face this site
-		    doesn't use, over a headline ("Recent CS grad designing at the speed
-		    of AI", "Subframe. Claude. No handoff required.") that appears
-		    nowhere in src/ any more. It even carries the browser scrollbar down
-		    its right edge. Shipping it would put a picture of a site that no
-		    longer exists at the top of every link to this one, and a card that
-		    LOOKS wrong is worse than a card that is merely plain — the reader
-		    trusts the image over the text and arrives expecting the other site.
-		    Title and description alone still beat a bare URL, which is what
-		    every link to this site rendered as until today.
-		    If a real card image is ever made: drop it in public/, point
-		    og:image at `new URL('/og.png', Astro.site)` — absolute, same reason
-		    as canonical — add og:image:width/height and an og:image:alt, and
-		    move the twitter:card below up to summary_large_image. */}
-		{/* summary, NOT summary_large_image, precisely BECAUSE there is no
-		    image: the large-image card is a frame built around a picture, and
-		    asking for one without supplying it is how you get the stretched
-		    blank panel with the text crushed underneath. summary degrades to a
-		    clean text card. Twitter reads the og: tags above for title,
-		    description and url, so those aren't repeated here — only the two
-		    things it has no Open Graph equivalent for. */}
-		<meta name="twitter:card" content="summary" />
+		{/* The card image. 1200×630, dark (the site's default theme), and
+		    GENERATED rather than exported by hand: scripts/og-card.html is the
+		    artwork, and `node scripts/render-og.mjs` renders it to public/og.png
+		    painting it in the dark theme's own tokens, read out of global.css at
+		    render time. Re-run that after moving the <h1> in src/pages/index.astro
+		    or any of the tokens it lists. The PNG is committed, so the build needs
+		    neither the script nor a browser.
+
+		    THE INDIRECTION IS THE POINT, and it is the lesson of what this
+		    replaces. Until 2026-09-02 this spot held a comment explaining why there
+		    was NO image: the only candidate, legacy/og-image.png, was a screenshot
+		    of the PREVIOUS site — navy gradient and an orange pill button where
+		    this one is paper and green, over a headline that appears nowhere in
+		    src/ any more, with the browser scrollbar still down its right edge.
+		    Shipping it would have put a picture of a site that no longer exists at
+		    the top of every link to this one, and a card that LOOKS wrong is worse
+		    than a card that is merely plain — the reader trusts the image over the
+		    text and arrives expecting the other site. That argument stands. What
+		    changed is only that the card is now DERIVED from the site rather than
+		    photographed off it, so it cannot rot the same way.
+
+		    Absolute off Astro.site, the same reason canonical is: og:image is one
+		    of the handful of tags a relative path is simply invalid in. */}
+		<meta property="og:image" content={new URL('/og.png', Astro.site)} />
+		{/* Declared because a scraper that isn't told the size reserves a
+		    placeholder at the wrong aspect and pops when the real file lands. Keep
+		    these in step with WIDTH/HEIGHT in scripts/render-og.mjs, which is
+		    where the render actually gets its dimensions. */}
+		<meta property="og:image:width" content="1200" />
+		<meta property="og:image:height" content="630" />
+		{/* Describes the IMAGE, not the page. The description above already says
+		    what the site is, and repeating it here would tell a reader who can't
+		    see the card nothing about what they are actually missing. */}
+		<meta property="og:image:alt" content="The HE monogram over a rule, above the line “Design engineering, with good sense and taste.”" />
+		{/* summary_large_image, now that there IS an image to build the frame
+		    around. It was plain `summary` until 2026-09-02 precisely because there
+		    wasn't one: the large card is a frame around a picture, and asking for
+		    one without supplying it is how you get the stretched blank panel with
+		    the text crushed underneath. Twitter reads the og: tags above for title,
+		    description and url, so those still aren't repeated here — only the one
+		    thing it has no Open Graph equivalent for. */}
+		<meta name="twitter:card" content="summary_large_image" />
 	</head>
 	<body>
 		<slot />
