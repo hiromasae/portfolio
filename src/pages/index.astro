@@ -1,13 +1,15 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Nav from '../components/Nav.astro';
+import Icon from '../components/Icon.astro';
 import ProjectGrid from '../components/ProjectGrid.astro';
-import { projects } from '../data/projects';
+import { contacts, projects } from '../data/projects';
 
 /* Cards for the featured three, a plain list for the rest (2026-10-07; see
    `featured` in projects.ts). Both keep projects.ts order. */
 const featured = projects.filter((project) => project.featured);
 const earlier = projects.filter((project) => !project.featured);
+const email = contacts.find((contact) => contact.icon === 'email')!;
 ---
 
 <Layout>
@@ -15,8 +17,10 @@ const earlier = projects.filter((project) => !project.featured);
 
 	<main class="mx-auto max-w-[960px] px-5">
 		{/* Hero. The masthead above already carries the name at full size, so this
-		    says what the name does and hands off to About — the page's only route
-		    there since the nav links came out (2026-08-01). Held to --measure so a
+		    says what the name does and ends on Hiro's email address. It handed
+		    off to About until 2026-10-07 — the page's only route there from
+		    2026-08-01, when the nav links came out, until they came back from
+		    640px up that day (see the button's note). Held to --measure so a
 		    wide viewport can't run the line out past a readable length.
 
 		    It used to be the about page's opening line verbatim, matched to its
@@ -51,7 +55,18 @@ const earlier = projects.filter((project) => !project.featured);
 		    "one entrance on the hero, everything else static" — and collapsed:
 		    elements inside a block enter WITH it, same rule the hairline finale
 		    already enforces for the card dividers. */}
-		<section class="reveal pt-28 pb-32 text-left sm:pt-32 sm:pb-36" style="--i: 0">
+		{/* BOTTOM PADDING CUT 2026-10-07 (Hiro: "is the hero too tall?" — yes, a
+		    little, and only below). Measured at 1440×900 the hero was 551px tall
+		    around 228px of content: 152 above, 171 below, and the 171 sat on top
+		    of the projects section's own pt (66.5) and its rule, so two spacers
+		    stacked between the button and the first row — the covers started
+		    below the fold. The padding was tuned for the old one-line slogan,
+		    which needed air to float; the name/role/prose/button/photo block
+		    carries its own weight. So: pb-32→pb-20 and sm:pb-36→sm:pb-24, the
+		    TOP UNTOUCHED — the hero still floats under the nav the way it did.
+		    This is deliberately short of the pt-14/pb-16 cut that was tried and
+		    reverted on 2026-09-30 (see below): that one lost the top air too. */}
+		<section class="reveal pt-28 pb-20 text-left sm:pt-32 sm:pb-24" style="--i: 0">
 			{/* REWRITTEN 2026-09-30 off a hiring-panel read of the site: the old hero
 			    was one centred slogan ("Design engineering, with good sense and
 			    taste.") over a button, with Hiro's name appearing nowhere on the home
@@ -64,14 +79,15 @@ const earlier = projects.filter((project) => !project.featured);
 			    and the og:image:alt in Layout.astro, which describe that image and
 			    stay accurate.
 
-			    PADDING IS THE OLD HERO'S, pt-28/pb-32 (sm 32/36), on purpose. The
-			    first cut of this rewrite halved it (pt-14/pb-16) to pull the first
-			    row of covers into a 900px window, and Hiro pulled it straight back
-			    the same day: the block lost its impact with the air gone. Offered a
-			    bigger name with partial air instead, they chose same sizes, full air —
-			    so the first row starts just under the fold at 1440×900 and the hero
-			    floats the way the slogan did. Don't re-cut the padding for the fold
-			    argument without re-reading this; it was made and lost.
+			    PADDING WAS THE OLD HERO'S, pt-28/pb-32 (sm 32/36), on purpose, until
+			    2026-10-07 (see the note above the section tag: bottom trimmed, top
+			    kept). The first cut of this rewrite halved it (pt-14/pb-16) to pull
+			    the first row of covers into a 900px window, and Hiro pulled it
+			    straight back the same day: the block lost its impact with the air
+			    gone. Offered a bigger name with partial air instead, they chose
+			    same sizes, full air — the hero floats the way the slogan did. The
+			    2026-10-07 cut is the partial-air option a week later, taken only
+			    below: the top air that gives the block its float is intact.
 
 			    Spacing inside is one rhythm (Hiro, same pass, from three offered):
 			    name and role tight as one unit (mt-2), then the SAME gap (mt-6)
@@ -116,10 +132,23 @@ const earlier = projects.filter((project) => !project.featured);
 			    leading-snug, NOT the prose's relaxed (2026-09-30, second pass): at
 			    1.625 the gap between the two lines was nearly half the gap between
 			    beats, and the name+role unit fell apart. Snug closes the pair up so
-			    the hero's three beats (name+role, prose, button) read as three. */}
+			    the hero's three beats (name+role, prose, button) read as three.
+			    PLACE STEPPED DOWN (2026-10-08, Hiro's pick from four rendered
+			    variants): the two lines were the same size and ink, so they read as
+			    two equal labels and the pair felt like it was missing something.
+			    The role keeps the subtitle setting; the place drops to the prose
+			    size, so it reads as a detail OF the role. SIZE ONLY, NOT INK (same
+			    day, second pass): it was --ink-soft for an hour, and that made the
+			    hero four text styles in five lines — the place and the prose
+			    sentence were the same size in two greys, close enough to read as
+			    noise rather than rank. In body ink it IS the prose style, so the
+			    hero is three: name, role, small text. Don't re-tint it. Icons were
+			    tried and turned down — a pin indents the place off the block's
+			    left edge, and a briefcase on the role says nothing the word
+			    doesn't. */}
 			<p class="mt-2 text-pretty text-base leading-snug text-[var(--ink)]">
 				Design Engineer<br />
-				San Francisco Bay Area
+				<span class="text-sm">San Francisco Bay Area</span>
 			</p>
 			{/* The site's prose setting (text-sm / leading-relaxed), so this and the
 			    about page's paragraphs are the same object. NO width cap of its own
@@ -145,38 +174,46 @@ const earlier = projects.filter((project) => !project.featured);
 			    Fragment style, no "I", to match the role and place lines. Two
 			    sentences, what the work is and that Hiro is looking, run together
 			    on one line (Hiro's call after a pass with them <br>-split; the split
-			    moved to the role/place line above instead). */}
+			    moved to the role/place line above instead).
+			    COPY AGAIN (2026-10-07, Hiro's pick from four): "Product UI, built
+			    with AI." The old first sentence named a category anyone could
+			    claim; this one says how the work gets made. AI is the METHOD here,
+			    not the market — Hiro builds with AI tools rather than for AI
+			    companies, and a draft that read "for AI products" was turned down
+			    for exactly that. "design systems" dropped; the projects carry it.
+			    ~64 characters, shorter than the line it replaced, so the fit
+			    above only got looser. */}
 			<p class="mt-6 text-pretty text-sm leading-relaxed">
-				Product UI and design systems. Open to full&#8209;time and freelance work.
+				Product UI, built with AI. Open to full&#8209;time and freelance work.
 			</p>
-			{/* The page's only route to /about, so it's the site's one real button.
-			    Label shortened from "About Hiro Eernisse" — the name is the h1 two
-			    lines up now, and repeating it in the button read as a form letter.
+			{/* ONE ACTION, LABELLED WITH THE ADDRESS (2026-10-08, Hiro). The button
+			    is the hero's way to get in touch, and it reads as the address
+			    itself rather than "Get in touch". A mailto: on a desktop with no mail
+			    client set up can appear to do nothing; with the address as the
+			    label, a visitor it fails for can read or select it right there. It
+			    still opens mail — it does NOT copy. The nav's email icon copies on
+			    desktop (see Nav.astro), so the page offers both gestures, and the
+			    label names what this one does, same rule as the nav's.
+			    The envelope replaces the old → because the arrow meant "goes to
+			    another page"; this opens a message. It is the nav's own glyph
+			    (Icon.astro), sized here by the wrapper since the SVG carries none — at the old
+			    arrow's 0.85rem, because 0.95 stood taller than the text line and
+			    grew the button to 41px, which the photo square's 12rem is measured
+			    against (see SQUARE below).
 
-			    The arrow is DRAWN AT REST and doesn't animate, unlike the project
-			    cards' (which appear on hover). Different job: on a card the arrow
-			    is a flourish on something already obviously clickable — bordered
-			    image, whole-card cursor, a panel that lights up. Here it's the only
-			    thing distinguishing a button that navigates from a button that
-			    performs an action, and that's information you want before you
-			    hover, not after. .btn's flex + gap owns the spacing, so the glyph
-			    needs no margin of its own. */}
+			    HISTORY, same day and the day before: this was an About button,
+			    then "Get in touch" with a quiet About link beside it, then "Get in
+			    touch" alone (10-07, Hiro took the link out — so on a phone, where
+			    the nav's page links are hidden, the home page has no route to
+			    /about; fix that in the nav, not here). The address comes from
+			    `contacts` rather than being typed again, so it lives in one place.
+			    Still the site's one real button. */}
 			<p class="mt-6">
-				<a href="/about" class="btn">
-					About
-					<svg
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						aria-hidden="true"
-						class="inline-block h-[0.85rem] w-[0.85rem]"
-					>
-						<line x1="4" y1="12" x2="19" y2="12"></line>
-						<polyline points="12 5 19 12 12 19"></polyline>
-					</svg>
+				<a href={email.href} class="btn">
+					<span aria-hidden="true" class="inline-flex leading-none [&>svg]:block [&>svg]:h-[0.85rem] [&>svg]:w-[0.85rem]">
+						<Icon name="email" />
+					</span>
+					{email.href.replace('mailto:', '')}
 				</a>
 			</p>
 			</div>
@@ -192,9 +229,18 @@ const earlier = projects.filter((project) => !project.featured);
 			    the width from the stretched height so it could never drift. It
 			    collapsed to 2px wide — a flex item's main size is resolved before
 			    the stretched cross size is definite, so the ratio has nothing to
-			    work from. Don't re-try it. Below sm the side is 11rem. */}
+			    work from. Don't re-try it.
+
+			    HIDDEN BELOW sm (2026-10-07, same pass as the padding cut above). At
+			    390×844 the hero ran 797px — the whole first screen — and its bottom
+			    third was this square, empty, stacked under the button at 11rem a
+			    side. An empty box is not worth a third of a phone screen; the
+			    sm:block is so it returns on two-up where it sits beside the text.
+			    When a real portrait lands, revisit: a photo may earn the room an
+			    empty placeholder doesn't. The w-[11rem] is kept so re-showing it
+			    is one class, not a re-measure. */}
 			<div
-				class="aspect-square w-[11rem] shrink-0 rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface-sunken)] bg-clip-padding sm:w-[12rem]"
+				class="hidden aspect-square w-[11rem] shrink-0 rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface-sunken)] bg-clip-padding sm:block sm:w-[12rem]"
 				aria-hidden="true"
 			></div>
 			</div>
