@@ -85,7 +85,10 @@ export interface ProjectImage {
     is doing the work a topic sentence would otherwise do — if a section
     wants two paragraphs it probably wants to be two sections. */
 export interface ProjectSection {
-	heading: string;
+	/** Omit on the OPENING section only (2026-10-07, Hiro): an h2 directly
+	    under the title reads as a subtitle, so the study opens on its
+	    paragraph. Every later section keeps one. */
+	heading?: string;
 	body: string;
 	images: ProjectImage[];
 }
@@ -223,11 +226,10 @@ export const projects: Project[] = [
 		work:
 			"The skill is three markdown files. The first holds the timeless perceptual principles, the part of visual judgement that doesn't move. The second catalogues the patterns that read as AI-generated or dated, and the third what reads as excellent right now. Those last two rewrite themselves weekly, so the sense it works from tracks the present instead of settling into a style guide from last year. Anything that can read a skill file gets the whole thing.",
 		/* migaki is numbered 0-4 rather than 1-n like the others (2026-08-14,
-		   Hiro): migaki0 is the card cover and nothing else, migaki1-4 are the
-		   detail shots. The gap is the point — it keeps the cover free to be
-		   cropped for the card without owning a slot in the sequence below.
-		   Keep the convention if you add more; migaki5 is the next detail shot,
-		   not a second cover.
+		   Hiro): migaki0 was shot as the card cover, migaki1-4 as the detail
+		   shots. The cover has since moved to migaki2 (see below), and migaki0
+		   now lives only in the sections' files section. Keep the numbering
+		   anyway; migaki5 is the next detail shot.
 
 		   The four run in file order, and the shape is comparison first then
 		   mechanism: migaki1 and migaki2 are the same prompt built without and
@@ -252,13 +254,15 @@ export const projects: Project[] = [
 		   of the rewritten page, closing the loop migaki4 opens; until then the
 		   caption is doing that work alone.
 
-		   The cover is the only one on the site that isn't a product
-		   screenshot, because migaki has no product to shoot — it's three
-		   markdown files. So the shot is the files themselves: core.md, edge.md
-		   and slop.md open in three panes, which at the card's 304px reads as
-		   three columns of syntax colour long before any of it reads as words.
-		   That's the same bar the other covers clear; none of them are legible
-		   at card size either.
+		   ⚠ THE COVER IS migaki2, the "With migaki" page (2026-10-08, Hiro).
+		   It was migaki0, the three markdown files in an editor, on the theory
+		   that migaki has no product to shoot. At the card's ~304px that read
+		   as a grey block of type, and it showed the skill's source rather
+		   than what the skill does. migaki2 is the output: one big headline,
+		   one accent, legible at card size. Not the without/with pair side by
+		   side — each half would be ~150px wide. migaki2 is ~1.37, so the
+		   card's top-anchored 16/9 crop keeps the headline and the head of
+		   the terminal and drops the footer row.
 
 		   Everything here lands in the site's palette by construction rather
 		   than by grading: the editor theme in every shot is Tokyo Night, and
@@ -267,9 +271,8 @@ export const projects: Project[] = [
 		   need colour work to sit next to the others. Keep that in mind before
 		   re-shooting.
 
-		   Ratios differ by job. The cover is 2462x1438 and wants to stay near
-		   16/9 or wider, because the card frame crops to 16/9 regardless of
-		   what it's handed. The four below render uncropped at 920px, so their
+		   Ratios differ by job. The card frame crops the cover to 16/9
+		   regardless of what it's handed. The four below render uncropped at 920px, so their
 		   ratio only sets their height — the two landing pages are the squarer
 		   pair at ~1.37 and stand about 670px tall, the two terminals are wider
 		   and sit shorter. In file order that reads tall, tall, short, short.
@@ -278,7 +281,7 @@ export const projects: Project[] = [
 		   an even rhythm is a smaller prize than a comparison that works. All
 		   five are shot at ~2530 wide, which is the 2x the 920px render needs
 		   to stay crisp; don't drop below that. */
-		cover: '/images/migaki0.webp',
+		cover: '/images/migaki2.webp',
 		images: [
 			{ src: '/images/migaki1.webp', w: 2530, h: 1854, caption: 'Without migaki' },
 			{ src: '/images/migaki2.webp', w: 2530, h: 1844, caption: 'With migaki' },
@@ -290,89 +293,66 @@ export const projects: Project[] = [
 				caption: 'What it proposed for the first page',
 			},
 		],
-		/* ── The long-form study (2026-10-07, draft) ──
-		   Eight sections in the feedback's order: context, tried and rejected,
-		   the decision, what happened after, what I'd do differently. Facts
-		   are from the repo's history (orphan root 2026-08-05; the server era
-		   survives only on GitHub as PRs #1/#2) and the two open PRs.
+		/* ── The long-form study (2026-10-07, cut to five the same day) ──
+		   Was eight sections in the feedback's order, with GitHub screenshots
+		   for the restarts, the bounding commit, the sources file and the
+		   research PR. Hiro: too detailed — no one needs to see what the PRs
+		   were. Now five: the problem, the files, the failure that set the
+		   rule, the decision about authority, and what I'd do differently.
+		   The restarts survive as one clause in the last section; the
+		   monthly refresh as one in the files section. migaki5-8 are no
+		   longer referenced (still in public/images; delete if they stay
+		   unused).
 
-		   The without/with pair stays in ONE section (the first) for the reason
-		   the images note above gives at length. migaki0, the cover, now also
-		   appears in the body — the "three files" section has no better
-		   picture than the three files, and this is the same exception EJS
-		   already makes with its hero. migaki3 and migaki4 ride together in
-		   the propose-don't-impose section because one is the run and the
-		   other is what the run handed back.
+		   Cutting the research-PR section also retired the two claims the
+		   repo couldn't back ("All sixteen went in" on an open PR, and the
+		   inferred reason for the restarts). Don't reintroduce either
+		   without checking it.
 
-		   migaki5-8 are GitHub screenshots, dark, logged out (so they carry
-		   the Sign in / Sign up chrome — re-shoot signed in if that grates).
-		   5 = the PR list, 6 = commit 28faa86's diff, 7 = SOURCES.md, 8 = PR #3.
+		   The without/with pair stays in ONE section (the first) for the
+		   reason the images note above gives at length. migaki0 illustrates
+		   the files section, which has no better picture than the files.
+		   migaki2, the cover, also appears in the body, the same exception
+		   EJS makes with its hero. The
+		   beige section has no image: the only picture of it was the commit
+		   diff. It sits between two image sections so the page never runs
+		   two bare sections back to back mid-page.
 
-		   ⚠ ASK HIRO before this ships — things the repos don't say:
-		   - §2: WHY the server era and the JS rewrite were abandoned. The
-		     commit only says "deliberately smaller"; the paragraph infers it.
-		   - §5: was the 2026-08-11 routing test the same prompt as the
-		     without/with pair above?
-		   - §7: did the 2026-09-12 run go as a scheduled routine or by hand,
-		     and why PR #3 and #4 are still open. "All sixteen went in" is
-		     the owner review on the PR, not a merge.
-		   - Any external users; the repo shows none and the text claims none. */
+		   Written for a reader who has never used a coding agent: the first
+		   section says what a skill is, and "slop entry", "routing test",
+		   "tiers" and "RGB spread" are gone from the prose.
+
+		   ⚠ Still open: any external users. The repo shows none and the
+		   text claims none. */
 		sections: [
 			{
-				heading: 'Every agent lands on the same look',
-				body: 'A coding agent will build almost anything you describe, and left to its defaults it keeps arriving at the same page: the same gradient, the same card grid, the same three adjectives. Write the correction down and it starts aging the day you save it, because what reads as fresh now is exactly what the next training run absorbs. migaki (磨き, to polish) started as an attempt at both halves at once: a visual sense an agent can actually apply, that does not decay into last year’s style guide.',
+				body: 'A coding agent will build almost anything you describe, but left to its defaults it keeps arriving at the same page, with the same gradient and the same card grid. A written correction starts aging the day you save it, because whatever reads as fresh now ends up in the next model’s training data. I started migaki (磨き, to polish) to deal with both problems. It is a skill, a set of instructions an agent like Claude Code loads when a task calls for it, and it gives the agent visual judgement that doesn’t go stale.',
 				images: [
 					{ src: '/images/migaki1.webp', w: 2530, h: 1854, caption: 'Without migaki' },
 					{ src: '/images/migaki2.webp', w: 2530, h: 1844, caption: 'With migaki' },
 				],
 			},
 			{
-				heading: 'Two restarts before the shape stuck',
-				body: 'The first version was a TypeScript MCP server with a Railway deploy and a CI research pipeline: forty tests, a daily research action, an API key to keep alive. The second was a JavaScript rewrite of the same idea. Both were thrown away from an empty tree. What survived was the part that had never needed a runtime, three markdown files. No server, no build step, no dependencies. The deliverable is the text, and anything that can read a skill file gets the whole thing.',
-				images: [
-					{
-						src: '/images/migaki5.webp',
-						w: 2530,
-						h: 1581,
-						caption: 'The repo’s four pull requests: two from the server era, two from the one that stuck',
-					},
-				],
-			},
-			{
-				heading: 'Three files and a router',
-				body: 'SKILL.md is a router, not a container: it says which file to open and nothing else. core.md holds sixteen perceptual principles in four tiers, the part of visual judgement that does not move, with one rule for conflicts (the lower tier wins) and a three-question test at the end. slop.md catalogues what reads as generated or dated, edge.md what reads as excellent right now. The whole plugin is about five hundred lines, and keeping it there is written into the repo as a rule.',
+				heading: 'How it’s structured',
+				body: 'SKILL.md tells the agent which file to open. core.md holds sixteen principles of visual judgement that don’t change with fashion. slop.md lists what reads as AI-generated or dated, and edge.md what reads as excellent right now. Those two are refreshed monthly from shipped products, so the advice keeps up with the present. The whole thing is about five hundred lines, and I keep it that size on purpose.',
 				images: [{ src: '/images/migaki0.webp', w: 2462, h: 1438, caption: 'core.md, slop.md and edge.md' }],
 			},
 			{
-				heading: 'A flag, not a ban',
-				body: 'The hardest call was what the skill is allowed to do with its opinions. It builds the thing, then hands back the taste decisions it made as a list, each one accepted or rejected in a word: propose, don’t impose. Every slop entry carries a still-right case, because a pattern is a flag and not a ban. The wording keeps sense and taste apart, sense being grounded in fact and taste in preference, and a user’s own instruction outranks all of it.',
+				heading: 'Making the rules measurable',
+				body: 'In an early test, an instruction asking for a slightly warm neutral produced a heavy beige, and one asking for a Tiempos-style serif produced Palatino. Both described the right thing but set no limits. I fixed them with numbers: a warm neutral stays within about four RGB points of gray, and a display serif needs a licensed webfont or the pattern is skipped. Since then, every new rule has to name a value someone could check.',
+				images: [],
+			},
+			{
+				heading: 'Letting the user decide',
+				body: 'The biggest design question was how much authority the skill’s opinions should have. It builds what was asked, then lists the taste decisions it made so the user can accept or reject each one in a word. Every pattern it warns against also says when that pattern is still the right choice, and the user’s own instructions override all of it.',
 				images: [
 					{ src: '/images/migaki3.webp', w: 2528, h: 1312, caption: 'The skill running' },
 					{ src: '/images/migaki4.webp', w: 2528, h: 1376, caption: 'The decisions it handed back' },
 				],
 			},
 			{
-				heading: 'The adjective that produced beige',
-				body: 'In a routing test, an entry asking for a slight warm cast produced an eleven-point beige, and a Tiempos-class serif produced Palatino. The words were right and the result was wrong, because nothing bounded them. The fix was a number: a warm neutral holds to about four points of RGB spread, and a display serif needs a licensed webfont or the pattern is skipped. That failure became the entry gate for everything added since. An entry has to name a value a reader could check.',
-				images: [
-					{ src: '/images/migaki6.webp', w: 2530, h: 1933, caption: 'The commit that bounded both entries' },
-				],
-			},
-			{
-				heading: 'Weekly became monthly',
-				body: 'The catalogues were meant to rewrite themselves weekly. They do it monthly now: taste does not move weekly, and a faster loop mostly produced noise and re-check churn. Where the loop is allowed to look is written down and short. Shipped product surfaces and versioned design decisions qualify; Dribbble, trend roundups, AI-written blogs and awards sites are excluded by name. An empty run is a valid result, and it is preferred to padding.',
-				images: [
-					{ src: '/images/migaki7.webp', w: 2530, h: 1933, caption: 'Where the research loop may look' },
-				],
-			},
-			{
-				heading: 'The first run',
-				body: 'The first real research pass produced sixteen proposals: twelve sharpenings of existing entries, two new ones, two corrections, each citing CSS from a shipped product. One finding was uncomfortable. The hairline-border entry had bounded opacity at eight to twelve percent, and the most common shipped value turned out to be five. The catalogue had been excluding the thing it was describing. All sixteen went in.',
-				images: [{ src: '/images/migaki8.webp', w: 2530, h: 1757, caption: 'The research pull request' }],
-			},
-			{
-				heading: 'What I would do differently',
-				body: 'Put length pressure in from the start. Fourteen sharpenings added fifty-six lines and nothing capped the result, which is how a corpus that was supposed to improve without growing grew by fourteen percent. Entries are capped at eight lines now, and three accepted ones still break it. The other lesson is older. Two restarts is the cost of starting with the infrastructure instead of the text.',
+				heading: 'What I’d do differently',
+				body: 'I would start with the text. My first two versions were an MCP server and a JavaScript rewrite, and I scrapped both before settling on three markdown files. I would also limit length from the start: one round of edits grew the files by fourteen percent before I capped each entry at eight lines.',
 				images: [],
 			},
 		],
@@ -435,8 +415,17 @@ export const projects: Project[] = [
 			{ src: '/images/ejs2.webp', w: 2528, h: 1386 },
 			{ src: '/images/ejs3.webp', w: 2532, h: 1386 },
 		],
-		/* ── The long-form study (2026-10-07, draft) ──
-		   Eight sections. Facts are the redesign branch's history in
+		/* ── The long-form study (2026-10-07, cut to seven the same day) ──
+		   Was eight. Cut on the same note as migaki (Hiro: too detailed, no
+		   one needs the PRs): "Open, mergeable, unreviewed" / "Still waiting
+		   on review" and its PR #22 screenshot (ejs8, now unreferenced) are
+		   gone, and the build details (Astro output committed as static
+		   files, the lockfile lesson, the copy-pass line) came out of the
+		   docs, what-came-out and closing sections. The one fact the PR
+		   section carried that a reader needs, that the link below goes to
+		   the OLD site, now closes the last section.
+
+		   Facts are the redesign branch's history in
 		   ~/ejs-site (73 commits ahead of upstream) and PR #22 on mde/ejs-site.
 		   The before/after pair is split across sections 1 and 3 here, which
 		   the images note above forbids for the short form — it holds because
@@ -465,49 +454,43 @@ export const projects: Project[] = [
 		   - §3: where 20M+ / 7.7k come from, and as of when. */
 		sections: [
 			{
-				heading: 'A page that never said what EJS does',
 				body: 'ejs.co has looked the same for years: a wordmark, a four-word tagline, a lot of olive green. The only thing promoted above the fold is a different project, a Jake banner above EJS’s own logo, and the page never gets around to what the library does or why you would pick it over the alternatives. Twenty million people install it every week, and the first screen tells them almost nothing.',
 				images: [{ src: '/images/ejs1.webp', w: 2532, h: 1322, caption: 'The site as it is today' }],
 			},
 			{
-				heading: 'Static HTML, one file, and the green stays',
-				body: 'The site is a 2015 Bootstrap template with the documentation inlined into its one page, served as static files. The brief was to keep it that way: no build tooling, no framework, minimal JavaScript, one index.html with its CSS in a single style block. The olive green and the crimson were inherited too. They are what people recognise, so the question was never whether to keep them, only how much of the canvas they get.',
+				heading: 'Constraints',
+				body: 'The site is a 2015 Bootstrap template served as static files, and I kept it that way: no framework, no build step and very little JavaScript. The olive green and the crimson were inherited too. People recognise them, so I kept both and changed only how much of the page they cover.',
 				images: [
 					{ src: '/images/ejs4.webp', w: 2530, h: 757, caption: 'The old features band: the green as the whole canvas' },
 				],
 			},
 			{
-				heading: 'Say it, then show the install',
-				body: 'The new first screen is a plain statement, generate HTML with plain JS, with the install command under it in a chip you can copy, and the three numbers that make the case on their own: 20M+ weekly downloads, 7.7k stars, zero dependencies. A side-by-side code card was tried there first and cut; an install pill and a button row gave way to the stats. The green runs as a band behind this one screen instead of behind everything.',
+				heading: 'Rewriting the first screen',
+				body: 'The new first screen is a plain statement, generate HTML with plain JS, with the install command under it in a chip you can copy, and the three numbers that make the case on their own: 20M+ weekly downloads, 7.7k stars, zero dependencies. I tried a side-by-side code card there first and cut it, and the stats replaced an install pill and a row of buttons. The green runs as a band behind this one screen instead of behind everything.',
 				images: [{ src: '/images/ejs0.webp', w: 2530, h: 1332, caption: 'The same page, rebuilt' }],
 			},
 			{
-				heading: 'The compare section, four times',
-				body: 'The one section that argues for EJS over the alternatives went through four shapes. Tabs that switched between Handlebars, Pug and Mustache hid the comparison behind a click. A side-by-side grid with a glowing EJS card put it on the table but gave it no weight. Peers in a row above a full-width answer card read as a hierarchy. The version that stayed stacks the three peers on the left and sets EJS on the right, with the checklist under the code, where it is evidence rather than copy.',
+				heading: 'Comparing EJS to other libraries',
+				body: 'The one section that argues for EJS over the alternatives went through four shapes. Tabs that switched between Handlebars, Pug and Mustache hid the comparison behind a click. A side-by-side grid with a glowing EJS card put it on the table but gave it no weight. Peers in a row above a full-width answer card read as a hierarchy. The version that stayed stacks the three peers on the left and sets EJS on the right, with the checklist under the code.',
 				images: [
 					{ src: '/images/ejs5.webp', w: 2530, h: 1890, caption: 'Tabs, grid, row over answer, two columns' },
 				],
 			},
 			{
-				heading: 'What came out again',
-				body: 'A scroll-reveal animation went in and came out two weeks later: fade-up-on-scroll reads as template filler, and it was the only animation on the page. A mobile accordion for the About cards lasted a day before simpler, tighter cards replaced it. The security notice had a crimson ring and an exclamation mark, and the feedback was that it looked like a system error, so it is a plain note now. A last copy pass stripped the writing tells: the doubled rules of three, every “every other”.',
+				heading: 'What I cut',
+				body: 'A scroll-reveal animation went in and came out two weeks later: fade-up-on-scroll reads as template filler, and it was the only animation on the page. A mobile accordion for the About cards lasted a day before simpler, tighter cards replaced it. The security notice had a crimson ring and an exclamation mark, and the feedback was that it looked like a system error, so it is a plain note now.',
 				images: [
 					{ src: '/images/ejs6.webp', w: 2530, h: 1023, caption: 'The security notice, old site and redesign' },
 				],
 			},
 			{
-				heading: 'Docs: nine pages to one',
-				body: 'The docs are the one exception to no-build. They are generated with Astro and committed as static output, so hosting stays plain files. Nine per-topic pages were folded into one, with the old URLs kept as redirects. Search was removed, since one page does not need it, and the left sidebar went with it. What stayed is the on-this-page rail, scrollbar visible, so the reference is something you can move around in.',
+				heading: 'Documentation',
+				body: 'I folded nine separate docs pages into one, with redirects so old links still work. A single page doesn’t need search or a left sidebar, so both came out. The on-this-page rail stayed, with its scrollbar visible, so readers can jump between sections of the reference.',
 				images: [{ src: '/images/ejs7.webp', w: 2530, h: 1757, caption: 'The documentation page' }],
 			},
 			{
-				heading: 'Open, mergeable, unreviewed',
-				body: 'The branch took the maintainer’s v6 updates in September and the pull request went up on the sixteenth: seventy-three commits, the landing page, the docs move, and twenty-two thousand lines of legacy assets removed. As of this writing it is open, mergeable and has no reviews, and ejs.co still serves the 2015 site. The link at the end of this page goes to the live site, which is the before half of the comparison above.',
-				images: [{ src: '/images/ejs8.webp', w: 2530, h: 1581, caption: 'Pull request #22' }],
-			},
-			{
-				heading: 'What I would do differently',
-				body: 'Pin the build. The committed docs were generated with one Astro version and patched by hand when the local one drifted, which is the kind of problem a lockfile exists to prevent. Keep the decision log going: it stops in late May with entries marked rationale unconfirmed, and the reasons for the later cuts live only in commit messages. And put the work in front of the maintainer earlier than a seventy-three-commit pull request.',
+				heading: 'What I’d do differently',
+				body: 'I would show the maintainer the work much earlier, not as one seventy-three-commit pull request at the end. I would also keep the decision log going: mine stops in late May, and the reasons for the later cuts survive only in commit messages. The redesign is still a proposal, so the link below goes to ejs.co as it is today.',
 				images: [],
 			},
 		],
@@ -531,12 +514,31 @@ export const projects: Project[] = [
 		role: 'Designed and built the browsing flows, comparison views, and overall visual system.',
 		status: 'Concept',
 		featured: true,
-		blurb: 'A concept for browsing and comparing AI tools in a way that feels more useful than a giant list.',
+		blurb: 'A concept for browsing and comparing AI tools by the job you need done.',
 		problem:
-			'There are a lot of AI tools now, but most directories still feel like long lists with no real context. Stacksmith was my attempt to make that easier to sort through by showing what tools fit different roles, where they overlap, and how they might work together in an actual stack.',
+			'There are a lot of AI tools now, and most directories list them with little context. Stacksmith shows which tools fit which roles, where they overlap, and how they could work together in a stack.',
 		work:
-			"I built the browsing around roles and use cases instead of categories, so you start from the job you're trying to do rather than a list you have to read end to end. Comparison views let you put stacks side by side, and mapping how the tools connect puts the overlaps and gaps on the page instead of leaving them for you to work out. The visual system came last, mostly to keep that density readable.",
-		cover: '/images/stacksmith1.png',
+			"I organized browsing around roles and use cases instead of categories, so you start from the job you're trying to do. Comparison views put stacks side by side, and a map of how the tools connect shows where they overlap and what's missing. I designed the visual system last, mostly to keep that much information readable.",
+		/* A CROP, not a full screen (2026-10-08, Hiro). stacksmith1 was the
+		   cover: mostly white space around a blue gradient banner, the stock
+		   SaaS hero, sitting one card over from migaki's argument against it.
+		   This is stacksmith2 cut at (484,146) 670x377, exactly 16/9: the
+		   "Growth Engine Content Stack" title card whole, corner and all, with
+		   the Workflow Pipeline heading under it. A HEADLINE SHOT, on purpose
+		   (2026-10-08, Hiro): migaki's and EJS's covers both lead with big
+		   type, and the row reads as a set because of that, not their colours.
+		   An earlier cut of the pipeline itself had no headline and small
+		   text, and it made the last card the weakest. Keep it narrow — the
+		   title has to span about two-thirds of the card to read at 283px.
+		   Re-shoot stacksmith2 and this needs redoing (sharp is in
+		   node_modules).
+
+		   An inset frame (cover on a shared bed, bleeding off the bottom-
+		   right) was tried the same day to even out the row's mismatched
+		   lightness, and reverted: the edges matched but the black/green/
+		   white blocks still read first, and the shots shrank past legible.
+		   If the row's mismatch is fixed, it's inside the images. */
+		cover: '/images/stacksmith-cover.webp',
 		images: [
 			{ src: '/images/stacksmith1.png', w: 1920, h: 981 },
 			{ src: '/images/stacksmith2.png', w: 1920, h: 981 },
@@ -555,9 +557,9 @@ export const projects: Project[] = [
 		featured: false,
 		blurb: 'Diagrams for a healthcare compliance product made to be clear enough for non-technical reviewers.',
 		problem:
-			'Suma needed a clearer way to explain how its platform worked during a commercialization review. The audience was not deeply technical, so the challenge was turning a pretty complex healthcare product into diagrams that were easy to follow and still accurate.',
+			'Suma needed a clearer way to explain how its platform worked during a commercialization review. The reviewers were not deeply technical, so the diagrams had to make a complex healthcare product easy to follow without losing accuracy.',
 		work:
-			'I drew the user flows for the SumaAdmin platform, the architecture visuals that went into the review materials, and the supporting graphics around risk and process. Most of the work was deciding what to leave out: each diagram carries one idea, so a reviewer can follow the platform end to end without needing the engineering context underneath it. The set gave the team one consistent way to explain the product to people outside it.',
+			'I drew the user flows for the SumaAdmin platform, the architecture visuals that went into the review materials, and the supporting graphics around risk and process. Most of the work was deciding what to leave out. Each diagram covers one idea, so a reviewer can follow the whole platform without the engineering details. The set gave the team a consistent way to explain the product to outsiders.',
 		cover: '/images/suma1.webp',
 		images: [
 			{ src: '/images/suma1.webp', w: 1100, h: 790 },
@@ -576,11 +578,11 @@ export const projects: Project[] = [
 		role: 'Shipped product UI with the dev team, from the main showcase to the discovery flows.',
 		status: 'Shipped',
 		featured: false,
-		blurb: 'A lighter project showcase platform shaped in close collaboration with the dev team.',
+		blurb: 'A hackathon project showcase, designed alongside the dev team.',
 		problem:
-			'A lot of project platforms feel more focused on submission rules than the work itself. Shipyard was meant to feel lighter and more current, with a cleaner way for teams to show what they built and for other people to browse through projects.',
+			'Many project platforms put submission rules ahead of the projects. Shipyard was meant to put the projects first, with a simpler way for teams to show what they built and for other people to browse it.',
 		work:
-			'I led the product UI decisions with the dev team, working inside their loop instead of handing off finished screens. The main showcase and the discovery flows were the two pieces I owned end to end, and both went through several rounds as the scope of the product moved. Keeping the layouts loose enough to absorb that meant the later changes landed as adjustments rather than redesigns.',
+			'I led the product UI decisions and worked inside the dev team’s loop instead of handing off finished screens. I owned the main showcase and the discovery flows, and both went through several rounds as the product’s scope changed. I kept the layouts flexible, so later scope changes only needed small adjustments.',
 		cover: '/images/shipyard.png',
 		images: [{ src: '/images/shipyard.png', w: 2530, h: 1390 }],
 		link: 'https://shipyardhq.tech/',

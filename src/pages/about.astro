@@ -309,15 +309,22 @@ const tools = [
 				    line about AI, and a reader deciding whether to get in touch left it
 				    knowing neither what Hiro had done nor where. Now: the same first
 				    sentence (unchanged on purpose — the px-5 arithmetic above is derived
-				    from it), then the degree and the way of working (the résumé's own
-				    summary, so the two documents agree), then the two most recent jobs
-				    and migaki, then availability, then the résumé itself. The Experience
-				    and Education sections below carry the dates; this prose doesn't.
+				    from it), then the degree and the way of working (taken from the
+				    résumé's summary, then reworded 2026-10-07 to drop "from user need to
+				    shipped interface" and the "real thing rather than a picture of it"
+				    reframe, both stock AI-copy shapes; the résumé still has the old
+				    wording), then migaki, then availability, then the résumé itself.
 
-				    THE AI SENTENCE MOVED TO THE END of the card, as "How I Work". The
-				    review's point was that opening on it made the page about the tool
-				    rather than the person; as a closing note it reads as a working
-				    principle, which is what it always was. Don't bring it back up here.
+				    NO JOBS IN THE PROSE (2026-10-07, Hiro). The bio used to name
+				    Shipyard and Suma with a clause each, and Experience named them again
+				    two sections down with near-identical clauses. Experience is the
+				    record now; the bio only carries what it doesn't (migaki). Naming a
+				    job here again would restart that duplication.
+
+				    THE AI SENTENCE IS GONE. It moved to the end of the card as "How I
+				    Work" on 09-30 (opening on it made the page about the tool rather
+				    than the person), and Hiro removed it on 2026-10-07 after it read as
+				    stock AI-era copy. Don't bring it back without new wording.
 
 				    The résumé is a .btn-quiet--out, the borderless text link the
 				    detail page's link-out uses, and it carries the ↗ for the same
@@ -335,15 +342,11 @@ const tools = [
 				<div class="space-y-5 text-pretty text-sm leading-relaxed">
 					<p>I'm a Design Engineer based in the San Francisco Bay Area.</p>
 					<p>
-						I have a computer science degree from San Francisco State, and I work from user need to
-						shipped interface. I build what I design, so a prototype is the real thing rather than a
-						picture of it.
+						I have a computer science degree from San Francisco State. I design interfaces and build
+						them myself, so my prototypes are working code.
 					</p>
 					<p>
-						Most recently I designed the product UI for Shipyard, a hackathon showcase and judging
-						platform. Before that I was a design engineer at Suma Solutions, building enrollment tools
-						for healthcare administrators. On the side I write migaki, an open source design skill for
-						coding agents.
+						I also write migaki, an open source design skill for coding agents.
 					</p>
 					<p>I'm open to full&#8209;time, contract and freelance work.</p>
 					<p>
@@ -368,8 +371,14 @@ const tools = [
 					</p>
 				</div>
 
-				{/* ── Experience + Education (2026-09-30) ── the facts the prose above
-				    alludes to, with dates, from the résumé. Reverse chronological by
+				{/* ── Experience (2026-09-30) ── the dated record, from the résumé, and
+				    the only place on the page that names the jobs. Kept even though the
+				    résumé has it too: the PDF is a click and a new tab away, and a
+				    reader who never opens it should still leave with roles and dates.
+				    EDUCATION WAS CUT 2026-10-07 — the degree is in the bio's second
+				    paragraph, and one entry didn't earn a heading. Its SF Hacks line
+				    moved here as an entry (Aug 2025 – Feb 2026, from Hiro; the résumé
+				    gives no dates for it). Reverse chronological by
 				    start date. Each entry is the org as an h3 (the card-title weight —
 				    the one place this codebase already sets a bold h3 in a list), a
 				    dateline in the detail page's idiom (`dates · role`, soft ink, the
@@ -387,25 +396,19 @@ const tools = [
 							<p class="mt-1 text-pretty">Product UI for a live hackathon showcase and judging platform, across twelve events.</p>
 						</li>
 						<li>
+							<h3 class="[font-weight:var(--weight-emph)] text-[var(--ink-heading)]">SF Hacks</h3>
+							<p class="text-xs text-[var(--ink-soft)]"><span class="tabular-nums">Aug 2025 – Feb 2026</span> · Design Officer</p>
+							<p class="mt-1 text-pretty">Prototyped the landing page, designed its animations and mapped the site's user flows.</p>
+						</li>
+						<li>
 							<h3 class="[font-weight:var(--weight-emph)] text-[var(--ink-heading)]">ACM@SFSU</h3>
 							<p class="text-xs text-[var(--ink-soft)]"><span class="tabular-nums">Apr – Dec 2025</span> · Design Chair</p>
-							<p class="mt-1 text-pretty">The chapter's visual identity, as its sole designer, left as documented templates for the next chair.</p>
+							<p class="mt-1 text-pretty">Sole designer of the chapter's visual identity, documented as templates for the next chair.</p>
 						</li>
 						<li>
 							<h3 class="[font-weight:var(--weight-emph)] text-[var(--ink-heading)]">Suma Solutions</h3>
 							<p class="text-xs text-[var(--ink-soft)]"><span class="tabular-nums">Jan – Sep 2025</span> · Design Engineer</p>
 							<p class="mt-1 text-pretty">Enrollment tools for healthcare administrators, designed and built in React, plus the diagrams for a government review.</p>
-						</li>
-					</ul>
-				</section>
-
-				<section class="card-rule mt-10 pt-[40px]">
-					<h2 class="text-xl [font-weight:var(--weight-emph)] tracking-tight text-[var(--ink-heading)]">Education</h2>
-					<ul class="mt-4 space-y-5 text-sm leading-relaxed">
-						<li>
-							<h3 class="[font-weight:var(--weight-emph)] text-[var(--ink-heading)]">San Francisco State University</h3>
-							<p class="text-xs text-[var(--ink-soft)]"><span class="tabular-nums">2025</span> · B.S., Computer Science</p>
-							<p class="mt-1 text-pretty">Design Officer for SF Hacks: prototyped the landing page and designed its animations.</p>
 						</li>
 					</ul>
 				</section>
@@ -536,7 +539,7 @@ const tools = [
 							<span aria-hidden="true" class="interest-mark interest-mark--boot">
 								<Icon name="boot" />
 							</span>
-							<span>Enjoying nature and hiking</span>
+							<span>Hiking</span>
 						</li>
 					</ul>
 				</section>
@@ -594,20 +597,6 @@ const tools = [
 							</li>
 						))}
 					</ul>
-				</section>
-
-				{/* ── How I Work (2026-09-30) ── the sentence that used to be the
-				    page's second line, moved to the end of the card as a working note.
-				    See the bio block for why it came down here; the words are the ones
-				    Hiro wrote, unchanged. Last on purpose: it is the one section that
-				    is about method rather than fact, and a note reads as a note only
-				    after the facts. */}
-				<section class="card-rule mt-10 pt-[40px]">
-					<h2 class="text-xl [font-weight:var(--weight-emph)] tracking-tight text-[var(--ink-heading)]">How I Work</h2>
-					<p class="mt-4 text-pretty text-sm leading-relaxed">
-						I build with AI, but I make the decisions that matter myself. Taste, and knowing how a
-						person moves through a product, is still human work.
-					</p>
 				</section>
 			</div>
 			{/* Fixed 16rem at lg so the flex-1 column above resolves to a known
