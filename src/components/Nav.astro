@@ -4,6 +4,19 @@ import Icon from './Icon.astro';
 
 const path = Astro.url.pathname;
 const onHome = path === '/';
+
+// The page links (2026-10-07). Work is the home page's projects section, not a
+// route of its own: there is no projects index, and a project page is a page
+// OF the work, so it marks Work as the current item. About is a real page.
+// aria-current is "page" only where the link's destination IS this page; on a
+// project page Work is the current section, not the current page, so it says
+// "true" — the value the spec gives for "current item in a set".
+const onWork = path.startsWith('/projects/');
+const onAbout = path === '/about' || path === '/about/';
+const pages = [
+	{ href: '/#projects', label: 'Work', current: onWork ? 'true' : undefined },
+	{ href: '/about', label: 'About', current: onAbout ? 'page' : undefined },
+];
 ---
 
 <nav
@@ -58,10 +71,12 @@ const onHome = path === '/';
 		    the bar's centre. Out of flow it also can't push the toggle around, so
 		    the row's height comes from the two buttons alone. */}
 		<div class="nav-inner relative flex items-center">
-			{/* Left cluster: the wordmark alone since the Projects/About links came
-			    out (2026-08-01). The wrapper still carries the scale-down (see
-			    .nav-left in global.css) rather than the <a> itself — it's where a
-			    second element beside the name would go back. */}
+			{/* Left cluster: the wordmark, then the page links (back 2026-10-07 —
+			    see .nav-pages below). The wrapper carries the scale-down (see
+			    .nav-left in global.css) rather than the <a> itself. The links did
+			    NOT go inside it, despite this note once reserving the spot: the
+			    text link's underline offset is a measured pixel value, and inside
+			    a 0.47 scale every one of those pixels would be drawn at half. */}
 			<div class="nav-left relative flex origin-left items-center">
 				{/* The monogram carries --dye-name rather than --ink — the one piece
 				    of type on the site that is a mark rather than reading matter.
@@ -78,17 +93,65 @@ const onHome = path === '/';
 				    text without being recoloured. Don't try to fix a depth complaint
 				    here; it is not reachable from this component.
 
-				    Initials since 2026-08-02 (was the full "Hiro Eernisse"). The
-				    accessible name has to say what the mark can't: "HE" alone reads as
-				    two letters to a screen reader, and this is the site's home link. */}
+				    Initials since 2026-08-02 (was the full "Hiro Eernisse"), and a
+				    drawn mark rather than type since 2026-10-07 (see below). The
+				    accessible name has to say what the mark can't: an SVG says nothing
+				    at all to a screen reader, and this is the site's home link. */}
+				{/* THE FAVICON'S MARK, not set type (2026-10-07, Hiro: "the wordmark
+				    in the nav should use the favicon logo"). The two letter paths are
+				    copied verbatim from public/hirofavicondark.svg with its background
+				    square dropped, and the viewBox is cropped to their measured ink
+				    (x 20–80, y 12–87 of the favicon's 100-unit box). Fill is
+				    currentColor, so --dye-name colours it — and --dye-name IS the
+				    favicon's glyph colour in both themes (#9ece6a dark, #385f0d
+				    light), so one inline mark reproduces both favicon files. If the
+				    favicon's drawing changes, re-copy the paths from that file.
+				    Height is 2.9rem, the row's button box, so the bar does not grow;
+				    see .nav-logo__mark in global.css. No hover state, on purpose —
+				    see the .nav-logo block there. */}
 				<a
 					href="/"
-					class="nav-logo text-[2.5rem] font-semibold tracking-tight text-[var(--dye-name)]"
+					class="nav-logo text-[var(--dye-name)]"
 					aria-label="Hiro Eernisse — home"
 				>
-					HE
+					<svg
+						class="nav-logo__mark"
+						viewBox="20 12 60 75"
+						fill="currentColor"
+						aria-hidden="true"
+						focusable="false"
+					>
+						<path d="m20 12h4.3331 4.3332c.2534 0 .4561.0754.6081.2262.1521.1507.2281.3518.2281.603v12.9662 13.0416 12.9663 12.9662c-1.4697 0-2.9141 0-4.3332 0-1.3683 0-2.8127 0-4.3331 0-.152 0-.3041-.0252-.4561-.0754-.1014-.1005-.2027-.201-.3041-.3016-.0507-.1005-.076-.2512-.076-.4523 0-4.8749 0-9.7498 0-14.6247 0-4.9251 0-9.8251 0-14.7 0-4.9252 0-9.8252 0-14.7001 0-1.3569 0-2.6887 0-3.9954s0-2.6133 0-3.92zm4.4091 22.2386h17.6366 2.2046 2.0525l2.5087-.7539 1.7485 8.9708h-25.3907c-.1013 0-.2027 0-.304 0-.1014-.0502-.2028-.1005-.3041-.1507-.0507-.1006-.1014-.2011-.1521-.3016 0-.1005 0-.2261 0-.3769zm31.1682 30.5309c-1.5204 0-2.9648 0-4.3332 0-1.3683 0-2.8127 0-4.3331 0-.152 0-.3041-.0252-.4561-.0754-.1014-.1005-.2027-.201-.3041-.3016-.0507-.1005-.076-.2512-.076-.4523 0-4.322 0-8.6441 0-12.9662s0-8.6441 0-12.9662c0-4.3723 0-8.7195 0-13.0416s0-8.6441 0-12.9662h4.3331 4.3331c.1521 0 .2788.0251.3801.0754.1014 0 .1774.0502.2281.1508.1014.0502.152.1256.152.2261.0507.1005.0761.2262.0761.3769v11.0062 11.0062 10.9309 10.9308 4.2215z" />
+						<path d="m42.1567 34.2305h37.0222c.1991 0 .3484.0503.4479.1508.0995.0503.1742.1257.2239.2262.0995.1005.1493.2513.1493.4523v3.6938 3.6939h-37.0223c-.1493 0-.2985-.0251-.4478-.0754-.0995-.1005-.1991-.201-.2986-.3015-.0497-.1508-.0746-.3016-.0746-.4523 0-1.357 0-2.5883 0-3.6939s0-2.3369 0-3.6939zm9.7034 22.2386h23.0643c.199 0 .3483.0503.4478.1508.0995.0502.1742.1256.2239.2261.0996.1005.1493.2513.1493.4523v2.5631 2.2616 2.3369h-23.8853zm-4.9264 30.5309c-.199 0-.3483 0-.4478 0-.0995-.0503-.1991-.1005-.2986-.1508-.0497-.1005-.0995-.201-.1493-.3015 0-.1005 0-.2262 0-.3769 0-1.7088 0-3.9201 0-6.6339 0-2.7139 0-5.7544 0-9.1216s0-6.86 0-10.4785c0-3.6687 0-7.2872 0-10.8554 0-3.6185 0-7.0108 0-10.177h10.0767l-.5225 1.5831v3.3923 3.5431 7.6139 7.9154 7.9908 7.84h23.5121c.2986 0 .5225.0754.6718.2262s.2239.3518.2239.6031v3.6938 3.6939z" />
+					</svg>
 				</a>
 			</div>
+
+			{/* ── Page links: Work, About (2026-10-07, Hiro) ──
+			    Back after coming out on 2026-08-01. What made them worth it again:
+			    the About page and every project page had no route to the work but
+			    the monogram, and a visitor arriving on a project page from a shared
+			    link never sees the hero's About button at all.
+
+			    They wear .btn-quiet, the Contact trigger's family, so the bar's
+			    words read as one set — same size, weight, ink and underline. The
+			    sliding shared underline they had before 08-01 is NOT back: its
+			    machinery was removed on purpose, and the site's one underline
+			    since 08-15 is the in-place colour fade every text link wears.
+
+			    640px and up ONLY (hidden below in global.css). At 390 the free run
+			    between the monogram and the centred Contact trigger is ~104px and
+			    these two need ~112 plus a gap; on a phone the monogram stays the
+			    way home. A phone layout for them is a separate decision. */}
+			<ul class="nav-pages" role="list">
+				{pages.map((p) => (
+					<li>
+						<a href={p.href} class="btn-quiet nav-page" aria-current={p.current}>
+							<span class="btn-quiet__label">{p.label}</span>
+						</a>
+					</li>
+				))}
+			</ul>
 
 		{/* ── Two contact surfaces, one per pointer ──
 		    2026-08-15, Hiro: the dropdown should only be for mobile. So both are
@@ -132,10 +195,16 @@ const onHome = path === '/';
 		    hands off — re-synced in the browser whenever the window crosses the
 		    line, since server-rendered markup cannot know which side it will land
 		    on — and the menu's row reads "Email". */}
-		{/* Centred on the bar itself (2026-08-02). The layout box is wider than
-		    what the cluster draws — the buttons are scaled down inside it — but
-		    both are centred on the same line, so the drawn icons land on the
-		    bar's centre. See the close-ranks block in global.css. */}
+		{/* Centred on the bar itself from 2026-08-02 to 2026-10-07; from 640px up
+		    it now sits at the RIGHT, beside the theme toggle (Hiro picked the
+		    "split" layout: navigation left, actions right — the centred icons
+		    outranked the site's own pages once Work and About came back). The
+		    centring classes below still apply under 640, where this box is
+		    display: none anyway; the ≥640 override is in global.css under
+		    "The split". The layout box is wider than what the cluster draws —
+		    the buttons are scaled down inside it — so the spacing on either
+		    side of it is derived from that slack, never set by eye. See the
+		    close-ranks block in global.css. */}
 		{/* No `gap-*` utility on this box: the gap is --nav-icon-gap in global.css,
 		    because the close-ranks translate and the hit-box pseudo are both cut
 		    against it and the three have to move together. */}
@@ -416,6 +485,14 @@ const onHome = path === '/';
 		    row after the wordmark and takes `margin-left: auto` from
 		    #theme-toggle-wrap in global.css — at every width, which is what
 		    let both that token and the ≥640 override go. */}
+		{/* The divider between the contact icons and the theme toggle
+		    (2026-10-07, Hiro: "there needs to be something that divides the
+		    contact links from the dark/light toggle"). The four icons go
+		    somewhere; the toggle changes this page. In the centred layout a
+		    third of the bar separated them; side by side they need a mark.
+		    ≥640 only, with the icon row it belongs to. Decorative, so hidden
+		    from assistive tech: the two controls already have their names. */}
+		<span class="nav-divider" aria-hidden="true"></span>
 		<div id="theme-toggle-wrap" class="relative flex self-center">
 			{/* The pre-JS name. Dark is the site's default (stamped on <html> in
 			    Layout.astro), so the button starts out offering the way OUT of
@@ -718,6 +795,15 @@ const onHome = path === '/';
 	if (nav) {
 		const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+		// ── Let iOS run :active in the bar (2026-10-07) ──
+		// iOS Safari only applies :active on a tap when a touch listener sits on
+		// the element or an ancestor; without one, the pressed states on the
+		// mark, Work and About (global.css, "Pressed") never show on an iPhone or
+		// iPad. A passive no-op is the standard switch — it does nothing, cannot
+		// delay scrolling, and is scoped to the bar rather than the document so
+		// it changes nothing outside it.
+		nav.addEventListener('touchstart', () => {}, { passive: true });
+
 		// ── Wordmark → top of the page ──
 		// On home the wordmark's href="/" points at the page we're already on, so
 		// letting it navigate reloads the projects list to show it again. The
@@ -837,6 +923,21 @@ const onHome = path === '/';
 		group.appendChild(measurer);
 		const measurerText = measurer.querySelector<HTMLElement>('.contact-slider-text')!;
 
+		// ── When the word changes: as the plate passes the midpoint ──
+		// 2026-10-09 (Hiro, after the reveal strip read as too much for the
+		// contact labels). The plate is the only thing that moves; the word rides
+		// it and is replaced in one cut at the moment the plate is halfway
+		// between the two icons, so the first half of the slide still names
+		// where it came from and the second half names where it is going.
+		// --ease-slide is cubic-bezier(0.34, 1, 0.5, 1), which reaches half its
+		// TRAVEL at 0.192 of its duration (derived 09-13, still true), so 50ms
+		// into a 260ms slide. Read from the token so a retimed --dur-slide moves
+		// the cut with it; a changed curve needs the 0.192 re-derived.
+		const slideMs =
+			parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--dur-slide')) ||
+			260;
+		const SWAP_AT = slideMs * 0.192;
+
 		let visible = false;
 		const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -860,34 +961,32 @@ const onHome = path === '/';
 			pillStamp.style.opacity = '1';
 		};
 
-		// ── The word changes in the middle of the slide ──
-		// 2026-09-13 (Hiro: make the hover text have transition animations). The
-		// pill has always travelled between the icons as one object, but the label
-		// inside it was rewritten on the first frame of that travel — so the one
-		// thing that actually differed between two icons was the one thing that
-		// hard-cut. It now leaves and returns on the vertical while the plate
-		// carries on sideways underneath it; the gesture, its axis and the
-		// derivation of these numbers are at @keyframes pill-label-swap.
-		//
-		// 0.192 is where --ease-slide puts the plate at the halfway point between
-		// the two icons. The keyframes hold the label at opacity 0 from 15% to 30%
-		// — 39–78ms of a 260ms slide — so this timer lands in the middle of a
-		// window rather than on a point, and a late one still can't be seen.
-		// Read from the token rather than hard-coded, so a retimed --dur-slide
-		// moves the swap with the slide it is cut against.
-		const slideMs =
-			parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--dur-slide')) ||
-			260;
-		const SWAP_AT = slideMs * 0.192;
 
 		// Position + size the pill under `icon`, showing `text`. Links that open
-		// in a new tab also get the trailing ↗ arrow.
+		// in a new tab also get the trailing ↗.
 		//
-		// `slide` says this is an icon-to-icon move, i.e. the pill is already up
-		// and travelling — the only case the swap belongs to. An ENTRANCE places
-		// the pill with the transition suppressed and the pop then plays it in
-		// from 80%, so a word rolling inside that would be a second arrival
-		// competing with the first.
+		// ── One object, one motion (2026-10-09, Hiro) ──
+		// The label rides the plate and changes in a single cut at SWAP_AT. This
+		// replaces, in order: a hard cut at the start of the slide (to 09-13), a
+		// vertical fade-roll (09-13), horizontal rolls with and then against the
+		// slide and tied to its distance (10-07/08), and a reveal strip of all
+		// four labels under the plate (10-08). The strip worked, but it put a
+		// second, opposing motion — ~80px of text travel inside a ~90px box — into
+		// the smallest text on the site, on a hover most people only pass over.
+		// A copy of that version is kept outside the repo history in
+		// .playwright-mcp/label-compare/strip-version (gitignored).
+		//
+		// The WIDTH is written now, not at the cut: the plate resizes across the
+		// whole slide, so whichever word is in it is at most a few px from fitting
+		// (the four labels differ by ≤13px, so ≤3.5px a side at the midpoint).
+		//
+		// On a SWEEP each new hover cancels the pending cut. Faster than ~50ms an
+		// icon, the word holds still while the plate travels and changes once
+		// the pointer settles; slower, each word appears in turn as a clean cut
+		// (MEASURED both). Nothing fades either way, so nothing can flicker.
+		//
+		// `slide` says this is an icon-to-icon move. An ENTRANCE writes the word
+		// at once, under the suppressed transition, and the pop plays it in.
 		const place = (icon: HTMLElement, text: string, slide = false) => {
 			const gRect = group.getBoundingClientRect();
 			const iRect = icon.getBoundingClientRect();
@@ -896,38 +995,19 @@ const onHome = path === '/';
 			resetText();
 			measurerText.textContent = text;
 			measurer.classList.toggle('is-external', external);
-			// Nothing to sell if nothing changes. Two icons never share a label, but
-			// a re-place under the SAME one does happen — a focusin landing where
-			// the pointer already is, say — and blinking the word out and back to
-			// say "still Email" is worse than standing still.
-			const changes =
-				text !== pillText.textContent ||
-				external !== pill.classList.contains('is-external');
-			if (slide && changes && !reduce) {
-				// Retrigger from frame zero: remove, reflow, re-add, exactly as the
-				// pop does. A slide begun before the last swap finished has to start
-				// its own, or the word would be caught mid-travel by the next icon.
-				pill.classList.remove('is-swapping');
-				void pill.offsetWidth;
-				pill.classList.add('is-swapping');
-				const seq = ++swapSeq;
-				// The ↗ rides the same timer as the text. It differs between icons
-				// (three link out, email hands off), and a mark appearing beside a
-				// word that is still on screen is the same hard cut this replaces.
-				window.setTimeout(() => {
-					if (seq !== swapSeq) return;
-					pillText.textContent = text;
-					pill.classList.toggle('is-external', external);
-				}, SWAP_AT);
-			} else {
-				pill.classList.remove('is-swapping');
+			const write = () => {
 				pillText.textContent = text;
 				pill.classList.toggle('is-external', external);
+			};
+			if (slide && !reduce) {
+				// resetText() bumped swapSeq, so any earlier pending cut is now stale.
+				const seq = swapSeq;
+				window.setTimeout(() => {
+					if (seq === swapSeq) write();
+				}, SWAP_AT);
+			} else {
+				write();
 			}
-			// Written now rather than with the word: the plate is the thing that is
-			// travelling, and it resizes toward the new label's measurement across
-			// the whole slide. The blind window above sits over the fastest part of
-			// that, so nothing is seen being squeezed.
 			pill.style.width = `${measurer.offsetWidth}px`;
 			pill.style.transform = `translateX(${centerX}px) translateX(-50%)`;
 		};
@@ -997,18 +1077,13 @@ const onHome = path === '/';
 		// confirmation holds until unhover now, so that caller is gone and the
 		// flag with it.)
 		const stampText = (text: string) => {
-			// Supersede an in-flight swap: a click within a slide of landing (260ms)
-			// would otherwise leave the roll's animation owning this box's opacity,
-			// and the blink below — an inline style — would never be seen. The bump
-			// also stops that slide's timer from stamping its own label over
-			// "Copied!" a few frames later.
 			swapSeq++;
-			pill.classList.remove('is-swapping');
-			// The width is deliberately NOT re-measured: the pill stays at the
-			// resting label's width so the plate never resizes under the swap.
-			// "Copied!" is the shorter word, so it simply sits centred in a
-			// rectangle cut for "Copy email" — which is why the gesture scales the
-			// content box (whose centre is the plate's) and not the text span.
+			// The plate does NOT resize for the stamp (2026-10-08, Hiro: "the box
+			// should not resize for 'Copied!'"). It keeps the resting label's width
+			// and "Copied!", the shorter word, sits centred in it — which is why the
+			// blink below scales the content box (whose centre is the plate's) and
+			// not the text span. The swapSeq bump above also cancels a pending
+			// mid-slide cut, so it cannot write the hovered label over "Copied!".
 			pillText.textContent = text;
 			if (reduce) return;
 			// Blink the ink out and back. The word changes at the turn of the

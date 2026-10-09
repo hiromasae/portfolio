@@ -734,6 +734,17 @@
 	   AA-large unaided in both themes, so nothing on the site leans on WCAG
 	   1.4.3's logo/brand-name exemption. */
 	--dye-name: #385f0d; /* green, verbatim — 7.21:1; leads the muted text 1.029×, trails the title 0.801× (structural), see above */
+	/* The mark's HOVER (2026-10-07): the green a step further from the ground,
+	   so toward black here and toward white in the dark theme. Hover on this bar
+	   always means MORE contrast (the links go --ink-soft → --ink); a fixed
+	   "lighten" would wash this theme's green toward the near-white paper.
+	   The two percentages DIFFER ON PURPOSE: they are set for the same
+	   PERCEIVED step, about 0.055 of OKLab lightness each way. This green sits
+	   at L 0.44, near the middle, so black moves it fast; the dark theme's sits
+	   at 0.80, close to white, so it needs ~2.3× the mix to move as far. At an
+	   equal 18% the dark hover was barely visible (10.56 → 11.84:1) while this
+	   one leapt (7.21 → 10.14:1). */
+	--dye-name-lit: color-mix(in oklab, var(--dye-name), black 13%);
 
 	/* ── The page's hairlines ──
 	   One gradient, shared by the nav's bottom edge and the rule over the
@@ -1241,6 +1252,7 @@
 	   forward, raise L and re-measure rather than reaching for more chroma,
 	   which costs contrast — and check the title still trails it. */
 	--dye-name: #9ece6a; /* 10.56:1 — 1.50× the muted text (AAA pass), 1.15× the title */
+	--dye-name-lit: color-mix(in oklab, var(--dye-name), white 30%); /* hover; see the light theme's note for why 30 vs 13 */
 
 	--theme-fill-x: -9px;
 	--grain: none;
@@ -1951,6 +1963,105 @@ body {
 	scale: var(--nav-logo-scale);
 }
 
+/* ── Page links: Work, About (2026-10-07) ──
+   See the markup note in Nav.astro for why they are back and why they are
+   .btn-quiet. This block only owns their placement.
+
+   THE MARGIN CANCELS THE WORDMARK'S SLACK. `scale` is a transform, so
+   .nav-left keeps its full authored box in layout but draws it at
+   --nav-logo-scale, and the rest is empty layout. A plain margin would add to
+   that hole. So the margin is the gap we want MINUS the slack, and the slack
+   is derived from the scale token rather than typed, so the gap holds if the
+   scale is retuned.
+   --nav-logo-box is the mark's authored width. It was a font measurement
+   (55px, "HE" set in Recursive 600) until 2026-10-07; the mark is the
+   favicon's SVG now, so it is DERIVED: 2.9rem tall × the glyph's 60:75 crop.
+   Change it with .nav-logo__mark's height or the viewBox, never by eye.
+
+   2.5rem from the mark to Work (~47.5px drawn), 1.25rem between the two
+   words — the pair is about twice as close to each other as to the mark, so
+   they read as a set beside the name rather than three equal items. Was
+   1.5rem on the day they landed; Hiro, same day: "there should be a larger
+   gap between the links and the wordmark". The gap is --nav-pages-gap so a
+   width that cannot afford it can step it down without touching the calc.
+
+   NO display here: the base state is hidden, and the 640 block below shows
+   it. Same mobile-first shape as #contact-group's. */
+#site-nav {
+	--nav-logo-box: calc(2.9rem * 60 / 75);
+	--nav-pages-gap: 2.5rem;
+}
+.nav-pages {
+	display: none;
+	align-items: center;
+	gap: 1.25rem;
+	margin: 0;
+	margin-left: calc(var(--nav-pages-gap) - var(--nav-logo-box) * (1 - var(--nav-logo-scale)));
+	padding: 0;
+	list-style: none;
+}
+/* Tap target: same 4px block padding and same reasoning as .btn-quiet--out —
+   line-height: 1 makes the box the ink, 16.63px, under WCAG 2.2's 24. Above
+   640 this is mostly a cursor, but a tablet in landscape lands here too. */
+.nav-page {
+	padding-block: 4px;
+}
+/* The current item sits at full ink, the colour the family otherwise reserves
+   for hover. No underline at rest: the underline is the hover gesture, and a
+   resting one would read as a hover that never let go. */
+.nav-page[aria-current] {
+	color: var(--ink);
+}
+/* ── Pressed (2026-10-07, Hiro: "add active states") ──
+   Same grammar as the mark's and the icons': a dip, snapping in on
+   --dur-press and springing back on --dur-pop-in / --ease-pop. 0.94, the
+   pill's figure, not the glyphs' 0.9 — a word is two to three times as wide
+   as a glyph, and the bar's own rule (see --pill-press) is to equalise how
+   far the EDGES travel, not the ratio.
+   Ink and underline arrive with it, outside the hover guard: on a pointer
+   they are already there from the hover, so the dip is what reads as the
+   press; on a touch tablet the hover never fires, and without these a tap
+   would get a 3% shrink of grey text and nothing else.
+   The transform is on the <a> (inline-flex, so it has a box to scale), and
+   `color` keeps the family's own timing; the list restates it only because
+   a transition shorthand replaces the whole list. Scoped under #site-nav
+   because .btn-quiet's own rules sit LATER in this file at equal
+   specificity, and would otherwise take the transition back. */
+#site-nav .nav-page {
+	transition:
+		color var(--dur-pop-out) var(--nav-ease),
+		transform var(--dur-pop-in) var(--ease-pop);
+}
+#site-nav .nav-page:active {
+	color: var(--ink);
+	transform: scale(0.94);
+	transition-duration: 0s, var(--dur-press);
+}
+#site-nav .nav-page:active .btn-quiet__label {
+	text-decoration-color: currentColor;
+	transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+	#site-nav .nav-page:active {
+		transform: none;
+	}
+}
+@media (min-width: 640px) {
+	.nav-pages {
+		display: flex;
+	}
+}
+/* The one width that cannot afford the full gap. MEASURED: at 640 the 2.5rem
+   gap left About 14px from the first contact icon — closer than the 24px
+   between the two words, so the links read as the start of the icon row.
+   1.75rem gives the 14 back up to ~28; by 768 the centred icons have moved
+   out to ~78px clear and the full gap returns. */
+@media (min-width: 640px) and (max-width: 767.98px) {
+	#site-nav {
+		--nav-pages-gap: 1.75rem;
+	}
+}
+
 /* ── The wordmark's leading IS the bar's height ──
    `scale` is a transform, so the wordmark occupies its full authored line box
    in layout — 2.5rem of type at the body's 1.5 leading is 71.25px of row, of
@@ -2022,11 +2133,48 @@ body {
 	   130ms as everything else in the bar, and the pairing is exactly the
 	   pop pair's: instant in, --dur-pop-out out. --dur-gesture is the WIPE/SLIDE
 	   beat, and nothing here travels. */
-	text-decoration: underline;
-	text-decoration-color: transparent;
-	text-decoration-thickness: calc(2px / var(--nav-logo-scale));
-	text-underline-offset: calc(3px / var(--nav-logo-scale));
-	transition: text-decoration-color var(--dur-pop-out) var(--nav-ease);
+	/* ── 2026-10-07: THE MARK IS AN SVG NOW, AND IT HAS NO UNDERLINE ──
+	   Everything above this note is the history of the underline the mark wore
+	   while it was two letters of TYPE; it no longer applies. The wordmark is
+	   the favicon's drawn monogram now (see Nav.astro), and the underline came
+	   off the same day, at Hiro's ask, for two reasons:
+	   · It could not line up with Work and About beside it. MEASURED at 1440:
+	     the links' underline starts at y 46.4, and the mark's own bottom edge
+	     was already at 46.3, so its line started at 49.3 — 3px low, and lower
+	     still once the mark grew. Aligning them would mean lifting the mark
+	     ~5px off the axis the icons and the toggle share.
+	   · An underline under a drawn logo reads as a leftover. It was the right
+	     affordance for a word that sat among other words; a logo being the
+	     home link is a convention nobody needs cued.
+	   Keyboard focus still needs a cue, and that was the underline's other
+	   job, so it is the site's focus ring below.
+	   ── The hover is COLOUR (2026-10-07, same day, Hiro's pick) ──
+	   The green steps to --dye-name-lit: brighter on the dark ground, deeper on
+	   the light one — more contrast either way, which is what hover means
+	   everywhere else in the bar. Not a dim: the mark is tuned to out-contrast
+	   the whole bar (see the dye block), and fading it under the cursor would
+	   read as disabled. Same clock as the links: instant in, --dur-pop-out out,
+	   written the same way (this rule owns the OUT, the hover rule's 0s the IN),
+	   and guarded on (hover: hover) for the reason the block above gives. */
+	display: block;
+	transition: color var(--dur-pop-out) var(--nav-ease);
+}
+/* 2.9rem tall, up from the 2.5rem the type's line box was (2026-10-07, Hiro:
+   "slightly larger"). Drawn ~26px at 0.47, against the contact icons' 23.8px
+   box beside it; at 2.5rem it drew 22px and read lighter than both the icons
+   and the words, because the monogram is narrow and thin-stroked. 2.9rem is
+   NOT arbitrary: it is the row's button box (see the leading note above — the
+   row's floor), so the mark grows into the row without making it taller.
+   Above 2.9rem the bar grows. --nav-logo-box derives from this height. */
+#site-nav .nav-logo__mark {
+	display: block;
+	height: 2.9rem;
+	width: auto;
+	aspect-ratio: 60 / 75;
+	/* The RELEASE half of the press below: the icons' spring back, on the
+	   pop's arrival clock (--dur-pop-in / --ease-pop), because letting go is
+	   the mark returning to where it rests. */
+	transition: transform var(--dur-pop-in) var(--ease-pop);
 }
 
 /* ── HOVER IS GUARDED, and this is the block that explains why ──
@@ -2064,23 +2212,53 @@ body {
    hover-only affordance added to this bar from now on wants this treatment;
    the test for whether it needs it is not "is it in the mobile bar" but "does
    the tap leave the visitor on this page". */
-#site-nav .nav-logo:focus-visible {
-	text-decoration-color: currentColor;
-	transition-duration: 0s;
-}
-
+/* The focus ring every other control in the bar wears. All three lengths are
+   authored /--nav-logo-scale, because the ring is drawn inside the scaled
+   wrapper and would otherwise land at half weight. */
 @media (hover: hover) {
 	#site-nav .nav-logo:hover {
-		text-decoration-color: currentColor;
+		color: var(--dye-name-lit);
 		transition-duration: 0s;
 	}
 }
-
 @media (prefers-reduced-motion: reduce) {
 	#site-nav .nav-logo {
 		transition: none;
 	}
 }
+/* ── Pressed (2026-10-07, Hiro: "add active states") ──
+   The bar's press grammar, unchanged: the thing under the finger DIPS. The
+   icon glyphs scale to 0.9 (see the :active rules at the foot of this file),
+   and the mark is the same order of size (~26px drawn against their ~30), so
+   it takes the same 0.9 — not the pill's 0.94, which exists to stop a wide
+   plate lurching. Snaps in on --dur-press, releases on the spring above.
+   The COLOUR rides too, and outside the hover guard on purpose: on a phone
+   the hover green never arrives, so the press is the only answer a tap gets.
+   :active cannot strand the way :hover does — it ends when the finger lifts.
+   Under reduced motion the dip is dropped and the colour alone answers. */
+#site-nav .nav-logo:active {
+	color: var(--dye-name-lit);
+	transition-duration: 0s;
+}
+#site-nav .nav-logo:active .nav-logo__mark {
+	transform: scale(0.9);
+	transition-duration: var(--dur-press);
+}
+@media (prefers-reduced-motion: reduce) {
+	#site-nav .nav-logo__mark {
+		transition: none;
+	}
+	#site-nav .nav-logo:active .nav-logo__mark {
+		transform: none;
+	}
+}
+#site-nav .nav-logo:focus-visible {
+	outline: calc(2px / var(--nav-logo-scale)) solid var(--focus-ring);
+	outline-offset: calc(2px / var(--nav-logo-scale));
+	border-radius: calc(var(--radius) / var(--nav-logo-scale));
+}
+
+
 
 /* ── Hero: the About button ──
    Nothing here any more. The home page's route to /about was a bare text link
@@ -3831,70 +4009,23 @@ body {
 	}
 }
 
-/* ── The label's swap, icon to icon ──
-   2026-09-13 (Hiro: make the hover text have transition animations). The pill
-   slides between the four icons as one object — that was always true — but the
-   WORD inside it hard-cut on the first frame of the slide, so the one part that
-   actually changes was the one part that didn't move. It leaves and returns
-   now, and the plate travels underneath it as before.
+/* ── The label rides the plate (2026-10-09, Hiro) ──
+   No animation of its own. The word sits in the plate, travels with it, and
+   is replaced in one cut as the plate passes the midpoint between icons (the
+   timing lives in Nav.astro: SWAP_AT, place()).
 
-   VERTICAL, and that is the whole reason this gesture is allowed to exist. The
-   pill's identity is travelling SIDEWAYS; a horizontal roll inside a box that
-   is moving horizontally is two messages in one channel, which is the argument
-   that kept the contacts' label from rolling in the first place (2026-08-03,
-   and the toggle's label rolls horizontally precisely because that pill never
-   travels). The vertical is free here, and the word crossing it reads as being
-   REPLACED rather than as going along for the ride. Direction follows the
-   toggle's: the old word leaves the way the new one arrives from, so both
-   halves travel downward, the same one-way reading the horizontal roll has.
-
-   THE TWO PERCENTAGES ARE CUT AGAINST THE SLIDE, exactly as the theme label's
-   are cut against the ink. --ease-slide is cubic-bezier(0.34, 1, 0.5, 1),
-   which reaches half its TRAVEL at t = 0.206 — that solves to x = 0.192, so
-   the plate crosses the midpoint between the two icons 50ms into a 260ms
-   slide. 15%/30% puts a 39ms window of opacity 0 (39-78ms) around it: the word
-   is absent for exactly the frames the pill is committing to the next icon, and
-   the swap timer in Nav.astro fires into the middle of that window with a frame
-   of slack either side. The ↗ is swapped in the same instant and for the same
-   reason — it appears and disappears between icons, and a mark popping in under
-   a visible word is the same hard cut this rule exists to remove.
-   Retiming --dur-slide keeps all of this true; changing --ease-slide does NOT,
-   since the 0.192 crossing is a property of that curve. Re-derive both numbers
-   if it ever moves. (It is the same coincidence the toggle's roll runs on:
-   --nav-ease crosses at 0.2, so the two gestures share their percentages
-   without sharing a curve.)
-
-   The plate's WIDTH transition is hidden by the same window — it is animating
-   toward the new label's measurement from frame zero, and the word it would
-   otherwise be squeezing is not on screen for the fastest part of it.
-
-   Runs on .contact-slider-stamp, the content box: it holds the label and the ↗
-   and moves them as one row. Not `both`-filled — the last keyframe IS the
-   resting state, so it hands back cleanly to the inline styles place() writes
-   (this is what lets a copy confirmation's blink follow it without a fight). */
-@keyframes pill-label-swap {
-	0% {
-		transform: translateY(0);
-		opacity: 1;
-	}
-	15% {
-		transform: translateY(60%);
-		opacity: 0;
-	}
-	30% {
-		transform: translateY(-60%);
-		opacity: 0;
-	}
-	100% {
-		transform: translateY(0);
-		opacity: 1;
-	}
-}
-/* Scoped to the contacts' slider, the only pill that travels: the toggle's twin
-   has one label per theme and changes it on a click, which is the roll's job. */
-#contact-group .contact-slider.is-swapping .contact-slider-stamp {
-	animation: pill-label-swap var(--dur-slide) var(--ease-slide);
-}
+   WHAT THIS REPLACED, so none of it is re-tried blind. To 09-13: a hard cut
+   at the START of the slide. 09-13: a vertical fade-roll mid-slide. 10-07 and
+   10-08: horizontal rolls, first with the slide, then against it, then with
+   travel tied to the move distance, then a restart-from-current fix for the
+   flicker those fades caused on fast sweeps. 10-08: a reveal strip, all four
+   labels in a row under the plate as a moving window. That last one worked as
+   an illusion and was judged too much for these labels: it put an opposing
+   motion, ~80px of text travel inside a ~90px box, into the smallest text on
+   the site, on a hover most visitors only pass across on the way to one icon.
+   The bar is chrome; one object making one motion is the right amount here.
+   A copy of the strip version is in .playwright-mcp/label-compare/
+   strip-version (gitignored), with a recording beside it. */
 
 /* Reduced motion: the pill snaps between icons (matching the underline, whose
    slide is declared inside a no-preference block — the pill's slide was never
@@ -3914,13 +4045,6 @@ body {
 	.contact-slider.is-out .contact-slider-in {
 		animation: none;
 		opacity: 0;
-	}
-	/* The word snaps with the plate. Nav.astro doesn't add .is-swapping under
-	   reduced motion at all (it writes the new label straight in, or the timer
-	   would hold the old one for 50ms with nothing on screen explaining why);
-	   this is the belt to that braces. */
-	#contact-group .contact-slider.is-swapping .contact-slider-stamp {
-		animation: none;
 	}
 }
 
@@ -4330,7 +4454,89 @@ body {
 	   the only width where it could simply go to the end. Both surfaces are
 	   now out of flow and centred — the icon row as it always was, the trigger
 	   since 2026-08-17 — so the toggle is the only thing after the wordmark at
-	   EVERY width and the base rule already says so. Nothing to override. */
+	   EVERY width and the base rule already says so. Nothing to override.
+	   (Superseded at this width on 2026-10-07 — see "The split" below. Still
+	   true under 640.) */
+}
+
+/* ── The split: pages left, actions right (2026-10-07, Hiro) ──
+   From 640px up the icon row leaves the bar's centre and stands at the right
+   beside the theme toggle, with a divider between them. Chosen from four
+   mockups: with Work and About back, the centred icons held the bar's most
+   prominent spot and outranked the site's own pages, and floated 190px from
+   the left group and 351px from the toggle, belonging to neither.
+   Under 640 nothing here applies: the phone bar keeps its centred Contact
+   trigger. The phone version of the split collides below ~390px (About meets
+   Contact at 375) and is a separate change.
+
+   ── Everything is cut against the DRAWN icons, not their boxes ──
+   Both clusters keep full-size 2.9rem layout boxes and draw their buttons at
+   --nav-icon-scale inside them (see "Close ranks"), so a plain margin would
+   be measured from empty box. Three derived lengths, all in the tokens the
+   icons themselves are built from, so retuning the scale or the gap moves
+   them in step:
+   · --nav-icon-gap-drawn: the space between two drawn glyphs in the icon
+     row — one drawn pitch minus one drawn glyph. ~22.6px at 0.66 / 0.8rem.
+     The divider stands this far from the glyph on EACH side, so it reads as
+     a beat in the row's own rhythm rather than a gap of its own.
+   · --nav-group-slack: empty box to the right of the last drawn icon. The
+     row contracts about its centre, so the outermost glyph sits 1.5 drawn
+     pitches out (four icons: −1.5 … 1.5, as --nav-icon-c says) and the box
+     edge 1.5 full pitches out plus half a box. MEASURED 51px at 1440,
+     derived 51.5.
+   · --nav-toggle-slack: empty wrap box to the left of the toggle's glyph.
+     The toggle contracts about its RIGHT edge, so its glyph is pushed right
+     by half a box's shrink. MEASURED 25px at 1440, derived 25.0.
+   If the icon count changes, the 1.5 in the group slack is (count − 1) / 2. */
+@media (min-width: 640px) {
+	#site-nav {
+		--nav-icon-gap-drawn: calc(
+			(2.9rem + var(--nav-icon-gap)) * var(--nav-icon-scale) - 1.9rem * var(--nav-icon-scale)
+		);
+		--nav-group-slack: calc(
+			1.5 * (2.9rem + var(--nav-icon-gap)) * (1 - var(--nav-icon-scale)) + 1.45rem - 0.95rem *
+				var(--nav-icon-scale)
+		);
+		--nav-toggle-slack: calc(
+			1.45rem + 1.45rem * (1 - var(--nav-icon-scale)) - 0.95rem * var(--nav-icon-scale)
+		);
+	}
+	/* Out of the centre and into the row. `relative`, NOT static: the hover
+	   label's pill is positioned against this box, and so is its z-index: 60
+	   (see the stacking note on #contact-group), so it has to stay a
+	   positioned box. The markup's centring utilities are Tailwind's
+	   left-1/2 / top-1/2 / -translate-*, which v4 writes to the `translate`
+	   property — hence `translate: none`, not `transform`. */
+	#site-nav #contact-group {
+		position: relative;
+		left: auto;
+		top: auto;
+		translate: none;
+		margin-left: auto;
+	}
+	/* The divider. 1px, the bar's one line weight. Height is the drawn glyph's
+	   (1.9rem × the scale, ~24px), so it spans exactly what it divides.
+	   COLOUR IS --ink-soft at 45%, NOT the hairline's --line-soft. Tried
+	   first, and --line too (they are 0.11 and 0.12 alpha in dark): a 24px
+	   rule in either all but vanished in both themes. The bottom hairline
+	   gets away with that colour by being the width of the window; this one
+	   has to register at the length of a glyph. Full --ink-soft read as a
+	   fifth icon. 45% sits it under the icons' own ink, so it divides the
+	   row without joining it. */
+	#site-nav .nav-divider {
+		display: block;
+		flex: none;
+		width: 1px;
+		height: calc(1.9rem * var(--nav-icon-scale));
+		background: color-mix(in srgb, var(--ink-soft) 45%, transparent);
+		margin-left: calc(var(--nav-icon-gap-drawn) - var(--nav-group-slack));
+	}
+	#site-nav #theme-toggle-wrap {
+		margin-left: calc(var(--nav-icon-gap-drawn) - var(--nav-toggle-slack));
+	}
+}
+.nav-divider {
+	display: none;
 }
 
 /* ── The optical shift: the WORD on the axis, not the box ──
