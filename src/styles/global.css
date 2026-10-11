@@ -1486,9 +1486,17 @@ body {
 /* ── The about card's section rules ──
    The same device a third time (2026-08-05, Hiro: "match the index rule"). They
    were flat --line-soft borders and are now the --rule gradient, so all four of
-   the site's rules fade out at their ends and read as one family. Only the
-   PAINT changed here — width, spacing and the -mx-5/px-5 bleed are untouched;
-   see the long note at the section in about.astro before moving any of them.
+   the site's rules fade out at their ends and read as one family.
+   ⚠ ONE DELIBERATE EXCEPTION (2026-10-09, Hiro): the hairlines between the
+   home page's Earlier work rows are FLAT --line-soft and stay that way. They
+   divide items, not the page — the faded rule means "a new part of the page
+   starts here" — and a list's ends are where its content sits (the title at
+   the left, the year at the right), which is exactly where --rule fades out.
+   Faded divides the page, flat divides a list; both are --line-soft at peak.
+   See the Earlier work note in index.astro.
+
+   Only the PAINT changed here — width, spacing and the -mx-5/px-5 bleed are
+   untouched; see the long note at the section in about.astro before moving any of them.
 
    BORDER-IMAGE RATHER THAN A PSEUDO-ELEMENT, and that is a deliberate break
    from the two above. The note up there says a border "can only be one flat
@@ -5410,4 +5418,16 @@ html.reveal-wait #projects::before {
 		transition: none;
 		scale: 1;
 	}
+}
+
+/* ── Earlier work rows: the cards' underline, triggered by the row ──
+   (2026-10-09) The home page's Earlier work list reuses .project-card__title
+   for its titles so a row and a card answer a cursor the same way: instant
+   in, 130ms out, same band, same measured offset. This is only the trigger,
+   mirroring the .project-card:hover rule; everything else is inherited from
+   that block. See the Earlier work note in index.astro. */
+.earlier-row:hover .project-card__title,
+.earlier-row:focus-visible .project-card__title {
+	text-decoration-color: currentColor;
+	transition: none;
 }

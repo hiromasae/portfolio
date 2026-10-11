@@ -310,57 +310,62 @@ const email = contacts.find((contact) => contact.icon === 'email')!;
 			    ProjectGrid keeps the feature for any caller that wants it. */}
 			<ProjectGrid projects={featured} columns={3} class="reveal" style="--i: 1" />
 			{/* ── Earlier work (2026-10-07, Hiro: demote Suma and Shipyard to a
-			    text list) ──
-			    The projects that are no longer cards. A visible h3 under the
-			    section's sr-only h2, set like the detail page's "More projects"
-			    heading one step down (text-lg against text-xl): same weight, ink and
-			    tracking. Sentence case, no kicker label above it.
+			    text list; re-set 2026-10-09, Hiro: not feeling the look) ──
+			    The projects that are no longer cards, set as a quiet INDEX under
+			    the grid rather than a second section. What the first version got
+			    wrong, and what each choice below answers:
 
-			    Each row is a .btn-quiet link, the borderless family the detail
-			    page's link-out and the projects toggle already use, so the list
-			    adds no new control. --ink-soft at rest, which is the family's own
-			    colour and the right register for work the page has chosen to
-			    rank below the cards. The arrow is a plain right arrow, drawn like
-			    the hero button's, because these stay on the site; the ↗ means
-			    leaving it. The dateline beside each is the detail page's
-			    year · company, so a reader can place the work without opening it.
-			    It stacks under the title below sm and sits beside it from sm up:
-			    on a phone a long title pushed only ITS dateline to a second line,
-			    so rows disagreed with each other; stacking all of them settles it.
+			    The heading outranked the work. It was text-lg at --weight-emph,
+			    bigger than the cards' 1rem titles, and the grid above has no
+			    visible heading (see the sr-only h2), so the first heading a reader
+			    met in the work section was the one for the demoted work. It is
+			    now a LABEL, set like the cards' year: 0.8rem, normal weight,
+			    --ink-soft. Still an h3 for the outline.
+
+			    The datelines didn't line up. Each one started where its title
+			    ended, so two rows were two ragged lines. Each row now runs the
+			    column's full width with the year RIGHT-aligned and tabular, and
+			    the company sits after the title in --ink-soft.
+
+			    The arrow sat between the title and the dateline, pointing at the
+			    metadata. Gone. The whole row is the link and it answers with the
+			    cards' own underline (.project-card__title, instant in, 130ms out)
+			    via .earlier-row in global.css, so the page has one hover idiom
+			    for "open this project". The title is set at the card title's size
+			    and weight on purpose: the underline's 6px offset is MEASURED for
+			    that face, size and weight (see global.css), so changing either
+			    here means re-measuring it there.
+
+			    Rows are separated by --line-soft hairlines, the site's rule ink,
+			    top and bottom, so the list reads as a table without being one.
+
+			    The company is dropped where it only repeats the title
+			    ("Shipyard · Shipyard"). Below sm it stacks under the title so a
+			    long title never pushes it onto a ragged second line.
 
 			    Same reveal beat as the grid (--i 1), not a third: the home page's
 			    hairline finale is timed to the frame the grid lands, and a third
 			    beat would push the content past it. */}
 			{earlier.length > 0 && (
 				<div class="reveal mt-16" style="--i: 1">
-					<h3 class="text-lg [font-weight:var(--weight-emph)] tracking-tight text-[var(--ink-heading)]">
-						Earlier work
-					</h3>
-					<ul class="mt-4 space-y-3 sm:space-y-2">
+					<h3 class="text-[0.8rem] leading-snug text-[var(--ink-soft)]">Earlier work</h3>
+					<ul class="mt-3 border-t border-[var(--line-soft)]">
 						{earlier.map((project) => (
-							<li class="flex flex-col sm:flex-row sm:items-baseline sm:gap-x-3">
-								<a href={`/projects/${project.slug}/`} class="btn-quiet">
-									<span class="btn-quiet__label">{project.title}</span>
-									<svg
-										class="btn-quiet__arrow"
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										stroke-width="2"
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										aria-hidden="true"
-										width="14"
-										height="14"
-									>
-										<line x1="4" y1="12" x2="19" y2="12"></line>
-										<polyline points="12 5 19 12 12 19"></polyline>
-									</svg>
+							<li class="border-b border-[var(--line-soft)]">
+								<a
+									href={`/projects/${project.slug}/`}
+									class="earlier-row flex items-baseline gap-x-4 py-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus-ring)]"
+								>
+									<span class="flex min-w-0 flex-1 flex-col gap-0.5 sm:flex-row sm:items-baseline sm:gap-x-3">
+										<span class="text-[0.95rem] [font-weight:var(--weight-ui)] tracking-tight text-[var(--ink)] md:text-[1rem]">
+											<span class="project-card__title">{project.title}</span>
+										</span>
+										{project.company && project.company !== project.title && (
+											<span class="text-xs text-[var(--ink-soft)]">{project.company}</span>
+										)}
+									</span>
+									<span class="shrink-0 text-xs tabular-nums text-[var(--ink-soft)]">{project.year}</span>
 								</a>
-								<span class="text-xs text-[var(--ink-soft)]">
-									<span class="tabular-nums">{project.year}</span>
-									{project.company && ` · ${project.company}`}
-								</span>
 							</li>
 						))}
 					</ul>
