@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import Nav from '../../components/Nav.astro';
+import Footer from '../../components/Footer.astro';
 import ProjectGrid from '../../components/ProjectGrid.astro';
 import Shot from '../../components/Shot.astro';
 import LinkOut from '../../components/LinkOut.astro';
@@ -680,9 +681,10 @@ const others = [
 	    recorder has to be scoped to the home page (or keyed by origin as well
 	    as slug) — otherwise it records this page's scrollY under the target
 	    project's slug, a Y measured on a page you would never restore to. */}
-	<footer class="mx-auto max-w-[960px] px-5 py-10 text-xs text-[var(--ink-soft)]">
-		<span>© 2026 Hiro Eernisse</span>
-	</footer>
+	{/* 2026-10-12: the footer is a component now, with page and contact links
+	    beside the copyright — see Footer.astro. The note above records the
+	    copyright-only footer it replaced. */}
+	<Footer />
 
 	{/* ── The lightbox (2026-08-14, Hiro) ──
 	    ONE dialog for the whole page, re-pointed at whichever shot was clicked,

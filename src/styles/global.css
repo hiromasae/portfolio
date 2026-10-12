@@ -5263,3 +5263,66 @@ html.reveal-wait #projects::before {
 	text-decoration-color: currentColor;
 	transition: none;
 }
+
+/* ── Site footer (2026-10-12; the why is in Footer.astro) ──
+   MIRRORS THE NAV (same day, Hiro's pick from three rendered): pages at the
+   left, contacts at the right — the bar's own arrangement since 349caac —
+   with the copyright on its own line beneath. The first cut ran everything
+   left with the © at the right, and on desktop Work and About blurred into
+   the contacts: a 1.5rem gap against 1rem inside each group is not a
+   boundary anyone sees. The width between the groups is now the boundary.
+   A divider between them (the nav's hairline) was the runner-up; © beside
+   the pages was turned down for reading as a third, greyer link.
+   Below ~640px the two groups no longer fit one row and wrap, and
+   space-between leaves a lone item on a line at the START, so a phone gets
+   the stack it had: pages, contacts, ©, all on the column's left edge.
+   .btn-quiet is authored at the bar's 0.875rem; the footer's links inherit
+   the footer's text-xs instead, so they read as the footer and not as a
+   second nav. Each link gets 0.4rem of block padding so the row is ~28px tall
+   to a thumb (over WCAG 2.2's 24px floor) without the text growing.
+   SPACING IS A RHYTHM, not a size (same day, Hiro: on a phone it "feels like
+   one large unit instead of 3 sections"). The gaps were 0.25rem between the
+   page and contact groups and 0.75rem before the ©, and with the links' own
+   7px padding every line sat about the same distance apart — a list, not
+   three groups. Now each step out is roughly double the one inside it:
+   nothing between a group's wrapped lines (Twitter under Email at 320 stays
+   with its group), 0.75rem between groups, 1.5rem before the ©. On desktop
+   the groups share a row, so only the © gap shows there. */
+.site-footer {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 1.5rem;
+}
+.site-footer__nav {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-self: stretch;
+	gap: 0.75rem 1.5rem;
+}
+.site-footer__group {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0 1rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.site-footer__link {
+	font-size: inherit;
+	padding-block: 0.4rem;
+	gap: 0.25rem;
+}
+/* The ↗ on the contact links (see Footer.astro). In em so it tracks the
+   footer's text-xs the way LinkOut's 14px tracks .btn-quiet's 0.875rem —
+   about the same 0.8 of the type size. */
+.site-footer__ext {
+	width: 0.8em;
+	height: 0.8em;
+	display: block;
+	flex: none;
+}
+.site-footer__link[aria-current] {
+	color: var(--ink);
+}

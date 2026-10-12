@@ -1,0 +1,87 @@
+---
+import { contacts } from '../data/projects';
+
+/* The site's one footer, as a component (2026-10-12, Hiro). Until now every
+   route ended on the same copyright-only line, written out four times (home,
+   about, project pages, 404). On a phone that made About and the project
+   pages dead ends: the nav's page and contact links live behind the ≡ below
+   640px, so a visitor who had just finished reading — the likeliest moment to
+   reach out — had no way onward without scrolling back to the top. This puts
+   the same destinations at the bottom of every page, at every width.
+
+   Same box as the four it replaces — max-w-[960px]/px-5 so it sits on the
+   content column's left edge, py-10, text-xs on --ink-soft — so the copyright
+   reads exactly as before. The links are .btn-quiet, the nav's own text-link
+   family (same ink, hover and underline), at the footer's size rather than the
+   bar's.
+
+   Pages first, then contacts, with a wider gap between the two groups rather
+   than a drawn divider. The contacts come from `contacts`, the list the nav
+   reads, so an address changes in one place. Email is a plain mailto: here at
+   every width; the nav's copy-on-desktop gesture belongs to its hover pill,
+   which the footer doesn't have. External links open a tab, as in the nav.
+
+   THE ↗ ON THE CONTACTS ONLY (same day, Hiro). It is the site's mark for
+   "this takes you somewhere else" — every row of the phone menu wears one,
+   and so does a project page's link out — and the footer's contacts leave
+   for a tab or the mail app without it, so they were the one place breaking
+   that rule. Work and About stay on the site and go unmarked, which also
+   tells the two groups apart without a divider. The glyph is LinkOut's
+   plain ↗, not the menu's boxed one: these are .btn-quiet links, and that is
+   the family's arrow. Words, not icons, before it — icon-only contacts were
+   turned down on 08-15 for making a visitor recognise a bird to find
+   Twitter, and icon + word + ↗ four times was too busy for the footer.
+
+   aria-current mirrors the nav's: "page" on About when you are on it, "true"
+   on Work from a project page. */
+const path = Astro.url.pathname;
+const pages = [
+	{ href: '/#projects', label: 'Work', current: path.startsWith('/projects/') ? 'true' : undefined },
+	{ href: '/about', label: 'About', current: path === '/about' || path === '/about/' ? 'page' : undefined },
+];
+---
+
+<footer class="site-footer mx-auto max-w-[960px] px-5 py-10 text-xs text-[var(--ink-soft)]">
+	<nav aria-label="Footer" class="site-footer__nav">
+		<ul class="site-footer__group" role="list">
+			{pages.map((p) => (
+				<li>
+					<a href={p.href} class="btn-quiet site-footer__link" aria-current={p.current}>
+						<span class="btn-quiet__label">{p.label}</span>
+					</a>
+				</li>
+			))}
+		</ul>
+		<ul class="site-footer__group" role="list">
+			{contacts.map((c) => {
+				const isEmail = c.href.startsWith('mailto:');
+				return (
+					<li>
+						<a
+							href={c.href}
+							class="btn-quiet site-footer__link"
+							target={isEmail ? undefined : '_blank'}
+							rel="noopener"
+						>
+							<span class="btn-quiet__label">{c.label}</span>
+							<svg
+								class="site-footer__ext"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								aria-hidden="true"
+							>
+								<line x1="5" y1="19" x2="19" y2="5"></line>
+								<polyline points="9 5 19 5 19 15"></polyline>
+							</svg>
+						</a>
+					</li>
+				);
+			})}
+		</ul>
+	</nav>
+	<span>© 2026 Hiro Eernisse</span>
+</footer>

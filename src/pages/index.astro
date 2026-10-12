@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
 import Icon from '../components/Icon.astro';
 import ProjectGrid from '../components/ProjectGrid.astro';
 import { contacts, projects } from '../data/projects';
@@ -389,8 +390,9 @@ const email = contacts.find((contact) => contact.icon === 'email')!;
 	{/* text-xs, down from text-sm (2026-08-03, Hiro). A copyright line is the
 	    lowest-priority text on the page, and it was sharing a size with real
 	    body copy. The projects grid stepped down in the same pass. */}
-	<footer class="mx-auto max-w-[960px] px-5 py-10 text-xs text-[var(--ink-soft)]">
-		<span>© 2026 Hiro Eernisse</span>
-	</footer>
+	{/* 2026-10-12: the footer is a component now, with page and contact links
+	    beside the copyright — see Footer.astro. The note above records the
+	    copyright-only footer it replaced. */}
+	<Footer />
 
 </Layout>

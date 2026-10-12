@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
 ---
 
 {/* ── The 404 (2026-08-18) ──
@@ -86,7 +87,8 @@ import Nav from '../components/Nav.astro';
 
 	{/* The site's one footer, a fourth time — see the note in [slug].astro for
 	    why all routes end the same way. */}
-	<footer class="mx-auto max-w-[960px] px-5 py-10 text-xs text-[var(--ink-soft)]">
-		<span>© 2026 Hiro Eernisse</span>
-	</footer>
+	{/* 2026-10-12: the footer is a component now, with page and contact links
+	    beside the copyright — see Footer.astro. The note above records the
+	    copyright-only footer it replaced. */}
+	<Footer />
 </Layout>

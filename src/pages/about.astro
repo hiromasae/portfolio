@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
 import Icon from '../components/Icon.astro';
 
 // Hiro's own list, 2026-08-05, in his order — not a prototype, unlike the
@@ -695,7 +696,8 @@ const tools = [
 	    OUTSIDE <main>, matching both. It isn't page content and the reveal
 	    cascade doesn't touch it — no .reveal, no --i, so it is simply there
 	    when the page is. */}
-	<footer class="mx-auto max-w-[960px] px-5 py-10 text-xs text-[var(--ink-soft)]">
-		<span>© 2026 Hiro Eernisse</span>
-	</footer>
+	{/* 2026-10-12: the footer is a component now, with page and contact links
+	    beside the copyright — see Footer.astro. The note above records the
+	    copyright-only footer it replaced. */}
+	<Footer />
 </Layout>
