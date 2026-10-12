@@ -102,7 +102,17 @@ const email = contacts.find((contact) => contact.icon === 'email')!;
 			{/* The name is the h1 (the page had no h1 until 2026-08-18; see that
 			    note's point about screen readers landing on card h3s). Same classes
 			    as the about page's greeting h1 — the site has one heading idiom and
-			    this is it, not a display size invented for the front door. */}
+			    this is it, not a display size invented for the front door.
+
+			    2026-10-11 (Hiro): text-3xl → text-2xl, with the about greeting and
+			    the root's 19 → 18px step. 33.75px was over twice the 15.75px prose
+			    and read shouty; 27px is the project pages' h1, so the site now has
+			    one headline size.
+
+			    Same day, later (Hiro: "my name in the hero is too small now"): back
+			    to text-3xl, 33.75px at the 18px root — still a hair under the
+			    35.6px it was. The front door's name is the exception to the one
+			    headline size; about and the project pages stay text-2xl. */}
 			{/* Two-up on sm+ (2026-09-30, third pass, Hiro: "add room for a profile
 			    image"): text column left, portrait right, top-aligned, the about
 			    page's arrangement brought forward. Chosen over a small avatar beside

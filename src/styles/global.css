@@ -992,8 +992,22 @@
 	                                 either side of the 960px page
 	   Widening is not free the way it was at 32→35rem: the page is 960px, so
 	   the target's mid-point costs nearly all the side margin. If 39rem still
-	   reads short, the other lever is size, not width. */
-	--measure: 35rem;
+	   reads short, the other lever is size, not width.
+
+	   2026-10-11 (Hiro: "keep it to 10–12 words per line"): 35rem → 28rem.
+	   Everything above was measured against --text-lg prose; the project
+	   prose has since come down to text-sm, so 35rem had drifted to 13.8 w/l
+	   (lines up to 17). Re-swept the same way — headless Chrome, webfont
+	   loaded, full lines only, all 18 measured paragraphs on the project pages:
+	     35rem  630px  13.79 w/l
+	     30rem  540px  11.69       (but lines reach 15)
+	     28rem  504px  10.93       ← current, mid-target, lines 8–14
+	     27rem  486px  10.44
+	     26rem  468px  10.17
+	   It also equals the about page's 28rem column, so the two pages' prose
+	   now runs to the same width. Words a line don't move with the root size
+	   (width and type are both rem); they move with the prose's size step. */
+	--measure: 28rem;
 }
 
 /* ── Dark theme: Tokyo Night ── */
@@ -1259,8 +1273,9 @@
 }
 
 html {
-	/* Bump the base scale so nav + content read larger overall (16px → 19px) */
-	font-size: 118.75%;
+	/* Bump the base scale so nav + content read larger overall (16px → 18px;
+	   was 19px until 2026-10-11, Hiro: the type read too large) */
+	font-size: 112.5%;
 	/* Gated below — see the reduced-motion rule under this block. */
 	scroll-behavior: smooth;
 	/* Always reserve the scrollbar gutter so short pages (e.g. About) don't

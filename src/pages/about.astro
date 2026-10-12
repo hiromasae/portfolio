@@ -249,6 +249,12 @@ const tools = [
 				    size on every page, so this stays a greeting and 4xl is still
 				    the line not to cross.
 
+				    2026-10-11 (Hiro): text-3xl → text-2xl (27px at the new 18px root),
+				    matching the home and project h1s. Still one step above the
+				    section headings' text-xl. The px figures in this note are from
+				    the 3xl / 19px setting; mb-8 was kept, re-measure its ink before
+				    retuning.
+
 				    mb-8 (38px). It went mb-4 → 8 → 10 → and back to 8 on 08-05, and
 				    the last move is the one with a reason worth keeping.
 
@@ -270,7 +276,7 @@ const tools = [
 				    sized in em, so it tracks the h1 without a second number. It is
 				    decorative and aria-hidden, or it reads out as "waving hand" in
 				    the middle of a Japanese greeting. */}
-				<h1 class="mb-8 text-3xl [font-weight:var(--weight-emph)] tracking-tight text-[var(--ink-heading)]">
+				<h1 class="mb-8 text-2xl [font-weight:var(--weight-emph)] tracking-tight text-[var(--ink-heading)]">
 					{/* lang="ja" (2026-08-18): the document is lang="en", so without this a
 					    screen reader reads these five kana with an English voice — the first
 					    thing on the page, and unintelligible. The span wraps the RUN, not the
