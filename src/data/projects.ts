@@ -207,7 +207,7 @@ export interface Project {
 	    effectively AT the limit and a longer one would overflow. Anything past
 	    ~27 characters wants a shorter form (drop the owner, or name the host)
 	    rather than a fix in the CSS. The derived host is subject to the same
-	    ceiling — "app.subframe.com" is the longest one today at 16. */
+	    ceiling — "shipyardhq.tech" is the longest one today at 15. */
 	linkLabel?: string;
 }
 
@@ -229,7 +229,8 @@ export const projects: Project[] = [
 		   Hiro): migaki0 was shot as the card cover, migaki1-4 as the detail
 		   shots. The cover has since moved to migaki2 (see below), and migaki0
 		   now lives only in the sections' files section. Keep the numbering
-		   anyway; migaki5 is the next detail shot.
+		   anyway; migaki5 is the next free name. 5-8 were shots for sections
+		   cut on 10-07, deleted 2026-10-11 and still in git history.
 
 		   The four run in file order, and the shape is comparison first then
 		   mechanism: migaki1 and migaki2 are the same prompt built without and
@@ -300,9 +301,8 @@ export const projects: Project[] = [
 		   were. Now five: the problem, the files, the failure that set the
 		   rule, the decision about authority, and what I'd do differently.
 		   The restarts survive as one clause in the last section; the
-		   monthly refresh as one in the files section. migaki5-8 are no
-		   longer referenced (still in public/images; delete if they stay
-		   unused).
+		   monthly refresh as one in the files section. migaki5-8 went
+		   with them (deleted 2026-10-11; in git history).
 
 		   Cutting the research-PR section also retired the two claims the
 		   repo couldn't back ("All sixteen went in" on an open PR, and the
@@ -418,7 +418,7 @@ export const projects: Project[] = [
 		/* ── The long-form study (2026-10-07, cut to seven the same day) ──
 		   Was eight. Cut on the same note as migaki (Hiro: too detailed, no
 		   one needs the PRs): "Open, mergeable, unreviewed" / "Still waiting
-		   on review" and its PR #22 screenshot (ejs8, now unreferenced) are
+		   on review" and its PR #22 screenshot (ejs8, deleted 2026-10-11; in git history) are
 		   gone, and the build details (Astro output committed as static
 		   files, the lockfile lesson, the copy-pass line) came out of the
 		   docs, what-came-out and closing sections. The one fact the PR
@@ -544,7 +544,6 @@ export const projects: Project[] = [
 			{ src: '/images/stacksmith2.png', w: 1920, h: 981 },
 			{ src: '/images/stacksmith4.png', w: 1920, h: 981 },
 		],
-		link: 'https://app.subframe.com/a4820e3a0486/design/e6b3b72d-a1bb-41d8-95b6-dfe778ef8e78/share',
 	},
 	{
 		slug: 'suma',
