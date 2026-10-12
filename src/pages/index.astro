@@ -217,9 +217,11 @@ const email = contacts.find((contact) => contact.icon === 'email')!;
 			    the nav's page links are hidden, the home page has no route to
 			    /about; fix that in the nav, not here). The address comes from
 			    `contacts` rather than being typed again, so it lives in one place.
-			    Still the site's one real button. */}
+			    Still the site's one real button — but since 2026-10-11 in the
+			    GREEN OUTLINE variant (.btn--outline, global.css), not the enamel:
+			    the lit chip out-shone the name. */}
 			<p class="mt-6">
-				<a href={email.href} class="btn">
+				<a href={email.href} class="btn btn--outline">
 					<span aria-hidden="true" class="inline-flex leading-none [&>svg]:block [&>svg]:h-[0.85rem] [&>svg]:w-[0.85rem]">
 						<Icon name="email" />
 					</span>

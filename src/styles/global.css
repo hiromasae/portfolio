@@ -2993,6 +2993,44 @@ body {
 	outline-offset: 2px;
 }
 
+/* ── Outline variant: the home hero's email button (2026-10-11, Hiro's pick
+   from six rendered on both themes) ──
+   The enamel chip above was the brightest object in the hero — brighter and
+   wider than the h1 once its label became the full address — so the eye hit
+   the email before the name. This keeps .btn's box (padding, radius, type,
+   arrow gap, focus ring) and drops everything that made it a lit object: no
+   face, no gradients, no shadows.
+   GREEN, the wordmark's dye (--dye-name). It shipped cyan first, the same
+   day, on the grounds that cyan means "goes somewhere" here — and Hiro moved
+   it to green for exactly that reason: cyan is the PROJECT CARD links'
+   colour, and the button sitting directly above the grid read as one more
+   of them. Green sets it apart as the page's own call to action. The cost
+   that got green turned down on the first pass (it can read as a second
+   logo) is the trade Hiro made; the outline keeps it lighter than the
+   wordmark's solid glyph. The border is the same dye at 40% so the box reads
+   as the label's own edge rather than a second colour.
+   Hover/press TINT the inside rather than lighting it: 8% then 14% of the
+   dye, with the border going solid and the label taking --dye-name-lit, the
+   wordmark's own hover. The 404's .btn keeps the enamel; this is a variant,
+   not a restyle. */
+.btn--outline {
+	color: var(--dye-name);
+	background-color: transparent;
+	background-image: none;
+	border-color: color-mix(in oklab, var(--dye-name) 40%, transparent);
+	box-shadow: none;
+}
+.btn--outline:hover {
+	color: var(--dye-name-lit);
+	background-color: color-mix(in oklab, var(--dye-name) 8%, transparent);
+	border-color: var(--dye-name);
+	box-shadow: none;
+}
+.btn--outline:active {
+	background-color: color-mix(in oklab, var(--dye-name) 14%, transparent);
+	box-shadow: none;
+}
+
 /* Borderless TEXT link — .btn-icon's twin for words rather than a glyph, and
    the same colour model (--ink-soft at rest, --ink on hover/focus).
    The project pages' "Back to projects" wears this. Those pages carry no
