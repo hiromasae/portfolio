@@ -5085,8 +5085,8 @@ html.reveal-wait #projects::before {
    bigger than the one on the page (the rules above). On a phone that is no
    enlargement at all — 92vw is the width the page already gave it — so the
    open state is different in kind: the dialog takes the whole viewport and
-   becomes a scroll container, and the image is HELD at a legible width
-   inside it and panned. The scrim survives only as the 1.25rem frame around
+   becomes a scroll container; the image opens fitted, and a tap HOLDS it at
+   a legible width inside it to be panned (see FIT FIRST below). The scrim survives only as the 1.25rem frame around
    the picture (the site's own gutter), which is also the one band of pure
    backdrop left to tap.
 
@@ -5149,8 +5149,23 @@ html.reveal-wait #projects::before {
 		display: flex;
 	}
 
+	/* FIT FIRST, TAP TO ZOOM (2026-10-12, Hiro: on a phone the picture
+	   "zooms outside past the screen edges"). Until now every open on touch
+	   went straight to the --lightbox-min width below, so a 390px phone got a
+	   920px picture running off both sides before you had seen it whole. It
+	   now opens FITTED inside the 1.25rem frame — the desktop's shrink-wrap,
+	   on the full-viewport sheet — and a tap on the picture toggles
+	   .is-zoomed, which is the old legible-width state, unchanged. The
+	   script scrolls the tapped point to the middle on the way in. Chosen
+	   over fit-only (small text back to illegible, and a pinch zooms the PAGE
+	   under a modal) and over opening zoomed but centred (still never shows
+	   the whole picture). */
 	.lightbox__img {
 		margin: auto;
+		max-width: 100%;
+		max-height: 100%;
+	}
+	.lightbox.is-zoomed .lightbox__img {
 		max-width: none;
 		max-height: none;
 		width: max(100%, var(--lightbox-min));

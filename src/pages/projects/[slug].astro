@@ -807,6 +807,8 @@ const others = [
 				// day a srcset appears, this keeps working.
 				full.src = img.currentSrc || img.src;
 				full.alt = img.alt;
+				// Every open starts FITTED (2026-10-12) — see the tap toggle below.
+				dialog.classList.remove('is-zoomed');
 				dialog.showModal();
 				// On touch the dialog is a scroll container (see global.css) and a
 				// closed dialog KEEPS its scroll offset — reopened on the next shot
@@ -834,8 +836,36 @@ const others = [
 		// a scrim click. That mattered only while the image was NOT a dismiss
 		// target on a pointer device, which it has been since 08-14. Don't bring
 		// it back for the touch exemption — a tap is a click on ONE target.
+		//
+		// ── On touch, a tap on the picture ZOOMS (2026-10-12, Hiro) ──
+		// It used to be inert here because the picture always opened at the
+		// legible width and was being panned. It opens fitted now (see FIT
+		// FIRST in global.css), so the tap toggles .is-zoomed. Going in, the
+		// tapped point is scrolled to the middle of the screen — measured as a
+		// fraction of the fitted picture BEFORE the class lands, then applied to
+		// the zoomed one after a frame, once layout has the new width. Going
+		// out, back to the origin, where the fitted picture lives. A pan still
+		// never reaches here (a touch scroll cancels the click), so panning a
+		// zoomed picture doesn't snap it back.
 		dialog.addEventListener('click', (e) => {
-			if (!pointer.matches && e.target === full) return;
+			if (!pointer.matches && e.target === full) {
+				// Read the tap as a fraction BEFORE the toggle: clientWidth forces
+				// layout, and read after it, it is already the zoomed width.
+				const fx = e.offsetX / full.clientWidth;
+				const fy = e.offsetY / full.clientHeight;
+				const zoomed = dialog.classList.toggle('is-zoomed');
+				if (!zoomed) {
+					dialog.scrollTo(0, 0);
+					return;
+				}
+				requestAnimationFrame(() => {
+					dialog.scrollTo(
+						full.offsetLeft + fx * full.offsetWidth - dialog.clientWidth / 2,
+						full.offsetTop + fy * full.offsetHeight - dialog.clientHeight / 2
+					);
+				});
+				return;
+			}
 			dialog.close();
 		});
 	}
