@@ -142,7 +142,8 @@ const pages = [
 			    640px and up ONLY (hidden below in global.css). At 390 the free run
 			    between the monogram and the centred Contact trigger is ~104px and
 			    these two need ~112 plus a gap; on a phone the monogram stays the
-			    way home. A phone layout for them is a separate decision. */}
+			    way home. On a phone they live in the Menu panel instead (2026-10-11,
+			    see MENU, NOT CONTACT below). */}
 			<ul class="nav-pages" role="list">
 				{pages.map((p) => (
 					<li>
@@ -345,36 +346,42 @@ const pages = [
 		    So the height here is load-bearing for a rule in another file; see
 		    the .contact-menu block in global.css. */}
 		<div id="contact-menu-wrap" class="absolute inset-y-0 left-1/2 flex -translate-x-1/2 items-center">
-			{/* .btn-quiet, revived. It has styled nothing since "Back to
-			    projects" came off (2026-08-10) and its note says the next
-			    borderless text link on the site wants exactly it — this is that
-			    link: same 0.875rem, same --weight-ui, same --ink-soft → --ink,
-			    same focus ring. The wipe direction is the one thing overridden
-			    (see .contact-trigger in global.css): that rule's underline
-			    travels right-to-left to arrive at an arrow on the LEFT, and this
-			    caret is on the right. */}
+			{/* A square hamburger since 2026-10-11 (Hiro's pick; it was the word
+			    "Contact", then "Menu", with a caret). .btn-icon, the theme
+			    toggle's class, so the bar's two phone controls are one family —
+			    see .menu-trigger in global.css for the scale, the 44px hit region
+			    and why the glyph is 14 × 12 rather than a flat 16-wide stack.
+			    aria-label carries the word the glyph replaced; aria-expanded
+			    carries open/shut, and CSS morphs ≡ into ✕ off it, so the script is
+			    untouched. Same drawing system as every glyph in the bar: 24-unit
+			    box, 2px stroke, square cap. */}
 			<button
 				id="contact-toggle"
 				type="button"
-				class="btn-quiet contact-trigger"
+				class="btn-icon menu-trigger"
+				aria-label="Menu"
 				aria-expanded="false"
 				aria-controls="contact-menu"
 			>
-				<span class="btn-quiet__label">Contact</span>
-				{/* Rotates 180° while open — the affordance the caret exists for.
-				    Same drawing system as every other glyph in the bar: 24-unit
-				    box, 2px stroke, square cap. */}
+				{/* ONE glyph that morphs, not two that swap (2026-10-11, Hiro: "add
+				    a transition between the hamburger and x"). Three bars; open
+				    slides the outer two onto the middle one and turns them ±45° into
+				    the ✕ while the middle one fades — see .menu-trigger__bar in
+				    global.css. 16 units wide on a 7-unit pitch (was 14 on 6): the
+				    first square cut drew 15 × 13px beside the toggle's ~20px disc
+				    and read as the smallest thing in the bar while being its main
+				    control; this draws ~17 × 15. */}
 				<svg
-					class="contact-caret"
 					viewBox="0 0 24 24"
 					fill="none"
 					stroke="currentColor"
 					stroke-width="2"
 					stroke-linecap="square"
-					stroke-linejoin="miter"
 					aria-hidden="true"
 				>
-					<path d="m5 9 7 7 7-7" />
+					<path class="menu-trigger__bar menu-trigger__bar--top" d="M4 5h16" />
+					<path class="menu-trigger__bar menu-trigger__bar--mid" d="M4 12h16" />
+					<path class="menu-trigger__bar menu-trigger__bar--bot" d="M4 19h16" />
 				</svg>
 			</button>
 
@@ -384,7 +391,35 @@ const pages = [
 			    free (display flips do). Escape and an outside click close it;
 			    Escape returns focus to the button. Same contract the settings
 			    menu ran on, and its script is the one this was adapted from. */}
+			{/* ── MENU, NOT CONTACT (2026-10-11, Hiro's pick from three) ──
+			    The trigger read "Contact" and the panel held only the four
+			    contacts. That left a phone with no route to /about from the home
+			    page once the hero's About link came out (10-07): the bar's page
+			    links are 640px-and-up only, because at 390 the run between the
+			    monogram and this trigger is ~110px and they need ~112 plus a gap
+			    (see .nav-pages above). So the pages moved INTO the panel, first,
+			    over a rule, and the trigger was renamed to say what it now holds —
+			    "Menu", and later the same day a hamburger whose aria-label still
+			    says it (see the button below).
+			    Chosen over three links inline in the centre (fits 390, collides at
+			    320) and over keeping the "Contact" label. The cost is that About
+			    is two taps on a phone rather than one.
+			    Page rows are .contact-row with no icon and no ↗: they stay on this
+			    site, and the ↗ below means "this takes you somewhere else". Their
+			    labels sit at the icon column's left edge rather than indented to
+			    the contact labels — an indent with nothing in front of it read as a
+			    missing icon. aria-current is the bar's own (see `pages`), and every
+			    row, these included, closes the panel on click via the script. The
+			    ids keep their contact- names; renaming them would touch the
+			    script, the CSS and every note that cites them, for no change on
+			    screen. */}
 			<div id="contact-menu" class="contact-menu" hidden>
+				{pages.map((p) => (
+					<a class="contact-row" href={p.href} aria-current={p.current}>
+						<span class="contact-row__label">{p.label}</span>
+					</a>
+				))}
+				<div class="contact-menu__rule" aria-hidden="true"></div>
 				{
 					contacts.map((c) => {
 						// The email row is a PLAIN mailto: link (2026-08-15, Hiro: tapping
