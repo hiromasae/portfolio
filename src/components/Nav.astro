@@ -450,14 +450,15 @@ const pages = [
 
 		{/* Light/dark toggle: the classic contrast glyph — a circle half ink,
 		    half paper, drawn at the contact icons' size and stroke. The filled
-		    side marks the current theme (right = light, left = dark); on toggle
-		    the ink SWEEPS across to the other side — a slide, not a spin, to
-		    match the site's motion language, and always travelling RIGHTWARD:
-		    the fill is a pair of rects one pattern-period (18 units) apart
-		    sliding inside a static circular clip (animating rects, not the
-		    clipPath, keeps the motion working in Safari), so light→dark can
-		    wrap — ink exits through the circle's right edge while the twin
-		    rect pours in from the left. See the theme-swap block in
+		    side is the right half in BOTH themes (2026-10-12; it used to mark
+		    the current theme, right = light, left = dark, which nobody could
+		    read). On toggle the ink SWEEPS one full turn — a slide, not a
+		    spin, to match the site's motion language, always RIGHTWARD: the
+		    fill is a pair of rects one pattern-period (18 units) apart sliding
+		    inside a static circular clip (animating rects, not the clipPath,
+		    keeps the motion working in Safari), so the ink exits through the
+		    circle's right edge while the twin rect pours in from the left and
+		    lands where it started. See the theme-swap block in
 		    global.css. `ml-auto` holds it at the bar's right edge — with the
 		    contacts centred out of flow it's the only thing left in the row
 		    after the wordmark. Its close-ranks translate in global.css assumes
@@ -521,9 +522,8 @@ const pages = [
 					<g clip-path="url(#theme-fill-clip)">
 						<rect class="theme-fill-rect" x="12" y="2" width="9" height="20" fill="currentColor" stroke="none" />
 						{/* The twin, exactly one period (18) left: off-circle at rest
-						    in light (its right edge only touches the clip's tangent
-						    point), it becomes the left-half fill as the sweep carries
-						    it in. Both rects share the class so the resting transforms
+						    (its right edge only touches the clip's tangent point), it
+						    becomes the right-half fill as the sweep carries it in. Both rects share the class so the resting transforms
 						    and sweep keyframes drive them in lockstep. */}
 						<rect class="theme-fill-rect" x="-6" y="2" width="9" height="20" fill="currentColor" stroke="none" />
 					</g>
@@ -741,8 +741,8 @@ const pages = [
 	// The button is named for the theme a click switches TO (play/pause-style):
 	// "Dark mode" while light is active, "Light mode" while dark is. The hover
 	// pill below shows the same text, so the visible label and the accessible
-	// name always agree. The glyph's resting position comes from CSS state
-	// alone; only the name needs syncing.
+	// name always agree. The glyph rests the same way in both themes; only the
+	// name needs syncing.
 	// "mode", not "theme" (07-31, Hiro): the pill is read as an instruction by
 	// a visitor who has just moved the cursor onto a half-filled circle, and
 	// "light mode" is what that control is called everywhere else.

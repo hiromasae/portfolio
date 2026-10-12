@@ -829,11 +829,6 @@
 	   coincidence the 08-05 work replaced. --grain stays on both — it is the
 	   paper's tooth, not part of the shading. */
 
-	/* Theme glyph fill rest: the ink half sits right of center in light
-	   (translateX(0)), left in dark (-9px) — see .theme-fill-rect. A var so
-	   the click sweep's keyframes can target rest in either theme. */
-	--theme-fill-x: 0px;
-
 	/* The site's default easing. It was cut for the nav's collapse/expand
 	   ensemble — a motion assembled from independent transitions that all had
 	   to ride one curve, or their per-frame disagreement would bend the glide
@@ -1268,7 +1263,6 @@
 	--dye-name: #9ece6a; /* 10.56:1 — 1.50× the muted text (AAA pass), 1.15× the title */
 	--dye-name-lit: color-mix(in oklab, var(--dye-name), white 30%); /* hover; see the light theme's note for why 30 vs 13 */
 
-	--theme-fill-x: -9px;
 	--grain: none;
 }
 
@@ -3688,18 +3682,21 @@ body {
 /* Theme toggle: the classic contrast glyph — a circle half ink, half paper,
    drawn with the icons' 2px square-cap stroke at their exact size, so the
    button needs no box or track to hold its own in the row. The filled side
-   marks the current theme: right in light, left in dark. The fill is a PAIR
+   is ALWAYS the right half, in both themes (2026-10-12, Hiro): it marked the
+   current theme until then — right in light, left in dark — but left-vs-right
+   is no convention anyone can decode, and a state icon fought the button's
+   play/pause-style name. Fixed, the glyph is just "switch theme", and the
+   click sweep alone says the switch happened. The fill is a PAIR
    of ink rects one pattern-period (18 units) apart sliding inside a static
    circular clipPath (see Nav.astro) — sliding them sweeps the ink across the
    circle, a slide rather than a spin, in step with the site's other motion
    (contact pill wipe, travelling panel). Two rects rather than one so the
    sweep can always travel RIGHTWARD (see the theme-swap block): the pattern
    is periodic, so any two transforms 18 apart paint the same pixels.
-   Resting position is pure state — no transition here: the sweep on click is
-   played by keyframes, and everything else (initial paint, reduced motion)
-   should just snap. At translateX(0) the lead rect spans the circle's right
-   half (x 12–21 of its 3–21 diameter) with the twin off-circle at -6–3;
-   -9px lands the twin on the left half exactly (lead rect off-circle).
+   Resting position never changes — no transition here: the sweep on click is
+   played by keyframes, and under reduced motion there is nothing to snap. At
+   translateX(0) the lead rect spans the circle's right half (x 12–21 of its
+   3–21 diameter) with the twin off-circle at -6–3.
 
    RESTORED 2026-08-06, one day out. It spent 05→06 as a gear opening a
    dropdown of two switches (dark mode + a sticky-bar preference), and what
@@ -3712,7 +3709,7 @@ body {
    settings surface is ever wanted again — but it wants a third setting
    first, not two. */
 .theme-fill-rect {
-	transform: translateX(var(--theme-fill-x, 0px));
+	transform: translateX(0);
 }
 
 /* ── The hover label ──
@@ -4926,42 +4923,31 @@ html.reveal-wait #projects::before {
 	}
 
 	/* ── Theme swap ──
-	   The fill's resting position is pure state (the data-theme rule on
-	   .theme-fill-rect above); the sweep on click is played by keyframes, not
-	   a transition, so it survives the blanket `transition: none` the flip
-	   applies for its one frame (see .theme-switching). `.theme-anim` is
-	   toggled per-click in Nav.astro; the pair below picks the sweep for the
-	   theme just applied. BOTH sweeps travel rightward — the ink never
-	   reverses: to-light slides the left-half fill right through the middle,
-	   and to-dark wraps — the right-half ink exits through the circle's right
-	   edge while the twin rect pours in from the left. to-dark therefore ends
-	   at +9px, not the -9px resting value: the two-rect pattern repeats every
-	   18 units, so the frames are pixel-identical and the handoff to the
-	   resting rule doesn't snap. Under reduced motion Nav.astro never adds
-	   the class and the fill just snaps across. */
-	:root[data-theme='dark'] .theme-toggle.theme-anim .theme-fill-rect {
-		animation: theme-fill-to-dark var(--dur-gesture) var(--nav-ease);
-	}
-	:root:not([data-theme='dark']) .theme-toggle.theme-anim .theme-fill-rect {
-		animation: theme-fill-to-light var(--dur-gesture) var(--nav-ease);
+	   The fill rests on the right half in both themes (.theme-fill-rect
+	   above); the sweep on click is played by keyframes, not a transition, so
+	   it survives the blanket `transition: none` the flip applies for its one
+	   frame (see .theme-switching). `.theme-anim` is toggled per-click in
+	   Nav.astro. One sweep serves both directions: a full pattern period,
+	   0 → 18px, always RIGHTWARD — the ink, already in the new theme's
+	   colour, exits through the circle's right edge while the twin rect pours
+	   in from the left and settles where the ink began. The two-rect pattern
+	   repeats every 18 units, so the last frame is pixel-identical to rest
+	   and the handoff doesn't snap. The ink's edge crosses the centre at
+	   9px, mid-travel — the instant the label roll below is cut against.
+	   Under reduced motion Nav.astro never adds the class and the glyph
+	   simply stays put. */
+	.theme-toggle.theme-anim .theme-fill-rect {
+		animation: theme-fill-sweep var(--dur-gesture) var(--nav-ease);
 	}
 }
 
-@keyframes theme-fill-to-dark {
+@keyframes theme-fill-sweep {
 	from {
 		transform: translateX(0);
 	}
 	to {
-		/* +9, not -9: rightward wrap; pattern-identical to the -9px rest. */
-		transform: translateX(9px);
-	}
-}
-@keyframes theme-fill-to-light {
-	from {
-		transform: translateX(-9px);
-	}
-	to {
-		transform: translateX(0);
+		/* One full period: pattern-identical to the translateX(0) rest. */
+		transform: translateX(18px);
 	}
 }
 
