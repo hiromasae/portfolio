@@ -2446,14 +2446,20 @@ body {
    object on the site, so it needs that most — it just needs it measured in
    pixels rather than percent.
 
-   Everything about WHERE it goes is script (see index.astro): position and size
-   are written as a transform plus width/height, measured off the hovered card's
-   offset box. The rules here only say how it moves and what it looks like.
+   Everything about WHERE it goes is script (ProjectGrid.astro): the four edges
+   are written as left/top/right/bottom, measured off the hovered card's offset
+   box. The rules here only say how it moves and what it looks like.
 
-   Transform + width/height rather than top/left/right/bottom: the transform is
-   composited, and while width/height do lay out, they lay out an absolutely
-   positioned element with no in-flow siblings, so the reflow is confined to
-   this one box and never touches the grid.
+   FOUR EDGES, NOT translate + width/height (2026-10-11, Hiro: the stretch). It
+   used to be the latter, because a translate is composited — but a translate
+   and a size can only ever move the box as a whole, and the stretch needs the
+   leading edge and the trailing edge on different clocks. Insets give each
+   edge its own property and so its own transition. The cost is layout on every
+   frame of a hop, and it is the same cost width/height were already paying:
+   an absolutely positioned box with no in-flow siblings, so the reflow is
+   confined to this one element and never touches the grid. right and bottom
+   are written as calc(100% - …) so they hold if the list changes size under a
+   resting panel (Show more, a font swap) rather than drifting with it.
 
    --surface is deliberately the FAINT choice: against --paper it is one plane
    step, not a highlight (#0c0e14 → #1a1b26 dark, #f9fbff → #ffffff light). The
@@ -2503,8 +2509,37 @@ body {
 	   overrun invariant above still holds — it is just zero now. What still
 	   says this panel has momentum is the compress below, a read the pill
 	   never had, which is why the panel keeps a second device where the pill
-	   keeps only its launch. */
-	--ease-panel: cubic-bezier(0.34, 1, 0.5, 1);
+	   keeps only its launch.
+
+	   2026-10-11: (0.34, 1, 0.5, 1) → (0.3, 0, 0.1, 1), with the stretch below.
+	   The compress is gone, so the second device this note leans on is gone
+	   with it; the stretch carries the momentum now, and it wants a curve that
+	   eases OUT of the start as well as into the end, or the two edges both
+	   leave at full speed and the gap between them never opens. Picked by eye
+	   off the travel lab ("Stretch 260"). Still no overshoot. */
+	--ease-panel: cubic-bezier(0.3, 0, 0.1, 1);
+	/* ── The stretch's two clocks (2026-10-11, Hiro) ──
+	   Each hop's LEADING edges run on --panel-lead and its TRAILING edges on
+	   --panel-trail, so the panel reaches for the next card before it lets go
+	   of the last and briefly spans both. Which edge leads is per hop and per
+	   axis, and the script says (data-x / data-y on .card-panel).
+	   QUIETED the same day (Hiro: quiet the animation). The trail now ends at
+	   25 + 175 = 200ms and the lead at 120ms, so the stretch is the 80ms
+	   between the two edges landing — enough to read as one panel reaching
+	   and letting go, short enough to stay a hint rather than an event. It
+	   was the loudest motion on the page, and hover fires constantly.
+	   This deliberately leaves --dur-slide (260ms): the panel is no longer on
+	   the nav pill's beat, it is on hover-feedback time, which wants ~200ms.
+	   The history, so nobody re-walks it: 440ms (lead 200, trail 360 after
+	   80) was slow; 260ms (140 / 220 after 40) was picked, then judged the
+	   loudest thing on the page; 200ms with 110 / 170 after 30 was thought
+	   to lose the stretch in the lab, but that was judged at full volume.
+	   If this is retimed, shrink the delay less than the durations — the gap
+	   between the edges IS the effect, and scaling everything evenly closes
+	   it. To quiet it further, shorten the gap; to drop it, set the trail
+	   equal to the lead with no delay and the panel just slides. */
+	--panel-lead: 120ms var(--ease-panel);
+	--panel-trail: 175ms var(--ease-panel) 25ms;
 	/* ── The press clock ──
 	   2026-08-05, Hiro: the card should click down at the nav icons' speed. It
 	   was pressing on --dur-card (300ms) — the card's HOVER clock, which the
@@ -2533,10 +2568,12 @@ body {
 }
 .card-panel {
 	position: absolute;
+	/* A zero-size box at the origin until the script places it; it is invisible
+	   until then anyway. */
 	top: 0;
 	left: 0;
-	width: 0;
-	height: 0;
+	right: 100%;
+	bottom: 100%;
 	z-index: 0;
 	border-radius: var(--radius);
 	background: var(--surface);
@@ -2546,25 +2583,27 @@ body {
 	   origins the panel would creep out from under one edge and recede from
 	   the other — at 0.99 on a ~330px card that is ~1.6px of daylight at each
 	   end, which is plenty to see against a card border.
-	   NOTE this also re-anchors the travelling compress below — see the
-	   .is-sliding rule there, which overrides the X half of this for the length
-	   of a hop and hands it back on animationend. This declaration is the AT-REST
-	   origin: what the press scales about, and the only one the press ever sees.
-
-	   CORRECTION to what stood here (2026-08-13): the old note claimed that for a
-	   mostly-horizontal hop the choice of origin was negligible. It is the exact
-	   opposite — an X origin of 50% is why a horizontal hop had no visible
-	   squeeze. Measured below. */
+	   The press is the only thing that scales the panel now — the travelling
+	   compress that used to re-anchor this per hop went with the stretch
+	   (2026-10-11; see the marker below). */
 	transform-origin: 50% 0;
+	/* Every edge leads until the script says otherwise — see the data-x/data-y
+	   rules below, which hand the TRAILING edges --panel-trail. */
+	--clock-left: var(--panel-lead);
+	--clock-right: var(--panel-lead);
+	--clock-top: var(--panel-lead);
+	--clock-bottom: var(--panel-lead);
 	/* Never a hover target itself: it sits under the cursor constantly, and a
 	   panel that could take the pointer would fight the card it is under. */
 	pointer-events: none;
 	transition:
-		/* `translate`, not `transform` — see place() in index.astro for why the
-		   position had to move off the transform property. */
-		translate var(--dur-slide) var(--ease-panel),
-		width var(--dur-slide) var(--ease-panel),
-		height var(--dur-slide) var(--ease-panel),
+		/* One clock per edge, each a whole "duration easing delay" triple, so
+		   the direction rules below can swap an edge's timing without
+		   restating this list. */
+		left var(--clock-left),
+		right var(--clock-right),
+		top var(--clock-top),
+		bottom var(--clock-bottom),
 		opacity var(--dur-gesture) var(--nav-ease),
 		/* The press, and it takes the CARD's timing (--press-clock ease-out, see
 		   .project-card) rather than the panel's own --dur-slide. The panel is
@@ -2579,179 +2618,50 @@ body {
 .card-panel.is-visible {
 	opacity: 1;
 }
+/* The trailing edge of each axis the hop moves along. Travelling right, the
+   LEFT edge is the one left behind; travelling down, the TOP. An axis the hop
+   doesn't move along carries no attribute, so both its edges keep the lead
+   clock and simply resize in step. */
+.card-panel[data-x='right'] { --clock-left: var(--panel-trail); }
+.card-panel[data-x='left'] { --clock-right: var(--panel-trail); }
+.card-panel[data-y='down'] { --clock-top: var(--panel-trail); }
+.card-panel[data-y='up'] { --clock-bottom: var(--panel-trail); }
 
 /* ── The panel presses with the card ──
    2026-08-05, Hiro: the card's background should shrink on press too. The panel
    is a SIBLING of the cards, not a child, so it cannot inherit the card's
    active state — :has() on the list is what carries it across.
 
-   It uses the `scale` property, not a transform, for the same reason the
-   compress does: the script owns `transform` (that is where the panel's
-   position lives), and the two would overwrite each other. scale composes with
-   it instead.
-   One consequence of sharing the property with the compress: an animation beats
-   a normal declaration, so a press landing DURING a slide is ignored for that
-   slide's --dur-slide. The animation has no fill-mode, so the press applies
-   again the moment it finishes, and pressing a card that is still being slid
-   to is not a gesture anyone can really aim at. */
+   It uses the `scale` property, not a transform. The position has been on the
+   four insets since 2026-10-11, so nothing else owns `transform` any more —
+   but `scale` is still the one property that says "size change in place", and
+   it is what the card's press uses too. */
 #project-list:has(.project-card:active) .card-panel {
 	scale: 0.99;
 }
 
-/* ── The compress ──
-   2026-08-03, Hiro, chosen off a fourteen-variant study of how this panel could
-   travel (springs, arcs, stretch, distance-scaled durations, a hard cut). The
-   timing did not change: this is still --dur-slide on --ease-panel, exactly the
-   move that was tuned yesterday. What is new is that the panel gives up 3.5% of
-   its size while it is moving and fills back out as it arrives, so momentum is
-   something you can SEE rather than only infer from the curve.
-
-   The profile is DERIVED FROM THE CURVE'S OWN VELOCITY, not drawn by hand:
-   scale = 1 − 0.035 × (speed at t ÷ peak speed). That is why the stops are
-   uneven, and why the animation must run LINEAR — the easing is already baked
-   into the values, and putting --ease-panel on top would ease an eased curve.
-
-   Which means the compress arrives almost immediately rather than mid-flight,
-   and that is correct: --ease-panel's velocity peaks at t≈0, not in the middle.
-   Its start tangent is y1/x1 = 1.17/0.34 = 3.4× linear, so the panel leaves
-   FAST and coasts. (The note above on #project-list reads x1 = 0.34 as holding
-   the curve back at the start — that is the wrong way round, and worth knowing
-   before anyone retunes it. What gives the move its weight is the long tail and
-   the 4px overrun, not a slow launch.) So the panel braces as it goes and
-   swells as it settles, which is the way round a body under acceleration
-   actually behaves.
-
-   Uniform on both axes, deliberately. The study also offered Stretch — elongate
-   along the direction of travel, thin across it, volume held — and that was the
-   more literal squash-and-stretch. It reads as cartoon on a 472px background
-   tint; this reads as mass.
-
-   `scale` as its own property, not folded into `transform`, because the script
-   owns the position and the two would overwrite each other if both used one
-   property.
-
-   CORRECTION, 2026-08-05 — the note this replaces claimed "a translate followed
-   by a scale about the element's own centre is the same box either way round".
-   That is false, and it was the cause of the press jiggle. The individual
-   transform properties compose in a FIXED order (translate, rotate, scale,
-   transform), so `scale` is applied OUTSIDE anything written to `transform` and
-   multiplies its translate. While the position lived on `transform`, this
-   compress was also dragging the panel toward the origin by up to 3.5% of its
-   own offset — ~16px on a 471px hop — which nobody noticed because it happened
-   during travel and read as momentum. The position now lives on the `translate`
-   property, which is applied BEFORE scale and is therefore left alone, so this
-   is finally the pure size change the profile below was designed as.
-   If the travel ever feels lighter than it used to, that is why: the compress
-   lost an unintended translation it was never supposed to have. */
-@keyframes panel-compress {
-	0% { scale: 0.9823; }
-	2% { scale: 0.9655; }
-	10% { scale: 0.9696; }
-	22% { scale: 0.9776; }
-	36% { scale: 0.9878; }
-	50% { scale: 0.9954; }
-	66% { scale: 0.9995; }
-	100% { scale: 1; }
-}
-/* Applied only to a SLIDE, and re-triggered per hop by the script (remove →
-   reflow → add). Never on the panel's first appearance: that is a snap into
-   place with transitions suppressed, and a panel that compressed while landing
-   from nowhere would read as a pop rather than as travel. */
-.card-panel.is-sliding {
-	animation: panel-compress var(--dur-slide) linear;
-	/* ── The squeeze had to be one-sided to be seen (2026-08-13, Hiro: the
-	   horizontal hop doesn't squeeze like the vertical one) ──
-	   The compress above is UNIFORM and was already running identically in both
-	   directions — sampled frame by frame across a horizontal and a vertical hop,
-	   the `scale` timeline is the same numbers on the same clock. What differed
-	   was where the shrink came out of the box, and that is the origin's doing.
-
-	   At rest the origin is 50% 0. Vertically that pins the top edge, so the whole
-	   3.45% leaves the BOTTOM — on a downward hop that is the leading edge pulling
-	   back, one edge moving the full distance, which is the squash everyone can
-	   see. Horizontally 50% splits the same 3.45% across both edges, so each moves
-	   half as far and neither reads as braking. Measured at the compress's peak
-	   (scale 0.9655):
-
-	     home page, 471×346 card   bottom edge 11.94px │ each side 8.12px
-	     project page, 314×281     bottom edge  9.70px │ each side 5.41px
-
-	   5.4px of inset on a 313px hop is not a squeeze, it is a rounding error, and
-	   the project page's "More projects" strip is a single row of three — every
-	   hop there is horizontal, so that page had no squeeze at all. That is what
-	   was reported, and why it was reported against that page even though the
-	   grid is shared. The home page hid it: its vertical hops looked right, so the
-	   horizontal ones read as merely weaker rather than as broken.
-
-	   So: pin the TRAILING edge for the length of the hop and the full width
-	   shrink lands on the leading one — 16.25px on the home page, 10.83px on the
-	   project page, both now larger than their vertical counterpart, which is
-	   correct because the cards are wider than they are tall and the hops are
-	   longer. Both axes now spend the same 3.45% of the dimension they travel
-	   along, which is what "the same squeeze" has to mean on boxes of different
-	   proportions.
-
-	   ── AND THE CROSS AXIS HAS TO SPLIT (2026-08-13, second pass) ──
-	   Hiro, on the first version of this: the effect is only happening on the
-	   bottom of the card, the top just glides across. Correct, and the reason is
-	   that pinning the trailing edge is only half a rule.
-
-	   Movement PARALLEL to the sweep is masked by the sweep. A 16px lag on a 470px
-	   hop inside 260ms is not something an eye picks out. Movement PERPENDICULAR
-	   to it has nothing to hide behind, which is why the bottom edge was the only
-	   part anyone could see: on a horizontal hop the vertical axis is the only one
-	   that can carry a visible squeeze, and an origin pinned at the top spent all
-	   of that axis on the bottom edge, leaving the top with pure travel.
-
-	   So the rule is one rule applied per axis: an axis the panel MOVES along pins
-	   its trailing edge (the shrink leaves the leading one, and reads as braking);
-	   an axis it does NOT move along centres, so the shrink splits and both of
-	   that axis's edges pull in. A horizontal hop now drops the top by half the
-	   height shrink as it lifts the bottom by the same — 5.97px each on the home
-	   page, 4.85px on the project page — and the panel pinches around its own path
-	   instead of shedding one edge. A diagonal hop pins both axes and splits
-	   neither, which is right: it has a leading edge on both.
-
-	   Both halves are written by the script (ProjectGrid.astro), because only it
-	   knows which way the panel is going. X: 0% travelling right, 100% left. Y: 0%
-	   travelling down, 100% up. Either axis with no travel gets 50%. A purely
-	   vertical downward hop therefore resolves to 50% 0% — the at-rest origin, and
-	   byte-identical to what vertical hops have always done, which is the half
-	   that was already right. An upward hop now mirrors it rather than contracting
-	   from its trailing edge, which is a change, and the only one here that was
-	   not asked for: leaving it would have made up and down hops disagree.
-
-	   ⚠ THIS RULE MUST NOT OUTLIVE THE ANIMATION. The press (scale: 0.99, above)
-	   shares the origin, and it has to keep 50% or the panel shrinks about one
-	   edge while the card standing on it shrinks about its centre — the same
-	   daylight-at-one-end problem the at-rest origin note describes. The script
-	   drops .is-sliding on animationend, so the override is scoped to travel; the
-	   reduced-motion block below covers the one case where that event never
-	   comes. */
-	transform-origin: var(--slide-origin-x, 50%) var(--slide-origin-y, 0%);
-}
+/* ── The compress: GONE (2026-10-11, Hiro: go with the stretch) ──
+   From 08-03 to 10-11 the panel shrank 3.45% while travelling (a velocity-
+   derived keyframe profile, re-triggered per hop, anchored per axis so the
+   squeeze landed on the leading edge). The stretch replaces it as the thing
+   that says the panel has mass: the leading edges leave on --panel-lead and
+   the trailing ones follow on --panel-trail (see #project-list).
+   Worth knowing because the 08-03 study REJECTED a stretch — but that one
+   elongated the box along its path and thinned it across, volume held, and
+   read as cartoon. This one never changes the panel's shape off the path: it
+   spans the cards it is between for ~80ms, then lets go of the old one.
+   Bringing the compress back would mean layering it over the stretch, and the
+   two would fight over what the leading edge is doing. */
 
 /* Reduced motion: the panel still appears and still marks the hovered card —
    it just stops travelling, snapping between cards instead. Opacity keeps its
    transition so the appearance is still a fade rather than a flash; only the
-   three geometry properties are dropped. Restated in full rather than
+   four edges are dropped, and with them the stretch. Restated in full rather than
    overriding transition-property, because the durations are a positional list
-   and trimming the front would slide opacity onto --dur-slide. */
+   and trimming the front would slide opacity onto an edge's clock. */
 @media (prefers-reduced-motion: reduce) {
 	.card-panel {
 		transition: opacity var(--dur-gesture) var(--nav-ease);
-	}
-	/* Nothing travels here, so there is no velocity for the compress to answer
-	   to — it would be a shape change with no move under it. */
-	.card-panel.is-sliding {
-		animation: none;
-		/* And the directional origin has to come back off with it. Not cosmetic:
-		   with no animation there is no animationend, so the class the script
-		   normally sheds at the end of a hop STAYS ON for as long as the panel is
-		   showing. Left to itself the .is-sliding rule above would then hand the
-		   press an edge origin permanently — the exact failure that rule's own
-		   warning is about, reached by the one route that skips its cleanup. */
-		transform-origin: 50% 0;
 	}
 	/* The card pins its own press to scale-100 under this setting
 	   (motion-reduce:active:scale-100 in ProjectCard.astro), so the panel has

@@ -306,9 +306,9 @@ const columnClass = columns === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2';
 		let current: HTMLElement | null = null;
 		// Where place() last put the panel's top-left corner, in list coordinates.
 		// Read only to work out which way the NEXT hop travels; the panel's own
-		// style.translate would do as a source but would have to be parsed back out
-		// of a string, and mid-transition it reports an interpolated value rather
-		// than the target the last hop was aimed at.
+		// style.left/top would do as a source but would have to be parsed back out
+		// of a string, and a computed read mid-transition reports an interpolated
+		// value rather than the target the last hop was aimed at.
 		let placed = { x: 0, y: 0 };
 
 		// Sum offsetLeft/Top from `el` up to (not including) `root`, following the
@@ -328,108 +328,59 @@ const columnClass = columns === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2';
 			return { x, y };
 		};
 
-		// Position goes on the `translate` PROPERTY, never on `transform`.
-		// The individual transform properties compose in a fixed order —
-		// translate, then rotate, then scale, then `transform` — so anything
-		// written to `transform` sits INSIDE the scale and gets multiplied by
-		// it. With the position there, the panel's press (scale: 0.99) was
-		// scaling its own offset: card 1 sits at x=0 and never moved, card 2
-		// sits at x≈471 and lurched ~4.7px sideways on every press. That was
-		// the jiggle. On `translate` the position is applied before the scale
-		// and is left alone, so the panel only ever changes size in place.
+		// Written as FOUR EDGES, not a translate plus a size (2026-10-11, the
+		// stretch): each edge has to be its own property so each can run on its
+		// own clock — see the --panel-lead/--panel-trail note on #project-list.
+		// right and bottom are calc(100% - …) against the list, so a list that
+		// changes size under a resting panel doesn't drag those edges with it.
+		//
+		// The jiggle that put the position on `translate` (08-05: a position on
+		// `transform` sat inside the press's scale and got multiplied by it)
+		// can't recur here — insets are layout, not a transform, so the press
+		// scales the box where it stands.
 		const place = (card: HTMLElement) => {
 			const { x, y } = offsetIn(card, list);
-			panel.style.width = `${card.offsetWidth}px`;
-			panel.style.height = `${card.offsetHeight}px`;
-			panel.style.translate = `${x}px ${y}px`;
+			panel.style.left = `${x}px`;
+			panel.style.top = `${y}px`;
+			panel.style.right = `calc(100% - ${x + card.offsetWidth}px)`;
+			panel.style.bottom = `calc(100% - ${y + card.offsetHeight}px)`;
 			return { x, y };
 		};
 
-		// Where the compress should be anchored while the panel travels, one axis at
-		// a time. See .card-panel.is-sliding in global.css for why a uniform scale
-		// needs an origin chosen per hop to be visible at all.
-		//
-		// ONE RULE, APPLIED TWICE: an axis the panel is MOVING along pins its
-		// trailing edge, so the whole shrink on that axis comes out of the leading
-		// one and reads as braking. An axis it is NOT moving along centres, so the
-		// shrink splits and BOTH of that axis's edges pull in.
-		//
-		// The split matters more than it looks, and it is the half this got wrong
-		// first time (2026-08-13, Hiro: the effect is only happening on the bottom,
-		// the top just glides). Movement PARALLEL to the sweep is masked by the
-		// sweep — a 16px lag on a 470px hop is not something an eye picks out of a
-		// 260ms move. Movement PERPENDICULAR to it has nothing to hide behind. So on
-		// a horizontal hop the vertical axis is the only one that can carry a
-		// visible squeeze, and pinning it at the top spent all of it on the bottom
-		// edge, leaving the top with nothing but travel. Centred, the top drops as
-		// the bottom rises and the panel pinches around its own path.
-		//
-		// A diagonal hop gets a pin on both axes and no split, which is correct: it
-		// is moving along both, so both have a leading edge to brake with.
-		const originFor = (from: number, to: number, forward: string, back: string) => {
-			if (to === from) return '50%';
-			return to > from ? forward : back;
+		// Which way this hop goes, one axis at a time, as the attributes the CSS
+		// reads to give the TRAILING edge of each moving axis the slower clock.
+		// An axis with no travel gets no attribute: both its edges lead, and a
+		// difference in card height on that axis simply resizes in step.
+		const aim = (from: { x: number; y: number }, to: { x: number; y: number }) => {
+			panel.dataset.x = to.x > from.x ? 'right' : to.x < from.x ? 'left' : '';
+			panel.dataset.y = to.y > from.y ? 'down' : to.y < from.y ? 'up' : '';
 		};
 
-		// The origin override is scoped to the length of the hop, because the press
-		// scales about this same property and must keep the centre (again, see the
-		// warning on that CSS rule). Dropping the class here rather than leaving it
-		// until the next hop is what scopes it, and it costs nothing else: every
-		// other reader of .is-sliding — the remove/reflow/add retrigger, hide() —
-		// is idempotent with respect to the class already being off.
-		//
-		// Guarded on animationName so a future animation on this element can't shed
-		// the class on its own completion. Nothing guards against a cancelled hop's
-		// event landing on its replacement, because there is no such event: the
-		// retrigger removes the class, which CANCELS the running compress, and a
-		// cancel fires `animationcancel` rather than this. If a second animation is
-		// ever added here, check that assumption before trusting it.
-		panel.addEventListener('animationend', (e) => {
-			if (e.animationName === 'panel-compress') panel.classList.remove('is-sliding');
-		});
-
 		const show = (card: HTMLElement) => {
-			// Already on this card: do nothing. Without this guard, ANY second
-			// call for the same target re-runs the compress below, and the panel
-			// wobbles 3.5% in place with nothing travelling.
-			//
-			// It is not a hypothetical — pressing a card fires it every time.
-			// Mousedown focuses the card's <a>, focusin calls show() with the
-			// card already showing, and the compress restarts underneath the
-			// press. That is most of the jiggle: the press animates scale 1 →
-			// 0.99 while the compress independently drives it to 0.9655 and
-			// back, so the panel dips well past the pressed size and returns.
-			// Measured mid-press before the guard: 0.9805 at +80ms, 0.9986 at
-			// +200ms, 0.99 at +500ms — not even monotonic.
+			// Already on this card: do nothing. Pressing a card hits this every
+			// time — mousedown focuses the card's <a>, and focusin calls show()
+			// with the card already showing. It used to matter more (it restarted
+			// the travelling compress under the press, which was most of the
+			// 08-05 jiggle); now it just saves re-aiming a panel that isn't going
+			// anywhere.
 			if (visible && card === current) return;
 			current = card;
 			if (visible) {
-				// Slide + resize to the new card, and restart the compress that rides
-				// along with it (see @keyframes panel-compress in global.css — the
-				// panel gives up 3.5% of its size while it's moving). A CSS animation
-				// only re-runs if it's removed and re-added with a reflow in between,
-				// and the reflow has to happen while the class is OFF or the browser
-				// coalesces the two states and the animation simply continues from
-				// where the last hop left it. Placing after the flush keeps the
-				// transform change and the animation start in the same frame.
-				panel.classList.remove('is-sliding');
-				void panel.offsetWidth;
+				// Stretch to the new card. The direction goes on in the SAME style
+				// change as the new edges — a transition takes its timing from the
+				// style it is moving to, so the trailing edges pick up their slower
+				// clock for this hop without a reflow in between. A hop that cuts
+				// into one still in flight just re-aims from wherever each edge is.
 				const from = placed;
-				placed = place(card);
-				// Before the class goes back on, so the origin and the animation it
-				// applies to start in the same frame — the reflow above is already
-				// spent, and a property written after the class would take effect a
-				// frame into a 260ms compress that opens on its deepest keyframe.
-				panel.style.setProperty('--slide-origin-x', originFor(from.x, placed.x, '0%', '100%'));
-				panel.style.setProperty('--slide-origin-y', originFor(from.y, placed.y, '0%', '100%'));
-				panel.classList.add('is-sliding');
+				placed = offsetIn(card, list);
+				aim(from, placed);
+				place(card);
 				return;
 			}
 			// First appearance: kill the transition, land on the card, force the
 			// reflow so the browser doesn't coalesce the two states, then let the
-			// class fade it up. Only opacity animates here — and no compress, since
-			// nothing has travelled: the panel is being placed, not moved.
-			panel.classList.remove('is-sliding');
+			// class fade it up. Only opacity animates here: the panel is being
+			// placed, not moved.
 			panel.style.transition = 'none';
 			placed = place(card);
 			void panel.offsetWidth;
@@ -442,9 +393,6 @@ const columnClass = columns === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2';
 			visible = false;
 			current = null;
 			panel.classList.remove('is-visible');
-			// Drop the compress too, or a hop cut short by leaving the grid leaves a
-			// part-compressed panel behind for the next appearance to snap in at.
-			panel.classList.remove('is-sliding');
 		};
 
 		// Crossing the gutter between two cards briefly leaves every card, which
@@ -495,7 +443,7 @@ const columnClass = columns === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2';
 			// Kept in step or the next hop reads its direction against a column
 			// position that no longer exists — crossing the sm breakpoint moves
 			// every card to x=0, and a stale `placed` would call that a leftward
-			// hop and pin the wrong edge.
+			// hop and trail the wrong edge.
 			placed = place(current);
 			void panel.offsetWidth;
 			panel.style.transition = '';
