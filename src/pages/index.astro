@@ -251,9 +251,16 @@ const email = contacts.find((contact) => contact.icon === 'email')!;
 			    sm:block is so it returns on two-up where it sits beside the text.
 			    When a real portrait lands, revisit: a photo may earn the room an
 			    empty placeholder doesn't. The w-[11rem] is kept so re-showing it
-			    is one class, not a re-measure. */}
+			    is one class, not a re-measure.
+			    HIDDEN AT EVERY WIDTH (2026-10-12, Hiro), now that the site is live:
+			    an empty grey box beside the name read as an image that failed to
+			    load. It stays in the markup, sized, so a portrait drops straight
+			    in — when it does, put `sm:block` back after `hidden` and swap the
+			    box for the image. Until then the text column has the row to
+			    itself; the pitch line was sized to fit beside the square, so it
+			    only got looser. */}
 			<div
-				class="hidden aspect-square w-[11rem] shrink-0 rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface-sunken)] bg-clip-padding sm:block sm:w-[12rem]"
+				class="hidden aspect-square w-[11rem] shrink-0 rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface-sunken)] bg-clip-padding sm:w-[12rem]"
 				aria-hidden="true"
 			></div>
 			</div>
