@@ -102,10 +102,12 @@ const { name } = Astro.props;
     alien (the nearest thing to an invader) didn't fit, and the controller
     is the plainest read of "video game design" at 20px.
 
-    Phosphor has no drum, so that one is Lucide's (ISC): a rounded 2px line,
-    the nearest in hand. Lucide has no duotone, so the drum's tint is
+    Phosphor has no drum, so that one is Lucide's (ISC), the nearest in hand
+    — but at Phosphor's WEIGHT, not Lucide's: stroke-width 1.5 of 24 is
+    Phosphor's 16 of 256, where Lucide's own 2 read visibly heavier than its
+    neighbours (Hiro, 10-13). Lucide has no duotone, so the drum's tint is
     ADDED — a shell-shaped fill at Phosphor's own .2 opacity, laid under
-    Lucide's untouched strokes (Hiro, 10-13: without it the drum read
+    Lucide's strokes (Hiro, 10-13: without it the drum read
     darker and busier than its neighbours). That fill is the only
     hand-drawn path in this block; every other path is verbatim from its
     set, so re-fetch rather than hand-edit. Colour
@@ -115,7 +117,7 @@ const { name } = Astro.props;
 		<svg class="icon-drums" viewBox="0 0 24 24">
 			{/* The tint is the one hand-added path in this block — see above. */}
 			<path fill="currentColor" opacity=".2" d="M2 9a10 5 0 0 1 20 0v8a10 5 0 0 1-20 0Z" />
-			<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m2 2l8 8m12-8l-8 8"/><ellipse cx="12" cy="9" rx="10" ry="5"/><path d="M7 13.4v7.9m5-7.3v8m5-8.6v7.9M2 9v8a10 5 0 0 0 20 0V9"/></g>
+			<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"><path d="m2 2l8 8m12-8l-8 8"/><ellipse cx="12" cy="9" rx="10" ry="5"/><path d="M7 13.4v7.9m5-7.3v8m5-8.6v7.9M2 9v8a10 5 0 0 0 20 0V9"/></g>
 		</svg>
 	)
 }
