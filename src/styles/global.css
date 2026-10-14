@@ -559,7 +559,7 @@
 	   to sit in a scheme (Hiro, 08-04) — that is the whole brief, and it is
 	   why the "no honest per-icon colour" finding at the contact icons doesn't
 	   transfer: THOSE four had no inherent colour, so any hue was invented.
-	   A drum is red, an invader is purple, a boot is leather. The colour is
+	   A drum is red, a controller is purple, a boot is leather. The colour is
 	   describing the object, which is the one job it can do honestly here.
 
 	   All four verbatim Tokyo Night Light, and every one clears AA on its own
@@ -582,7 +582,7 @@
 
 	   Dark's mirror block carries the verbatim night values; see there. */
 	--mark-drums: #8c4351; /* red, verbatim — 6.68:1 */
-	--mark-invader: #5a3e8e; /* magenta, verbatim — 8.06:1 */
+	--mark-controller: #5a3e8e; /* magenta, verbatim — 8.06:1 */
 	--mark-clapper: #2959aa; /* blue, verbatim — 6.53:1 */
 	--mark-boot: #965027; /* orange, verbatim — 5.84:1; was --ink-num's value until the 08-05 AAA pass deepened the numeral */
 
@@ -1219,7 +1219,7 @@
 	   Every one of these clears its light counterpart by 1.3–1.9×, which is
 	   this theme's usual margin and not a per-mark decision. */
 	--mark-drums: #f7768e; /* red, verbatim — 7.29:1 */
-	--mark-invader: #bb9af7; /* magenta, verbatim — 8.34:1 */
+	--mark-controller: #bb9af7; /* magenta, verbatim — 8.34:1 */
 	--mark-clapper: #7aa2f7; /* blue, verbatim — 7.66:1 */
 	--mark-boot: #ff9e64; /* orange, verbatim — 9.49:1, and --ink-num's own value */
 
@@ -3593,8 +3593,8 @@ body {
 .interest-mark--drums {
 	color: var(--mark-drums);
 }
-.interest-mark--invader {
-	color: var(--mark-invader);
+.interest-mark--controller {
+	color: var(--mark-controller);
 }
 .interest-mark--clapper {
 	color: var(--mark-clapper);
@@ -3661,7 +3661,7 @@ body {
    four above — so it is sized in the HEADING's em, not the body's, and rides
    the text baseline instead of a line box it has to itself.
 
-   0.9em: a hand drawn to a 24-unit box has more silhouette in it than a
+   0.9em: a hand drawn to fill its icon box has more silhouette in it than a
    letter does, so matching the cap height by the numbers draws a wave that
    out-weighs the greeting it follows. Set by eye against はじめまして at
    text-xl, which is the only place it appears.
@@ -3671,7 +3671,7 @@ body {
    text. -0.06em seats the palm on the baseline and lets the fingers rise into
    the line, which is what the emoji did.
 
-   No colour of its own: the hand is stroked in currentColor, so with nothing
+   No colour of its own: the hand is painted in currentColor, so with nothing
    set here it inherits the h1's --ink-heading and reads as part of the
    greeting rather than as a mark set beside it. The four tool-marks above
    keep their hues because colour is how they identify a thing; this one is

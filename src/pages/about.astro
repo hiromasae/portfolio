@@ -24,8 +24,8 @@ import Icon from '../components/Icon.astro';
 // service.
 //
 // `icon` names an entry in Icon.astro, and `key` names its colour token
-// (--tool-<key> in global.css). Adding a tool needs BOTH: a drawing that
-// survives a 24-unit box at 2px, and a free hue — the palette has eight and
+// (--tool-<key> in global.css). Adding a tool needs BOTH: its Simple Icons
+// mark (see the toolbox block in Icon.astro), and a free hue — the palette has eight and
 // green is spoken for by the wordmark, so the next tool is the tight one.
 const tools = [
 	{ name: 'Astro', icon: 'astro' as const, key: 'astro' },
@@ -513,8 +513,8 @@ const tools = [
 							<span>Playing drums</span>
 						</li>
 						<li class="flex items-start gap-3">
-							<span aria-hidden="true" class="interest-mark interest-mark--invader">
-								<Icon name="invader" />
+							<span aria-hidden="true" class="interest-mark interest-mark--controller">
+								<Icon name="controller" />
 							</span>
 							<span>Video game design &amp; pixel art</span>
 						</li>

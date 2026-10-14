@@ -2,7 +2,7 @@
 interface Props {
 	name:
 		| 'email' | 'linkedin' | 'github' | 'twitter'
-		| 'drums' | 'invader' | 'clapper' | 'boot' | 'wave'
+		| 'drums' | 'controller' | 'clapper' | 'boot' | 'wave'
 		| 'astro' | 'javascript' | 'tailwind' | 'react' | 'figma' | 'claude' | 'git';
 }
 const { name } = Astro.props;
@@ -87,250 +87,126 @@ const { name } = Astro.props;
 	)
 }
 
-{/* ── The about page's marks (2026-08-04) ──
-    These five replaced 👋🥁👾🎬🥾, which were the only emoji on the site and the
-    only marks on it that no token could reach: OS colour bitmaps take no
-    --ink-*, can't mirror per theme (🎬's black body sank into the night
-    ground), render as a different typeface per platform — so what you check in
-    `astro dev` isn't what a visitor gets — and, being saturated colour against
-    a 300/400/500 weight scale, out-weighted the very labels they were marking.
+{/* ── The about page's marks (2026-10-13) ──
+    Phosphor Duotone (MIT, phosphoricons.com), with one borrowed drum. Hiro's
+    pick from the icon lab, replacing the 08-04 hand-drawn set — 2px square
+    caps to match the contact icons, which read as thin and stiff once the
+    toolbox below went to solid brand marks. Duotone is still a line drawing
+    but carries a 20% tint of its own colour, which brings the row up to the
+    toolbox's weight without turning it into silhouettes.
 
-    EACH ONE REDRAWS ITS OWN EMOJI and is not free to become a neighbouring
-    idea (Hiro, 08-04, after a first pass wandered): 👾 is an invader, not a
-    gamepad; 🎬 is a clapperboard, not a film strip; 🥾 is a boot, not a
-    mountain. The label beside each already names the interest, so an icon
-    that generalises it says strictly less than the emoji it replaced.
+    These replaced 👋🥁👾🎬🥾 on 08-04 (OS emoji take no --ink-*, can't follow
+    the theme, and render differently per platform), and the rule then was
+    that each mark redraws ITS OWN emoji rather than a neighbouring idea.
+    One exception now, Hiro's call: 👾 became a game controller. Phosphor's
+    alien (the nearest thing to an invader) didn't fit, and the controller
+    is the plainest read of "video game design" at 20px.
 
-    They carry a colour each — see the --mark-* tokens in global.css, where
-    the values and their ratios live.
+    Phosphor has no drum, so that one is Lucide's (ISC): a rounded 2px line,
+    the nearest in hand. It has no duotone tint, so it sits slightly lighter
+    than the other four — accepted rather than painted in, because a
+    hand-added fill would be the only edited path in this block.
 
-    Same drawing system as the contact icons: 24-unit box, 2px
-    stroke, square caps, miter joins at limit 2. Butt caps appear only on
-    interior detail whose ends are meant to die into a surrounding shape —
-    the same exception the email flap takes, and here it is load-bearing
-    rather than cosmetic: a square cap on the snare's zigzag overhangs a full
-    unit along its own diagonal and lands inside the drum's left wall. */}
+    Paths are verbatim from their sets; re-fetch rather than hand-edit. Colour
+    is the --mark-* tokens in global.css; the wave stays uncoloured. */}
 {
 	name === 'drums' && (
-		<svg class="icon-drums" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="2">
-			<ellipse cx="12" cy="6.5" rx="9" ry="3" />
-			<path d="M3 6.5v10a9 3 0 0 0 18 0v-10" />
-			{/* Tension rods. Peaks held at y=12 rather than tucked up under the
-			    rim: the head's lower stroke reaches y=10.5 at centre, and a peak
-			    any higher welds the zigzag onto the ellipse at exactly the point
-			    where the two are meant to read as separate parts. */}
-			<path stroke-linecap="butt" d="M5.4 12 8.7 16.2 12 12l3.3 4.2L18.6 12" />
+		<svg class="icon-drums" viewBox="0 0 24 24">
+			<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m2 2l8 8m12-8l-8 8"/><ellipse cx="12" cy="9" rx="10" ry="5"/><path d="M7 13.4v7.9m5-7.3v8m5-8.6v7.9M2 9v8a10 5 0 0 0 20 0V9"/></g>
 		</svg>
 	)
 }
 {
-	name === 'invader' && (
-		<svg class="icon-invader" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="2">
-			{/* One closed silhouette on a 2-unit grid, every segment orthogonal.
-			    That's the whole reason this one works in the site's hand: square
-			    caps and miter joins ARE the pixel-art idiom, so a stepped outline
-			    reads as sprite rather than as an icon of a sprite. Nothing here
-			    may go diagonal — a single slope and it stops being pixels.
-
-			    Shoulders step OUT (x3/x21) past the head (x6/x18) and the three
-			    feet step down: those two moves are what separate an invader from
-			    a rounded blob, and they survive being drawn at 20px where the
-			    eyes almost don't. */}
-			<path d="M6 7h12v3h3v4h-3v3h-2v-2h-2v2h-4v-2h-2v2H6v-3H3v-4h3Z" />
-			<path stroke-linecap="butt" d="M9 7V4.5" />
-			<path stroke-linecap="butt" d="M15 7V4.5" />
-			{/* 2×2 eyes, the LinkedIn i-dot trick again: a butt-capped 2-unit
-			    vertical at stroke-width 2 paints the exact square. */}
-			<path stroke-linecap="butt" d="M10 10.5v2" />
-			<path stroke-linecap="butt" d="M14 10.5v2" />
+	name === 'controller' && (
+		<svg class="icon-controller" viewBox="0 0 256 256">
+			<g fill="currentColor"><path d="M216.86 207.57a28 28 0 0 1-24.66-7.77L150.09 152H172a51.94 51.94 0 0 0 51.2-61l16.36 84.17a28 28 0 0 1-22.7 32.4" opacity=".2"/><path d="M176 112h-24a8 8 0 0 1 0-16h24a8 8 0 0 1 0 16m-72-16h-8v-8a8 8 0 0 0-16 0v8h-8a8 8 0 0 0 0 16h8v8a8 8 0 0 0 16 0v-8h8a8 8 0 0 0 0-16m137.48 104.65a36 36 0 0 1-54.94 4.81c-.12-.12-.24-.24-.35-.37L146.48 160h-37l-39.67 45.09l-.35.37A36.08 36.08 0 0 1 44 216a36 36 0 0 1-35.44-42.25a.7.7 0 0 1 0-.14l16.37-84.09A59.88 59.88 0 0 1 83.89 40H172a60.08 60.08 0 0 1 59 49.25v.18l16.37 84.17a.7.7 0 0 1 0 .14a35.74 35.74 0 0 1-5.89 26.91M172 144a44 44 0 0 0 0-88H83.89a43.9 43.9 0 0 0-43.21 36.37v.13L24.3 176.59A20 20 0 0 0 58 194.3l41.92-47.59a8 8 0 0 1 6-2.71Zm59.7 32.59l-8.74-45A60 60 0 0 1 172 160h-4.2l30.2 34.31a20.09 20.09 0 0 0 17.46 5.39a20 20 0 0 0 16.23-23.11Z"/></g>
 		</svg>
 	)
 }
 {
 	name === 'clapper' && (
-		<svg class="icon-clapper" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="2">
-			<rect x="2" y="10" width="20" height="10" rx="0.5" />
-			{/* The bar is hinged at the left and OPEN — its underside climbs from
-			    y9.9 to y7.3 while the slate's top edge stays at 10, and the
-			    wedge of ground that opens up between them is the only thing
-			    saying "clapperboard" rather than "box with a lid". Close the
-			    angle and it stops reading.
-
-			    NO diagonal stripes. The bar is 3.2 units thick, of which 2 are
-			    its own stroke, so a stripe has 1.2 units of clear interior to
-			    live in — at this size it fills the bar solid rather than
-			    striping it. Tried at 4.2 thick too; the bar then out-weighs the
-			    slate it sits on. The tilt carries the read on its own. */}
-			<path d="M2 9.9 21.6 7.3V4.1L2 6.7Z" />
+		<svg class="icon-clapper" viewBox="0 0 256 256">
+			<g fill="currentColor"><path d="m67.71 64.59l47.79 27.6L40.43 112l-8.16-30a7.76 7.76 0 0 1 5.58-9.52Zm132.13-26.83a7.9 7.9 0 0 0-9.66-5.49l-63.57 16.78l47.79 27.59l33.6-8.87Z" opacity=".2"/><path d="M216 104H102.09L210 75.51a8 8 0 0 0 5.68-9.84l-8.16-30a15.93 15.93 0 0 0-19.42-11.13L35.81 64.74a15.75 15.75 0 0 0-9.7 7.4a15.5 15.5 0 0 0-1.55 12L32 111.56V200a16 16 0 0 0 16 16h160a16 16 0 0 0 16-16v-88a8 8 0 0 0-8-8m-23.84-64l6 22.07l-22.62 6l-28.12-16.24Zm-66.69 17.6l28.12 16.24l-36.94 9.75l-28.12-16.22Zm-79.4 44.62l-6-22.08l26.5-7L94.69 89.4ZM208 200H48v-80h160z"/></g>
 		</svg>
 	)
 }
 {
 	name === 'boot' && (
-		<svg class="icon-boot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="2">
-			{/* The TOE IS AN ARC and the shaft is wide — both were the fix. The
-			    first draft ran the toe out as a straight diagonal (`v7 l6 2`) off
-			    a narrow shaft, and at 20px it read as a bracket or a chair, not
-			    footwear: a boot's silhouette is a tall back and a round front,
-			    and a straight wedge gives it neither.
-
-			    The sole is a band the full width of the silhouette that
-			    overhangs at the HEEL (x4.5 against the upper's 6). Overhang is
-			    the hiking part — a sole flush with the upper draws a dress
-			    boot — and it goes at the back because the toe already has the
-			    arc to carry its own weight. */}
-			<path d="M6 4h7v7h3a5 5 0 0 1 5 5v2H4.5v-2H6Z" />
-			{/* Two lace bars, butt-capped so their ends die inside the shaft's
-			    walls rather than poking through them. */}
-			<path stroke-linecap="butt" d="M7.6 6.5h3.8" />
-			<path stroke-linecap="butt" d="M7.6 9h3.8" />
+		<svg class="icon-boot" viewBox="0 0 256 256">
+			<g fill="currentColor"><path d="M32 168c9.22-32.06 12-88.65 0-120h112a8 8 0 0 1 8 8v64h40a48 48 0 0 1 48 48Z" opacity=".2"/><path d="M192 112h-32V56a16 16 0 0 0-16-16H32a8 8 0 0 0-7.47 10.86c11.06 28.84 8.76 83.71-.22 114.93A8.3 8.3 0 0 0 24 168v32a16 16 0 0 0 16 16h26.11a16 16 0 0 0 7.16-1.69L85.89 208h16.22l12.62 6.31a16 16 0 0 0 7.16 1.69h28.22a16 16 0 0 0 7.16-1.69l12.62-6.31h16.22l12.62 6.31a16 16 0 0 0 7.16 1.69H232a16 16 0 0 0 16-16v-32a56.06 56.06 0 0 0-56-56m-48-56v24h-32a8 8 0 0 0 0 16h32v16h-32a8 8 0 0 0 0 16h80a40.07 40.07 0 0 1 39.2 32H42.25c6.74-30.84 8.16-74.17.61-104Zm61.89 144l-12.62-6.31a16 16 0 0 0-7.16-1.69h-16.22a16 16 0 0 0-7.16 1.69L150.11 200h-28.22l-12.62-6.31a16 16 0 0 0-7.16-1.69H85.89a16 16 0 0 0-7.16 1.69L66.11 200H40v-24h192v24Z"/></g>
 		</svg>
 	)
 }
 {
 	name === 'wave' && (
-		<svg class="icon-wave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="2">
-			{/* The one icon on the site that is mostly ARCS, and it has to be:
-			    fingers are capsules, and stepping them the way the invader is
-			    stepped would draw a comb. It keeps the 2px weight and the miter
-			    limit, which is what holds it in the same hand.
-
-			    Every path is butt-capped, without exception. Three of the four
-			    are finger backs whose lower ends are meant to disappear into the
-			    palm; a square cap there adds a unit of stroke that surfaces
-			    through the palm's own outline as a stray notch. */}
-			{/* Tilted 18° (Hiro, 08-05). Upright, an open hand is the STOP gesture —
-			    the same drawing means halt at 0° and hello off-vertical, and no
-			    amount of redrawing the fingers fixes that. Rotated about (12,13)
-			    rather than the box centre: the pivot sits in the palm, so the
-			    wrist stays put and the fingers swing, which is where a real wave
-			    turns. Painted bounds still clear the box — the hand's widest
-			    reach is ~19.5 units and 18° of rotation costs it under 2. */}
-			<g transform="rotate(18 12 13)">
-				<path stroke-linecap="butt" d="M18 11V6a2 2 0 0 0-4 0" />
-				<path stroke-linecap="butt" d="M14 10V4a2 2 0 0 0-4 0v2" />
-				<path stroke-linecap="butt" d="M10 10.5V6a2 2 0 0 0-4 0v8" />
-				<path stroke-linecap="butt" d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" />
-			</g>
+		<svg class="icon-wave" viewBox="0 0 256 256">
+			<g fill="currentColor"><path d="M184 213.27A80 80 0 0 1 74.7 184l-40-69.32a20 20 0 0 1 34.64-20L55.08 70a20 20 0 0 1 34.65-20l6.92 12a20 20 0 0 1 34.64-20l30 52A20 20 0 0 1 196 74l17.31 30A80 80 0 0 1 184 213.27" opacity=".2"/><path d="m220.17 100l-17.31-30a28 28 0 0 0-38.24-10.25a27.7 27.7 0 0 0-9 8.34L138.2 38a28 28 0 0 0-48.48 0a28 28 0 0 0-41.57 36l1.59 2.76A27.7 27.7 0 0 0 38 80.41a28 28 0 0 0-10.24 38.25l40 69.32a87.47 87.47 0 0 0 53.43 41a88.6 88.6 0 0 0 22.92 3a88 88 0 0 0 76.06-132Zm-6.66 62.64A72 72 0 0 1 81.62 180l-40-69.32a12 12 0 0 1 20.78-12L81.63 132a8 8 0 1 0 13.85-8L62 66a12 12 0 1 1 20.78-12L114 108a8 8 0 1 0 13.85-8l-24.28-42a12 12 0 1 1 20.78-12l33.42 57.9a48 48 0 0 0-5.54 60.6a8 8 0 0 0 13.24-9a32 32 0 0 1 7.31-43.5a8 8 0 0 0 2.13-10.4L168.23 90A12 12 0 1 1 189 78l17.31 30a71.56 71.56 0 0 1 7.2 54.62ZM184.25 31.71A8 8 0 0 1 194 26a59.62 59.62 0 0 1 36.53 28l.33.57a8 8 0 1 1-13.85 8l-.33-.57a43.67 43.67 0 0 0-26.8-20.5a8 8 0 0 1-5.63-9.79M80.89 237a8 8 0 0 1-11.23 1.33A119.6 119.6 0 0 1 40.06 204a8 8 0 0 1 13.86-8a103.7 103.7 0 0 0 25.64 29.72A8 8 0 0 1 80.89 237"/></g>
 		</svg>
 	)
 }
 
-{/* ── The toolbox marks (2026-08-05) ──
-    Seven tools, and unlike the interests marks these are BRAND marks.
+{/* ── The toolbox marks (2026-10-13) ──
+    Simple Icons (CC0, simpleicons.org): each brand's OWN mark, solid, in one
+    colour, painted through currentColor so the --tool-* hues in global.css
+    still apply. Hiro's pick from the icon lab, replacing the 08-05 set.
 
-    Brand marks are drawn as FILLS by their owners and this site draws
-    strokes, so an outline trace of a solid logo comes back as a doubled
-    contour. Each of these is redrawn as a single-stroke skeleton instead —
-    the same trade the nav made when LinkedIn's solid slab became an "in"
-    box. They are recognisable, not accurate; anything needing accuracy
-    should ship the vendor's own SVG and sit outside this file.
+    That set redrew every logo as a single 2px stroke to match the contact
+    icons, and the trade it made — "recognisable, not accurate" — is what
+    went: a stroke skeleton of a filled logo reads as a near-miss of the
+    brand rather than the brand. Claude Code had been a generic terminal for
+    the same reason (Anthropic's tapered burst can't survive a uniform
+    stroke); with real fills it can carry the real mark.
 
-    One is deliberately GENERIC: Claude Code is a terminal, because
-    Anthropic's mark is a burst of TAPERED rays and taper is the one thing a
-    uniform 2px stroke cannot do — traced, it comes out an asterisk. A bad
-    trace of a famous mark reads as a mistake; an honest generic reads as a
-    category.
-
-    Colour lives in the --tool-* tokens in global.css, one hue per tool, with
-    the brand each is answering to and the note that green is unavailable.
-
-    TWO MARKS WERE HERE AND ARE GONE — `markup` (an HTML/CSS code caret) and
-    `aws` (a cloud), removed with their list entries the same day. Keeping
-    why, because both would be re-drawn the same way by anyone adding them
-    back: HTML and CSS ship the same shield in two colours, so in a row that
-    reads by hue they were one mark repeated; and AWS's smile-arrow
-    identifies nothing without the wordmark above it, which left a generic
-    cloud standing for a specific claim. Neither drawing was the problem.
-    The list entries were, and the note on `tools` in about.astro has that. */}
+    These are FILLS where everything else in this file is strokes, on
+    purpose: the toolbox names products, and products are identified by
+    their logos. Paths are verbatim from Simple Icons — don't hand-edit
+    them; to update one, re-fetch it from the same source. */}
 {
 	name === 'astro' && (
-		<svg class="icon-astro" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="2">
-			{/* The mark's silhouette reduced to its A: two outer legs and the
-			    inner apex, open at the foot the way the original is. */}
-			<path d="M12 2.5 4.5 20h4l3.5-10.5L15.5 20h4Z" />
+		<svg class="icon-astro" viewBox="0 0 24 24">
+			<path fill="currentColor" d="M8.358 20.162c-1.186-1.07-1.532-3.316-1.038-4.944c.856 1.026 2.043 1.352 3.272 1.535c1.897.283 3.76.177 5.522-.678c.202-.098.388-.229.608-.36c.166.473.209.95.151 1.437c-.14 1.185-.738 2.1-1.688 2.794c-.38.277-.782.525-1.175.787c-1.205.804-1.531 1.747-1.078 3.119l.044.148a3.16 3.16 0 0 1-1.407-1.188a3.3 3.3 0 0 1-.544-1.815c-.004-.32-.004-.642-.048-.958c-.106-.769-.472-1.113-1.161-1.133c-.707-.02-1.267.411-1.415 1.09c-.012.053-.028.104-.045.165zm-5.961-4.445s3.24-1.575 6.49-1.575l2.451-7.565c.092-.366.36-.614.662-.614s.57.248.662.614l2.45 7.565c3.85 0 6.491 1.575 6.491 1.575L16.088.727C15.93.285 15.663 0 15.303 0H8.697c-.36 0-.615.285-.784.727z"/>
 		</svg>
 	)
 }
 {
 	name === 'javascript' && (
-		<svg class="icon-javascript" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="2">
-			{/* The tile with a J and an S set as single strokes. The only
-			    lettering anywhere in this file, and near its floor at 20px — if
-			    the toolbox ever renders smaller than the interests list, this is
-			    the first mark that stops working. */}
-			<rect x="2.5" y="2.5" width="19" height="19" rx="0.5" />
-			<path stroke-linecap="butt" d="M11 8.6v6.1a2.2 2.2 0 0 1-4.4 0" />
-			<path stroke-linecap="butt" d="M18.2 9.5a2.4 2.4 0 0 0-4 1.4c0 2.1 4 1.6 4 3.6a2.4 2.4 0 0 1-4 1.3" />
+		<svg class="icon-javascript" viewBox="0 0 24 24">
+			<path fill="currentColor" d="M0 0h24v24H0zm22.034 18.276c-.175-1.095-.888-2.015-3.003-2.873c-.736-.345-1.554-.585-1.797-1.14c-.091-.33-.105-.51-.046-.705c.15-.646.915-.84 1.515-.66c.39.12.75.42.976.9c1.034-.676 1.034-.676 1.755-1.125c-.27-.42-.404-.601-.586-.78c-.63-.705-1.469-1.065-2.834-1.034l-.705.089c-.676.165-1.32.525-1.71 1.005c-1.14 1.291-.811 3.541.569 4.471c1.365 1.02 3.361 1.244 3.616 2.205c.24 1.17-.87 1.545-1.966 1.41c-.811-.18-1.26-.586-1.755-1.336l-1.83 1.051c.21.48.45.689.81 1.109c1.74 1.756 6.09 1.666 6.871-1.004c.029-.09.24-.705.074-1.65zm-8.983-7.245h-2.248c0 1.938-.009 3.864-.009 5.805c0 1.232.063 2.363-.138 2.711c-.33.689-1.18.601-1.566.48c-.396-.196-.597-.466-.83-.855c-.063-.105-.11-.196-.127-.196l-1.825 1.125c.305.63.75 1.172 1.324 1.517c.855.51 2.004.675 3.207.405c.783-.226 1.458-.691 1.811-1.411c.51-.93.402-2.07.397-3.346c.012-2.054 0-4.109 0-6.179z"/>
 		</svg>
 	)
 }
 {
 	name === 'tailwind' && (
-		<svg class="icon-tailwind" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="2">
-			{/* Two waves, offset right and down — the brand's own arrangement,
-			    drawn as centrelines rather than as the filled ribbon it really
-			    is. Stroking the ribbon's outline gives four wavy lines where the
-			    mark has two. */}
-			<path stroke-linecap="butt" d="M2 11c1.8-3.7 4.4-3.7 6.2 0s4.4 3.7 6.2 0" />
-			<path stroke-linecap="butt" d="M7.6 16.4c1.8-3.7 4.4-3.7 6.2 0s4.4 3.7 6.2 0" />
+		<svg class="icon-tailwind" viewBox="0 0 24 24">
+			<path fill="currentColor" d="M12.001 4.8q-4.8 0-6 4.8q1.8-2.4 4.2-1.8c.913.228 1.565.89 2.288 1.624C13.666 10.618 15.027 12 18.001 12q4.8 0 6-4.8q-1.8 2.4-4.2 1.8c-.913-.228-1.565-.89-2.288-1.624C16.337 6.182 14.976 4.8 12.001 4.8m-6 7.2q-4.8 0-6 4.8q1.8-2.4 4.2-1.8c.913.228 1.565.89 2.288 1.624c1.177 1.194 2.538 2.576 5.512 2.576q4.8 0 6-4.8q-1.8 2.4-4.2 1.8c-.913-.228-1.565-.89-2.288-1.624C10.337 13.382 8.976 12 6.001 12"/>
 		</svg>
 	)
 }
 {
 	name === 'react' && (
-		<svg class="icon-react" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="2">
-			{/* The one brand mark here that IS a line drawing already, so it needs
-			    no reinterpretation. rx 9.4 keeps the painted ellipse inside the
-			    box once the 2px stroke is added. */}
-			<circle cx="12" cy="12" r="2" />
-			<ellipse cx="12" cy="12" rx="9.4" ry="3.6" />
-			<ellipse cx="12" cy="12" rx="9.4" ry="3.6" transform="rotate(60 12 12)" />
-			<ellipse cx="12" cy="12" rx="9.4" ry="3.6" transform="rotate(120 12 12)" />
+		<svg class="icon-react" viewBox="0 0 24 24">
+			<path fill="currentColor" d="M14.23 12.004a2.236 2.236 0 0 1-2.235 2.236a2.236 2.236 0 0 1-2.236-2.236a2.236 2.236 0 0 1 2.235-2.236a2.236 2.236 0 0 1 2.236 2.236m2.648-10.69c-1.346 0-3.107.96-4.888 2.622c-1.78-1.653-3.542-2.602-4.887-2.602c-.41 0-.783.093-1.106.278c-1.375.793-1.683 3.264-.973 6.365C1.98 8.917 0 10.42 0 12.004c0 1.59 1.99 3.097 5.043 4.03c-.704 3.113-.39 5.588.988 6.38c.32.187.69.275 1.102.275c1.345 0 3.107-.96 4.888-2.624c1.78 1.654 3.542 2.603 4.887 2.603c.41 0 .783-.09 1.106-.275c1.374-.792 1.683-3.263.973-6.365C22.02 15.096 24 13.59 24 12.004c0-1.59-1.99-3.097-5.043-4.032c.704-3.11.39-5.587-.988-6.38a2.17 2.17 0 0 0-1.092-.278zm-.005 1.09v.006c.225 0 .406.044.558.127c.666.382.955 1.835.73 3.704c-.054.46-.142.945-.25 1.44a23.5 23.5 0 0 0-3.107-.534A24 24 0 0 0 12.769 4.7c1.592-1.48 3.087-2.292 4.105-2.295zm-9.77.02c1.012 0 2.514.808 4.11 2.28c-.686.72-1.37 1.537-2.02 2.442a23 23 0 0 0-3.113.538a15 15 0 0 1-.254-1.42c-.23-1.868.054-3.32.714-3.707c.19-.09.4-.127.563-.132zm4.882 3.05q.684.704 1.36 1.564c-.44-.02-.89-.034-1.345-.034q-.691-.001-1.36.034c.44-.572.895-1.096 1.345-1.565zM12 8.1c.74 0 1.477.034 2.202.093q.61.874 1.183 1.86q.557.961 1.018 1.946c-.308.655-.646 1.31-1.013 1.95c-.38.66-.773 1.288-1.18 1.87a25.6 25.6 0 0 1-4.412.005a27 27 0 0 1-1.183-1.86q-.557-.961-1.018-1.946a25 25 0 0 1 1.013-1.954c.38-.66.773-1.286 1.18-1.868A25 25 0 0 1 12 8.098zm-3.635.254c-.24.377-.48.763-.704 1.16q-.336.585-.635 1.174c-.265-.656-.49-1.31-.676-1.947c.64-.15 1.315-.283 2.015-.386zm7.26 0q1.044.153 2.006.387c-.18.632-.405 1.282-.66 1.933a26 26 0 0 0-1.345-2.32zm3.063.675q.727.226 1.375.498c1.732.74 2.852 1.708 2.852 2.476c-.005.768-1.125 1.74-2.857 2.475c-.42.18-.88.342-1.355.493a24 24 0 0 0-1.1-2.98c.45-1.017.81-2.01 1.085-2.964zm-13.395.004c.278.96.645 1.957 1.1 2.98a23 23 0 0 0-1.086 2.964c-.484-.15-.944-.318-1.37-.5c-1.732-.737-2.852-1.706-2.852-2.474s1.12-1.742 2.852-2.476c.42-.18.88-.342 1.356-.494m11.678 4.28c.265.657.49 1.312.676 1.948c-.64.157-1.316.29-2.016.39a26 26 0 0 0 1.341-2.338zm-9.945.02c.2.392.41.783.64 1.175q.345.586.705 1.143a22 22 0 0 1-2.006-.386c.18-.63.406-1.282.66-1.933zM17.92 16.32c.112.493.2.968.254 1.423c.23 1.868-.054 3.32-.714 3.708c-.147.09-.338.128-.563.128c-1.012 0-2.514-.807-4.11-2.28c.686-.72 1.37-1.536 2.02-2.44c1.107-.118 2.154-.3 3.113-.54zm-11.83.01c.96.234 2.006.415 3.107.532c.66.905 1.345 1.727 2.035 2.446c-1.595 1.483-3.092 2.295-4.11 2.295a1.2 1.2 0 0 1-.553-.132c-.666-.38-.955-1.834-.73-3.703c.054-.46.142-.944.25-1.438zm4.56.64q.661.032 1.345.034q.691.001 1.36-.034c-.44.572-.895 1.095-1.345 1.565q-.684-.706-1.36-1.565"/>
 		</svg>
 	)
 }
 {
 	name === 'figma' && (
-		<svg class="icon-figma" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="2">
-			{/* Five parts on a 2×3 grid, the arrangement being the whole mark —
-			    two capsules top, a capsule and a circle mid, a capsule bottom
-			    left. Rounded on each cell's outer edge and square where a cell
-			    meets its neighbour, which is what makes the stack read as one
-			    object rather than five. */}
-			<path d="M12 3.2H9a2.9 2.9 0 0 0 0 5.8h3Z" />
-			<path d="M12 3.2h3a2.9 2.9 0 0 1 0 5.8h-3Z" />
-			<path d="M12 9H9a2.9 2.9 0 0 0 0 5.8h3Z" />
-			<circle cx="15" cy="11.9" r="2.9" />
-			<path d="M12 14.8H9a2.9 2.9 0 1 0 3 2.9Z" />
+		<svg class="icon-figma" viewBox="0 0 24 24">
+			<path fill="currentColor" d="M15.852 8.981h-4.588V0h4.588c2.476 0 4.49 2.014 4.49 4.49s-2.014 4.491-4.49 4.491M12.735 7.51h3.117c1.665 0 3.019-1.355 3.019-3.019s-1.355-3.019-3.019-3.019h-3.117zm0 1.471H8.148c-2.476 0-4.49-2.014-4.49-4.49S5.672 0 8.148 0h4.588v8.981zm-4.587-7.51c-1.665 0-3.019 1.355-3.019 3.019s1.354 3.02 3.019 3.02h3.117V1.471zm4.587 15.019H8.148c-2.476 0-4.49-2.014-4.49-4.49s2.014-4.49 4.49-4.49h4.588v8.98zM8.148 8.981c-1.665 0-3.019 1.355-3.019 3.019s1.355 3.019 3.019 3.019h3.117V8.981zM8.172 24c-2.489 0-4.515-2.014-4.515-4.49s2.014-4.49 4.49-4.49h4.588v4.441c0 2.503-2.047 4.539-4.563 4.539m-.024-7.51a3.023 3.023 0 0 0-3.019 3.019c0 1.665 1.365 3.019 3.044 3.019c1.705 0 3.093-1.376 3.093-3.068v-2.97zm7.704 0h-.098c-2.476 0-4.49-2.014-4.49-4.49s2.014-4.49 4.49-4.49h.098c2.476 0 4.49 2.014 4.49 4.49s-2.014 4.49-4.49 4.49m-.097-7.509c-1.665 0-3.019 1.355-3.019 3.019s1.355 3.019 3.019 3.019h.098c1.665 0 3.019-1.355 3.019-3.019s-1.355-3.019-3.019-3.019z"/>
 		</svg>
 	)
 }
 {
 	name === 'claude' && (
-		<svg class="icon-claude" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="2">
-			{/* GENERIC, and the honest choice: Anthropic's mark is a radial burst
-			    of TAPERED rays, and taper is exactly what a uniform 2px stroke
-			    cannot do — traced here it comes out an asterisk. This is a
-			    terminal, which is what Claude Code actually is. */}
-			<rect x="2" y="4" width="20" height="16" rx="0.5" />
-			<path stroke-linecap="butt" d="m7.2 10 3 2.6-3 2.6" />
-			<path stroke-linecap="butt" d="M12.6 15.2h4.4" />
+		<svg class="icon-claude" viewBox="0 0 24 24">
+			<path fill="currentColor" d="m4.714 15.956l4.718-2.648l.079-.23l-.08-.128h-.23l-.79-.048l-2.695-.073l-2.337-.097l-2.265-.122l-.57-.121l-.535-.704l.055-.353l.48-.321l.685.06l1.518.104l2.277.157l1.651.098l2.447.255h.389l.054-.158l-.133-.097l-.103-.098l-2.356-1.596l-2.55-1.688l-1.336-.972l-.722-.491L2 6.223l-.158-1.008l.656-.722l.88.06l.224.061l.893.686l1.906 1.476l2.49 1.833l.364.304l.146-.104l.018-.072l-.164-.274l-1.354-2.446l-1.445-2.49l-.644-1.032l-.17-.619a3 3 0 0 1-.103-.729L6.287.133L6.7 0l.995.134l.42.364l.619 1.415L9.735 4.14l1.555 3.03l.455.898l.243.832l.09.255h.159V9.01l.127-1.706l.237-2.095l.23-2.695l.08-.76l.376-.91l.747-.492l.583.28l.48.685l-.067.444l-.286 1.851l-.558 2.903l-.365 1.942h.213l.243-.242l.983-1.306l1.652-2.064l.728-.82l.85-.904l.547-.431h1.032l.759 1.129l-.34 1.166l-1.063 1.347l-.88 1.142l-1.263 1.7l-.79 1.36l.074.11l.188-.02l2.853-.606l1.542-.28l1.84-.315l.832.388l.09.395l-.327.807l-1.967.486l-2.307.462l-3.436.813l-.043.03l.049.061l1.548.146l.662.036h1.62l3.018.225l.79.522l.473.638l-.08.485l-1.213.62l-1.64-.389l-3.825-.91l-1.31-.329h-.183v.11l1.093 1.068l2.003 1.81l2.508 2.33l.127.578l-.321.455l-.34-.049l-2.204-1.657l-.85-.747l-1.925-1.62h-.127v.17l.443.649l2.343 3.521l.122 1.08l-.17.353l-.607.213l-.668-.122l-1.372-1.924l-1.415-2.168l-1.141-1.943l-.14.08l-.674 7.254l-.316.37l-.728.28l-.607-.461l-.322-.747l.322-1.476l.388-1.924l.316-1.53l.285-1.9l.17-.632l-.012-.042l-.14.018l-1.432 1.967l-2.18 2.945l-1.724 1.845l-.413.164l-.716-.37l.066-.662l.401-.589l2.386-3.036l1.439-1.882l.929-1.086l-.006-.158h-.055L4.138 18.56l-1.13.146l-.485-.456l.06-.746l.231-.243l1.907-1.312Z"/>
 		</svg>
 	)
 }
 {
 	name === 'git' && (
-		<svg class="icon-git" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" stroke-miterlimit="2">
-			{/* The branch, not the lozenge. Git's own mark is a filled rotated
-			    square with three nodes and reads as a logo nobody recognises out
-			    of context; branch-and-merge is what people picture when they
-			    hear the word. */}
-			<circle cx="6.5" cy="5.5" r="2.6" />
-			<circle cx="6.5" cy="18.5" r="2.6" />
-			<circle cx="17.5" cy="5.5" r="2.6" />
-			<path stroke-linecap="butt" d="M6.5 8.1v7.8" />
-			<path stroke-linecap="butt" d="M17.5 8.1v1.4a4 4 0 0 1-4 4h-3a4 4 0 0 0-4 4v.5" />
+		<svg class="icon-git" viewBox="0 0 24 24">
+			<path fill="currentColor" d="M13.09 23.549a1.54 1.54 0 0 1-2.18 0L.451 13.089a1.54 1.54 0 0 1 0-2.179l7.191-7.19l2.733 2.733a1.85 1.85 0 0 0 .964 2.326v6.66a1.849 1.849 0 1 0 1.54 0V8.957l2.508 2.508a1.85 1.85 0 1 0 1.09-1.09l-2.634-2.634a1.85 1.85 0 0 0-2.378-2.377L8.73 2.63L10.91.451a1.54 1.54 0 0 1 2.179 0l10.459 10.46a1.54 1.54 0 0 1 0 2.179z"/>
 		</svg>
 	)
 }
