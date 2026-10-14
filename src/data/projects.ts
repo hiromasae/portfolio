@@ -371,13 +371,13 @@ export const projects: Project[] = [
 		year: '2026',
 		tags: ['Landing Page', 'UI/UX'],
 		role: 'Redesigned the marketing site: hero, support page, and docs.',
-		/* Proposed, not Open source: the redesign is not deployed — see the
-		   link's note below, which is the same fact seen from the other side. */
-		status: 'Proposed',
+		/* Shipped (2026-10-13, was Proposed): the redesign is live on ejs.co.
+		   Not Open source — the library is mde's; what shipped is the site. */
+		status: 'Shipped',
 		featured: true,
 		blurb: 'A redesign of the EJS landing page, so the library says what it does up front.',
 		problem:
-			"ejs.co has looked more or less the same for years. There's a wordmark, a four-word tagline, and a lot of olive green. What it never gets around to is what EJS actually does, or why you would pick it over the alternatives. The only thing promoted above the fold is a different project. The Jake banner sits above EJS's own logo. Twenty million people install this library every week and the page tells them almost nothing about it.",
+			"Before the redesign, ejs.co had looked more or less the same for years. There was a wordmark, a four-word tagline, and a lot of olive green. What it never got around to was what EJS actually does, or why you would pick it over the alternatives. The only thing promoted above the fold was a different project: the Jake banner sat above EJS's own logo. Twenty million people install this library every week, and the page told them almost nothing about it.",
 		work:
 			"I led with a plain statement of what the library does, generate HTML with plain JS, and put the install command right under it in a chip you can copy. The numbers that make the case on their own are on the page for the first time: 20M+ weekly downloads, 7.7k stars, zero dependencies. I also built the two pages a one-screen site had nowhere to put. Support sends a question to Stack Overflow or GitHub Issues, and the docs have an on-this-page rail so the reference is something you can move around in. The olive green stays, since it is what people recognise, but it runs as a band and an accent instead of the whole canvas.",
 		/* ── Image order is 1, 0, 2, 3, and that is deliberate (Hiro's ask) ──
@@ -410,7 +410,7 @@ export const projects: Project[] = [
 		   you commit the one file, not the pair. */
 		cover: '/images/ejs0.webp',
 		images: [
-			{ src: '/images/ejs1.webp', w: 2532, h: 1322, caption: 'The site as it is today' },
+			{ src: '/images/ejs1.webp', w: 2532, h: 1322, caption: 'The site before the redesign' },
 			{ src: '/images/ejs0.webp', w: 2530, h: 1332, caption: 'The same page, rebuilt' },
 			{ src: '/images/ejs2.webp', w: 2528, h: 1386 },
 			{ src: '/images/ejs3.webp', w: 2532, h: 1386 },
@@ -422,8 +422,8 @@ export const projects: Project[] = [
 		   gone, and the build details (Astro output committed as static
 		   files, the lockfile lesson, the copy-pass line) came out of the
 		   docs, what-came-out and closing sections. The one fact the PR
-		   section carried that a reader needs, that the link below goes to
-		   the OLD site, now closes the last section.
+		   section carried that a reader needs, where the work stands, now
+		   closes the last section (since 2026-10-13: it is live).
 
 		   Facts are the redesign branch's history in
 		   ~/ejs-site (73 commits ahead of upstream) and PR #22 on mde/ejs-site.
@@ -434,14 +434,22 @@ export const projects: Project[] = [
 
 		   ejs4-8 are new (2026-10-07): 4 = the old features band, from the
 		   gitignored screenshots in ~/ejs-site; 5 = four compare-history frames
-		   (e9e9693, 31d321f, 87e7fe4, 674f45d) in a 2x2 with transparent gaps,
-		   shorter frames padded rather than cropped so each shape is whole;
-		   6 = the security notice cropped from the old about section and the
+		   (e9e9693, 31d321f, 87e7fe4, 674f45d) in a 2x2 with transparent gaps;
+		   6 = the security notice from the old about section and the
 		   redesign's, side by side; 7 = /docs/ served locally from the
-		   committed build, light theme to match ejs0; 8 = PR #22 on GitHub,
-		   dark, logged out. The old-site notice in 6 is NOT the crimson-ring
+		   committed build, light theme to match ejs0, cut off between the
+		   Import code blocks and the next heading so no line is sliced.
+		   8 = PR #22 on GitHub, dark, logged out. The old-site notice in 6 is NOT the crimson-ring
 		   version the paragraph describes — that one was never shot — so the
 		   caption says what the picture is, not what the text is about.
+		   ⚠ 5 and 6 were re-shot 2026-10-13 (Hiro: the grid cells ran to
+		   different heights and some frames were cut awkwardly). Every frame
+		   is a 1440px viewport at 2x with the sticky nav hidden, cut to the
+		   same band (x 16–1424; the 87e7fe4 grid is wider than the
+		   container), and padded to the tallest frame in ITS OWN background
+		   colour, centred, so every cell is the same size and nothing is
+		   cropped. White padding is what made the old cells look ragged.
+		   Re-shoot one and you re-shoot the set.
 
 		   ⚠ ASK HIRO before this ships:
 		   - §2: the brief. The repo has no written one; the constraints are
@@ -449,17 +457,15 @@ export const projects: Project[] = [
 		     maintainer, same surname) is not on the page and maybe should be.
 		   - §5: who said the notice "looked like a system error", and why the
 		     accordion came out after a day (the commit only says "lighter").
-		   - §7: whether mde has seen PR #22, and whether "unreviewed" belongs
-		     on a portfolio page at all. "As of this writing" dates fast.
 		   - §3: where 20M+ / 7.7k come from, and as of when. */
 		sections: [
 			{
-				body: 'ejs.co has looked the same for years: a wordmark, a four-word tagline, a lot of olive green. The only thing promoted above the fold is a different project, a Jake banner above EJS’s own logo, and the page never gets around to what the library does or why you would pick it over the alternatives. Twenty million people install it every week, and the first screen tells them almost nothing.',
-				images: [{ src: '/images/ejs1.webp', w: 2532, h: 1322, caption: 'The site as it is today' }],
+				body: 'Before the redesign, ejs.co had looked the same for years: a wordmark, a four-word tagline, a lot of olive green. The only thing promoted above the fold was a different project, a Jake banner above EJS’s own logo, and the page never got around to what the library does or why you would pick it over the alternatives. Twenty million people install it every week, and the first screen told them almost nothing.',
+				images: [{ src: '/images/ejs1.webp', w: 2532, h: 1322, caption: 'The site before the redesign' }],
 			},
 			{
 				heading: 'Constraints',
-				body: 'The site is a 2015 Bootstrap template served as static files, and I kept it that way: no framework, no build step and very little JavaScript. The olive green and the crimson were inherited too. People recognise them, so I kept both and changed only how much of the page they cover.',
+				body: 'The site was a 2015 Bootstrap template served as static files, and I kept it that way: no framework, no build step and very little JavaScript. The olive green and the crimson were inherited too. People recognise them, so I kept both and changed only how much of the page they cover.',
 				images: [
 					{ src: '/images/ejs4.webp', w: 2530, h: 757, caption: 'The old features band: the green as the whole canvas' },
 				],
@@ -473,35 +479,31 @@ export const projects: Project[] = [
 				heading: 'Comparing EJS to other libraries',
 				body: 'The one section that argues for EJS over the alternatives went through four shapes. Tabs that switched between Handlebars, Pug and Mustache hid the comparison behind a click. A side-by-side grid with a glowing EJS card put it on the table but gave it no weight. Peers in a row above a full-width answer card read as a hierarchy. The version that stayed stacks the three peers on the left and sets EJS on the right, with the checklist under the code.',
 				images: [
-					{ src: '/images/ejs5.webp', w: 2530, h: 1890, caption: 'Tabs, grid, row over answer, two columns' },
+					{ src: '/images/ejs5.webp', w: 2530, h: 1924, caption: 'Tabs, grid, row over answer, two columns' },
 				],
 			},
 			{
 				heading: 'What I cut',
 				body: 'A scroll-reveal animation went in and came out two weeks later: fade-up-on-scroll reads as template filler, and it was the only animation on the page. A mobile accordion for the About cards lasted a day before simpler, tighter cards replaced it. The security notice had a crimson ring and an exclamation mark, and the feedback was that it looked like a system error, so it is a plain note now.',
 				images: [
-					{ src: '/images/ejs6.webp', w: 2530, h: 1023, caption: 'The security notice, old site and redesign' },
+					{ src: '/images/ejs6.webp', w: 2530, h: 1085, caption: 'The security notice, old site and redesign' },
 				],
 			},
 			{
 				heading: 'Documentation',
 				body: 'I folded nine separate docs pages into one, with redirects so old links still work. A single page doesn’t need search or a left sidebar, so both came out. The on-this-page rail stayed, with its scrollbar visible, so readers can jump between sections of the reference.',
-				images: [{ src: '/images/ejs7.webp', w: 2530, h: 1757, caption: 'The documentation page' }],
+				images: [{ src: '/images/ejs7.webp', w: 2530, h: 1467, caption: 'The documentation page' }],
 			},
 			{
 				heading: 'What I’d do differently',
-				body: 'I would show the maintainer the work much earlier, not as one seventy-three-commit pull request at the end. I would also keep the decision log going: mine stops in late May, and the reasons for the later cuts survive only in commit messages. The redesign is still a proposal, so the link below goes to ejs.co as it is today.',
+				body: 'I would show the maintainer the work much earlier, not as one seventy-three-commit pull request at the end. I would also keep the decision log going: mine stops in late May, and the reasons for the later cuts survive only in commit messages. The redesign is live now at ejs.co.',
 				images: [],
 			},
 		],
-		/* ⚠ THIS GOES TO THE SITE AS IT IS TODAY — the OLD page, the one the
-		   first screenshot is of, not the redesign. The redesign is not deployed
-		   anywhere, so ejs.co is the before half of this page's before/after and
-		   the link lands a visitor on it. That is honest and worth keeping (the
-		   prose is an argument about a real page, and the reader can check it),
-		   but it does mean the label must stay the bare host: anything warmer —
-		   "See it live" — would promise the work above and deliver its opposite.
-		   If the redesign ever ships, this URL is the first thing to revisit. */
+		/* The redesign is live (2026-10-13), so the link now lands on the
+		   work above — until then it went to the OLD page, the before half of
+		   the before/after. The label stays the bare host, per the field's
+		   note: the destination, not an instruction. */
 		link: 'https://ejs.co/',
 		linkLabel: 'ejs.co',
 	},
