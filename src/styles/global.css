@@ -3589,6 +3589,14 @@ body {
 	display: block;
 	width: 100%;
 	height: 100%;
+	/* Optical sizing (2026-10-13), the counterpart of the toolbox's JS/Git
+	   rule. Phosphor (and Lucide's drum) draw inside built-in padding, so
+	   their ink fills ~70-90% of the box where the Simple Icons marks below
+	   run edge to edge — the interests read a size smaller than the tools.
+	   1.1 brings them level (~85-100%) without touching the box, so the
+	   leading and the label edge are unchanged; the controller's wings
+	   land a fraction of a pixel past the box, into the gap. */
+	transform: scale(1.1);
 }
 .interest-mark--drums {
 	color: var(--mark-drums);
