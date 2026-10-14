@@ -121,7 +121,7 @@ const tools = [
 		    keeping from the version this replaces: the row has been a measured
 		    margin, then a bottom alignment, and is now a top alignment, and only
 		    the first of those needed a number that could go stale. */}
-		<div class="flex flex-col gap-12 lg:flex-row lg:items-start lg:gap-10">
+		<div class="flex flex-col gap-10 sm:gap-12 lg:flex-row lg:items-start lg:gap-10">
 			{/* ── The card is ONE reveal, and the page's first (Hiro, 08-05) ──
 			    .reveal sits here rather than on the pieces inside it, so the whole
 			    card — greeting, prose, both sections — fades and slides in as a
@@ -310,7 +310,20 @@ const tools = [
 				    it's here. That 3.5px is one copy edit or one type-scale nudge from
 				    gone, and the failure it prevents is the one Hiro flagged: "Area."
 				    alone on line two. Without this, losing the margin means an orphan;
-				    with it, losing the margin means two balanced lines. */}
+				    with it, losing the margin means two balanced lines.
+
+				    sm: ONLY (2026-10-13). Below sm this column is a phone's full width
+				    and WebKit's pretty is not Chromium's: Chromium only touches the
+				    last few lines, WebKit re-breaks the WHOLE paragraph toward even
+				    lengths. Measured in WebKit at 390px, the 345px column set its intro
+				    lines at ~270px — 78% of the measure, every line pulled in, which
+				    read as a narrower container than the sections below it (Hiro:
+				    "wraps after about 6 words per line"). Plain wrap fills to 306–338.
+				    The orphan it was guarding against moves to a non-breaking space
+				    instead: "and&nbsp;Astro." (alone at 375–390px) and
+				    "freelance&nbsp;work." (alone at 430px) are the last lines that
+				    broke alone at phone widths, and the &nbsp; holds them in every
+				    engine. */}
 				{/* ── A REAL BIO (2026-09-30) ── off the same hiring-panel read that
 				    rewrote the home hero: the page used to hold one line of who and one
 				    line about AI, and a reader deciding whether to get in touch left it
@@ -348,13 +361,13 @@ const tools = [
 				    deleted from public/ in the same commit, so the old URL 404s after
 				    a deploy. Deliberately NO "available on request" line in its place
 				    (Hiro's call). git has the link and its note (the commit before). */}
-				<div class="space-y-5 text-pretty text-sm leading-relaxed">
+				<div class="space-y-5 text-sm leading-relaxed sm:text-pretty">
 					<p>I'm a Design Engineer based in the San Francisco Bay Area.</p>
 					<p>
 						I have a computer science degree from San Francisco State. I design interfaces and build
-						them myself, mostly in React and Astro.
+						them myself, mostly in React and&nbsp;Astro.
 					</p>
-					<p>I'm open to full&#8209;time, contract and freelance work.</p>
+					<p>I'm open to full&#8209;time, contract and freelance&nbsp;work.</p>
 				</div>
 
 				{/* ── Experience (2026-09-30) ── the dated record, from the résumé, and
@@ -588,6 +601,21 @@ const tools = [
 					</ul>
 				</section>
 			</div>
+			{/* ── A rule above the photo, phones only (Hiro, 2026-10-13) ── Below sm
+			    the card has no frame, so the Toolbox list ran straight into the
+			    photo with nothing marking where the card's content ended. This is
+			    the same .card-rule the three sections wear, capped at the same
+			    28rem so it spans exactly what theirs do.
+
+			    gap-10 below sm (not the gap-12 the stack keeps from sm up) puts
+			    47.5px on each side of it: the sections' own mt-10 above, and
+			    within a few px of their pt-[40px] below. From sm the card's
+			    border does this job and the rule would double it.
+
+			    It reveals WITH the figure (--i: 1) because it belongs to the
+			    photo, not the card; outside any .reveal it would sit on the page
+			    before the card above it had arrived. */}
+			<div aria-hidden="true" class="reveal card-rule w-full max-w-[28rem] sm:hidden" style="--i: 1"></div>
 			{/* Fixed 16rem at lg so the flex-1 column above resolves to a known
 			    width (see the note there); it is the last thing in the row, so
 			    shrink-0 keeps the prose taking the slack rather than the photo.
