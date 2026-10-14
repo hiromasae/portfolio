@@ -3657,6 +3657,21 @@ body {
 	color: var(--tool-git);
 }
 
+/* Optical sizing (2026-10-13). The Simple Icons marks all share a 24-unit
+   box, but JavaScript's is a solid tile that fills it edge to edge and
+   Git's a solid diamond, while Tailwind, React and Figma are open line
+   work — so at the same box size the two solids read as visibly bigger
+   and heavier, and the column's eye lands on row two. Scaled down inside
+   the box rather than the box itself shrinking, so the label edge and the
+   row seating stay shared with every other mark. Re-judge these by eye
+   if either mark is re-fetched or a solid mark joins the list. */
+.tool-mark--js svg {
+	transform: scale(0.85);
+}
+.tool-mark--git svg {
+	transform: scale(0.9);
+}
+
 /* The greeting's wave, inline in the h1 rather than in the margin like the
    four above — so it is sized in the HEADING's em, not the body's, and rides
    the text baseline instead of a line box it has to itself.
