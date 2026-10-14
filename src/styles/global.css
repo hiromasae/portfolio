@@ -1275,23 +1275,24 @@ body {
    on the site. What follows describes the pair as it was designed; the
    relationship is history rather than something you can still see side by side.
 
-   The project card's gesture RUN BACKWARDS, because the link means the
-   opposite thing. On the card the underline wipes left-to-right toward an
-   arrow sitting on the right, which then wipes in and tilts to ↗ ("out").
-   Here the arrow sits on the LEFT, so the wipe travels right-to-left and
-   arrives at it, and the arrow answers by nudging further left ("back").
-   Same tokens, same easing — see the .project-card__arrow block above before
-   retiming either.
+   Originally the project card's gesture RUN BACKWARDS, because the link means
+   the opposite thing. On the card the underline wiped left-to-right toward an
+   arrow sitting on the right, which wiped in and tilted to ↗ ("out"). Here the
+   arrow sits on the LEFT, so the wipe travels right-to-left and arrives at it,
+   and the arrow answers by nudging further left ("back").
 
-   The overlap fractions no longer match: the card's moved to 0.25 because it
-   has a zoom and a lift that must contain the arrow's stagger, and this link
-   has neither — it's type on paper, so a 0.55 nudge landing at 365ms trails
-   nothing and reads fine. Divergent on purpose; don't "resync" them without
-   re-reading why the card's number is what it is.
+   THE PAIR IS BROKEN, and deliberately. The card kept none of its half: the
+   wipe went 2026-08-02 (it just appears now), and the arrow went 2026-08-03
+   (removed outright — the .project-card__arrow this used to point at no longer
+   exists). This link is now the site's ONLY wiping underline and its only
+   arrow-on-hover, so nothing here is mirroring anything any more; read it on its
+   own terms. Retiming it affects this link alone, which also means the old
+   warning about resyncing the two overlap fractions is moot — there is no
+   second fraction left to resync to.
 
-   No tilt on this one: the card's -45° is carrying a MEANING (this leaves
-   the site), and there's no second meaning here for a rotation to encode,
-   so it would be decoration. The nudge is the whole idea. */
+   No tilt on this one: the ↗ carries a MEANING (this leaves the site), and
+   there's no second meaning here for a rotation to encode, so it would be
+   decoration. The nudge is the whole idea. */
 .btn-quiet__label {
 	/* inline-block, NOT inline: an inline element's padding doesn't grow the
 	   line box, so the underline can land outside it — and outside any ancestor's

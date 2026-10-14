@@ -53,7 +53,7 @@ import { projects } from '../data/projects';
 			    global.css for why the two themes are proportional rather than
 			    inverse. */}
 			<p class="reveal mx-auto max-w-[var(--measure)] text-lg leading-relaxed text-[var(--ink-hero)]" style="--i: 0">
-				I design product interfaces and then go build them.
+				Building with good sense and taste.
 			</p>
 			{/* The page's only route to /about, so it's the site's one real button.
 			    mt-6 rather than the old link's mt-4 — a control needs more air off
@@ -128,7 +128,10 @@ import { projects } from '../data/projects';
 		</section>
 	</main>
 
-	<footer class="mx-auto max-w-[960px] px-5 py-10 text-sm text-[var(--ink-soft)]">
+	{/* text-xs, down from text-sm (2026-08-03, Hiro). A copyright line is the
+	    lowest-priority text on the page, and it was sharing a size with real
+	    body copy. The projects grid stepped down in the same pass. */}
+	<footer class="mx-auto max-w-[960px] px-5 py-10 text-xs text-[var(--ink-soft)]">
 		<span>© 2026 Hiro Eernisse</span>
 	</footer>
 

@@ -70,10 +70,12 @@ const { project } = Astro.props;
 		    title lead. --ink-num is still live on the project pages' datelines, so
 		    the token is not orphaned — but the two headers no longer match here, and
 		    that was the argument for the year taking its own line at all. */}
-		<p class="text-[0.85rem] leading-snug tabular-nums text-[var(--ink)]">{project.year}</p>
-		{/* The underline is back (2026-08-02, Hiro), so the <span> is too: it exists
-		    to stop the line at the words, keeping the decorative arrow outside it.
-		    Targets .project-card__title in global.css. */}
+		<p class="text-[0.8rem] leading-snug tabular-nums text-[var(--ink)]">{project.year}</p>
+		{/* The <span> stops the underline at the words rather than letting it run
+		    the full width of the h3's line box. It originally also kept the line
+		    clear of the decorative arrow; the arrow went (2026-08-03, Hiro), but
+		    the width job stands on its own. Targets .project-card__title in
+		    global.css. */}
 		{/* Stepped down a size when the list went two-up (2026-08-01): at half the
 		    old column width, 1.3rem titles ran to three lines on the longer ones
 		    and the card read as a headline with a picture under it rather than a
@@ -86,28 +88,17 @@ const { project } = Astro.props;
 		    loaded range (400;500;600;700 in Layout.astro), not a rounding — see
 		    the .btn note in global.css for what happens when it isn't.
 		    500 is the next step down and also real, if this still reads heavy. */}
-		<h3 class="text-base font-semibold tracking-tight text-[var(--ink-title)] md:text-[1.1rem] md:leading-tight">
+		{/* NO ARROW HERE (2026-08-03, Hiro: remove the arrow that appears on
+		    hover). It had been through four states in two days — wiping in and
+		    tilting to ↗, drawn at rest on every card, hidden until hover, gone —
+		    so if one is ever wanted back, it is a new decision, not a restoration.
+		    The underline alone now answers the hover. Note the hero's /about
+		    button keeps ITS arrow at rest: different job, and index.astro says why. */}
+		{/* Stepped down again 2026-08-03 (Hiro: slightly smaller). base/1.1rem →
+		    0.95rem/1rem, matching the year's step down in the same pass so the
+		    block shrinks as a unit and the title/date ratio holds. */}
+		<h3 class="text-[0.95rem] font-semibold tracking-tight text-[var(--ink-title)] md:text-[1rem] md:leading-tight">
 			<span class="project-card__title">{project.title}</span>
-			{/* A right-pointing arrow that appears on hover with the underline,
-			    neither of them animated. It has been through three states in one
-			    day (2026-08-02) — wiping in and tilting to ↗, then drawn at rest on
-			    every card, now hidden until hover — so read the .project-card__arrow
-			    note in global.css before changing it rather than inferring intent
-			    from whichever state you happened to find. Decorative; the whole
-			    card is the link. */}
-			<svg
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				aria-hidden="true"
-				class="project-card__arrow ml-2 inline-block h-[0.95rem] w-[0.95rem] align-[-0.125em]"
-			>
-				<line x1="4" y1="12" x2="19" y2="12"></line>
-				<polyline points="12 5 19 12 12 19"></polyline>
-			</svg>
 		</h3>
 	</div>
 
